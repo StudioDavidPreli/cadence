@@ -1,0 +1,575 @@
+.tokenLab {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+  min-height: 480px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  /* No background-color here — the two child columns cover the full area.
+     Setting one would bleed through at the rounded corners (the border-radius
+     clips the children back from the edges, exposing the container behind them).
+     In light mode this appeared as a white outline along the left edge where
+     the controls column (--color-bg) was clipped but the white container showed. */
+}
+
+/* ── Controls column ────────────────────────────────────────────────────── */
+
+.controls {
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  background-color: var(--color-bg);
+}
+
+/* Header strip — title on left, Explore toggle on right.
+   Matches the section header height so it reads as the same rhythm. */
+.controlsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.controlsTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ── Presets section ─────────────────────────────────────────────────────── */
+
+/* Always-visible, no collapse. Sits between the header and Duration section. */
+.presetsSection {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presetsSectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.presetsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Preset button — matches the easeButton visual style for consistency */
+.presetItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.presetItem:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* Active preset — dark background (same as easeButtonActive) signals "loaded" */
+.presetItemActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.presetItemActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Delete target on user presets. Hover turns amber to signal destructive action. */
+.presetDelete {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color 80ms;
+}
+
+.presetDelete:hover {
+  color: var(--color-accent3);
+}
+
+/* Save button — dashed border signals "potential action" without competing with
+   the active preset pill. Appears only when state diverges from all presets. */
+.presetSaveButton {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px dashed var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 100ms, color 100ms;
+}
+
+.presetSaveButton:hover {
+  border-color: var(--color-border2);
+  color: var(--color-text-base);
+}
+
+/* Inline save row — input + confirm button side by side */
+.presetSaveArea {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.presetSaveInput {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 100ms;
+}
+
+.presetSaveInput:focus {
+  border-color: var(--color-border2);
+}
+
+.presetSaveInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.presetSaveConfirm {
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: none;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 100ms;
+}
+
+.presetSaveConfirm:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+
+/* inline-flex preserves the trigger element's intrinsic dimensions.
+   No position: relative needed — the tooltip renders in a portal attached to
+   document.body, so it doesn't position relative to this wrapper. */
+.tooltipWrapper {
+  display: inline-flex;
+}
+
+/* Tooltip panel — fixed-positioned because it renders via createPortal into
+   document.body, outside the overflow-y: auto stacking context of .controls.
+   top/right are set as inline styles from getBoundingClientRect() at hover time.
+   pointer-events: none prevents the tooltip from capturing mouse events that
+   would immediately trigger handleLeave and hide the tooltip. */
+.tooltip {
+  position: fixed;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-base);
+  max-width: 220px;
+  line-height: 1.5;
+  white-space: normal;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.section {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: left;
+}
+
+.sectionHeader:hover {
+  color: var(--color-text-base);
+  background-color: var(--color-surface-active);
+}
+
+.chevron {
+  font-size: 10px;
+  transition: transform 150ms;
+  display: inline-block;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.sectionContent {
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+.sectionInner {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Slider control ─────────────────────────────────────────────────────── */
+
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sliderName {
+  font-size: 12px;
+  color: var(--color-text-base);
+  font-weight: 500;
+}
+
+.sliderValue {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  /* --color-text-muted2 (#aaaaaa in dark) is visible against the dark track
+     (--color-border: #2e2e2e) while remaining unobtrusive. --color-surface
+     (#1e1e1e in dark) was nearly identical to the track — invisible. */
+  background: var(--color-text-muted2);
+  cursor: pointer;
+  transition: transform 100ms;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ── Easing selector ────────────────────────────────────────────────────── */
+
+.easeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.easeButton {
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.easeButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+.easeButtonActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.easeButtonActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  /* .easeButton:hover sets color: --color-text-base (dark in light/HC themes).
+     This rule must explicitly override it — the dark hover background needs
+     light text, which is what --color-text-primary provides. */
+  color: var(--color-text-primary);
+}
+
+/* Four-value display shown above the EasingVisualizer when a custom curve
+   is active. Centered to match the graph width. Tabular nums prevent layout
+   shift as digits change during drag. */
+.curveValues {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+/* Sixth easeGrid button — appears when a custom curve is active.
+   Accent border distinguishes it as an action (reset to standard)
+   rather than a passive preset selection. */
+.easeButtonCustom {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ── Demo column ────────────────────────────────────────────────────────── */
+
+/* Outer column wrapper — background only. Padding lives in .demoContent so
+   the tab bar can span edge-to-edge with its own horizontal padding. */
+.demo {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-raised);
+  min-width: 0; /* prevent grid blowout */
+}
+
+/* ── Tab bar ────────────────────────────────────────────────────────────── */
+
+.demoTabBar {
+  display: flex;
+  padding: 0 48px;  /* matches the left-heavy demoContent indent */
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Each button is a positioned container so the sliding pill (position: absolute)
+   is constrained inside it. Framer Motion's layoutId detects when the pill's
+   DOM parent changes and animates between the two bounding boxes. */
+.tabButton {
+  position: relative;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The sliding pill — behind the label (z-index below .tabLabel).
+   Inset gives it a slight vertical margin so it reads as a chip, not a block. */
+.tabPill {
+  position: absolute;
+  inset: 5px 4px;
+  background-color: var(--color-accent);
+  border-radius: 5px;
+}
+
+.tabLabel {
+  position: relative;
+  z-index: 1;  /* renders above the absolute pill */
+  color: var(--color-text-muted);
+  transition: color 100ms;
+}
+
+/* Dark text on the green accent pill. --color-bg (#141414) gives 8.5:1 against
+   --color-accent (#76c17d) in dark — AAA. Light and HC themes also verified. */
+.tabLabelActive {
+  color: var(--color-bg);
+}
+
+/* ── Panel wrapper ──────────────────────────────────────────────────────── */
+
+/* Stretches to fill the remaining column height. overflow: hidden clips the
+   AnimatePresence fade to the panel boundary. */
+.demoPanel {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tabPanelInner {
+  height: 100%;
+}
+
+/* Tab content — restores the left-heavy padding that was on .demo before the
+   tab layout restructure. gap between demo groups preserved from prior design. */
+.demoContent {
+  padding: 32px 40px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Shown for tabs without content yet. Centered within the panel height. */
+.placeholderPane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 32px 48px;
+}
+
+.placeholderText {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Trigger button used in demo wrappers (e.g. DrawerDemo) where importing
+   the Button component would add a Framer Motion whileTap that isn't the
+   focus of that particular demonstration. Plain CSS button that matches the
+   system button aesthetic without adding animation noise. */
+.demoTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  outline: 1px solid var(--color-border2);
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.demoTrigger:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.demoLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+.demoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demoRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.demoCards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.demoNavList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 200px;
+}
+
+.demoInstruction {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ── Active token highlighting ───────────────────────────────────────────── */
+
+/* The demo group whose component is affected by the slider being dragged.
+   Green accent background + outline makes the connection explicit without noise. */
+.demoGroupHighlighted {
+  background-color: var(--color-accent-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  margin: -12px;
+  outline: 1px solid var(--color-accent);
+  transition: opacity 150ms;
+}
+
+/* All other demo groups step back — reduce contrast without hiding. */
+.demoGroupDimmed {
+  opacity: 0.35;
+  transition: opacity 150ms;
+}
+
+/* Shown inside a dimmed group when the active token has no demo component.
+   Amber signals "attention without alarm" — this is informational, not an error. */
+.noDemoNote {
+  font-size: 11px;
+  color: var(--color-accent3);
+  font-style: italic;
+  margin-top: 4px;
+}

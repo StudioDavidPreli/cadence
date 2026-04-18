@@ -1,0 +1,47 @@
+:root {
+  /* Duration
+     Controls how long an animation runs.
+     Fast: micro-interactions (button press feedback).
+     Base: most UI transitions (panel open, tab switch).
+     Slow: content reveals, modals.
+     Slower: complex sequenced animations. */
+  --motion-duration-fast:   100ms;
+  --motion-duration-base:   200ms;
+  --motion-duration-slow:   400ms;
+  --motion-duration-slower: 600ms;
+
+  /* Easing
+     Controls how velocity changes over time.
+     Linear: progress bars, continuous loops — no perceived acceleration.
+     Standard: general-purpose; enters and exits at equal speed.
+     Enter: decelerates in — element arrives gently.
+     Exit: accelerates out — element leaves with intention.
+     Spring: overshoots, then settles — expressive, physical feel. */
+  --motion-ease-linear:   cubic-bezier(0, 0, 1, 1);
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-enter:    cubic-bezier(0, 0, 0.2, 1);
+  --motion-ease-exit:     cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Delay
+     Staggers and sequences. Use sparingly — most individual elements need none.
+     Short: tightest stagger step for lists.
+     Medium: second beat in a two-element sequence.
+     Long: deliberate pause before a response or reveal. */
+  --motion-delay-none:   0ms;
+  --motion-delay-short:  50ms;
+  --motion-delay-medium: 100ms;
+  --motion-delay-long:   200ms;
+
+  /* Scale
+     Compress tokens (below 1): how much an element shrinks on press.
+       Subtle: density-heavy UI, small targets.
+       Base: standard interactive elements (buttons, cards).
+       Expressive: hero elements, CTAs where physicality is a design goal.
+     Lift token (above 1): how much an element grows when selected or elevated.
+       Lift: persistent selected state — card chosen, item highlighted. */
+  --motion-scale-subtle:      0.98;
+  --motion-scale-base:        0.95;
+  --motion-scale-expressive:  0.9;
+  --motion-scale-lift:        1.02;
+}

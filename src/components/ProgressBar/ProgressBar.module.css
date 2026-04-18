@@ -1,0 +1,54 @@
+.progressBar {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Relative container clips the fill to the track boundary.
+   overflow: hidden is required — without it the fill div can
+   briefly extend beyond the track ends during animation. */
+.trackContainer {
+  flex: 1;
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* The background rail — muted at 0.45 opacity so the accent fill
+   reads clearly against it. Sibling of .fill (not parent), so the
+   opacity does not affect the fill's rendered color. */
+.track {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-border);
+  opacity: 0.45;
+}
+
+/* The animated fill — Framer Motion animates width from 0% to value%.
+   Left-anchored (left: 0) so fill grows rightward. */
+.fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--color-accent);
+  border-radius: 3px;
+}
+
+/* Percentage label — right of the track.
+   min-width prevents layout shift when value crosses 10% or 100%
+   (digit count changes, e.g. "9%" → "10%"). tabular-nums aligns digits. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+  text-align: right;
+  flex-shrink: 0;
+}

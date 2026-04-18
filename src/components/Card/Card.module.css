@@ -1,0 +1,121 @@
+.card {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  cursor: pointer;
+
+  /* No CSS transition — Framer Motion owns all transitions on this element.
+     Color changes (background, border, text) happen as instant class swaps
+     because Framer Motion cannot interpolate CSS custom property values. */
+}
+
+.card:hover {
+  background-color: var(--color-surface-active);
+  border-color: var(--color-text-muted);
+}
+
+/* ── Selected state ─────────────────────────────────────────────────────────
+   Full surface inversion. A single token cannot express this correctly across
+   all three themes — the inversion direction differs:
+     Dark:  card flips light (--color-text-base = #e1e1e1 fill, dark text)
+     Light: card flips dark (--color-surface = #1a1a1a fill, light text)
+     HC:    card flips dark (--color-surface = #000000 fill, light text)
+
+   Default rules cover dark (the base theme). Light and HC override below. */
+
+.selected {
+  background-color: var(--color-text-base);  /* #e1e1e1 in dark — light fill */
+  border-color: var(--color-accent);
+}
+
+.selected:hover {
+  background-color: var(--color-text-muted2); /* #aaaaaa in dark — dimmed on hover */
+  border-color: var(--color-accent);
+}
+
+/* Dark: light card background needs dark text. --color-bg (#141414) gives
+   16.9:1 on #e1e1e1. Opacity on tag/description provides visual hierarchy. */
+.selected .tag {
+  color: var(--color-bg);
+  opacity: 0.65;
+}
+
+.selected .title {
+  color: var(--color-bg);
+}
+
+.selected .description {
+  color: var(--color-bg);
+  opacity: 0.75;
+}
+
+/* ── Light selected ─────────────────────────────────────────────────────── */
+
+:root[data-theme="light"] .selected {
+  background-color: var(--color-surface);      /* #1a1a1a */
+  border-color: var(--color-surface);
+}
+
+:root[data-theme="light"] .selected:hover {
+  background-color: var(--color-surface-hover); /* #333333 */
+  border-color: var(--color-surface-hover);
+}
+
+:root[data-theme="light"] .selected .tag,
+:root[data-theme="light"] .selected .title,
+:root[data-theme="light"] .selected .description {
+  color: var(--color-text-primary);  /* #ffffff */
+}
+
+:root[data-theme="light"] .selected .tag {
+  opacity: 0.65;
+}
+
+:root[data-theme="light"] .selected .description {
+  opacity: 0.75;
+}
+
+/* ── High-contrast selected ─────────────────────────────────────────────── */
+
+:root[data-theme="high-contrast"] .selected {
+  background-color: var(--color-surface);      /* #000000 */
+  border-color: var(--color-surface);
+}
+
+:root[data-theme="high-contrast"] .selected:hover {
+  background-color: var(--color-surface-hover); /* #000000 */
+  border-color: var(--color-surface-hover);
+}
+
+:root[data-theme="high-contrast"] .selected .tag,
+:root[data-theme="high-contrast"] .selected .title,
+:root[data-theme="high-contrast"] .selected .description {
+  color: var(--color-text-primary);  /* #ffffff */
+  opacity: 1;  /* HC: no opacity reductions — maximum legibility */
+}
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-base);
+  line-height: 1.3;
+}
+
+.description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}

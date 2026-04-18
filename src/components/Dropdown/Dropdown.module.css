@@ -1,0 +1,111 @@
+/* position: relative creates the stacking context for the absolutely-positioned
+   menu. The menu's position is calculated from this container's bounds. */
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Trigger button — matches the project's button aesthetic:
+   surface background, primary text, hover state. Not using the Button component
+   directly so the trigger can have a different shape (rounded less aggressively)
+   and include the inline chevron without prop drilling. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color     100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.trigger:hover {
+  background-color: var(--color-surface-active);
+  border-color: var(--color-border2);
+  color: var(--color-text-base);
+}
+
+/* Chevron — CSS transition (not Framer Motion) because this is a supporting
+   visual cue on a static element. Inline style in the JSX handles the rotation
+   value; this class provides the transition timing. */
+.chevron {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  transition: transform 120ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  display: inline-block;
+}
+
+/* Menu — absolutely positioned below the trigger, full width of the container.
+   min-width ensures the menu never collapses narrower than the trigger. */
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  /* Shadow uses a fixed rgba rather than a token — shadows are not part of the
+     motion token system and should not respond to token slider changes. */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 40;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  overflow: hidden;
+}
+
+/* Individual menu item button — full width, left-aligned */
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--color-text-base);
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background-color 80ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 80ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.menuItem:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* Delete / destructive item — --color-accent3 (amber) signals danger.
+   Contrast verified: dark 10.1:1 AAA, light 5.1:1 AA, HC 8.6:1 AAA. */
+.menuItemDestructive {
+  color: var(--color-accent3);
+}
+
+.menuItemDestructive:hover {
+  background-color: var(--color-surface-active);
+  /* Keep accent3 on hover — the warning color should persist when focused */
+  color: var(--color-accent3);
+}
+
+/* Icon — fixed width aligns all item labels regardless of icon width */
+.menuIcon {
+  font-size: 12px;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}

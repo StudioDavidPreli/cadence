@@ -1,0 +1,49 @@
+.button {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+
+  /* Typography */
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+
+  /* Color tokens — resolved at runtime from whichever theme is active on :root */
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+
+  /* transform is intentionally absent — Framer Motion owns that property.
+     If both CSS and Framer Motion animate transform simultaneously, they
+     conflict and the animation breaks. CSS handles color and outline only. */
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    outline          var(--motion-duration-fast) var(--motion-ease-standard);
+
+  /* Transparent outline placeholder — keeps layout stable when
+     high-contrast theme adds a visible outline on hover */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+
+  user-select: none;
+}
+
+.button:hover {
+  background-color: var(--color-surface-hover);
+
+  /* High-contrast theme: background stays black, so we signal hover
+     via a white outline instead. In light/dark themes outline stays
+     transparent and this rule has no visual effect. */
+  outline-color: var(--color-text-primary);
+}
+
+.button:active {
+  /* Scale is handled by Framer Motion's whileTap — only color changes here */
+  background-color: var(--color-surface-press);
+  outline-color: transparent;
+}

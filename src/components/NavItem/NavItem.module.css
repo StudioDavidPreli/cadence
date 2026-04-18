@@ -1,0 +1,47 @@
+.navItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+
+  font-size: 14px;
+  font-weight: 400;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  text-align: left;
+
+  /* Left border acts as the active indicator. Declared at full width here
+     with a transparent color so the layout space always exists — no shift
+     when it becomes visible on active state. */
+  border-left: 3px solid transparent;
+
+  /* No CSS transition — Framer Motion owns all transitions on this element.
+     Color and border changes happen as instant class swaps. */
+
+  user-select: none;
+}
+
+.navItem:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* Active state: persistent selection, not just hover.
+   Uses a left border indicator rather than a full background fill
+   to avoid competing visually with card-level surfaces. */
+.active {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  font-weight: 500;
+
+  /* --color-accent (green) as the active indicator.
+     --color-surface (#1e1e1e in dark) was invisible against the
+     surface-active background (#262626) — both near-black values with
+     no perceptible contrast. Accent is legible in all three themes. */
+  border-left-color: var(--color-accent);
+}
+

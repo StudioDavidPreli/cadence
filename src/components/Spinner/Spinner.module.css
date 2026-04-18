@@ -1,0 +1,22 @@
+.spinner {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Full circle track — the path the arc travels along.
+   --color-border at reduced opacity creates a recessed ring effect without
+   introducing a new color. The 0.4 opacity keeps it present but subordinate
+   to the arc above it. */
+.track {
+  fill: none;
+  stroke: var(--color-border);
+  opacity: 0.4;
+}
+
+/* The active arc.
+   --color-accent (green) = active/loading, consistent with the project's
+   established color semantic. No fill — it's a stroked path. */
+.arc {
+  fill: none;
+  stroke: var(--color-accent);
+}

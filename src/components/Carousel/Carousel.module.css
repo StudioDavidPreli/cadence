@@ -1,0 +1,172 @@
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  /* Prevent the drag gesture from selecting text in surrounding UI */
+  user-select: none;
+}
+
+/* ── Viewport ────────────────────────────────────────────────────────────── */
+
+/* overflow: hidden clips all slides except the current one.
+   position: relative contains the absolutely-positioned edge gradients.
+   border-radius gives the viewport itself rounded corners so the fade
+   overlays clip correctly at the edges. */
+.viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+}
+
+/* ── Track ───────────────────────────────────────────────────────────────── */
+
+/* display:flex lays slides side by side horizontally.
+   The track is wider than the viewport (SLIDES.length × slideWidth).
+   Framer Motion's x MotionValue shifts it left to show successive slides.
+
+   cursor:grab signals the drag affordance while idle.
+   cursor:grabbing applies during active drag via :active — no JS state needed.
+   This matches the EasingVisualizer's cursor approach. */
+.track {
+  display: flex;
+  cursor: grab;
+}
+
+.track:active {
+  cursor: grabbing;
+}
+
+/* ── Slides ──────────────────────────────────────────────────────────────── */
+
+/* flex: 0 0 auto prevents the slide from shrinking.
+   Width is set via inline style (slideWidth px) from the component.
+   min-height prevents the carousel from collapsing to zero height when
+   slideWidth is 0 on the first synchronous render before useLayoutEffect fires.
+   The user won't see this state (useLayoutEffect runs before first paint) but
+   it prevents a layout flash if the timing assumption is ever violated. */
+.slide {
+  flex: 0 0 auto;
+  min-height: 140px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  /* Prevent drag from triggering text selection highlight */
+  -webkit-user-drag: none;
+}
+
+/* Principle name — DM Serif Display italic.
+   The serif italic registers as editorial weight: this is a named concept,
+   not a label. Contrast with the mono description below creates a typographic
+   hierarchy that mirrors the design system's voice (editorial heading / mono body). */
+.slideTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--color-text-base);
+  line-height: 1.2;
+}
+
+/* Description — IBM Plex Mono.
+   The mono stack signals that this is precise, technical language —
+   a definition, not a headline. The smaller size and muted color provide
+   visual separation from the title above. */
+.slideDescription {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  max-width: 42ch;
+}
+
+/* ── Edge gradients ──────────────────────────────────────────────────────── */
+
+/* Gradient overlays hint that adjacent slides exist beyond the visible edge.
+   The color matches --color-surface-raised so the fade blends seamlessly with
+   the slide background. pointer-events:none lets drag gestures pass through.
+   z-index: 1 places them above the slides but below nothing (they're decorative). */
+.fadeLeft,
+.fadeRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fadeLeft {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--color-surface-raised),
+    transparent
+  );
+}
+
+.fadeRight {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--color-surface-raised),
+    transparent
+  );
+}
+
+/* ── Dot indicators ──────────────────────────────────────────────────────── */
+
+.dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Dot button — fixed 20×16px so all buttons have the same clickable area.
+   width: 20px matches the pill width so the gap between dots stays stable
+   as the active dot expands. No position:relative needed — no absolute child. */
+.dotButton {
+  width: 20px;
+  height: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Single element per dot — morphs between circle (inactive) and pill (active)
+   via CSS transitions. Uses --motion-duration-slow to match the carousel snap
+   speed (which also uses duration.slow). Both animations respond to the same
+   slider so the dot and slide feel synchronized.
+   No Framer Motion involvement: CSS transitions are immune to the global
+   ProjectionNode snapshot cycle that layout animations trigger. */
+.dotPip {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-border);
+  flex-shrink: 0;
+  transition:
+    width var(--motion-duration-slow, 400ms) var(--motion-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    border-radius var(--motion-duration-slow, 400ms) var(--motion-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    background-color var(--motion-duration-slow, 400ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/* Active state — expands to a 20×8px pill in the accent color. */
+.dotPipActive {
+  width: 20px;
+  border-radius: 4px;
+  background-color: var(--color-accent);
+}

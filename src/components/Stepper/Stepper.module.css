@@ -1,0 +1,221 @@
+.stepper {
+  width: 100%;
+}
+
+/* position: relative contains the absolutely-positioned completion overlay.
+   min-height ensures the overlay has a visible area to fill even when the
+   step content is sparse. */
+.stepperBody {
+  position: relative;
+  min-height: 148px;
+}
+
+/* ── Circle row ─────────────────────────────────────────────────────────── */
+
+/* align-items: flex-start keeps circles at the top of the row so that
+   step labels below them don't push the connector wrappers out of alignment.
+   Connectors use padding-top to vertically center themselves with the circles. */
+.circleRow {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Fixed width so labels don't affect the width distribution.
+   The connector flex:1 fills whatever space the fixed step items leave. */
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+/* Connector wrapper: flex: 1 fills space between step items.
+   padding-top: 14px = half of 28px circle height — aligns the 2px connector
+   line with the vertical center of the circles. */
+.connectorWrapper {
+  flex: 1;
+  padding-top: 14px;
+}
+
+.connectorTrack {
+  height: 2px;
+  background-color: var(--color-border);
+  position: relative;
+  /* overflow: hidden clips the scaleX fill so it never bleeds beyond the track */
+  overflow: hidden;
+}
+
+/* The animated fill bar. scaleX 0→1 with originX: 0 (set via inline style)
+   produces a left-to-right fill. Framer Motion animates scaleX in the index.jsx. */
+.connectorFill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-accent);
+}
+
+/* ── Step circle ────────────────────────────────────────────────────────── */
+
+.circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* CSS transition owns border-color and background-color.
+     Framer Motion owns the checkmark/number scale inside.
+     No transform here — Framer Motion would conflict with CSS transforms. */
+  transition:
+    border-color 150ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    background-color 150ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.circleActive {
+  border-color: var(--color-accent);
+}
+
+/* Completed: fully filled with accent. The checkmark uses --color-bg so it
+   reads against the green fill — same inversion pattern as Card selected state. */
+.circleCompleted {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Checkmark — dark text on green fill.
+   --color-bg (#141414 dark, #f5f5f5 light, #ffffff HC) verified against:
+   dark  #76c17d: 8.5:1 AAA ✓
+   light #4a9e52: 5.3:1 AA  ✓  (#f5f5f5 is the light bg value)
+   HC    #006810: 21:1  AAA ✓  (white on deep green) */
+.checkmark {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-bg);
+  line-height: 1;
+  display: block;
+}
+
+.stepNumber {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  display: block;
+}
+
+/* ── Step labels ────────────────────────────────────────────────────────── */
+
+.stepLabel {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  text-align: center;
+  white-space: nowrap;
+  /* opacity animated by Framer Motion in index.jsx — no CSS transition needed */
+}
+
+.stepLabelActive {
+  color: var(--color-text-base);
+}
+
+/* ── Step description ───────────────────────────────────────────────────── */
+
+.stepDescription {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  min-height: 20px; /* prevents layout shift when description changes */
+}
+
+/* ── Next / Deploy button ───────────────────────────────────────────────── */
+
+/* Matches Button.module.css visually — same surface, primary text, hover state.
+   Defined here (not imported) so Stepper stays self-contained and we can
+   control whileTap ease independently per button (Next vs Reset). */
+.nextButton {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    outline          100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.nextButton:hover {
+  background-color: var(--color-surface-hover);
+  outline-color: var(--color-text-primary);
+}
+
+/* ── Completion overlay ─────────────────────────────────────────────────── */
+
+/* Absolutely positioned inside .stepperBody — overlaps the fading step view.
+   background-color matches the demo column surface so the overlay is opaque. */
+.completion {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Large check icon — --color-accent as a graphical element (not text),
+   so the 3:1 UI threshold applies. All themes exceed this comfortably. */
+.completionCheck {
+  font-size: 20px;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.completionText {
+  font-size: 13px;
+  color: var(--color-text-base);
+}
+
+/* Reset — secondary action, uses border style instead of filled surface
+   to visually separate it from the Next/Deploy primary action. */
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  background: none;
+  color: var(--color-text-muted);
+  margin-left: 4px;
+  transition:
+    border-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color        100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.resetButton:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-base);
+}

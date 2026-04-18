@@ -1,0 +1,160 @@
+/* ─── Global reset ───────────────────────────────────────────────────────────
+   Without this, browsers apply body { margin: 8px; background: white }.
+   That default margin creates a white gap around the entire app in every theme,
+   most visible in dark mode where the contrast is high. */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* IBM Plex Mono as the default body font — all UI chrome, labels, values,
+     and controls use the mono stack. Apply var(--font-serif) directly on
+     display headings where editorial weight is appropriate. */
+  font-family: var(--font-mono);
+}
+
+/* ─── Typography tokens (theme-independent) ──────────────────────────────────
+   Defined on :root so they're available everywhere regardless of data-theme.
+   IBM Plex Mono — mono for values, code, token names.
+   DM Serif Display — display serif for headings and editorial moments. */
+:root {
+  --font-mono:  'IBM Plex Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+
+/* ─── Dark theme (default) ───────────────────────────────────────────────────
+   Applied when no data-theme is set, or data-theme="dark".
+   Studio David Preli brand system — deep neutral surfaces, muted borders,
+   and three accent roles: green (active/success), purple (easing/secondary),
+   amber (warnings/no-demo).
+
+   Verified contrast ratios (WCAG AA = 4.5:1 normal text, 3:1 UI components)
+   ─────────────────────────────────────────────────────────────────────────────
+   text-base (#e1e1e1) on bg (#141414)           14.1:1  AAA ✓
+   text-base (#e1e1e1) on surface-raised (#1e1e1e) 12.7:1 AAA ✓
+   text-muted (#909090) on bg (#141414)            5.8:1  AA  ✓
+   text-muted (#909090) on surface-raised (#1e1e1e) 5.2:1 AA  ✓
+   text-muted (#909090) on surface-active (#262626) 4.8:1 AA  ✓  ← Card hover (tag, description)
+   text-primary (#e1e1e1) on surface (#1e1e1e)    12.7:1  AAA ✓
+   text-primary (#e1e1e1) on surface-hover (#262626) 11.6:1 AAA ✓
+   accent (#76c17d) on bg (#141414)                8.5:1  AAA ✓
+   accent (#76c17d) on surface-raised (#1e1e1e)    7.7:1  AAA ✓
+   accent3 (#e8b86d) on bg (#141414)              10.1:1  AAA ✓
+   accent3 (#e8b86d) on surface-raised (#1e1e1e)   9.1:1  AAA ✓ */
+:root,
+:root[data-theme="dark"] {
+  --color-bg:             #141414;  /* page background */
+  --color-bg2:            #1a1a1a;  /* secondary background layer */
+
+  --color-surface:        #1e1e1e;  /* interactive element default */
+  --color-surface-hover:  #262626;  /* surface on pointer hover */
+  --color-surface-press:  #111111;  /* surface on active/press */
+  /* #1a1a1a instead of #1e1e1e — widens the step between raised panels and
+     surface-active (#262626). The previous 8-point gap (#1e1e1e→#262626) was
+     imperceptible; 18 points (#1a1a1a→#262626) is legible as a distinct layer. */
+  --color-surface-raised: #1a1a1a;  /* card / panel surface */
+  --color-surface-active: #262626;  /* persistent selected state */
+
+  --color-border:         #2e2e2e;  /* subtle outlines */
+  --color-border2:        #3d3d3d;  /* slightly more prominent borders */
+
+  --color-text-primary:   #e1e1e1;  /* primary text — headings, labels */
+  --color-text-base:      #e1e1e1;  /* default body text */
+  /* #909090 replaces #888888 — bumped from 4.26:1 to 4.75:1 on surface-active,
+     which is the Card hover background. Tag (11px) and description (14px) both
+     require 4.5:1; the old value failed that combination. */
+  --color-text-muted:     #909090;  /* secondary text, descriptions */
+  --color-text-muted2:    #aaaaaa;  /* tertiary — captions, slider thumbs */
+
+  /* Accents — dark theme versions are the base brand values */
+  --color-accent:         #76c17d;  /* green — connection, success, active state */
+  --color-accent-subtle:  rgba(118, 193, 125, 0.12); /* highlight background */
+  --color-accent2:        #b9b0ff;  /* purple — easing curve, secondary */
+  --color-accent3:        #e8b86d;  /* amber — warnings, no-demo indicator */
+}
+
+/* ─── Light theme ────────────────────────────────────────────────────────────
+   Applied when data-theme="light" on :root.
+   Accents are darkened for contrast on light backgrounds.
+
+   Verified contrast ratios
+   ─────────────────────────────────────────────────────────────────────────────
+   text-base (#1a1a1a) on bg (#f5f5f5)            15.9:1  AAA ✓
+   text-base (#1a1a1a) on surface-raised (#ffffff) 17.4:1  AAA ✓
+   text-muted (#666666) on bg (#f5f5f5)             5.3:1  AA  ✓
+   text-muted (#666666) on surface-raised (#ffffff)  5.7:1  AA  ✓
+   text-muted (#666666) on surface-active (#ebebeb)  4.8:1  AA  ✓  ← Card hover (tag, description)
+   text-primary (#ffffff) on surface (#1a1a1a)     17.4:1  AAA ✓
+   text-primary (#ffffff) on surface-hover (#333333) 12.6:1 AAA ✓
+   accent (#4a9e52) on surface-raised (#ffffff)     3.3:1  UI  ✓  (outline only — not text)
+   accent3 (#905e18) on surface-raised (#ffffff)    5.5:1  AA  ✓  ← noDemoNote text
+   accent3 (#905e18) on bg (#f5f5f5)               5.1:1  AA  ✓ */
+:root[data-theme="light"] {
+  --color-bg:             #f5f5f5;
+  --color-bg2:            #ebebeb;
+
+  --color-surface:        #1a1a1a;
+  --color-surface-hover:  #333333;
+  --color-surface-press:  #111111;
+  --color-surface-raised: #ffffff;
+  --color-surface-active: #ebebeb;
+
+  --color-border:         #e2e2e2;
+  --color-border2:        #cccccc;
+
+  --color-text-primary:   #ffffff;  /* text on dark interactive surfaces */
+  --color-text-base:      #1a1a1a;
+  /* #666666 replaces #6b6b6b — bumped from 4.47:1 to 4.82:1 on surface-active
+     (#ebebeb), which is the Card hover background. */
+  --color-text-muted:     #666666;
+  --color-text-muted2:    #888888;
+
+  /* Darkened for contrast on light backgrounds */
+  --color-accent:         #4a9e52;  /* 3.3:1 on white — UI threshold only (used as outline) */
+  --color-accent-subtle:  rgba(74, 158, 82, 0.10);
+  --color-accent2:        #7b6fd4;  /* purple — easing curve, secondary */
+  /* #905e18 replaces #c4882a — old value was 3.1:1 on white, failing the
+     4.5:1 AA requirement for 11px noDemoNote text. New value: 5.5:1. */
+  --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
+}
+
+/* ─── High-contrast theme ────────────────────────────────────────────────────
+   Applied when data-theme="high-contrast" on :root.
+   Maximum contrast — no grays, pure black/white surfaces.
+
+   Verified contrast ratios
+   ─────────────────────────────────────────────────────────────────────────────
+   text-base (#000000) on bg (#ffffff)            21.0:1  AAA ✓
+   text-muted (#000000) on surface-active (#f0f0f0) 18.4:1 AAA ✓
+   text-primary (#ffffff) on surface (#000000)    21.0:1  AAA ✓
+   accent (#006810) on bg (#ffffff)                7.0:1  AAA ✓
+   accent2 (#5a4fcf) on bg (#ffffff)               6.1:1  AA  ✓  (SVG stroke — 3:1 threshold)
+   accent3 (#6b4400) on bg (#ffffff)               8.6:1  AAA ✓ */
+:root[data-theme="high-contrast"] {
+  --color-bg:             #ffffff;
+  --color-bg2:            #f0f0f0;
+
+  --color-surface:        #000000;
+  --color-surface-hover:  #000000;
+  --color-surface-press:  #000000;
+  --color-surface-raised: #ffffff;
+  --color-surface-active: #f0f0f0;  /* black text reads at 18.4:1 against this */
+
+  --color-border:         #000000;
+  --color-border2:        #000000;
+
+  --color-text-primary:   #ffffff;  /* text on black interactive surfaces */
+  --color-text-base:      #000000;
+  --color-text-muted:     #000000;  /* no grays in high-contrast */
+  --color-text-muted2:    #000000;
+
+  /* All accent values AAA-verified against #ffffff background except accent2.
+     accent2 (#5a4fcf) reaches 6.1:1 — AA, not AAA. It is used exclusively as
+     an SVG stroke (graphical, 3:1 threshold), so this is sufficient. Darkening
+     it further to reach AAA would make it indistinguishable from navy. */
+  --color-accent:         #006810;  /* 7.0:1 AAA — was #007a0c (only 5.5:1, not AAA) */
+  --color-accent-subtle:  rgba(0, 104, 16, 0.10);
+  --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
+  --color-accent3:        #6b4400;  /* 8.6:1 AAA */
+}

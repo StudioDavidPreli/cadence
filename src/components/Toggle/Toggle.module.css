@@ -1,0 +1,107 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The track is the clickable button element.
+   44px wide, 26px tall, 3px padding gives the thumb 18px of travel.
+   :active uses the --motion-scale-base CSS custom property so press feedback
+   responds to the scale.base slider in TokenLab without needing Framer Motion
+   on the button itself. */
+.track {
+  display: flex;
+  align-items: center;
+  width: 44px;
+  height: 26px;
+  padding: 3px;
+  border-radius: 13px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-border);
+  cursor: pointer;
+  /* Reset button defaults */
+  appearance: none;
+  -webkit-appearance: none;
+  gap: 0;
+}
+
+.track:active {
+  transform: scale(var(--motion-scale-base, 0.95));
+}
+
+/* Expressive mode: track color changes on state.
+   Duration is set via inline style so it stays in sync with the token slider. */
+.trackExpressive {
+  transition-property: background-color, border-color;
+  transition-timing-function: var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  /* duration injected via style prop in the component */
+}
+
+.trackOn {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* The sliding thumb.
+   --color-text-base (#e1e1e1 dark, #1a1a1a light, #000000 HC) is
+   legible against both the neutral track (--color-border) and the
+   accent track (--color-accent) in dark and light themes.
+
+   High-contrast is the exception: --color-text-base resolves to #000000,
+   which is invisible against the black track (--color-border: #000000).
+   The two modes require different fixes because their tracks differ:
+
+   Expressive mode: track flips to --color-accent (#006810, dark green) when
+   on, and stays black when off. So the thumb needs to be white (#ffffff) in
+   both states — white on black (off) and white on green (on) both pass AAA.
+   We use --color-text-primary (#ffffff in HC) rather than a hardcoded value.
+   The off-state override lives on .thumb alone (no track-state class needed)
+   because --color-text-primary is correct in both positions for HC expressive.
+
+   Subtle mode: the track is always black. A color change isn't available as a
+   signal (that would make it expressive). Instead, a 1px border using
+   --color-border2 (#000000 in most themes, but we apply it only in HC where
+   it resolves to the same black — so we use the outline trick: a box-shadow
+   inset in white creates a visible ring without adding layout or color) makes
+   the thumb readable. We use outline rather than border to avoid shifting
+   the thumb's size inside the fixed-dimension track. */
+.thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--color-text-base);
+}
+
+/* ── High-contrast thumb overrides ─────────────────────────────────────────
+   Applied only when data-theme="high-contrast" is on :root.
+   Expressive and subtle require different approaches (see comment above). */
+
+/* Expressive HC: white thumb reads against both black (off) and green (on) tracks. */
+:root[data-theme="high-contrast"] .trackExpressive .thumb {
+  background-color: var(--color-text-primary);
+}
+
+/* Subtle HC: thumb stays black (matches text-base) but gets a white inset
+   ring so it separates from the black track. outline-offset pushes the ring
+   inside the circle boundary so it doesn't clip against the track edges. */
+:root[data-theme="high-contrast"] .thumb {
+  outline: 1.5px solid var(--color-text-primary);
+  outline-offset: -2px;
+}
+
+/* The expressive rule above sets background-color: --color-text-primary (white).
+   That rule's selector is more specific, so it wins over the base .thumb rule.
+   But the outline rule immediately above applies to ALL HC thumbs — including
+   expressive. A white outline on a white thumb is invisible and harmless, but
+   reset it anyway for clarity. */
+:root[data-theme="high-contrast"] .trackExpressive .thumb {
+  outline: none;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  user-select: none;
+}

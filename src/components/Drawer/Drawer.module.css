@@ -1,0 +1,106 @@
+/* Backdrop — full viewport dimming layer.
+   background-color is --color-bg (the page background in each theme).
+   Opacity is animated by Framer Motion from 0 to 0.8 — not set in CSS —
+   so the CSS class just provides the base color. Setting opacity here
+   would conflict with Framer Motion's opacity animation target.
+   z-index 50 puts it above all page content but below the drawer. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  z-index: 50;
+  /* cursor tells the user the backdrop is interactive (click to close) */
+  cursor: pointer;
+}
+
+/* Drawer panel — slides up from the bottom of the viewport.
+   position: fixed escapes any parent overflow:hidden or transform context
+   (unless a parent has will-change:transform, filter, or perspective set).
+   The TokenLab does not apply these, so fixed works correctly here.
+
+   Only top corners are rounded — the drawer extends to the viewport bottom,
+   so bottom corners would be clipped and invisible. Rounded top corners signal
+   that this is a temporary overlay, not a full-page navigation change. */
+.drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 51;
+  background-color: var(--color-surface-raised);
+  border-top: 2px solid var(--color-accent);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 24px 32px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* ── Drag handle ─────────────────────────────────────────────────────────── */
+
+/* Centered cluster of three lines — signals "this panel can be dragged."
+   The handle is a visual affordance only in this demo; actual drag gesture
+   implementation belongs in the Gesture tab. */
+.handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 20px;
+}
+
+.handleLine {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-border2);
+  border-radius: 1px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-base);
+  font-family: inherit;
+}
+
+/* Close button — minimal, inherits font, no visual noise */
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.closeButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* ── Content ─────────────────────────────────────────────────────────────── */
+
+.content {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
