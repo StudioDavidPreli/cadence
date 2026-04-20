@@ -1,0 +1,54 @@
+/* ── Library container ───────────────────────────────────────────────────────
+   Fills the full panel height (TabPanel sets height:100% on .tabPanelInner).
+   overflow-y: auto allows the card grid to scroll when it exceeds panel height.
+   scrollbar-gutter: stable reserves the scrollbar lane whether the scrollbar is
+   visible or not. Without this, gaining a row from a 2x2 expansion could cause
+   the scrollbar to appear mid-animation — reducing .library's width, which
+   triggers auto-fit to recount columns, resizing every card while the layout
+   animation is in flight. Stable gutter keeps available width constant.
+   container-type: inline-size enables @container queries in PrincipleCard.module.css.
+   container-name: library is a CSS property value (not a class name), so CSS
+   Modules does not hash it — both files agree on the name at runtime. */
+
+.library {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  container-type: inline-size;
+  container-name: library;
+}
+
+/* ── Card grid ───────────────────────────────────────────────────────────────
+   auto-fit + minmax(180px, 1fr): responsive columns with no JavaScript width
+   math. The browser computes column count at every container width — 1 column
+   on mobile, up to 6+ on wide panels. 180px is the minimum readable card width
+   (titles wrap to two lines without truncation at this width).
+
+   grid-auto-rows: 234px (fixed, not minmax): 234px = 180 × 1.3. Fixed row height
+   means the expanded card's final bounding box is deterministic the moment
+   isExpanded flips true. An earlier minmax(234px, auto) version allowed rows to
+   grow if content demanded more space, but that flexibility caused a layout
+   animation bug: rows continued resolving during the reflow triggered by the 2x2
+   expansion, so Framer Motion's layout prop captured a target bounding box that
+   then changed before the animation finished — producing an overshoot followed
+   by a hard cut at the end. Fixed row height removes the moving target entirely.
+
+   align-content: start prevents rows from spreading to fill the overflow-y
+   container's height when card count is low.
+
+   grid-auto-flow: row (default): cards hold DOM sequence. A 2x2 expansion that
+   does not align with column boundaries leaves one or two empty cells. This is
+   intentional — the empty cells are visible evidence that the system yielded
+   space for the expanded card. An earlier version used dense, which filled gaps
+   by reordering cards; expansion read as global reshuffle rather than
+   neighbors making room. See CLAUDE.md for the full reasoning. */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-auto-rows: 234px;
+  grid-auto-flow: row;
+  gap: 12px;
+  padding: 24px;
+  align-content: start;
+}

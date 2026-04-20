@@ -1,0 +1,326 @@
+/* ── Card shell ──────────────────────────────────────────────────────────────
+   Row height is owned by the grid (grid-auto-rows: minmax(234px, auto)).
+   Cards fill their row with height: 100% — the 2x2 expanded area produces a
+   correctly proportioned rectangle regardless of position in the grid.
+   min-width/min-height: 0 fixes a CSS Grid gotcha: grid children refuse to
+   shrink below their content's intrinsic size by default. Setting 0 lets the
+   grid cell constrain the card as intended.
+   Framer Motion's layout prop FLIP-animates all bounding box changes. */
+
+.card {
+  background-color: var(--color-surface-raised);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.cardCollapsed {
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+/* Expanded: --color-accent border signals "active/live" — same semantic as
+   the EasingVisualizer handle and NavItem active indicator.
+   gridColumn and gridRow come from inline style, computed by
+   getExpandedFootprint in PrincipleCard/index.jsx. */
+.cardExpanded {
+  border: 1px solid var(--color-accent);
+  cursor: default;
+}
+
+/* ── Collapsed content ───────────────────────────────────────────────────────
+   Placeholder icon + meta row + title stacked vertically. */
+
+.collapsedContent {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Gray rectangle placeholder. aspect-ratio 1:1 per spec.
+   Will be replaced by Rive illustration post-launch. */
+.placeholderIcon {
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: var(--color-border);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardNumber {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* ── Category badge ──────────────────────────────────────────────────────────
+   Classic: --color-accent-subtle / --color-accent (green).
+   Extended: --color-accent2-subtle / --color-accent2 (purple).
+   Mirrors the highlight pattern used by the EasingVisualizer active handle. */
+
+.categoryBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.categoryClassic {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.categoryExtended {
+  background-color: var(--color-accent2-subtle);
+  color: var(--color-accent2);
+}
+
+/* DM Serif Display italic — editorial weight for principle names.
+   Two-line clamp instead of single-line ellipsis: titles like
+   "Straight Ahead & Pose to Pose" need two lines to read at 180px
+   card width. -webkit-line-clamp is well-supported and the correct
+   cross-browser approach for multi-line truncation. */
+.cardTitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-base);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Expanded content ────────────────────────────────────────────────────────
+   Left half: AnimatePresence crossfades between animation placeholder (State 1)
+   and component demo area (State 2).
+   Right half: principle info + toggle + bridge text area that also crossfades.
+   Close button is position:absolute in the top-right corner. */
+
+.expandedContent {
+  display: flex;
+  gap: 24px;
+  height: 100%;
+  padding: 20px 24px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* × close button — top right of expanded card */
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 100ms var(--motion-ease-standard),
+              background-color 100ms var(--motion-ease-standard);
+}
+
+.closeButton:hover {
+  color: var(--color-text-base);
+  background-color: var(--color-surface-active);
+}
+
+/* Left half: flex column containing the state wrapper.
+   The wrapper creates a positioned context for the AnimatePresence crossfade
+   between animation placeholder and component demo. */
+.animationHalf {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Creates a positioned context so .animationState children can be
+   position:absolute and fill the same space for crossfading. */
+.animationStateWrapper {
+  flex: 1;
+  position: relative;
+}
+
+/* Both left-half states (animation placeholder, component demo) occupy
+   the wrapper absolutely. They crossfade via AnimatePresence without
+   affecting the surrounding flex layout. */
+.animationState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animation placeholder fills the left half.
+   --color-surface-active distinguishes this from the card's surface-raised
+   background — reads as a designated stage area, not empty space.
+   Replaced by Rive illustration in Phase 6. */
+.animationPlaceholder {
+  flex: 1;
+  background-color: var(--color-surface-active);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animationPlaceholderText {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* Right half: principle text + toggle + bridge text area.
+   padding-right leaves room for the close button. */
+.contentHalf {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 28px;
+  min-height: 0;
+}
+
+.expandedMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.expandedNumber {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.expandedTitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--color-text-base);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.expandedSummary {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* "See it in UI" / "See it in motion" toggle */
+.stateToggle {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 100ms var(--motion-ease-standard),
+              color 100ms var(--motion-ease-standard),
+              background-color 100ms var(--motion-ease-standard);
+}
+
+.stateToggle:hover {
+  border-color: var(--color-border2);
+  color: var(--color-text-base);
+  background-color: var(--color-surface-active);
+}
+
+/* Bridge text / animation context area — dashed placeholder for content
+   written per principle in Phase 2. Both State 1 and State 2 use this
+   same class; the label text changes via AnimatePresence crossfade.
+   flex-shrink: 0 keeps this area at its natural height rather than
+   collapsing when the right half has more content than space. */
+.bridgeArea {
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+.bridgeAreaText {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Dashed placeholder for component demo area (left half State 2).
+   flex: 1 fills the animationState container. */
+.demoArea {
+  flex: 1;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.demoAreaText {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Responsive stacked layout ───────────────────────────────────────────────
+   Below 600px the two-column expanded layout (animationHalf beside contentHalf)
+   compresses both halves below readability. @container flips to stacked:
+   animationHalf on top, contentHalf below. Container queries are correct here
+   because the library panel resizes independently of the viewport — a sidebar
+   collapse would not register in a media query.
+
+   container-name: library is set on .library in PrinciplesLibrary.module.css.
+   CSS Modules hashes class names but not container-name values, so 'library'
+   is the same string in both files at runtime. */
+
+@container library (max-width: 600px) {
+  .expandedContent {
+    flex-direction: column;
+  }
+
+  .animationHalf {
+    min-height: 200px;
+  }
+
+  .contentHalf {
+    padding-right: 0;
+  }
+}
