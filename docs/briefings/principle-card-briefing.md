@@ -1,109 +1,105 @@
 ---
 Subject: PrincipleCard expand/collapse animation
 Last updated: 2026-05-01
-Status: Active — close animation symptoms remain after cheap fix (d636b93)
+Status: Resolved at commit 6b59838 — explicit-scale architecture in place
 Related: docs/case-studies/cadence-animation-chronology.md
 ---
 
 # PrincipleCard Briefing
 
 Read `docs/case-studies/cadence-animation-chronology.md` before proposing any changes to the
-expand/collapse machinery. That document records eleven days of iteration, three loops, and one
-hallucination. This briefing summarizes the current state for a new session.
+expand/collapse machinery. That document records eleven days of iteration, three loops, one
+hallucination, and the resolution at commit 6b59838.
 
 ---
 
-## 1. Current architecture (as of d636b93)
+## 1. Current architecture (as of 6b59838)
 
-The card is a `motion.div` with the `layout` prop. When `isExpanded` flips true, an inline
-`gridColumn` / `gridRow` style changes the card's footprint from 1x1 to 2x2. Framer Motion
-records the before and after bounding rects and applies a FLIP corrective: a `scaleX`/`scaleY`
-transform anchored at `transform-origin: 0 0` (top-left), animated from the corrective value
-back to identity over `duration.slow`.
+The card is a `motion.div` with explicit `scaleX`/`scaleY` MotionValues animated imperatively
+via Framer Motion's `animate(motionValue, target)`. No `layout` prop. When `isExpanded` flips
+true, an inline `gridColumn`/`gridRow` style sets the card's footprint to 2×2; on close, the
+footprint is held at 2×2 by `isClosing` state until the close animation completes. The wrapper
+fills the card via `inset: 0` and inherits the card's transform via CSS cascade.
 
-The expanded content lives in a `motion.div` (the expandedWrapper) inside `AnimatePresence`.
-The wrapper has no `layout` prop. It has `initial={{ opacity: 0 }}`, `animate={{ opacity: 1 }}`,
-`exit={{ opacity: 0 }}`. It inherits the card's FLIP corrective via CSS transform cascade.
+State variables: `uiMode`, `drawerOpen`, `isStable`, `isAnimating`, `isClosing`
+Refs: `isAnimatingRef`, `cardRef`
+MotionValues: `scaleX`, `scaleY`
 
-On expand: the wrapper is invisible while the FLIP corrective is large. By the time it fades in,
-the corrective has resolved and the content appears at natural size. Expansion looks correct.
+The two axis animations are coordinated via `Promise.all` so post-animation state transitions
+run after both complete, not after one. `transformOrigin` is computed per-card from
+`getExpandedFootprint` to match the edge-case biasing (right-edge cards extend left, bottom-row
+cards extend up) so the shrink converges back to each card's natural cell position.
 
-On close: the wrapper is fully visible (opacity 1) at the moment the FLIP begins. The corrective
-starts at ~2.0 (expanded/collapsed ratio). The wrapper inherits this transform, so all content
-appears at ~2x its natural size on the first frame, then scales down as FLIP resolves.
+`cellWidth` is read from the resolved `gridTemplateColumns` in PrinciplesLibrary and passed to
+each card. Combined with the `GRID_ROW_HEIGHT` and `GRID_GAP` constants in PrincipleCard, it
+produces the close animation's target ratio.
 
-State variables: `uiMode`, `drawerOpen`, `isStable`, `isAnimating`
-Refs: `isAnimatingRef`, `tokensRef`
-Timers: two `setTimeout` calls at `duration.slow * 1000` (tUnblock, tStable)
-
-What is NOT in the current code (removed in d636b93):
-- `expandedDimensions` (measured dimensions of the wrapper)
-- `wrapperRef`
-- `hasExpandedRef`
-- `tClearDims` timeout
-- `scale: 0.95` on wrapper exit
-- `layout` on the wrapper
+What is NOT in the current code:
+- `layout` prop on the card or wrapper
+- FLIP corrective transforms
+- `expandedDimensions`, `wrapperRef`, `hasExpandedRef`
+- `tokensRef` (was only used by removed setTimeouts)
+- setTimeout-driven state transitions
+- `scale: 0.95` on the wrapper exit
 
 ---
 
-## 2. What has been tried and failed
+## 2. What has been tried and failed (do not revert)
 
-Read the chronology for full detail. Short version:
+Read the chronology for full detail. Three loops are documented there. The architecture below
+appears in those loops and was reverted twice before being applied at commit 6b59838 with
+measurements justifying it.
 
-**layout on wrapper** — added twice, removed twice. Same result both times: expansion animation
-breaks. The wrapper's own layout animation conflicts with the inherited FLIP corrective.
+**Explicit-scale architecture (current, do not revert).** Attempted April 30 (Loop 3 in the
+chronology) and abandoned mid-iteration. Returned at commit 6b59838 with the following
+differences from the prior attempts:
+1. Diagnosis is settled with measurements (briefing diagnostic captures), not intuition.
+2. Implementation is documented in a state-machine comment block in PrincipleCard.
+3. Scoped to the card's expand/collapse animation only — no mixing with adjacent concerns.
+4. Both axis animations coordinated via `Promise.all` to avoid the registration-order race
+   that otherwise leaves scaleY frozen at the close target.
 
-**isClosing / holdFootprint** — introduced April 29, iterated across multiple sessions, explicitly
-deleted April 30 as part of "architectural simplification." Re-proposed May 1 without noting the
-prior lifecycle. Do not reintroduce without explaining how this attempt differs.
+**layout on wrapper.** Added twice, removed twice. Same result both times: expansion animation
+breaks. The wrapper's own layout animation conflicts with the inherited transform. Do not add.
 
-**scale-driven close (explicit scaleX/scaleY MotionValues)** — implemented April 30, reverted at
-user request April 30, re-proposed May 1. Same mechanism. Do not reintroduce without explaining
-how this attempt differs.
+**isClosing / holdFootprint on top of FLIP.** Introduced April 29, deleted April 30. Was a
+patch on top of FLIP. The current implementation uses `isClosing` for footprint hold but
+without FLIP underneath; the mechanism is the same name with a different role. Do not
+reintroduce as a patch on top of any other architecture.
 
-**expandedDimensions pinning** — applied fixed width/height to the wrapper during exit so the
-FLIP corrective would not compress the wrapper's flex layout. Composed multiplicatively with the
-FLIP corrective (e.g., 2.06 FLIP × 0.95 scale exit), producing two simultaneous scaling motions
-anchored at different origins. Removed in d636b93.
+**`mode="wait"` on AnimatePresence.** Tried April 29. Produced overlapping crossfade. Reverted.
 
-**mode="wait" on AnimatePresence** — tried April 29. Produced overlapping crossfade. Reverted.
+**`expandedDimensions` pinning.** Applied fixed width/height to the wrapper during exit.
+Composed multiplicatively with the FLIP corrective, producing two simultaneous scaling motions
+anchored at different origins. Removed at d636b93. Do not reintroduce.
 
 ---
 
-## 3. Active symptoms (observed 2026-05-01 at duration.slow = 2000ms)
+## 3. Resolved symptoms (resolved at commit 6b59838)
 
-The cheap fix (d636b93) was observed in the browser at an exaggerated duration. Three symptoms
-appeared during card close that are not present during card open:
+Three symptoms were observed at d636b93 during the close animation. All are resolved by the
+explicit-scale architecture:
 
-**Symptom A — Rive disappears at frame zero.**
-The Rive canvas is visible in the expanded state. At the moment close is triggered, the Rive
-animation disappears before the close animation begins. It is not fading out — it is gone
-instantly. The rest of the expanded content remains visible and animates.
+**Symptom A — Rive disappears at frame zero of close.** Caused by the wrapper's flex column
+collapsing to zero cross-axis at narrow CSS width when the footprint cleared. The Rive canvas
+was rendered into a zero-height parent. Resolved: the footprint now holds at 2×2 throughout
+the close, so the wrapper's CSS box stays at expanded dimensions and the canvas keeps its
+full height.
 
-**Symptom B — Text font sizes increase during collapse.**
-During the close animation, text elements (title, summary, quote) visibly increase in size.
-This is consistent with the expected FLIP behavior: the card inherits a corrective of ~2x,
-which makes text appear at ~2x its rendered size. The increase is visible because the wrapper
-is fully opaque at frame zero of the close.
+**Symptom B — Text font sizes appear larger during collapse.** Caused by the FLIP corrective
+inheriting through CSS cascade and visually scaling text by the before/after ratio (~2x).
+Resolved: there is no FLIP corrective. The card's visible shrink is a transform that does not
+affect the laid-out font size or wrapping.
 
-**Symptom C — Text drifts toward center during collapse.**
-Text elements drift inward (toward the card's center) during the close animation. The collapse
-appears to pull content toward center rather than scaling uniformly from a fixed anchor. The
-toggle button (bottom-right of the content half) is obscured by the drifting text.
+**Symptom C — contentHalf drifts toward center, obscuring toggle button.** Caused by
+contentHalf reflowing to single-cell width and rendering at 332px intrinsic height while the
+flex container cross-axis collapsed to 0, with `align-items: center` overflowing it above
+and below. Resolved: the card's CSS box does not reflow; contentHalf renders at expanded
+width throughout, as it does in the open state.
 
-**Assessment:**
-Symptoms B and C are consistent with the FLIP corrective cascade. The corrective is anchored
-at the card's top-left. Content positioned in the right half of the 2x2 layout is far from
-that anchor — the corrective at those coordinates is large, producing visible scale and
-translation drift. This is a geometry problem: FLIP corrective + content-is-far-from-anchor.
-
-Symptom A (Rive disappears) is not explained by the FLIP corrective alone. Possible causes:
-- The Rive canvas renders at layout dimensions and the FLIP corrective would show it at 2x
-  its canvas resolution, which may be causing Rive to dispose the canvas or re-initialize
-- The `pointerEvents: uiMode ? 'none' : 'auto'` on the animationState div may be triggering
-  a visibility event that Rive interprets as unmount
-- `AnimatePresence` unmounting behavior may be interacting with Rive's canvas lifecycle
-This symptom requires investigation before diagnosis.
+Diagnostic captures (DevTools console snapshots at both 2000ms and production durations,
+plus a screen recording confirming all three symptoms occurred on the same frame) are
+preserved in the chronology document.
 
 ---
 
@@ -112,66 +108,37 @@ This symptom requires investigation before diagnosis.
 Read `docs/case-studies/cadence-animation-chronology.md` sections "The loops" and
 "What the code has never had" before proposing any change.
 
-Hard constraints for any proposed fix:
-- Do not reintroduce `isClosing`, `holdFootprint`, or explicit `scaleX`/`scaleY` MotionValues
-  without first explaining how this attempt differs from the April 29-30 iterations.
-- Do not add `layout` to the expandedWrapper without first explaining why the prior two
-  attempts broke expansion and why this attempt would not.
-- Do not use `mode="wait"` on the outer AnimatePresence — tried and reverted April 29.
-- The footprint (`gridColumn`/`gridRow`) must clear on the same render that `isExpanded`
-  becomes false. This is required for FLIP to record the correct before/after rects.
-  `holdFootprint` delays this clear and breaks the FLIP record.
-
-Constraints from CLAUDE.md:
+Constraints carried over from CLAUDE.md:
 - `ease.standard` (not spring) for concurrent layout animations.
 - All animation values must come from tokens — no hardcoded durations or easing values.
-- `layoutId` removed from in-place card expansions — layout prop only.
+- `layoutId` removed from in-place card expansions — explicit transforms only.
+
+Constraints from this resolution:
+- Both axis animations must be coordinated (Promise.all or equivalent) so post-animation
+  state transitions run after both complete, not after one. Framer Motion processes
+  animations in registration order; relying on a single `onComplete` callback to coordinate
+  both axes produces a race that leaves the second-completing axis frozen at its target.
+- `transformOrigin` must match the per-card edge-case biasing in `getExpandedFootprint`. A
+  fixed `'0 0'` origin produces a horizontal or vertical jump for right-edge or bottom-row
+  cards.
+- Footprint must clear in the same callback that resets the scale to 1, so neighbors reflow
+  at the same paint as the visual identity reset.
 
 ---
 
-## 5. What to try next
-
-The root problem: the expandedWrapper is fully opaque when FLIP begins on close. The FLIP
-corrective cascades to all children at ~2x, so all content appears oversized on frame zero.
-
-Candidate approaches (not yet tried in current architecture):
-
-**Candidate 1 — Fade wrapper before FLIP starts.**
-Trigger the wrapper's exit opacity fade before the footprint clears. If the wrapper is
-already at opacity 0 when FLIP begins, the 2x frame-zero artifact is invisible. Implementation
-challenge: `isExpanded` and `footprint` are set on the same render. To fade first, the wrapper
-would need to begin its exit animation one frame or one tick before the footprint clears.
-
-**Candidate 2 — Opacity-only exit, no scale, accept the pop.**
-The current exit is `opacity: 0` over `duration.slow`. The FLIP corrective is what produces
-the visible scaling — not an explicit scale prop on the wrapper. If the opacity fade is fast
-enough relative to the FLIP duration, the artifact may be imperceptible. At normal duration
-(400ms), the initial 2x frame may be less visible. Observation at normal speed is needed
-before concluding the symptom is unacceptable.
-
-**Candidate 3 — counterScale on the wrapper.**
-Apply a `scale` to the wrapper that is the inverse of the card's FLIP corrective. This
-requires reading the corrective at runtime — not trivial. Previously the corrective was
-approximated by measuring `expandedDimensions` and dividing by the collapsed size. This
-brings back the measurement step, which was removed because it composed incorrectly with
-`scale: 0.95`.
-
-Before implementing any candidate: observe the animation at normal duration (tokens as set,
-not 2000ms). The symptoms at 2000ms may not be visible at 400ms.
-
----
-
-## 6. What to read before starting
+## 5. What to read before starting
 
 In order:
-1. This document (done)
-2. `docs/case-studies/cadence-animation-chronology.md` — full loop history
-3. `src/components/PrincipleCard/index.jsx` — current implementation
-4. The stale comment block at lines 163-186 of PrincipleCard/index.jsx — these lines
-   still mention `expandedDimensions` and describe the wrapper's behavior in terms of the
-   removed mechanism. The description is inaccurate. Do not use it as ground truth.
+1. This document.
+2. `docs/case-studies/cadence-animation-chronology.md` — full loop history, including the
+   Resolution section at the end.
+3. `src/components/PrincipleCard/index.jsx` — current implementation. The state-machine
+   comment block at the top of the PrincipleCard component is authoritative.
+4. `src/components/PrinciplesLibrary/index.jsx` — measures cellWidth from the resolved grid
+   template columns and passes it to each card.
 
-Do not propose a change until you can answer:
-- Does this approach appear in the chronology? If yes, what makes this attempt different?
-- Where is the wrapper opacity at frame zero of the close animation under this approach?
-- What happens to the footprint clear timing under this approach?
+Do not propose a change without first answering:
+- Does this approach appear in the chronology's loops? If yes, what makes this attempt
+  different?
+- What state holds the footprint during the proposed transition?
+- What transform-origin is in effect for edge cards?
