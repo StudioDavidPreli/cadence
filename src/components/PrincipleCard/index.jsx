@@ -211,17 +211,9 @@ export function PrincipleCard({
   // isAnimating: true for duration.slow after any expand/collapse toggle.
   // Prevents collapsed content from appearing during the close animation.
   const [isAnimating, setIsAnimating] = useState(false)
-  // expandedDimensions: measured after the card settles open. Applied as fixed
-  // inline dimensions on the wrapper during exit to prevent layout squish.
-  const [expandedDimensions, setExpandedDimensions] = useState(null)
-
-  const wrapperRef = useRef(null)
   // Ref mirror of isAnimating used in the click handler — refs don't cause
   // re-renders when read, which avoids unnecessary renders on fast clicks.
   const isAnimatingRef = useRef(false)
-  // Prevents the dimension-clear timeout from firing on initial mount when
-  // the card starts collapsed and has never been expanded.
-  const hasExpandedRef = useRef(false)
   // tokensRef keeps token values readable inside effects without listing tokens
   // as a dependency. Effects that use token values only for timer durations
   // must not re-fire when tokens change — that would trigger spurious close
@@ -252,34 +244,11 @@ export function PrincipleCard({
     // isStable becomes true after expand settles, false after collapse settles.
     const tStable = setTimeout(() => setIsStable(isExpanded), d)
 
-    if (isExpanded) {
-      hasExpandedRef.current = true
-    } else if (hasExpandedRef.current) {
-      // Clear measured dimensions after exit animation completes.
-      // By this point AnimatePresence has unmounted the wrapper — this is cleanup.
-      const tClearDims = setTimeout(() => setExpandedDimensions(null), d)
-      return () => {
-        clearTimeout(tUnblock)
-        clearTimeout(tStable)
-        clearTimeout(tClearDims)
-      }
-    }
-
     return () => {
       clearTimeout(tUnblock)
       clearTimeout(tStable)
     }
   }, [isExpanded])
-
-  // Measure the wrapper once the card is fully settled at expanded size.
-  // These dimensions are applied during exit so FLIP does not squish the content.
-  useEffect(() => {
-    if (!isStable || !wrapperRef.current) return
-    setExpandedDimensions({
-      width: wrapperRef.current.offsetWidth,
-      height: wrapperRef.current.offsetHeight,
-    })
-  }, [isStable])
 
   // Two exit contexts for the drawer:
   //
@@ -376,27 +345,15 @@ export function PrincipleCard({
         {isExpanded && (
           <motion.div
             key="expanded"
-            ref={wrapperRef}
             className={styles.expandedWrapper}
             // The wrapper does not have its own layout prop. The card's
             // FLIP corrective transform is the visible scaling motion of
             // the contents. Contents inherit the corrective via CSS
             // transform and scale with the card, anchored at the card's
             // top-left.
-            //
-            // During exit, fix the wrapper at its measured expanded dimensions so
-            // FLIP shrinking the card does not compress the wrapper's flex layout.
-            // right/bottom: auto overrides the CSS inset:0 stretch on those axes
-            // so the explicit width/height takes effect.
-            style={expandedDimensions ? {
-              width:  expandedDimensions.width,
-              height: expandedDimensions.height,
-              right:  'auto',
-              bottom: 'auto',
-            } : undefined}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: dur.slow, ease: tokens.ease.standard }}
           >
             <div className={styles.expandedContent}>
