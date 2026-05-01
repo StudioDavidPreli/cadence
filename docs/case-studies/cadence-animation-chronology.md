@@ -189,3 +189,15 @@ The eleven days of uncommitted work made this worse. Without commits, there was 
 3. If the close animation still has visible artifacts: read this document before proposing a new approach. Check whether the proposed approach has already been tried (see the loops above). If it has, name why this attempt differs before implementing.
 
 4. Do not propose reintroducing `isClosing`, `holdFootprint`, or explicit `scaleX`/`scaleY` MotionValues without first explaining how this attempt differs from the April 29–30 iterations that were explicitly deleted.
+
+---
+
+## Resolution
+
+Commit `6b59838` (May 2026): replaced FLIP-driven card scaling with explicit animate scale on the card, with footprint hold during close via `isClosing` state.
+
+The architecture that landed had been proposed and reverted twice in earlier loops (Loop 3 in the chronology above). It is now in place because the diagnostic captures in `docs/briefings/principle-card-briefing.md` confirmed the geometric failure mode that justifies it: at narrow CSS width, the wrapper's flex column collapses asymmetrically, driving the Rive canvas to zero height. The FLIP corrective cannot compensate for layout reflow, only for visual position and size. Explicit scale separates the two: the CSS box stays at expanded dimensions throughout the close animation; the visible shrink is a transform that does not affect descendants' layout.
+
+Both axis animations are coordinated via `Promise.all` so post-animation state transitions run after both complete. An earlier draft of the architecture used `onComplete` on one animation to coordinate state for both, which produced a registration-order race that left scaleY frozen at the close target. The race was diagnosed in one round-trip via measurement; the fix was two lines.
+
+The discipline that produced this resolution: commits between every change, briefings between sessions, measurements before architectural decisions, predictions before observations, and a stop-and-write rule when reasoning toward a previously-rejected pattern. The chronology above documents what happened in the eleven days before that discipline was in place. This section documents what happened in the four days after.
