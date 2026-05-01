@@ -216,18 +216,27 @@ export function PrinciplesLibrary() {
   const tokens = useMotionTokens()
   const [selectedId, setSelectedId] = useState(null)
   const [columnCount, setColumnCount] = useState(6)
+  // cellWidth: pixel width of one grid column, read from the resolved
+  // grid-template-columns. PrincipleCard uses it to compute the scale ratio
+  // between its expanded (2-column) and collapsed (1-column) footprints for
+  // the explicit-scale close animation. Default 190 is a reasonable estimate
+  // for a typical panel before measurement runs; it is overwritten on mount.
+  const [cellWidth, setCellWidth] = useState(190)
   const gridRef = useRef(null)
 
-  // Read the actual column count from the grid's computed style. This runs
-  // whenever the grid element resizes — panel resize, window resize, or any
-  // layout shift that changes the number of auto-fit columns.
+  // Read the actual column count and per-column width from the grid's computed
+  // style. Both are derived from gridTemplateColumns, which auto-fit resolves
+  // to a space-separated list of pixel values. Re-runs on any grid resize —
+  // panel, window, or any layout shift that changes the number of auto-fit
+  // columns or their resolved width.
   useLayoutEffect(() => {
     if (!gridRef.current) return
 
     const measure = () => {
       const computed = window.getComputedStyle(gridRef.current)
-      const columns = computed.gridTemplateColumns.split(' ').length
-      setColumnCount(columns)
+      const columns = computed.gridTemplateColumns.split(' ')
+      setColumnCount(columns.length)
+      setCellWidth(parseFloat(columns[0]))
     }
 
     measure()
@@ -260,6 +269,7 @@ export function PrinciplesLibrary() {
             tokens={tokens}
             index={index}
             columnCount={columnCount}
+            cellWidth={cellWidth}
             totalCards={totalCards}
             selectedId={selectedId}
           />

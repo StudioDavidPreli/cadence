@@ -1,11 +1,13 @@
 /* ── Card shell ──────────────────────────────────────────────────────────────
-   Row height is owned by the grid (grid-auto-rows: minmax(234px, auto)).
+   Row height is owned by the grid (grid-auto-rows: 234px).
    Cards fill their row with height: 100% — the 2x2 expanded area produces a
    correctly proportioned rectangle regardless of position in the grid.
    min-width/min-height: 0 fixes a CSS Grid gotcha: grid children refuse to
    shrink below their content's intrinsic size by default. Setting 0 lets the
    grid cell constrain the card as intended.
-   Framer Motion's layout prop FLIP-animates all bounding box changes. */
+   Open and close are driven by an explicit scaleX/scaleY transform applied
+   in PrincipleCard via Framer Motion MotionValues, with the footprint held
+   at 2×2 throughout the close (see PrincipleCard for state machine). */
 
 /* display: flex; flex-direction: column lets the expandedWrapper fill the card
    while the quoteBlock sits below it as a natural-height sibling. The collapsed
@@ -133,10 +135,13 @@
 .expandedWrapper {
   display: flex;
   flex-direction: column;
-  /* Fills the card via inset: 0. During close, holdFootprint keeps the card's
-     DOM at 2×2 so the wrapper has stable dimensions. The card's scale transform
-     shrinks card and wrapper together as one unit — no layout changes, no
-     content reflow. */
+  /* Fills the card via inset: 0. The wrapper has no transform of its own —
+     it inherits the card's scaleX/scaleY transform via CSS cascade, so
+     wrapper and contents shrink with the card as one unit. Because the
+     card's CSS box stays at expanded dimensions throughout the close
+     (footprint held), the flex column inside does not reflow and contents
+     do not rewrap. Opacity fades to 0 during exit, concurrent with the
+     scale-down. */
   position: absolute;
   inset: 0;
   min-height: 0;

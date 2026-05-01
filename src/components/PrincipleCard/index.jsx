@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { motion, AnimatePresence, useReducedMotion, useMotionValue, animate } from 'framer-motion'
 import { PrincipleAnimation } from '../PrincipleAnimation'
 import { Button } from '../Button'
 import { Drawer } from '../Drawer'
@@ -10,14 +10,31 @@ import styles from './PrincipleCard.module.css'
 const supportsHover =
   typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
+// Grid invariants. These mirror the values in PrinciplesLibrary.module.css
+// (grid-auto-rows: 234px and gap: 12px). If the grid layout changes, update
+// both files together. cellWidth is dynamic (varies with panel width) and
+// arrives as a prop from PrinciplesLibrary, which reads it from the resolved
+// gridTemplateColumns.
+const GRID_ROW_HEIGHT = 234
+const GRID_GAP        = 12
+
 // ─── getExpandedFootprint ─────────────────────────────────────────────────────
 //
-// Computes the grid-column and grid-row span for an expanded card.
+// Computes the grid-column, grid-row span, and matching transform-origin for
+// an expanded card.
 //
 // Bias rule (down-right): the expansion extends right and down from the card's
 // natural 1-indexed position. Edge cases:
 //   - Right edge (col === columnCount): extend left instead of right.
 //   - Bottom row (row === totalRows): extend up instead of down.
+//
+// transformOrigin matches the natural cell's corner within the expanded
+// footprint, so the close animation's scale shrinks toward the resting
+// collapsed position with no horizontal or vertical jump:
+//   - Interior:    "0% 0%"     (top-left)
+//   - Right edge:  "100% 0%"   (top-right)
+//   - Bottom row:  "0% 100%"   (bottom-left)
+//   - Bottom-right corner: "100% 100%"
 //
 // Phase 2 hook: this function receives index, columnCount, and totalCards.
 // It is the correct place to add neighborhood-relative logic when Phase 2
@@ -31,9 +48,13 @@ function getExpandedFootprint(index, columnCount, totalCards) {
   const colStart = col === columnCount ? col - 1 : col
   const rowStart = row === totalRows ? row - 1 : row
 
+  const transformOrigin =
+    `${col === columnCount ? '100%' : '0%'} ${row === totalRows ? '100%' : '0%'}`
+
   return {
     gridColumn: `${colStart} / span 2`,
     gridRow:    `${rowStart} / span 2`,
+    transformOrigin,
   }
 }
 
@@ -154,35 +175,65 @@ function QuoteBlock({ principle, uiMode, isStable, tokens: motionTokens }) {
 // Renders a single principle card in a CSS Grid context. The card occupies one
 // grid cell when collapsed and a 2×2 footprint when expanded.
 //
-// ── Expand ────────────────────────────────────────────────────────────────────
-// Framer Motion's layout prop FLIP-animates the card from 1×1 to 2×2. The
-// expandedWrapper fades in over duration.slow. isStable gates inner AnimatePresence
-// crossfades so they don't fire during the enter animation.
+// Background:
+//   docs/case-studies/cadence-animation-chronology.md — eleven-day history of
+//     iteration on this animation, including the loops that produced the
+//     architecture below.
+//   docs/briefings/principle-card-briefing.md — diagnostic captures and the
+//     measurements that justified replacing FLIP with explicit scale.
 //
-// ── Close ─────────────────────────────────────────────────────────────────────
-// Also uses FLIP. The footprint inline style clears on the same render that
-// isExpanded becomes false, so the FLIP records the correct before/after rects.
-// expandedDimensions fixes the wrapper at its measured expanded size during exit
-// so the FLIP shrink does not compress the wrapper's flex layout. The card's
-// overflow:hidden clips the wrapper progressively as the visual clip shrinks —
-// this wipe is mostly imperceptible behind the simultaneous opacity fade.
+// ── State machine ─────────────────────────────────────────────────────────────
 //
-// Both expand and collapse use the same one mechanism. The close animation is
-// not a separate scale+translate implementation — it is FLIP running in reverse.
+//   RESTING   collapsed at 1×1 cell. scaleX=scaleY=1. footprint={}.
+//   OPENING   isExpanded=true, isAnimating=true, isStable=false.
+//             Footprint at 2×2 — CSS box at expanded dimensions on the same
+//             render isExpanded flips. The open useLayoutEffect snaps
+//             scaleX/Y to the cell ratio (visually 1×1 at frame 0), then
+//             animates them to 1.
+//   OPEN      isExpanded=true, isStable=true. Inner AnimatePresence
+//             crossfades on uiMode toggle are gated by isStable.
+//   CLOSING   isExpanded=false (set by parent), isClosing=true (set in
+//             handleClose). Both batch into one render. Footprint stays at
+//             2×2 via the (isExpanded || isClosing) guard. Wrapper stays at
+//             expanded dimensions; contents do not reflow. The close
+//             useLayoutEffect animates scaleX/Y from 1 down to the cell
+//             ratio. On animation completion: MotionValues snap back to 1,
+//             then setIsClosing(false). On the next render, footprint clears
+//             and the card returns to RESTING with no visible jump (the snap
+//             and the clear happen on the same paint).
 //
-// ── Layout animation timing ───────────────────────────────────────────────────
-// Layout transitions use duration.slow + ease.standard so all reflowing cards
-// arrive together. Spring is reserved for whileHover and whileTap.
+// ── Why explicit scale instead of layout-prop FLIP ───────────────────────────
+//
+// FLIP records before/after bounding rects and applies a corrective transform.
+// On close, FLIP forced the card's CSS box to reflow to single-cell dimensions
+// on the same render as isExpanded flipping false. At single-cell width the
+// flex column inside the wrapper collapsed asymmetrically: quoteBlock claimed
+// all available height, expandedContent collapsed to zero cross-axis,
+// animationHalf collapsed to zero, the Rive canvas was rendered into a
+// zero-height box, and contentHalf overflowed its parent at 332px intrinsic
+// height. The FLIP corrective then scaled this collapsed-and-overflowing
+// layout up by 2×, producing the symptoms documented in the case study and
+// the diagnostic captures in the briefing.
+//
+// Explicit scale separates layout from visual size. The CSS box stays at
+// expanded dimensions throughout the animation; the visible shrink is a
+// transform that does not affect descendants' layout. transformOrigin
+// (returned per-card from getExpandedFootprint to match the edge-case
+// biasing) anchors the shrink at the natural cell's corner so the visual
+// size at the end of the close (scale at cell ratio, footprint still at 2×2)
+// equals the resting collapsed visual size (scale 1, footprint 1×1) on the
+// next paint. No reflow, no FLIP corrective, no canvas collapse.
+//
+// ── Animation timing ──────────────────────────────────────────────────────────
+// Both directions use duration.slow + ease.standard. Spring is reserved for
+// whileHover and whileTap.
 // See CLAUDE.md: "ease.standard (not spring) for concurrent layout animations."
 //
-// ── isStable ─────────────────────────────────────────────────────────────────
-// Resets to false on collapse so every expansion starts at State 1 (animation).
-//
-// ── expandedDimensions ───────────────────────────────────────────────────────
-// Measured when isStable first becomes true (card fully settled). During exit,
-// these are applied as fixed width/height on the wrapper. Combined with
-// `right: auto; bottom: auto` to override the CSS `inset: 0` stretch on those
-// axes, the wrapper holds its expanded size while FLIP shrinks the card around it.
+// ── Neighbor reflow ───────────────────────────────────────────────────────────
+// Cards no longer carry a layout prop, so neighbor cards do not FLIP-animate
+// their position changes. When the closing card's footprint clears at the
+// end of the close animation, all neighbors snap to their new grid positions
+// in a single paint.
 
 export function PrincipleCard({
   principle,
@@ -192,6 +243,7 @@ export function PrincipleCard({
   tokens,
   index,
   columnCount,
+  cellWidth,
   totalCards,
   selectedId,
 }) {
@@ -208,18 +260,29 @@ export function PrincipleCard({
   // isStable: true only while card is fully expanded and settled. Gates inner
   // AnimatePresence crossfades so they don't fire during expand/collapse.
   const [isStable, setIsStable] = useState(false)
-  // isAnimating: true for duration.slow after any expand/collapse toggle.
-  // Prevents collapsed content from appearing during the close animation.
+  // isAnimating: true during expand and close. Prevents collapsed content
+  // from appearing during the close animation. Cleared in the imperative
+  // animate() onComplete callbacks below.
   const [isAnimating, setIsAnimating] = useState(false)
+  // isClosing: true only during the close animation. Holds the footprint at
+  // the expanded 2×2 so the wrapper's CSS box stays at expanded dimensions
+  // throughout — preventing the inner flex column from collapsing
+  // asymmetrically at single-cell width. Set synchronously in handleClose
+  // alongside the parent's onClose() (React 18 batches both into one commit).
+  // Cleared in the close animation's onComplete.
+  const [isClosing, setIsClosing] = useState(false)
   // Ref mirror of isAnimating used in the click handler — refs don't cause
   // re-renders when read, which avoids unnecessary renders on fast clicks.
   const isAnimatingRef = useRef(false)
-  // tokensRef keeps token values readable inside effects without listing tokens
-  // as a dependency. Effects that use token values only for timer durations
-  // must not re-fire when tokens change — that would trigger spurious close
-  // animations on any previously-expanded card every time a preset is selected.
-  const tokensRef = useRef(tokens)
-  useEffect(() => { tokensRef.current = tokens })
+  const cardRef = useRef(null)
+  // MotionValues drive the card's inline transform. They are animated
+  // imperatively via Framer Motion's animate(motionValue, target) in the
+  // open/close useLayoutEffects below. Imperative animation avoids a race
+  // with the animate prop reading a target on the same render the MotionValue
+  // is set, and per CLAUDE.md is the recommended pattern for component-local
+  // motion that should not broadcast through the global animation scope.
+  const scaleX = useMotionValue(1)
+  const scaleY = useMotionValue(1)
 
   // Reset interactive state when card collapses.
   useEffect(() => {
@@ -229,26 +292,91 @@ export function PrincipleCard({
     }
   }, [isExpanded])
 
-  // On any isExpanded change: block animation, update isStable, clear dimensions.
-  // All three share the same duration so they fire in sync.
-  useEffect(() => {
-    const d = tokensRef.current.duration.slow * 1000
+  // ── Open animation ─────────────────────────────────────────────────────────
+  // On expand, snap scaleX/Y to the collapsed-cell ratio synchronously
+  // (before paint) and animate to identity. The card's CSS box has already
+  // reflowed to the 2×2 footprint at this point; the small initial scale
+  // produces a visual size of one cell at frame 0, growing to two cells.
+  // transformOrigin (set on the inline style via getExpandedFootprint)
+  // anchors growth at the natural cell's corner.
+  useLayoutEffect(() => {
+    if (!isExpanded || isClosing || !cellWidth) return
+
+    const ratioX = cellWidth        / (2 * cellWidth        + GRID_GAP)
+    const ratioY = GRID_ROW_HEIGHT  / (2 * GRID_ROW_HEIGHT  + GRID_GAP)
+
+    scaleX.set(ratioX)
+    scaleY.set(ratioY)
 
     isAnimatingRef.current = true
     setIsAnimating(true)
-    const tUnblock = setTimeout(() => {
+    setIsStable(false)
+
+    const ax = animate(scaleX, 1, {
+      duration: dur.slow,
+      ease: tokens.ease.standard,
+    })
+    const ay = animate(scaleY, 1, {
+      duration: dur.slow,
+      ease: tokens.ease.standard,
+    })
+
+    // Both axes animate independently. State transitions run after both
+    // complete, not after one. Without this, the animation that finishes
+    // second can overwrite values set in the first's onComplete (Framer
+    // Motion processes animations in registration order within a single
+    // frame).
+    Promise.all([ax, ay]).then(() => {
       isAnimatingRef.current = false
       setIsAnimating(false)
-    }, d)
+      setIsStable(true)
+    })
 
-    // isStable becomes true after expand settles, false after collapse settles.
-    const tStable = setTimeout(() => setIsStable(isExpanded), d)
-
-    return () => {
-      clearTimeout(tUnblock)
-      clearTimeout(tStable)
-    }
+    return () => { ax.stop(); ay.stop() }
   }, [isExpanded])
+
+  // ── Close animation ────────────────────────────────────────────────────────
+  // On close, animate scaleX/Y from identity down to the cell ratio. The
+  // footprint stays at 2×2 (held by isClosing in the footprint guard below),
+  // so the wrapper's CSS box does not reflow and contents do not rewrap. The
+  // canvas does not reach 0 height. The toggle stays in position.
+  //
+  // onComplete: snap MotionValues back to 1 BEFORE clearing isClosing, so the
+  // footprint clear and the scale reset land on the same paint with no jump.
+  useLayoutEffect(() => {
+    if (!isClosing || !cellWidth) return
+
+    const ratioX = cellWidth        / (2 * cellWidth        + GRID_GAP)
+    const ratioY = GRID_ROW_HEIGHT  / (2 * GRID_ROW_HEIGHT  + GRID_GAP)
+
+    isAnimatingRef.current = true
+    setIsAnimating(true)
+    setIsStable(false)
+
+    const ax = animate(scaleX, ratioX, {
+      duration: dur.slow,
+      ease: tokens.ease.standard,
+    })
+    const ay = animate(scaleY, ratioY, {
+      duration: dur.slow,
+      ease: tokens.ease.standard,
+    })
+
+    // Both axes animate independently. State transitions run after both
+    // complete, not after one. Without this, the animation that finishes
+    // second can overwrite values set in the first's onComplete (Framer
+    // Motion processes animations in registration order within a single
+    // frame).
+    Promise.all([ax, ay]).then(() => {
+      scaleX.set(1)
+      scaleY.set(1)
+      isAnimatingRef.current = false
+      setIsClosing(false)
+      setIsAnimating(false)
+    })
+
+    return () => { ax.stop(); ay.stop() }
+  }, [isClosing])
 
   // Two exit contexts for the drawer:
   //
@@ -270,6 +398,11 @@ export function PrincipleCard({
   function handleClose(e) {
     e.stopPropagation()
     if (drawerOpen) setDrawerOpen(false)
+    // setIsClosing(true) and onClose() (which sets selectedId=null in the
+    // parent) batch into one React 18 commit. On that commit isExpanded is
+    // false and isClosing is true, so the footprint guard below resolves to
+    // expanded and the card's CSS box stays at 2×2 through the close.
+    setIsClosing(true)
     onClose()
   }
 
@@ -279,30 +412,33 @@ export function PrincipleCard({
     setUiMode(prev => !prev)
   }
 
-  // Footprint clears immediately when isExpanded becomes false. FLIP records the
-  // before rect (2×2) and after rect (1×1) on the same frame — no holdFootprint needed.
-  const footprint = isExpanded ? getExpandedFootprint(index, columnCount, totalCards) : {}
+  // Footprint holds at 2×2 throughout the close animation via isClosing, so
+  // the wrapper's CSS box stays at expanded dimensions and contents do not
+  // reflow. It clears at the end of the close, in the same render that the
+  // scale resets to 1 (see close useLayoutEffect's onComplete).
+  const footprint = (isExpanded || isClosing)
+    ? getExpandedFootprint(index, columnCount, totalCards)
+    : {}
 
-  // isStable keeps zIndex elevated during the collapse animation even though
-  // isExpanded is already false. It becomes false only after duration.slow, by
-  // which time the FLIP has completed and neighboring cards have reflowed.
-  const zIndex = isExpanded || isStable ? 10 : 1
+  // zIndex stays elevated across the full close animation. isStable is also
+  // included for the open path's small tail (it is set true on open
+  // completion and persists until the next close begins).
+  const zIndex = (isExpanded || isClosing || isStable) ? 10 : 1
 
   return (
     <motion.div
-      layout
+      ref={cardRef}
       className={[
         styles.card,
         isExpanded ? styles.cardExpanded : styles.cardCollapsed,
       ].join(' ')}
-      style={{ ...footprint, zIndex }}
+      style={{ ...footprint, zIndex, scaleX, scaleY }}
       animate={{
         opacity: selectedId && !isExpanded ? 0.5 : 1,
       }}
       onClick={handleCardClick}
       whileHover={isExpanded || !supportsHover ? undefined : { scale: tokens.scale.subtle }}
       transition={{
-        layout:  { duration: dur.slow, ease: tokens.ease.standard },
         opacity: { duration: dur.base },
         duration: dur.fast,
         ease: tokens.ease.spring,
@@ -339,18 +475,19 @@ export function PrincipleCard({
       )}
 
       {/* ── Expanded state ────────────────────────────────────────────────── */}
-      {/* AnimatePresence holds the wrapper through its exit animation so it
-          fades out concurrently with the FLIP card shrink. */}
+      {/* AnimatePresence holds the wrapper through its exit animation so its
+          opacity fades out concurrently with the card's scale-down. */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             key="expanded"
             className={styles.expandedWrapper}
-            // The wrapper does not have its own layout prop. The card's
-            // FLIP corrective transform is the visible scaling motion of
-            // the contents. Contents inherit the corrective via CSS
-            // transform and scale with the card, anchored at the card's
-            // top-left.
+            // The wrapper has no transform of its own. It inherits the card's
+            // scaleX/scaleY transform via CSS cascade, so wrapper and contents
+            // shrink with the card as one unit. Because the card's CSS box
+            // stays at expanded dimensions throughout the close (footprint
+            // held by isClosing), the wrapper's flex column does not reflow,
+            // contents do not rewrap, and the canvas keeps its full height.
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
