@@ -71,6 +71,7 @@ body {
   --color-accent:         #76c17d;  /* green — connection, success, active state */
   --color-accent-subtle:  rgba(118, 193, 125, 0.12); /* highlight background */
   --color-accent2:        #b9b0ff;  /* purple — easing curve, secondary */
+  --color-accent2-subtle: rgba(185, 176, 255, 0.12); /* extended principle badge background */
   --color-accent3:        #e8b86d;  /* amber — warnings, no-demo indicator */
 }
 
@@ -114,6 +115,7 @@ body {
   --color-accent:         #4a9e52;  /* 3.3:1 on white — UI threshold only (used as outline) */
   --color-accent-subtle:  rgba(74, 158, 82, 0.10);
   --color-accent2:        #7b6fd4;  /* purple — easing curve, secondary */
+  --color-accent2-subtle: rgba(123, 111, 212, 0.10); /* extended principle badge background */
   /* #905e18 replaces #c4882a — old value was 3.1:1 on white, failing the
      4.5:1 AA requirement for 11px noDemoNote text. New value: 5.5:1. */
   --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
@@ -156,5 +158,6 @@ body {
   --color-accent:         #006810;  /* 7.0:1 AAA — was #007a0c (only 5.5:1, not AAA) */
   --color-accent-subtle:  rgba(0, 104, 16, 0.10);
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
+  --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
 }

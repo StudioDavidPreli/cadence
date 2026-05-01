@@ -7,6 +7,10 @@
    grid cell constrain the card as intended.
    Framer Motion's layout prop FLIP-animates all bounding box changes. */
 
+/* display: flex; flex-direction: column lets the expandedWrapper fill the card
+   while the quoteBlock sits below it as a natural-height sibling. The collapsed
+   state's collapsedContent keeps height: 100% which resolves correctly inside
+   a flex container with a defined height. */
 .card {
   background-color: var(--color-surface-raised);
   border-radius: 10px;
@@ -15,6 +19,8 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardCollapsed {
@@ -39,9 +45,12 @@
   flex-direction: column;
   padding: 12px;
   gap: 10px;
-  height: 100%;
   box-sizing: border-box;
   overflow: visible;
+  /* Absolute siblings: both states overlay each other in the same card space.
+     The card's height is grid-owned; flow sizing is irrelevant for these children. */
+  position: absolute;
+  inset: 0;
 }
 
 /* Gray rectangle placeholder. aspect-ratio 1:1 per spec.
@@ -109,28 +118,52 @@
   overflow: hidden;
 }
 
-/* ── Expanded content ────────────────────────────────────────────────────────
-   Left half: AnimatePresence crossfades between animation placeholder (State 1)
-   and component demo area (State 2).
-   Right half: principle info + toggle + bridge text area that also crossfades.
-   Close button is position:absolute in the top-right corner. */
+/* ── Expanded structure ──────────────────────────────────────────────────────
+   expandedWrapper is the AnimatePresence item (motion.div key="expanded"). It
+   fills .card via flex: 1 and stacks expandedContent (two-column area) above
+   quoteBlock (natural height) as a column.
+
+   expandedContent is the two-column area (animation half + content half). It
+   gets flex: 1 instead of height: 100% so quoteBlock can sit below it.
+   position: relative hosts the close button absolutely.
+
+   Close button is position: absolute top-right of expandedWrapper so it stays
+   anchored to the card corner regardless of expandedContent height. */
+
+.expandedWrapper {
+  display: flex;
+  flex-direction: column;
+  /* Fills the card via inset: 0. During close, holdFootprint keeps the card's
+     DOM at 2×2 so the wrapper has stable dimensions. The card's scale transform
+     shrinks card and wrapper together as one unit — no layout changes, no
+     content reflow. */
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+}
 
 .expandedContent {
   display: flex;
+  flex: 1;
   gap: 24px;
-  height: 100%;
-  padding: 20px 24px;
+  padding: 24px 32px;
   position: relative;
   box-sizing: border-box;
+  align-items: center;
+  min-height: 0;
 }
 
-/* × close button — top right of expanded card */
+/* × close button — top right of expanded card.
+   44×44 meets the WCAG 2.5.5 touch target minimum.
+   top/right are offset inward by 10px relative to the old 24×24 position
+   so the × glyph stays visually anchored at the same corner. */
 .closeButton {
   position: absolute;
-  top: 12px;
-  right: 14px;
-  width: 24px;
-  height: 24px;
+  top: 2px;
+  right: 4px;
+  width: 44px;
+  height: 44px;
   border: none;
   background: none;
   font-size: 18px;
@@ -150,20 +183,24 @@
   background-color: var(--color-surface-active);
 }
 
-/* Left half: flex column containing the state wrapper.
-   The wrapper creates a positioned context for the AnimatePresence crossfade
-   between animation placeholder and component demo. */
+/* Left half: stretches full card height (overrides parent align-items: center)
+   so the animation fills all available vertical space without a size cap. */
 .animationHalf {
-  flex: 1;
+  flex: 1.4;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  align-self: stretch;
 }
 
 /* Creates a positioned context so .animationState children can be
-   position:absolute and fill the same space for crossfading. */
+   position:absolute and fill the same space for crossfading.
+   overflow:hidden clips the scoped Drawer's pre-entrance position (below the
+   bottom edge) so it is not visible before its slide-up animation begins. */
 .animationStateWrapper {
   flex: 1;
   position: relative;
+  overflow: hidden;
 }
 
 /* Both left-half states (animation placeholder, component demo) occupy
@@ -195,14 +232,13 @@
   color: var(--color-text-muted);
 }
 
-/* Right half: principle text + toggle + bridge text area.
-   padding-right leaves room for the close button. */
+/* Right half: vertically centered as a block by the parent's align-items:
+   center. The 40px padding on expandedContent clears the close button. */
 .contentHalf {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-right: 28px;
+  gap: 14px;
   min-height: 0;
 }
 
@@ -259,28 +295,6 @@
   background-color: var(--color-surface-active);
 }
 
-/* Bridge text / animation context area — dashed placeholder for content
-   written per principle in Phase 2. Both State 1 and State 2 use this
-   same class; the label text changes via AnimatePresence crossfade.
-   flex-shrink: 0 keeps this area at its natural height rather than
-   collapsing when the right half has more content than space. */
-.bridgeArea {
-  border: 1px dashed var(--color-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  min-height: 48px;
-  flex-shrink: 0;
-}
-
-.bridgeAreaText {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--color-text-muted);
-  font-style: italic;
-}
-
 /* Dashed placeholder for component demo area (left half State 2).
    flex: 1 fills the animationState container. */
 .demoArea {
@@ -300,6 +314,86 @@
   font-style: italic;
 }
 
+/* Scoped Drawer demo container. position:relative is the anchor for the
+   scoped Drawer's position:absolute backdrop and panel. overflow:hidden clips
+   the pre-entrance Drawer position. background-color gives the stage area
+   visible contrast against the card surface. */
+.drawerDemo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-active);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.drawerTrigger {
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-base);
+  cursor: pointer;
+  transition:
+    background-color 100ms var(--motion-ease-standard),
+    border-color 100ms var(--motion-ease-standard);
+}
+
+.drawerTrigger:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-text-muted);
+}
+
+/* ── Quote block ─────────────────────────────────────────────────────────────
+   Sits below expandedContent as a natural-height sibling inside expandedWrapper.
+   Padding matches expandedContent's left/right (32px) for visual alignment. */
+
+.quoteBlock {
+  padding: 20px 32px 24px 32px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* quoteContent wraps quote text + optional attribution as a single crossfade
+   unit. AnimatePresence swaps the whole block on uiMode change. */
+.quoteContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quoteText {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-base);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.quoteAttribution {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.tokenRow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0;
+  margin-top: 4px;
+}
+
 /* ── Responsive stacked layout ───────────────────────────────────────────────
    Below 600px the two-column expanded layout (animationHalf beside contentHalf)
    compresses both halves below readability. @container flips to stacked:
@@ -314,13 +408,14 @@
 @container library (max-width: 600px) {
   .expandedContent {
     flex-direction: column;
+    align-items: stretch;
+    padding: 24px;
+    gap: 20px;
   }
 
   .animationHalf {
-    min-height: 200px;
-  }
-
-  .contentHalf {
-    padding-right: 0;
+    max-height: none;
+    min-height: 240px;
+    align-self: auto;
   }
 }

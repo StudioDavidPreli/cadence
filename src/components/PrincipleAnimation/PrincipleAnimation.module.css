@@ -1,0 +1,39 @@
+/* Wrapper fills whatever space the parent gives it. Rive's RiveComponent
+   renders a canvas inside a container div — giving RiveComponent a className
+   sizes it directly per Rive's own docs. */
+.animationContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RiveComponent renders a div + canvas. The className prop sizes the outer div.
+   No size caps — the canvas fills whatever the parent gives it. */
+.riveCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Shown when no .riv file exists for the given principleId. Matches the visual
+   language of the existing animationPlaceholder in PrincipleCard. */
+.fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: var(--color-surface-active);
+  border-radius: 8px;
+}
+
+.fallbackText {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+}

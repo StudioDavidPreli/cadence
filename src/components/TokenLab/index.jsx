@@ -5,6 +5,7 @@ import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { EasingVisualizer } from '../EasingVisualizer'
+import { PrinciplesLibrary } from '../PrinciplesLibrary'
 import { Button } from '../Button'
 import { Card } from '../Card'
 import { NavItem } from '../NavItem'
@@ -26,6 +27,7 @@ const TABS = [
   { id: 'enter-exit',        label: 'Enter & Exit' },
   { id: 'sequence-progress', label: 'Sequence & Progress' },
   { id: 'gesture',           label: 'Gesture' },
+  { id: 'principles',        label: 'Principles' },
 ]
 
 // ─── Token → Component map ────────────────────────────────────────────────────
@@ -1150,6 +1152,10 @@ export function TokenLab() {
                 </DemoWrapper>
 
               </div>
+            ) : activeTab === 'principles' ? (
+              // PrinciplesLibrary manages its own padding and layout.
+              // No demoContent wrapper — the component fills the full panel area.
+              <PrinciplesLibrary />
             ) : null}
 
           </TabPanel>

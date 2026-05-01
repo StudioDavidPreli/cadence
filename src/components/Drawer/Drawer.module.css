@@ -35,6 +35,28 @@
   overflow-y: auto;
 }
 
+/* ── Scoped mode ─────────────────────────────────────────────────────────────
+   Anchors backdrop and drawer to the nearest positioned ancestor instead of
+   the viewport. The parent container must have position:relative and
+   overflow:hidden for correct containment. The drawer slides up from below
+   the container's bottom edge; overflow:hidden clips the pre-entrance position
+   so it is not visible before the animation begins. */
+
+.backdropScoped {
+  position: absolute;
+  z-index: 1;
+}
+
+.drawerScoped {
+  position: absolute;
+  z-index: 2;
+  /* Leave 30% of container height above the drawer so the backdrop is visible
+     and clickable, and the anticipation overshoot reads against empty space.
+     The viewport-mode 60vh constraint serves the same purpose at viewport scale. */
+  max-height: 70%;
+  padding: 12px 16px 20px;
+}
+
 /* ── Drag handle ─────────────────────────────────────────────────────────── */
 
 /* Centered cluster of three lines — signals "this panel can be dragged."

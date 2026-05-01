@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PrincipleCard — Open / Close Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111;
+    color: #ccc;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    padding: 48px 40px 80px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #444;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #1c1c1c;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 0.05em;
+  }
+
+  .legend-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .swatch-card    { background: #4a9e52; }
+  .swatch-content { background: #7b61ff; }
+  .swatch-state   { background: #444; }
+  .swatch-trigger { background: #888; }
+
+  /* ── Two-column layout ─────────────────────────────────────────────── */
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .col {
+    padding: 0 40px;
+  }
+
+  .col:first-child {
+    border-right: 1px solid #1c1c1c;
+    padding-left: 0;
+  }
+
+  .col:last-child {
+    padding-right: 0;
+  }
+
+  .col-header {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 28px;
+  }
+
+  /* ── Timeline ──────────────────────────────────────────────────────── */
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Step ──────────────────────────────────────────────────────────── */
+
+  .step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 20px;
+  }
+
+  /* vertical connector between steps */
+  .step:not(:last-child) > .step-track::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    left: 4px;
+    width: 1px;
+    background: #1e1e1e;
+  }
+
+  .step-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body {
+    flex: 1;
+    padding-top: 2px;
+  }
+
+  .step-label {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 3px;
+  }
+
+  .step-detail {
+    font-size: 10px;
+    color: #444;
+    line-height: 1.6;
+  }
+
+  /* ── Entity colours ────────────────────────────────────────────────── */
+
+  /* Card */
+  .card    .dot          { background: #4a9e52; }
+  .card    .step-label   { color: #4a9e52; }
+
+  /* Content / wrapper */
+  .content .dot          { background: #7b61ff; }
+  .content .step-label   { color: #9b8fff; }
+
+  /* State / effect */
+  .state   .dot          { background: #333; border: 1px solid #3a3a3a; }
+  .state   .step-label   { color: #555; }
+
+  /* Trigger / user action */
+  .trigger .dot          { background: #888; }
+  .trigger .step-label   { color: #aaa; }
+
+  /* ── Badges ────────────────────────────────────────────────────────── */
+
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  .badge-card    { background: #1a2e1b; color: #4a9e52; }
+  .badge-content { background: #1a1630; color: #7b61ff; }
+  .badge-frame   { background: #1a1a1a; color: #3a3a3a; letter-spacing: 0.1em; }
+  .badge-warn    { background: #2e1f0a; color: #8a5a1a; }
+
+  /* ── Concurrent block ──────────────────────────────────────────────── */
+
+  .concurrent-wrapper {
+    padding-bottom: 20px;
+    position: relative;
+  }
+
+  .concurrent-wrapper:not(:last-child) > .concurrent-track::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    left: 4px;
+    width: 1px;
+    background: #1e1e1e;
+  }
+
+  .concurrent-label {
+    font-size: 9px;
+    color: #2c2c2c;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-left: 23px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .concurrent-label::before {
+    content: '┬';
+    position: absolute;
+    left: -14px;
+    color: #222;
+  }
+
+  .concurrent-body {
+    border-left: 1px solid #1e2a1f;
+    margin-left: 8px;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 4px;
+  }
+
+  .concurrent-body.close-block {
+    border-left-color: #1e1a2e;
+  }
+
+  .concurrent-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .concurrent-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .concurrent-dot.card-dot    { background: #4a9e52; }
+  .concurrent-dot.content-dot { background: #7b61ff; }
+
+  .concurrent-text .label   { font-size: 11px; margin-bottom: 2px; }
+  .concurrent-text .detail  { font-size: 10px; color: #444; line-height: 1.6; }
+
+  .open-card-label    { color: #4a9e52; }
+  .open-content-label { color: #9b8fff; }
+
+  /* ── Timing marker ─────────────────────────────────────────────────── */
+
+  .timing-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 20px 0;
+    padding-left: 22px;
+  }
+
+  .timing-line {
+    flex: 1;
+    height: 1px;
+    background: #1e1e1e;
+  }
+
+  .timing-label {
+    font-size: 9px;
+    color: #2e2e2e;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── Problem callout ───────────────────────────────────────────────── */
+
+  .callout {
+    background: #1e1a10;
+    border: 1px solid #3a2e10;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin: 4px 0 0 22px;
+    font-size: 10px;
+    color: #6a5020;
+    line-height: 1.6;
+  }
+
+  .callout strong {
+    color: #8a6a28;
+    display: block;
+    margin-bottom: 3px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>PrincipleCard — Open / Close Sequence</h1>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch swatch-trigger"></div> User action</div>
+  <div class="legend-item"><div class="legend-swatch swatch-card"></div> Card (motion.div)</div>
+  <div class="legend-item"><div class="legend-swatch swatch-content"></div> Content (expandedWrapper)</div>
+  <div class="legend-item"><div class="legend-swatch swatch-state"></div> State / effect</div>
+</div>
+
+<div class="columns">
+
+  <!-- ═══ OPEN ═══════════════════════════════════════════════════════════ -->
+  <div class="col">
+    <div class="col-header">Open</div>
+    <div class="timeline">
+
+      <div class="step trigger">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">User clicks collapsed card</div>
+          <div class="step-detail">handleCardClick → onSelect()</div>
+        </div>
+      </div>
+
+      <div class="step state">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label"><span class="badge badge-frame">same frame</span> isExpanded → true</div>
+          <div class="step-detail">
+            footprint = getExpandedFootprint()<br>
+            gridColumn / gridRow applied as inline style<br>
+            card class switches → cardExpanded
+          </div>
+        </div>
+      </div>
+
+      <div class="concurrent-wrapper">
+        <div class="concurrent-label">concurrent &nbsp;·&nbsp; duration.slow</div>
+        <div class="concurrent-body">
+
+          <div class="concurrent-item">
+            <div class="concurrent-dot card-dot"></div>
+            <div class="concurrent-text">
+              <div class="label open-card-label"><span class="badge badge-card">card</span> FLIP: 1×1 → 2×2</div>
+              <div class="detail">
+                Records before (1×1) + after (2×2) rects<br>
+                Applies corrective scale(~0.5)<br>
+                Animates scale(0.5) → scale(1.0)
+              </div>
+            </div>
+          </div>
+
+          <div class="concurrent-item">
+            <div class="concurrent-dot content-dot"></div>
+            <div class="concurrent-text">
+              <div class="label open-content-label"><span class="badge badge-content">content</span> Mounts via AnimatePresence</div>
+              <div class="detail">
+                initial={{ opacity: 0 }} → animate={{ opacity: 1 }}<br>
+                Inherits card's FLIP transform<br>
+                Appears to scale up from small — looks correct
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="step state">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">Effect fires (after paint)</div>
+          <div class="step-detail">
+            isAnimating = true &nbsp;·&nbsp; isAnimatingRef = true<br>
+            Timers set for duration.slow
+          </div>
+        </div>
+      </div>
+
+      <div class="timing-row">
+        <div class="timing-line"></div>
+        <div class="timing-label">duration.slow elapses</div>
+        <div class="timing-line"></div>
+      </div>
+
+      <div class="step state">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">isAnimating → false &nbsp;·&nbsp; isStable → true</div>
+        </div>
+      </div>
+
+      <div class="step content">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label"><span class="badge badge-content">content</span> Dimensions measured</div>
+          <div class="step-detail">
+            wrapperRef.offsetWidth / offsetHeight<br>
+            expandedDimensions state set<br>
+            Inner AnimatePresence crossfades enabled
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ CLOSE ══════════════════════════════════════════════════════════ -->
+  <div class="col">
+    <div class="col-header">Close</div>
+    <div class="timeline">
+
+      <div class="step trigger">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">User clicks ×</div>
+          <div class="step-detail">handleClose → onClose()</div>
+        </div>
+      </div>
+
+      <div class="step state">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label"><span class="badge badge-frame">same frame</span> isExpanded → false</div>
+          <div class="step-detail">
+            footprint = {} cleared immediately<br>
+            expandedDimensions still set (not yet cleared)<br>
+            isStable still true (timer hasn't fired)<br>
+            card class switches → cardCollapsed
+          </div>
+        </div>
+      </div>
+
+      <div class="concurrent-wrapper">
+        <div class="concurrent-label">concurrent &nbsp;·&nbsp; duration.slow</div>
+        <div class="concurrent-body close-block">
+
+          <div class="concurrent-item">
+            <div class="concurrent-dot card-dot"></div>
+            <div class="concurrent-text">
+              <div class="label open-card-label"><span class="badge badge-card">card</span> FLIP: 2×2 → 1×1</div>
+              <div class="detail">
+                Records before (2×2) + after (1×1) rects<br>
+                Applies corrective scale(~2.0)<br>
+                Animates scale(2.0) → scale(1.0)
+              </div>
+            </div>
+          </div>
+
+          <div class="concurrent-item">
+            <div class="concurrent-dot content-dot"></div>
+            <div class="concurrent-text">
+              <div class="label open-content-label"><span class="badge badge-content">content</span> AnimatePresence holds wrapper</div>
+              <div class="detail">
+                expandedDimensions applied as fixed size<br>
+                exit={{ opacity: 0, scale: 0.95 }}<br>
+                Fades and scales out over duration.slow
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Problem zone</strong>
+        Content is fully visible (opacity 1) when the FLIP starts with scale(~2.0).
+        Children inherit the parent's transform — content appears at 2× its natural
+        size on the first frame, then scales down visually as the FLIP resolves.
+        On open this is hidden by opacity: the content is invisible during the worst
+        distortion. On close, it isn't.
+      </div>
+
+      <div class="step state" style="padding-top: 20px;">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">Effect fires (after paint)</div>
+          <div class="step-detail">
+            isAnimating = true &nbsp;·&nbsp; isAnimatingRef = true<br>
+            Collapsed content gated: !isExpanded &amp;&amp; !isAnimating = false
+          </div>
+        </div>
+      </div>
+
+      <div class="timing-row">
+        <div class="timing-line"></div>
+        <div class="timing-label">duration.slow elapses</div>
+        <div class="timing-line"></div>
+      </div>
+
+      <div class="step state">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label">isAnimating → false &nbsp;·&nbsp; isStable → false</div>
+          <div class="step-detail">
+            expandedDimensions → null<br>
+            Wrapper unmounted by AnimatePresence
+          </div>
+        </div>
+      </div>
+
+      <div class="step card">
+        <div class="step-track"><div class="dot"></div></div>
+        <div class="step-body">
+          <div class="step-label"><span class="badge badge-card">card</span> Collapsed content fades in</div>
+          <div class="step-detail">
+            !isExpanded &amp;&amp; !isAnimating → true<br>
+            motion.div mounts with opacity 0 → 1
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { PrincipleAnimation } from '../PrincipleAnimation'
+import { Button } from '../Button'
+import { Drawer } from '../Drawer'
 import styles from './PrincipleCard.module.css'
+
+// Hover animations only apply to pointer devices. Touch devices have no hover
+// state and exposing scale feedback there would be distracting.
+const supportsHover =
+  typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
 // ─── getExpandedFootprint ─────────────────────────────────────────────────────
 //
@@ -11,22 +19,16 @@ import styles from './PrincipleCard.module.css'
 //   - Right edge (col === columnCount): extend left instead of right.
 //   - Bottom row (row === totalRows): extend up instead of down.
 //
-// This keeps the 2x2 footprint inside the grid at all positions without
-// overflow or empty columns.
-//
 // Phase 2 hook: this function receives index, columnCount, and totalCards.
 // It is the correct place to add neighborhood-relative logic when Phase 2
-// card deformation is implemented — expanded card position is already
-// available here to compute distance to any given card.
+// card deformation is implemented.
 
 function getExpandedFootprint(index, columnCount, totalCards) {
   const row       = Math.floor(index / columnCount) + 1  // 1-indexed
   const col       = (index % columnCount) + 1            // 1-indexed
   const totalRows = Math.ceil(totalCards / columnCount)
 
-  // Extend right unless at the right edge — then extend left.
   const colStart = col === columnCount ? col - 1 : col
-  // Extend down unless at the bottom row — then extend up.
   const rowStart = row === totalRows ? row - 1 : row
 
   return {
@@ -35,31 +37,152 @@ function getExpandedFootprint(index, columnCount, totalCards) {
   }
 }
 
+
+// ─── getPrincipleComponent ────────────────────────────────────────────────────
+//
+// Returns the UI component demo for a given principle. Add cases here as
+// Phase 2 components are built. The default renders the Phase 2 placeholder.
+//
+// drawerOpen / setDrawerOpen are passed for principles that use the Drawer.
+// Each principle that needs local UI state receives it from PrincipleCard
+// rather than managing its own state, keeping the state lifecycle tied to
+// the card's isExpanded / uiMode resets.
+
+function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
+  switch (principleId) {
+    case 1:
+      return (
+        <div className={styles.demoArea}>
+          <Button>Press me</Button>
+        </div>
+      )
+    case 2:
+      return (
+        <div className={styles.drawerDemo}>
+          <button
+            className={styles.drawerTrigger}
+            onClick={() => setDrawerOpen(true)}
+          >
+            Open drawer
+          </button>
+          <Drawer
+            scoped
+            isOpen={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            title="Anticipation"
+          >
+            The drawer dips slightly downward before sliding up. That small
+            reverse motion is anticipation — preparing the eye for arrival.
+          </Drawer>
+        </div>
+      )
+    default:
+      return (
+        <div className={styles.demoArea}>
+          <span className={styles.demoAreaText}>
+            Component example coming in Phase 2
+          </span>
+        </div>
+      )
+  }
+}
+
+// ─── QuoteBlock ───────────────────────────────────────────────────────────────
+//
+// Renders the quote, attribution, and token row below the expanded card's main
+// content area.
+//
+// When isStable is false (card is entering or exiting), content renders as plain
+// elements — no inner animations. When isStable is true (card fully expanded),
+// AnimatePresence activates and crossfades on uiMode toggle.
+
+function QuoteBlock({ principle, uiMode, isStable, tokens: motionTokens }) {
+  const quote = uiMode ? principle.componentQuote : principle.animationQuote
+  const attribution = uiMode
+    ? principle.componentQuoteAttribution
+    : principle.animationQuoteAttribution
+
+  return (
+    <div className={styles.quoteBlock}>
+      {isStable ? (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={uiMode ? 'component' : 'animation'}
+            className={styles.quoteContent}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
+          >
+            <p className={styles.quoteText}>{quote}</p>
+            {attribution && (
+              <p className={styles.quoteAttribution}>— {attribution}</p>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      ) : (
+        <div className={styles.quoteContent}>
+          <p className={styles.quoteText}>{quote}</p>
+          {attribution && (
+            <p className={styles.quoteAttribution}>— {attribution}</p>
+          )}
+        </div>
+      )}
+
+      {isStable ? (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={uiMode ? 'ui-tokens' : 'anim-tokens'}
+            className={styles.tokenRow}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease.enter }}
+          >
+            {principle.tokens}
+          </motion.p>
+        </AnimatePresence>
+      ) : (
+        <p className={styles.tokenRow}>{principle.tokens}</p>
+      )}
+    </div>
+  )
+}
+
 // ─── PrincipleCard ────────────────────────────────────────────────────────────
 //
 // Renders a single principle card in a CSS Grid context. The card occupies one
-// grid cell when collapsed and a 2x2 footprint when expanded. CSS Grid handles
-// all sizing — the card sets no explicit width or height.
+// grid cell when collapsed and a 2×2 footprint when expanded.
 //
-// ── Why no inline width/height ────────────────────────────────────────────────
-// Sizing is owned by the grid. .card has aspect-ratio: 1/1.3, which shapes the
-// collapsed card relative to its grid cell width. The expanded card gets
-// aspect-ratio: auto so it fills the 2x2 grid area without constraint.
+// ── Expand ────────────────────────────────────────────────────────────────────
+// Framer Motion's layout prop FLIP-animates the card from 1×1 to 2×2. The
+// expandedWrapper fades in over duration.slow. isStable gates inner AnimatePresence
+// crossfades so they don't fire during the enter animation.
+//
+// ── Close ─────────────────────────────────────────────────────────────────────
+// Also uses FLIP. The footprint inline style clears on the same render that
+// isExpanded becomes false, so the FLIP records the correct before/after rects.
+// expandedDimensions fixes the wrapper at its measured expanded size during exit
+// so the FLIP shrink does not compress the wrapper's flex layout. The card's
+// overflow:hidden clips the wrapper progressively as the visual clip shrinks —
+// this wipe is mostly imperceptible behind the simultaneous opacity fade.
+//
+// Both expand and collapse use the same one mechanism. The close animation is
+// not a separate scale+translate implementation — it is FLIP running in reverse.
 //
 // ── Layout animation timing ───────────────────────────────────────────────────
-// All layout transitions use duration.slow + ease.standard. ease.standard
-// produces coordinated movement — all reflowing cards arrive together.
-// Spring is reserved for whileHover (single isolated element). See CLAUDE.md.
+// Layout transitions use duration.slow + ease.standard so all reflowing cards
+// arrive together. Spring is reserved for whileHover and whileTap.
+// See CLAUDE.md: "ease.standard (not spring) for concurrent layout animations."
 //
-// ── uiMode state ─────────────────────────────────────────────────────────────
-// Resets to false when the card collapses so every expansion starts at
-// State 1 (animation context).
+// ── isStable ─────────────────────────────────────────────────────────────────
+// Resets to false on collapse so every expansion starts at State 1 (animation).
 //
-// ── Bridge text ───────────────────────────────────────────────────────────────
-// The bridge text is the core editorial argument of Cadence: the explicit
-// connection between animation principle and UI component behavior. Write it
-// per principle in Phase 2 with the same care as case study copy. Do not
-// generate this automatically.
+// ── expandedDimensions ───────────────────────────────────────────────────────
+// Measured when isStable first becomes true (card fully settled). During exit,
+// these are applied as fixed width/height on the wrapper. Combined with
+// `right: auto; bottom: auto` to override the CSS `inset: 0` stretch on those
+// axes, the wrapper holds its expanded size while FLIP shrinks the card around it.
 
 export function PrincipleCard({
   principle,
@@ -72,32 +195,129 @@ export function PrincipleCard({
   totalCards,
   selectedId,
 }) {
-  const [uiMode, setUiMode] = useState(false)
+  // Drop all animation durations to 0 when the user has prefers-reduced-motion set.
+  const prefersReducedMotion = useReducedMotion()
+  const dur = {
+    slow: prefersReducedMotion ? 0 : tokens.duration.slow,
+    base: prefersReducedMotion ? 0 : tokens.duration.base,
+    fast: prefersReducedMotion ? 0 : tokens.duration.fast,
+  }
 
+  const [uiMode, setUiMode] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  // isStable: true only while card is fully expanded and settled. Gates inner
+  // AnimatePresence crossfades so they don't fire during expand/collapse.
+  const [isStable, setIsStable] = useState(false)
+  // isAnimating: true for duration.slow after any expand/collapse toggle.
+  // Prevents collapsed content from appearing during the close animation.
+  const [isAnimating, setIsAnimating] = useState(false)
+  // expandedDimensions: measured after the card settles open. Applied as fixed
+  // inline dimensions on the wrapper during exit to prevent layout squish.
+  const [expandedDimensions, setExpandedDimensions] = useState(null)
+
+  const wrapperRef = useRef(null)
+  // Ref mirror of isAnimating used in the click handler — refs don't cause
+  // re-renders when read, which avoids unnecessary renders on fast clicks.
+  const isAnimatingRef = useRef(false)
+  // Prevents the dimension-clear timeout from firing on initial mount when
+  // the card starts collapsed and has never been expanded.
+  const hasExpandedRef = useRef(false)
+  // tokensRef keeps token values readable inside effects without listing tokens
+  // as a dependency. Effects that use token values only for timer durations
+  // must not re-fire when tokens change — that would trigger spurious close
+  // animations on any previously-expanded card every time a preset is selected.
+  const tokensRef = useRef(tokens)
+  useEffect(() => { tokensRef.current = tokens })
+
+  // Reset interactive state when card collapses.
   useEffect(() => {
-    if (!isExpanded) setUiMode(false)
+    if (!isExpanded) {
+      setUiMode(false)
+      setDrawerOpen(false)
+    }
   }, [isExpanded])
 
+  // On any isExpanded change: block animation, update isStable, clear dimensions.
+  // All three share the same duration so they fire in sync.
+  useEffect(() => {
+    const d = tokensRef.current.duration.slow * 1000
+
+    isAnimatingRef.current = true
+    setIsAnimating(true)
+    const tUnblock = setTimeout(() => {
+      isAnimatingRef.current = false
+      setIsAnimating(false)
+    }, d)
+
+    // isStable becomes true after expand settles, false after collapse settles.
+    const tStable = setTimeout(() => setIsStable(isExpanded), d)
+
+    if (isExpanded) {
+      hasExpandedRef.current = true
+    } else if (hasExpandedRef.current) {
+      // Clear measured dimensions after exit animation completes.
+      // By this point AnimatePresence has unmounted the wrapper — this is cleanup.
+      const tClearDims = setTimeout(() => setExpandedDimensions(null), d)
+      return () => {
+        clearTimeout(tUnblock)
+        clearTimeout(tStable)
+        clearTimeout(tClearDims)
+      }
+    }
+
+    return () => {
+      clearTimeout(tUnblock)
+      clearTimeout(tStable)
+    }
+  }, [isExpanded])
+
+  // Measure the wrapper once the card is fully settled at expanded size.
+  // These dimensions are applied during exit so FLIP does not squish the content.
+  useEffect(() => {
+    if (!isStable || !wrapperRef.current) return
+    setExpandedDimensions({
+      width: wrapperRef.current.offsetWidth,
+      height: wrapperRef.current.offsetHeight,
+    })
+  }, [isStable])
+
+  // Two exit contexts for the drawer:
+  //
+  // Primary exit — user dismisses the drawer directly via backdrop or × while
+  // the card stays open. The full anticipation animation plays out visibly.
+  // This is the demonstration the card exists to show.
+  //
+  // Secondary exit — user closes the card or toggles state while the drawer is
+  // open. The drawer's exit runs in parallel with the parent state change. The
+  // drawer's tail-end descent is essentially invisible during the card collapse,
+  // which is correct behavior — the user has moved on and is not watching the
+  // drawer specifically.
+
   function handleCardClick() {
-    if (!isExpanded) onSelect()
+    // isAnimatingRef blocks re-expand while the close animation is running.
+    if (!isExpanded && !isAnimatingRef.current) onSelect()
   }
 
   function handleClose(e) {
     e.stopPropagation()
+    if (drawerOpen) setDrawerOpen(false)
     onClose()
   }
 
   function handleStateToggle(e) {
     e.stopPropagation()
+    if (drawerOpen) setDrawerOpen(false)
     setUiMode(prev => !prev)
   }
 
-  // Collapsed: no inline style — card takes its natural grid cell.
-  // Expanded: explicit gridColumn/gridRow pins the 2x2 footprint at the
-  // correct position, accounting for edge bias.
-  const footprint = isExpanded
-    ? getExpandedFootprint(index, columnCount, totalCards)
-    : {}
+  // Footprint clears immediately when isExpanded becomes false. FLIP records the
+  // before rect (2×2) and after rect (1×1) on the same frame — no holdFootprint needed.
+  const footprint = isExpanded ? getExpandedFootprint(index, columnCount, totalCards) : {}
+
+  // isStable keeps zIndex elevated during the collapse animation even though
+  // isExpanded is already false. It becomes false only after duration.slow, by
+  // which time the FLIP has completed and neighboring cards have reflowed.
+  const zIndex = isExpanded || isStable ? 10 : 1
 
   return (
     <motion.div
@@ -106,205 +326,165 @@ export function PrincipleCard({
         styles.card,
         isExpanded ? styles.cardExpanded : styles.cardCollapsed,
       ].join(' ')}
-      style={footprint}
-      // opacity goes through animate (not style) so Framer Motion applies the
-      // transition.opacity timing when surrounding cards dim on selection.
-      animate={{ opacity: selectedId && !isExpanded ? 0.5 : 1 }}
+      style={{ ...footprint, zIndex }}
+      animate={{
+        opacity: selectedId && !isExpanded ? 0.5 : 1,
+      }}
       onClick={handleCardClick}
-      whileHover={isExpanded ? undefined : { scale: tokens.scale.subtle }}
+      whileHover={isExpanded || !supportsHover ? undefined : { scale: tokens.scale.subtle }}
       transition={{
-        // layout governs the FLIP animation for all bounding box changes —
-        // the expanding card and all siblings reflowing around it.
-        // ease.standard: coordinated arrival, all cards land at the same time.
-        layout: {
-          duration: tokens.duration.slow,
-          ease: tokens.ease.standard,
-        },
-        // opacity: dimming of non-selected cards.
-        opacity: { duration: tokens.duration.base },
-        // Default governs whileHover scale. ease.spring gives the single-element
-        // scale a physical overshoot — appropriate here, not on concurrent layouts.
-        duration: tokens.duration.fast,
+        layout:  { duration: dur.slow, ease: tokens.ease.standard },
+        opacity: { duration: dur.base },
+        duration: dur.fast,
         ease: tokens.ease.spring,
       }}
     >
-      <AnimatePresence initial={false}>
-        {isExpanded ? (
-          // ── Expanded state ─────────────────────────────────────────────────
+      {/* ── Collapsed state ───────────────────────────────────────────────── */}
+      {/* Hidden while isAnimating so collapsed content does not appear while
+          the close animation is running. Fades in after duration.slow. */}
+      {!isExpanded && !isAnimating && (
+        <motion.div
+          className={styles.collapsedContent}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: dur.base, ease: tokens.ease.standard }}
+        >
+          <div className={styles.placeholderIcon} />
+
+          <div className={styles.cardMeta}>
+            <span className={styles.cardNumber}>
+              {String(principle.id).padStart(2, '0')}
+            </span>
+            <span className={[
+              styles.categoryBadge,
+              principle.category === 'extended'
+                ? styles.categoryExtended
+                : styles.categoryClassic,
+            ].join(' ')}>
+              {principle.category === 'extended' ? 'Extended' : 'Classic'}
+            </span>
+          </div>
+
+          <h3 className={styles.cardTitle}>{principle.title}</h3>
+        </motion.div>
+      )}
+
+      {/* ── Expanded state ────────────────────────────────────────────────── */}
+      {/* AnimatePresence holds the wrapper through its exit animation so it
+          fades out concurrently with the FLIP card shrink. */}
+      <AnimatePresence>
+        {isExpanded && (
           <motion.div
             key="expanded"
-            className={styles.expandedContent}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{
-              opacity: 0,
-              // exit scale: 0.85 prevents the large expanded title from being
-              // visible at full size while the card collapses. The scale
-              // compression is timed to match the card's layout shrink animation.
-              scale: 0.85,
-              transition: {
-                duration: tokens.duration.base,
-                ease: tokens.ease.exit,
-                delay: 0,
-              },
-            }}
-            transition={{
-              duration: tokens.duration.fast,
-              ease: tokens.ease.enter,
-              delay: tokens.delay.short,
-            }}
-          >
-            {/* motion.button: whileTap spring is intentional — single-element
-                micro-interaction, overshoot reads as physical responsiveness. */}
-            <motion.button
-              className={styles.closeButton}
-              onClick={handleClose}
-              whileTap={{ scale: tokens.scale.subtle }}
-              transition={{ duration: tokens.duration.fast, ease: tokens.ease.spring }}
-            >
-              ×
-            </motion.button>
-
-            {/* Left half: AnimatePresence crossfades between animation placeholder
-                (State 1) and component demo area (State 2) on uiMode toggle.
-                Both states use position:absolute to fill the wrapper so the
-                crossfade does not affect surrounding layout. */}
-            <div className={styles.animationHalf}>
-              <div className={styles.animationStateWrapper}>
-                <AnimatePresence initial={false}>
-                  {!uiMode ? (
-                    <motion.div
-                      key="anim"
-                      className={styles.animationState}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
-                    >
-                      <div className={styles.animationPlaceholder}>
-                        <span className={styles.animationPlaceholderText}>
-                          Animation placeholder
-                        </span>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="ui"
-                      className={styles.animationState}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
-                    >
-                      <div className={styles.demoArea}>
-                        <span className={styles.demoAreaText}>
-                          Component example coming in Phase 2
-                        </span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Right half: principle info is always visible. Bridge text area
-                below the toggle crossfades between animation context (State 1)
-                and bridge text (State 2). Both sides switch on the same boolean. */}
-            <div className={styles.contentHalf}>
-              <div className={styles.expandedMeta}>
-                <span className={styles.expandedNumber}>
-                  {String(principle.id).padStart(2, '0')}
-                </span>
-                <span className={[
-                  styles.categoryBadge,
-                  principle.category === 'extended'
-                    ? styles.categoryExtended
-                    : styles.categoryClassic,
-                ].join(' ')}>
-                  {principle.category === 'extended' ? 'Extended' : 'Classic'}
-                </span>
-              </div>
-
-              <h2 className={styles.expandedTitle}>{principle.title}</h2>
-              <p className={styles.expandedSummary}>{principle.summary}</p>
-
-              {/* uiMode: false = State 1 (animation context), label "See it in UI"
-                  uiMode: true  = State 2 (UI component),       label "See it in motion" */}
-              <button className={styles.stateToggle} onClick={handleStateToggle}>
-                {uiMode ? 'See it in motion' : 'See it in UI'}
-              </button>
-
-              <AnimatePresence initial={false}>
-                {uiMode ? (
-                  <motion.div
-                    key="bridge"
-                    className={styles.bridgeArea}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
-                  >
-                    <span className={styles.bridgeAreaText}>
-                      Bridge text coming in Phase 2
-                    </span>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="context"
-                    className={styles.bridgeArea}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
-                  >
-                    <span className={styles.bridgeAreaText}>
-                      Animation context coming in Phase 2
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        ) : (
-          // ── Collapsed state ─────────────────────────────────────────────────
-          <motion.div
-            key="collapsed"
-            className={styles.collapsedContent}
+            ref={wrapperRef}
+            className={styles.expandedWrapper}
+            // The wrapper does not have its own layout prop. The card's
+            // FLIP corrective transform is the visible scaling motion of
+            // the contents. Contents inherit the corrective via CSS
+            // transform and scale with the card, anchored at the card's
+            // top-left.
+            //
+            // During exit, fix the wrapper at its measured expanded dimensions so
+            // FLIP shrinking the card does not compress the wrapper's flex layout.
+            // right/bottom: auto overrides the CSS inset:0 stretch on those axes
+            // so the explicit width/height takes effect.
+            style={expandedDimensions ? {
+              width:  expandedDimensions.width,
+              height: expandedDimensions.height,
+              right:  'auto',
+              bottom: 'auto',
+            } : undefined}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{
-              opacity: 0,
-              transition: {
-                duration: tokens.duration.fast,
-                ease: tokens.ease.exit,
-              },
-            }}
-            transition={{
-              duration: tokens.duration.fast,
-              ease: tokens.ease.enter,
-              // Wait for 80% of the layout shrink (duration.slow) before fading
-              // collapsed content in — prevents it from appearing in a still-large
-              // card while the layout animation is still running.
-              delay: tokens.duration.slow * 0.8,
-            }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: dur.slow, ease: tokens.ease.standard }}
           >
-            <div className={styles.placeholderIcon} />
+            <div className={styles.expandedContent}>
+              {/* motion.button: whileTap spring is intentional — single-element
+                  micro-interaction isolated from the layout animation. */}
+              <motion.button
+                className={styles.closeButton}
+                onClick={handleClose}
+                whileTap={{ scale: tokens.scale.subtle }}
+                transition={{ duration: dur.fast, ease: tokens.ease.spring }}
+              >
+                ×
+              </motion.button>
 
-            <div className={styles.cardMeta}>
-              <span className={styles.cardNumber}>
-                {String(principle.id).padStart(2, '0')}
-              </span>
-              <span className={[
-                styles.categoryBadge,
-                principle.category === 'extended'
-                  ? styles.categoryExtended
-                  : styles.categoryClassic,
-              ].join(' ')}>
-                {principle.category === 'extended' ? 'Extended' : 'Classic'}
-              </span>
+              {/* Left half: animation and UI component as continuously mounted
+                  siblings. PrincipleAnimation stays mounted for the entire
+                  expanded lifetime of the card. The Rive instance initializes
+                  once on card expand and persists through uiMode toggles.
+
+                  Crossfade between the two states is driven by direct opacity
+                  animation on each sibling. pointerEvents prevents the invisible
+                  layer from intercepting clicks intended for the visible layer. */}
+              <div className={styles.animationHalf}>
+                <div className={styles.animationStateWrapper}>
+                  <motion.div
+                    className={styles.animationState}
+                    animate={{ opacity: uiMode ? 0 : 1 }}
+                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
+                    style={{ pointerEvents: uiMode ? 'none' : 'auto' }}
+                  >
+                    <PrincipleAnimation principleId={principle.id} />
+                  </motion.div>
+                  <motion.div
+                    className={styles.animationState}
+                    animate={{ opacity: uiMode ? 1 : 0 }}
+                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
+                    style={{ pointerEvents: uiMode ? 'auto' : 'none' }}
+                  >
+                    {getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen)}
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Right half: meta, title, crossfading summary, toggle. */}
+              <div className={styles.contentHalf}>
+                <div className={styles.expandedMeta}>
+                  <span className={styles.expandedNumber}>
+                    {String(principle.id).padStart(2, '0')}
+                  </span>
+                  <span className={[
+                    styles.categoryBadge,
+                    principle.category === 'extended'
+                      ? styles.categoryExtended
+                      : styles.categoryClassic,
+                  ].join(' ')}>
+                    {principle.category === 'extended' ? 'Extended' : 'Classic'}
+                  </span>
+                </div>
+
+                <h2 className={styles.expandedTitle}>{principle.title}</h2>
+
+                {/* Summary crossfades on uiMode toggle only when isStable. */}
+                {isStable ? (
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.p
+                      key={uiMode ? 'component' : 'principle'}
+                      className={styles.expandedSummary}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: dur.fast, ease: tokens.ease.enter }}
+                    >
+                      {uiMode ? principle.componentSummary : principle.summary}
+                    </motion.p>
+                  </AnimatePresence>
+                ) : (
+                  <p className={styles.expandedSummary}>
+                    {uiMode ? principle.componentSummary : principle.summary}
+                  </p>
+                )}
+
+                <button className={styles.stateToggle} onClick={handleStateToggle}>
+                  {uiMode ? 'See it in motion' : 'See it in UI'}
+                </button>
+              </div>
             </div>
 
-            <h3 className={styles.cardTitle}>{principle.title}</h3>
+            <QuoteBlock principle={principle} uiMode={uiMode} isStable={isStable} tokens={tokens} />
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local references (not for repo)
+docs/references/animation-principles/
+
+# macOS
+.DS_Store
+docs/.DS_Store

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PrincipleCard — Target Implementation Diagram</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0e0e0e;
+  color: #777;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 11px;
+  padding: 40px 40px 80px;
+}
+h1 { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.2em; text-align: center; margin-bottom: 6px; }
+.file-note { font-size: 10px; color: #666; text-align: center; margin-bottom: 8px; line-height: 1.6; }
+.impl-note {
+  max-width: 900px; margin: 0 auto 28px;
+  background: #141414; border: 1px solid #252525; border-radius: 4px;
+  padding: 10px 14px; font-size: 10px; color: #777; line-height: 1.75;
+}
+.impl-note strong { color: #aaa; }
+.impl-note .decision { color: #7aca7a; }
+.impl-note .tradeoff { color: #ccb84a; }
+.impl-note .fixed { color: #6a9abc; }
+
+.phase-decisions {
+  max-width: 900px; margin: 0 auto 36px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.decision-card {
+  background: #161616; border: 1px solid #252525; border-radius: 4px;
+  padding: 8px 12px; font-size: 9px; color: #777; line-height: 1.65;
+}
+.decision-card h3 { font-size: 9px; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.decision-card .verdict { color: #7aca7a; font-weight: 600; }
+.decision-card .why { color: #666; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 32px; }
+.li { display: flex; align-items: center; gap: 5px; font-size: 9px; color: #777; }
+.ls { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Scroll + Panels ─────────────────────────────────────────────── */
+.scroll-wrapper { overflow-x: auto; padding-bottom: 24px; }
+.panels { display: flex; gap: 18px; align-items: flex-start; min-width: max-content; }
+.panel { width: 262px; flex-shrink: 0; }
+.ph { font-size: 9px; color: #666; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+.pt { font-size: 10px; color: #777; margin-bottom: 10px; line-height: 1.4; min-height: 28px; }
+.pv {
+  width: 262px; height: 300px;
+  background: #111; border: 1px solid #1a1a1a; border-radius: 4px;
+  position: relative; overflow: hidden;
+}
+
+.el {
+  position: absolute; border-radius: 3px;
+  font-size: 7px; line-height: 1.35;
+  padding: 2px 3px; overflow: visible;
+}
+.el-name { display: block; font-weight: 600; }
+.el-dims { display: block; }
+.el-xf   { display: block; margin-top: 1px; }
+
+.ec-grid     { background: rgba(28,40,28,0.18); border: 1px dashed #253525; }
+.ec-card-c   { background: #141414; border: 1px solid #383838; }
+.ec-card-e   { background: #101810; border: 1px solid #4a9e52; }
+.ec-wrapper  { background: rgba(12,22,42,0.9); border: 1px solid #3a55cc; }
+.ec-econtent { background: rgba(8,18,32,0.95); border: 1px solid #1e4060; }
+.ec-anim     { background: rgba(16,12,32,0.95); border: 1px solid #4a2a9a; }
+.ec-content  { background: rgba(8,24,24,0.95); border: 1px solid #2a7a7a; }
+.ec-quote    { background: rgba(20,16,8,0.95); border: 1px solid #6a4a1a; }
+.ec-close    { background: rgba(26,8,8,0.95); border: 1px solid #aa2222; }
+.ec-collapsed{ background: rgba(24,24,24,0.9); border: 1px solid #3a3a3a; }
+
+.ec-grid     .el-name { color: #6aca6a; }
+.ec-card-c   .el-name { color: #909090; }
+.ec-card-e   .el-name { color: #6aca72; }
+.ec-wrapper  .el-name { color: #7a9aee; }
+.ec-econtent .el-name { color: #6aaace; }
+.ec-anim     .el-name { color: #9a7adf; }
+.ec-content  .el-name { color: #5ababa; }
+.ec-quote    .el-name { color: #caaa4a; }
+.ec-close    .el-name { color: #ee5a5a; }
+.ec-collapsed .el-name { color: #909090; }
+.el-dims { color: #666; font-size: 6px; }
+.el-xf   { font-size: 6px; }
+.xf-normal  { color: #6a9a6a; }
+.xf-inherit { color: #cc7a5a; }
+.xf-fading  { color: #cccc3a; }
+.xf-ok      { color: #6aca6a; }
+.xf-info    { color: #6a9abc; }
+
+.xf-badge {
+  position: absolute; font-size: 6px; font-family: 'SF Mono', monospace;
+  padding: 1px 4px; border-radius: 2px; white-space: nowrap; z-index: 10;
+}
+.xf-badge.corrective { background: #2e1a0a; color: #cc8a28; border: 1px solid #5a3a10; }
+.xf-badge.inherited  { background: #2e0a0a; color: #cc3a3a; border: 1px solid #5a1a1a; }
+.xf-badge.fading     { background: #2e2a0a; color: #aaaa28; border: 1px solid #5a5a10; }
+.xf-badge.gone       { background: #0a2e0a; color: #3acc3a; border: 1px solid #1a5a1a; }
+
+.state-row { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.sp { font-size: 8px; padding: 2px 5px; border-radius: 3px; letter-spacing: 0.04em; white-space: nowrap; }
+.sp-t { background: #0e1e0e; color: #6aca6a; }
+.sp-f { background: #1c1c1c; color: #777; }
+.sp-v { background: #0e0e1e; color: #7a8aca; }
+
+.ann { margin-top: 7px; font-size: 9px; line-height: 1.55; padding: 5px 8px; border-radius: 3px; }
+.ann-warn { background: #1e140a; color: #cc8a40; border: 1px solid #4a3010; }
+.ann-ok   { background: #0a180a; color: #6aaa6a; border: 1px solid #1a4a1a; }
+.ann-info { background: #181818; color: #888; border: 1px solid #282828; }
+.ann-partial { background: #1a1a0a; color: #cccc3a; border: 1px solid #4a4a10; }
+</style>
+</head>
+<body>
+
+<h1>PrincipleCard — Target Implementation (Tightened)</h1>
+<p class="file-note">diagram-target.html · computed from source, not rendered</p>
+
+<div class="impl-note">
+  <strong>Target changes from current:</strong>
+  <span class="decision">No <code>layout</code> on expandedWrapper</span> — removes mount-time counter-transform bug. &nbsp;
+  <span class="decision">Exit at <code>duration.base</code> (200ms)</span> — inherited scale(2.06) fades before FLIP midpoint. &nbsp;
+  <span class="fixed"><code>onLayoutAnimationComplete</code></span> replaces setTimeout cascade — fires on actual animation end. &nbsp;
+  <span class="fixed">isStable + expandedDimensions batched</span> in same callback — eliminates one-frame M5 race. &nbsp;
+  <span class="tradeoff">M6 tradeoff: 1 frame of inherited scale(2.06) at full opacity before fade starts.</span> Acceptable — animation is in motion, scale eases quickly, fade covers by ~50ms.
+</div>
+
+<div class="phase-decisions">
+  <div class="decision-card">
+    <h3>J — Corrective scale (close)</h3>
+    <span class="verdict">Decision: (b) faster opacity exit.</span><br>
+    <span class="why">Remove <code>layout</code> from wrapper. Set <code>exit={{ opacity:0, transition:{ duration: dur.base } }}</code>. Option (a) empirically broke expand — Framer Motion can't resolve a freshly mounted element's counter-transform when parent already carries corrective scale. Option (b) hides distortion within dur.base (200ms) before FLIP reaches midpoint.</span>
+  </div>
+  <div class="decision-card">
+    <h3>Timer consolidation</h3>
+    <span class="verdict">Decision: onLayoutAnimationComplete.</span><br>
+    <span class="why">Fires on the card's actual FLIP completion — not a race against clock drift. Check <code>isExpanded</code> captured in closure. React 18 batches all setState calls in same microtask.</span>
+  </div>
+  <div class="decision-card">
+    <h3>M5 race (isStable / dims gap)</h3>
+    <span class="verdict">Decision: batch in same callback.</span><br>
+    <span class="why">Call <code>setIsStable(true)</code> and <code>setExpandedDimensions({...})</code> inside the same <code>onLayoutAnimationComplete</code>. React 18 automatic batching merges them into one render — no one-frame window.</span>
+  </div>
+  <div class="decision-card">
+    <h3>Mobile clipping (β)</h3>
+    <span class="verdict">Decision: defer. Add overflow-y:auto.</span><br>
+    <span class="why">At @container ≤600px, stacked content may exceed 2-row card height. Scroll is correct: clipping silently hides content, natural height breaks deterministic FLIP. Add <code>overflow-y:auto</code> to expandedWrapper in the @container rule when implementing mobile.</span>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="li"><div class="ls" style="background:rgba(28,40,28,0.2);border:1px dashed #253525"></div>grid cell</div>
+  <div class="li"><div class="ls" style="background:#141414;border:1px solid #383838"></div>card (collapsed)</div>
+  <div class="li"><div class="ls" style="background:#101810;border:1px solid #4a9e52"></div>card (expanded)</div>
+  <div class="li"><div class="ls" style="background:#0c1525;border:1px solid #3a55cc"></div>expandedWrapper</div>
+  <div class="li"><div class="ls" style="background:#081420;border:1px solid #1e4060"></div>expandedContent</div>
+  <div class="li"><div class="ls" style="background:#100c20;border:1px solid #4a2a9a"></div>animationHalf</div>
+  <div class="li"><div class="ls" style="background:#081818;border:1px solid #2a7a7a"></div>contentHalf</div>
+  <div class="li"><div class="ls" style="background:#14100a;border:1px solid #6a4a1a"></div>quoteBlock</div>
+  <div class="li"><div class="ls" style="background:#1a0808;border:1px solid #aa2222"></div>closeButton</div>
+  <div class="li"><div class="ls" style="background:#181818;border:1px solid #3a3a3a"></div>collapsedContent</div>
+</div>
+
+<div class="scroll-wrapper"><div class="panels" id="panels"></div></div>
+
+<script>
+const S = 0.55
+
+const CW = Math.round(204 * S)   // 112
+const CH = Math.round(234 * S)   // 129
+const EW = Math.round(420 * S)   // 231
+const EH = Math.round(480 * S)   // 264
+const QH = Math.round(158 * S)   // 87
+const ECH = EH - QH              // 177
+const EIPT = Math.round(24 * S)  // 13
+const EIPL = Math.round(32 * S)  // 18
+const EIPB = Math.round(24 * S)  // 13
+const EIPR = Math.round(32 * S)  // 18
+const EIW = EW - EIPL - EIPR     // 195
+const EIH = ECH - EIPT - EIPB    // 151
+const HG = Math.round(24 * S)    // 13
+const AW = Math.round((EIW - HG) * 1.4 / 2.4)  // 107
+const KW = EIW - HG - AW         // 75
+const KH = Math.round(130 * S)   // 72
+const CBW = Math.round(44 * S)   // 24
+const CBH = Math.round(44 * S)   // 24
+
+const PW = 262, PH = 300
+const EX = Math.round((PW - EW) / 2)   // 15
+const EY = 18
+const CX = Math.round((PW - CW) / 2)   // 75
+const CY = Math.round((PH - CH) / 2) - 10  // 76
+
+const C = {
+  gridCellExp:  { x: EX - 1,     y: EY - 1,       w: EW + 2, h: EH + 2 },
+  card:         { x: EX,         y: EY,            w: EW,     h: EH     },
+  wrapper:      { x: EX,         y: EY,            w: EW,     h: EH     },
+  econtent:     { x: EX,         y: EY,            w: EW,     h: ECH    },
+  closeBtn:     { x: EX + EW - 2 - CBW, y: EY + 1, w: CBW,   h: CBH   },
+  animHalf:     { x: EX + EIPL,  y: EY + EIPT,     w: AW,     h: EIH   },
+  contHalf:     { x: EX + EIPL + AW + HG,
+                  y: EY + EIPT + Math.round((EIH - KH) / 2), w: KW, h: KH },
+  quoteBlock:   { x: EX,         y: EY + ECH,      w: EW,     h: QH    },
+  gridCellColl: { x: CX - 1,     y: CY - 1,        w: CW + 2, h: CH + 2 },
+  cardColl:     { x: CX,         y: CY,            w: CW,     h: CH    },
+  collapsed:    { x: CX + 2,     y: CY + 2,        w: CW - 4, h: CH - 4 },
+}
+
+function el(cls, c, name, dims, extra, alpha = 1) {
+  const style = [
+    `left:${c.x}px`, `top:${c.y}px`, `width:${c.w}px`, `height:${c.h}px`,
+    alpha < 1 ? `opacity:${alpha}` : '',
+  ].filter(Boolean).join(';')
+  const xf = extra ? `<span class="el-xf ${extra.cls}">${extra.text}</span>` : ''
+  return `<div class="el ${cls}" style="${style}">
+    <span class="el-name">${name}</span>
+    <span class="el-dims">${dims}</span>${xf}</div>`
+}
+
+function badge(c, text, type, ox = 3, oy = 16) {
+  return `<div class="xf-badge ${type}" style="left:${c.x + ox}px;top:${c.y + c.h - oy}px">${text}</div>`
+}
+
+const moments = [
+
+  // M1 — Resting
+  {
+    id: 'M1', title: 'Resting\n(collapsed)',
+    html: () => [
+      el('ec-grid', C.gridCellColl, 'grid cell', '204×234'),
+      el('ec-card-c', C.cardColl, 'card', '204×234 · no transform'),
+      el('ec-collapsed', C.collapsed, 'collapsedContent', 'inset:0 · opacity:1'),
+    ].join(''),
+    state: { isExpanded: false, isAnimating: false, isStable: false, wMounted: false, dims: 'null' },
+    ann: null,
+  },
+
+  // M2 — Frame 0 expand
+  {
+    id: 'M2', title: 'Frame 0\nof expand',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell 2×2', '420×480'),
+      el('ec-card-e', C.card, 'card', '420×480 · FLIP corrective',
+        { cls: 'xf-inherit', text: 'transform: scale(0.49) corrective' }),
+      // No layout on wrapper — no counter-transform. Wrapper inherits scale(0.49).
+      // But opacity:0 hides the inherited distortion on expand.
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', 'inset:0 · opacity:0 (initial)',
+        { cls: 'xf-ok', text: 'no layout prop · inherits scale(0.49) · hidden by opacity:0' }, 0.08),
+      badge(C.card, 'card: scale(0.49)', 'corrective', 3, 30),
+      badge(C.wrapper, 'inherited scale(0.49) — invisible (opacity:0)', 'gone', 3, 16),
+    ].join(''),
+    state: { isExpanded: true, isAnimating: false, isStable: false, wMounted: true, dims: 'null' },
+    ann: { type: 'ann-ok', text: 'No layout prop on wrapper — no mount-time counter-transform bug. Wrapper inherits scale(0.49) from parent but opacity:0 hides it. Same visual result as current, simpler mechanism.' },
+  },
+
+  // M3 — Mid-expand
+  {
+    id: 'M3', title: 'Mid-expand\n(50% of 400ms)',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell 2×2', '420×480'),
+      el('ec-card-e', C.card, 'card', 'FLIP ~50%',
+        { cls: 'xf-inherit', text: 'transform: scale(~0.75)' }),
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', 'no layout · opacity:~0.5',
+        { cls: 'xf-inherit', text: 'inherits scale(~0.75) · visual distortion present but fading in' }, 0.5),
+      el('ec-econtent', C.econtent, 'expandedContent', '420×322', null, 0.45),
+      el('ec-anim', C.animHalf, 'animationHalf', '194×274', null, 0.4),
+      el('ec-content', C.contHalf, 'contentHalf', '138×130', null, 0.4),
+      el('ec-quote', C.quoteBlock, 'quoteBlock', '420×158', null, 0.4),
+    ].join(''),
+    state: { isExpanded: true, isAnimating: true, isStable: false, wMounted: true, dims: 'null' },
+    ann: { type: 'ann-info', text: 'Content fading in while inheriting card scale. At opacity ~0.5 the inherited distortion is partially visible — acceptable since content is clearly still arriving.' },
+  },
+
+  // M4 — Expand complete
+  {
+    id: 'M4', title: 'Expand complete\n(before isStable)',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell 2×2', '420×480'),
+      el('ec-card-e', C.card, 'card', '420×480 · no transform',
+        { cls: 'xf-ok', text: 'FLIP done · no transform' }),
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', 'inset:0 · opacity:1',
+        { cls: 'xf-ok', text: 'no inherited transform · onLayoutAnimationComplete pending' }),
+      el('ec-econtent', C.econtent, 'expandedContent', '420×322'),
+      el('ec-anim', C.animHalf, 'animationHalf', '194×274'),
+      el('ec-content', C.contHalf, 'contentHalf', '138×~130'),
+      el('ec-close', C.closeBtn, '×', '44×44'),
+      el('ec-quote', C.quoteBlock, 'quoteBlock', '420×158'),
+    ].join(''),
+    state: { isExpanded: true, isAnimating: false, isStable: false, wMounted: true, dims: 'null' },
+    ann: { type: 'ann-info', text: 'onLayoutAnimationComplete callback is pending — fires this frame. Will batch: setIsStable(true) + setExpandedDimensions({420,480}) + isAnimatingRef=false + setIsAnimating(false).' },
+  },
+
+  // M5 — Stable expanded
+  {
+    id: 'M5', title: 'Stable expanded\n(uiMode toggle)',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell 2×2', '420×480'),
+      el('ec-card-e', C.card, 'card', '420×480 · no transform'),
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', '420×480 (fixed dims measured)',
+        { cls: 'xf-ok', text: 'expandedDimensions: {w:420, h:480} — batched with isStable, no race' }),
+      el('ec-econtent', C.econtent, 'expandedContent', '420×322'),
+      el('ec-anim', C.animHalf, 'animationHalf', 'crossfade active'),
+      el('ec-content', C.contHalf, 'contentHalf', 'crossfade active'),
+      el('ec-close', C.closeBtn, '×', '44×44'),
+      el('ec-quote', C.quoteBlock, 'quoteBlock', 'crossfade active'),
+    ].join(''),
+    state: { isExpanded: true, isAnimating: false, isStable: true, wMounted: true, dims: '420×480' },
+    ann: { type: 'ann-ok', text: 'M5 race resolved: isStable and expandedDimensions set in same onLayoutAnimationComplete callback. React 18 batches both into one render.' },
+  },
+
+  // M6 — Frame 0 of collapse (the critical panel for Phase 1)
+  {
+    id: 'M6', title: 'Frame 0\nof collapse',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell → 1×1 logical', 'footprint cleared'),
+      el('ec-card-e', C.card, 'card', 'FLIP: before=420×480, after=204×234',
+        { cls: 'xf-inherit', text: 'transform: scale(2.06) corrective' }),
+      // No layout on wrapper. Wrapper inherits scale(2.06).
+      // Exit transition: opacity→0 at duration.base (200ms) — faster than FLIP (400ms).
+      // Frame 0: opacity still ~1, content at 2× size. Fading starts immediately.
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', '420×480 fixed · exit: opacity→0 at 200ms',
+        { cls: 'xf-inherit', text: '⚠ inherits scale(2.06) · opacity:~1 frame 0 · fading fast' }, 0.92),
+      el('ec-econtent', C.econtent, 'expandedContent', 'opacity:~1 · scale(2.06) inherited', null, 0.88),
+      el('ec-anim', C.animHalf, 'animationHalf', 'visible at 2× scale', null, 0.85),
+      el('ec-content', C.contHalf, 'contentHalf', 'visible at 2× scale', null, 0.85),
+      el('ec-close', C.closeBtn, '×', '44×44', null, 0.85),
+      el('ec-quote', C.quoteBlock, 'quoteBlock', 'visible at 2× scale', null, 0.85),
+      badge(C.card, 'card: scale(2.06) corrective', 'corrective', 3, 30),
+      badge(C.wrapper, '⚠ 1 frame distortion — opacity fade starts NOW', 'fading', 3, 16),
+    ].join(''),
+    state: { isExpanded: false, isAnimating: false, isStable: true, wMounted: true, dims: '420×480' },
+    ann: { type: 'ann-partial', text: 'Partial resolution of Footnote J. Frame 0: content at opacity ~1, inherited scale(2.06). Exit fade (200ms) starts immediately. By ~50ms opacity drops to ~0.8, distortion partially hidden. Fully hidden before 200ms. FLIP runs 400ms total — wrapper is gone before midpoint.' },
+  },
+
+  // M7 — Mid-collapse
+  {
+    id: 'M7', title: 'Mid-collapse\n(200ms = dur.base)',
+    html: () => [
+      el('ec-grid', C.gridCellExp, 'grid cell (1×1 logical)', ''),
+      el('ec-card-e', C.card, 'card', 'FLIP ~50% · scale(~1.53)',
+        { cls: 'xf-inherit', text: 'transform: scale(~1.53) corrective' }),
+      // At 200ms (= dur.base), exit opacity animation is complete → opacity ≈ 0
+      el('ec-wrapper', C.wrapper, 'expandedWrapper', 'opacity:~0 · exit complete at 200ms',
+        { cls: 'xf-ok', text: 'faded out — inherited distortion no longer visible' }, 0.05),
+      badge(C.card, 'card: scale(1.53) · FLIP still running', 'corrective', 3, 30),
+      badge(C.wrapper, 'opacity:~0 · distortion hidden', 'gone', 3, 16),
+    ].join(''),
+    state: { isExpanded: false, isAnimating: true, isStable: true, wMounted: true, dims: '420×480' },
+    ann: { type: 'ann-ok', text: 'At 200ms, exit opacity animation finishes. Wrapper is invisible. FLIP continues for another 200ms with no visible content — only the card outline shrinking. Clean.' },
+  },
+
+  // M8 — Collapse complete
+  {
+    id: 'M8', title: 'Collapse complete\n(onLayoutAnimationComplete)',
+    html: () => [
+      el('ec-grid', C.gridCellColl, 'grid cell', '204×234'),
+      el('ec-card-c', C.cardColl, 'card', '204×234 · no transform',
+        { cls: 'xf-ok', text: 'FLIP done · onLayoutAnimationComplete fires' }),
+      el('ec-collapsed', C.collapsed, 'collapsedContent', 'opacity:0→1 (fading in)', null, 0.35),
+    ].join(''),
+    state: { isExpanded: false, isAnimating: false, isStable: false, wMounted: false, dims: 'null' },
+    ann: { type: 'ann-ok', text: 'onLayoutAnimationComplete batches: isStable=false, isAnimating=false, expandedDimensions=null. Wrapper unmounted by AnimatePresence. collapsedContent mounts.' },
+  },
+
+  // M9 — Back to resting
+  {
+    id: 'M9', title: 'Back to resting',
+    html: () => [
+      el('ec-grid', C.gridCellColl, 'grid cell', '204×234'),
+      el('ec-card-c', C.cardColl, 'card', '204×234 · no transform'),
+      el('ec-collapsed', C.collapsed, 'collapsedContent', 'opacity:1'),
+    ].join(''),
+    state: { isExpanded: false, isAnimating: false, isStable: false, wMounted: false, dims: 'null' },
+    ann: null,
+  },
+]
+
+function sp(key, val, isVal = false) {
+  if (isVal) return `<span class="sp sp-v">${key}:${val}</span>`
+  return `<span class="sp ${val ? 'sp-t' : 'sp-f'}">${key}:${val ? 'T' : 'F'}</span>`
+}
+
+const container = document.getElementById('panels')
+
+moments.forEach(m => {
+  const s = m.state
+  const stateHTML = [
+    sp('isExpanded', s.isExpanded),
+    sp('isAnimating', s.isAnimating),
+    sp('isStable', s.isStable),
+    sp('wMounted', s.wMounted),
+    sp('dims', s.dims, true),
+  ].join('')
+  const annHTML = m.ann ? `<div class="ann ${m.ann.type}">${m.ann.text}</div>` : ''
+  const titleLines = m.title.split('\n')
+  container.innerHTML += `
+    <div class="panel">
+      <div class="ph">${m.id}</div>
+      <div class="pt">${titleLines.join('<br>')}</div>
+      <div class="pv">${m.html()}</div>
+      <div class="state-row">${stateHTML}</div>
+      ${annHTML}
+    </div>`
+})
+</script>
+</body>
+</html>

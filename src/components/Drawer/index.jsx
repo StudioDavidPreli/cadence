@@ -32,11 +32,19 @@ import styles from './Drawer.module.css'
 // The backdrop and the drawer panel are both direct keyed children of a single
 // AnimatePresence. This allows them to animate independently:
 // backdrop: symmetric fade (same timing enter/exit)
-// drawer:   asymmetric slide (slow enter, base exit)
+// drawer:   keyframe anticipation on both enter and exit
 // AnimatePresence tracks each child by key and runs their exit animations
 // before removing them from the DOM.
+//
+// Enter and exit both use keyframes to demonstrate anticipation. The component
+// must exhibit the principle it teaches — exit without anticipation would
+// contradict the lesson.
 
-export function Drawer({ isOpen, onClose, title, children }) {
+// scoped=true anchors the Drawer to its nearest positioned ancestor instead of
+// the viewport. The parent container must have position:relative and
+// overflow:hidden for correct containment. Default false preserves the existing
+// fixed-to-viewport behavior used in Token Lab.
+export function Drawer({ isOpen, onClose, title, children, scoped = false }) {
   const tokens = useMotionTokens()
 
   return (
@@ -45,14 +53,14 @@ export function Drawer({ isOpen, onClose, title, children }) {
       {isOpen && (
         <motion.div
           key="drawer-backdrop"
-          className={styles.backdrop}
+          className={[styles.backdrop, scoped && styles.backdropScoped].filter(Boolean).join(' ')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
           exit={{ opacity: 0 }}
           // Symmetric timing — the backdrop fade should feel ambient, not weighted.
           // Using duration.base matches the drawer's exit speed so they clear together.
           transition={{ duration: tokens.duration.base, ease: tokens.ease.enter }}
-          onClick={onClose}
+          onMouseDown={onClose}
         />
       )}
 
@@ -60,19 +68,26 @@ export function Drawer({ isOpen, onClose, title, children }) {
       {isOpen && (
         <motion.div
           key="drawer-panel"
-          className={styles.drawer}
+          className={[styles.drawer, scoped && styles.drawerScoped].filter(Boolean).join(' ')}
           initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{
-            y: '100%',
-            opacity: 0,
-            // Exit transition overrides the default transition defined below.
-            // duration.base + ease.exit: quick, decisive departure.
-            transition: { duration: tokens.duration.base, ease: tokens.ease.exit },
+          animate={{
+            y: ['100%', '-4%', '0%'],
+            opacity: [0, 1, 1],
           }}
-          // Default transition applies to animate (enter).
-          // duration.slow + ease.enter: deliberate arrival.
-          transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
+          exit={{
+            y: ['0%', '-4%', '100%'],
+            opacity: [1, 1, 0],
+            transition: {
+              duration: tokens.duration.slow,
+              times: [0, 0.2, 1],
+              ease: tokens.ease.exit,
+            },
+          }}
+          transition={{
+            duration: tokens.duration.slow,
+            times: [0, 0.7, 1],
+            ease: tokens.ease.enter,
+          }}
         >
 
           {/* Drag handle — three stacked lines signal that the panel can be
