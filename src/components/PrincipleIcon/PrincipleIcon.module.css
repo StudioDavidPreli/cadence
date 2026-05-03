@@ -1,0 +1,20 @@
+/* Wrapper fills the parent .placeholderIcon slot (1:1 aspect ratio).
+   pointer-events: none so clicks pass through to the parent PrincipleCard,
+   which owns expand-on-click. The icon is decorative; the principle name
+   is the labeled element on the card. */
+.iconWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RiveComponent renders a div + canvas. Sizing the outer div via className
+   per Rive's docs lets the canvas fill the wrapper at any card width. */
+.riveCanvas {
+  width: 100%;
+  height: 100%;
+}

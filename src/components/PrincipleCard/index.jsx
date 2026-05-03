@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, animate } from 'framer-motion'
 import { PrincipleAnimation } from '../PrincipleAnimation'
+import { PrincipleIcon } from '../PrincipleIcon'
 import { Button } from '../Button'
 import { Drawer } from '../Drawer'
 import styles from './PrincipleCard.module.css'
@@ -454,7 +455,9 @@ export function PrincipleCard({
           animate={{ opacity: 1 }}
           transition={{ duration: dur.base, ease: tokens.ease.standard }}
         >
-          <div className={styles.placeholderIcon} />
+          <div className={styles.placeholderIcon}>
+            <PrincipleIcon principleId={principle.id} />
+          </div>
 
           <div className={styles.cardMeta}>
             <span className={styles.cardNumber}>
