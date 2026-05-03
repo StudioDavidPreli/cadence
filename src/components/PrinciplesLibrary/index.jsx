@@ -36,7 +36,7 @@ const PRINCIPLES = [
     tokens: 'duration.slow · ease.enter',
   },
   {
-    id: 4, title: 'Straight Ahead & Pose to Pose', category: 'classic',
+    id: 4, title: 'Straight Ahead & Pose to Pose', gridTitle: 'Pose to Pose', category: 'classic',
     summary: 'Two approaches to animation: frame by frame versus key poses with fills between.',
     componentSummary: 'Component summary coming in Phase 2',
     animationQuote: 'Straight ahead produces surprise. Pose to pose produces structure. Neither alone is enough.',

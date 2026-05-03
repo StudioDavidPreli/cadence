@@ -473,7 +473,7 @@ export function PrincipleCard({
             </span>
           </div>
 
-          <h3 className={styles.cardTitle}>{principle.title}</h3>
+          <h3 className={styles.cardTitle}>{principle.gridTitle ?? principle.title}</h3>
         </motion.div>
       )}
 
