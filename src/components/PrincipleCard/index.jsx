@@ -171,6 +171,16 @@ function QuoteBlock({ principle, uiMode, isStable, tokens: motionTokens }) {
   )
 }
 
+// 2026-05-03 regression note: the card-to-card switch path was missed by the
+// 2026-05-01 explicit-scale fix. handleClose engages isClosing synchronously,
+// but selecting a different card only flips isExpanded false — isClosing was
+// never set on the deselected card, the close animation never ran, and the
+// card's elevated z-index dropped immediately. Both are addressed below: a
+// render-time transition detector engages isClosing whenever isExpanded
+// transitions true → false without our own handler, and the newly-expanding
+// card sits one stack level above the closing card so it visually arrives
+// over the collapse rather than under it.
+
 // ─── PrincipleCard ────────────────────────────────────────────────────────────
 //
 // Renders a single principle card in a CSS Grid context. The card occupies one
@@ -292,6 +302,24 @@ export function PrincipleCard({
       setDrawerOpen(false)
     }
   }, [isExpanded])
+
+  // ── External deselection detector (Issue C, 2026-05-03) ───────────────────
+  // The X-button path engages isClosing synchronously inside handleClose. The
+  // card-to-card path doesn't — it only flips isExpanded false via the parent.
+  // Without isClosing, the footprint clears immediately, the close animation
+  // never runs, and z-index drops to 1 mid-exit. We detect the transition
+  // here in render and engage isClosing ourselves, which routes the card
+  // through the same close path as the X-button. The render-time setState
+  // (rather than useEffect) means React discards the in-progress render and
+  // restarts with the corrected state — the footprint is never observed
+  // cleared, so the wrapper doesn't reflow at single-cell width.
+  const [prevIsExpanded, setPrevIsExpanded] = useState(isExpanded)
+  if (isExpanded !== prevIsExpanded) {
+    setPrevIsExpanded(isExpanded)
+    if (prevIsExpanded && !isExpanded && !isClosing) {
+      setIsClosing(true)
+    }
+  }
 
   // ── Open animation ─────────────────────────────────────────────────────────
   // On expand, snap scaleX/Y to the collapsed-cell ratio synchronously
@@ -424,7 +452,13 @@ export function PrincipleCard({
   // zIndex stays elevated across the full close animation. isStable is also
   // included for the open path's small tail (it is set true on open
   // completion and persists until the next close begins).
-  const zIndex = (isExpanded || isClosing || isStable) ? 10 : 1
+  //
+  // Concurrent card-to-card stacking (Issue C, 2026-05-03). The newly-
+  // expanding card sits on top (11) so it visually arrives over the card
+  // the user is leaving. The closing card holds at 10 — above inactive
+  // siblings (1) so its collapse isn't clipped by neighbor reflow, but
+  // below the new selection.
+  const zIndex = isClosing ? 10 : (isExpanded || isStable) ? 11 : 1
 
   return (
     <motion.div
