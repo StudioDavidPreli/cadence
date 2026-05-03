@@ -406,6 +406,13 @@
    because the library panel resizes independently of the viewport — a sidebar
    collapse would not register in a media query.
 
+   The card geometry stays fixed at the 2×2 grid footprint at every viewport.
+   The column layout fits inside that fixed box: expandedContent flips to
+   stacked, and the two halves divide available height by their existing
+   flex-grow ratio (animationHalf 1.4 : contentHalf 1) — no min-height floor
+   on either half is needed, since either floor would over-claim space and
+   collapse the other half.
+
    container-name: library is set on .library in PrinciplesLibrary.module.css.
    CSS Modules hashes class names but not container-name values, so 'library'
    is the same string in both files at runtime. */
@@ -418,9 +425,22 @@
     gap: 20px;
   }
 
+  /* min-height: 0 (replacing the previous 240px floor) lets flex distribute
+     the available height by flex-grow alone. The 240px floor over-claimed
+     vertical space at the card's fixed 480px height and forced contentHalf
+     to collapse to its zero-floor. */
   .animationHalf {
     max-height: none;
-    min-height: 240px;
+    min-height: 0;
     align-self: auto;
+  }
+
+  /* contentHalf also at min-height: 0 so it participates in the same flex
+     distribution. flex-shrink: 1 is the flex default but stated explicitly
+     here as a counterpart to animationHalf's relaxation — both halves
+     stretch and shrink together. */
+  .contentHalf {
+    min-height: 0;
+    flex-shrink: 1;
   }
 }

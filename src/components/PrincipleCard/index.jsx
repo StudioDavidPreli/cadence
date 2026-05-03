@@ -11,13 +11,13 @@ import styles from './PrincipleCard.module.css'
 const supportsHover =
   typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
-// Grid invariants. These mirror the values in PrinciplesLibrary.module.css
-// (grid-auto-rows: 234px and gap: 12px). If the grid layout changes, update
-// both files together. cellWidth is dynamic (varies with panel width) and
-// arrives as a prop from PrinciplesLibrary, which reads it from the resolved
-// gridTemplateColumns.
+// Grid invariant. Mirrors grid-auto-rows: 234px in PrinciplesLibrary.module.css
+// — the target height the close animation lands on (one collapsed cell). The
+// expanded card's rendered height is read from getBoundingClientRect at the
+// start of each open/close, so it absorbs vertical growth at stacked widths
+// without needing a separate gap/ratio formula. cellWidth (the matching width
+// target) is dynamic and arrives as a prop from PrinciplesLibrary.
 const GRID_ROW_HEIGHT = 234
-const GRID_GAP        = 12
 
 // ─── getExpandedFootprint ─────────────────────────────────────────────────────
 //
@@ -328,11 +328,22 @@ export function PrincipleCard({
   // produces a visual size of one cell at frame 0, growing to two cells.
   // transformOrigin (set on the inline style via getExpandedFootprint)
   // anchors growth at the natural cell's corner.
+  //
+  // The ratio targets are derived from the rendered bounding rect rather
+  // than the GRID_ROW_HEIGHT formula. At wide widths the rect equals the
+  // 2×2 footprint dims, so the ratio matches the formula exactly. At
+  // stacked widths (@container library < 600px in PrincipleCard.module.css)
+  // the card grows vertically beyond the 2×2 footprint to fit content;
+  // the rect captures that growth, and the close animation lands precisely
+  // on the single-cell target. scaleX/Y are at 1 at this moment (initial
+  // value, or set to 1 in the previous close's onComplete), so the rect
+  // reflects the natural box.
   useLayoutEffect(() => {
-    if (!isExpanded || isClosing || !cellWidth) return
+    if (!isExpanded || isClosing || !cellWidth || !cardRef.current) return
 
-    const ratioX = cellWidth        / (2 * cellWidth        + GRID_GAP)
-    const ratioY = GRID_ROW_HEIGHT  / (2 * GRID_ROW_HEIGHT  + GRID_GAP)
+    const rect = cardRef.current.getBoundingClientRect()
+    const ratioX = cellWidth       / rect.width
+    const ratioY = GRID_ROW_HEIGHT / rect.height
 
     scaleX.set(ratioX)
     scaleY.set(ratioY)
@@ -373,10 +384,15 @@ export function PrincipleCard({
   // onComplete: snap MotionValues back to 1 BEFORE clearing isClosing, so the
   // footprint clear and the scale reset land on the same paint with no jump.
   useLayoutEffect(() => {
-    if (!isClosing || !cellWidth) return
+    if (!isClosing || !cellWidth || !cardRef.current) return
 
-    const ratioX = cellWidth        / (2 * cellWidth        + GRID_GAP)
-    const ratioY = GRID_ROW_HEIGHT  / (2 * GRID_ROW_HEIGHT  + GRID_GAP)
+    // Same rect-based ratio as the open path. Footprint is held at 2×2 by
+    // isClosing and scaleX/Y are at 1 (set in the prior open's onComplete),
+    // so the rect captures the card's natural rendered size — including any
+    // vertical growth at stacked widths.
+    const rect = cardRef.current.getBoundingClientRect()
+    const ratioX = cellWidth       / rect.width
+    const ratioY = GRID_ROW_HEIGHT / rect.height
 
     isAnimatingRef.current = true
     setIsAnimating(true)
