@@ -84,3 +84,54 @@ The next session picks up Phase 2 with browser tools available: `browser_navigat
 ---
 
 The reconnaissance step is what saved the session. Six paragraphs of scoped edits would have landed on a codebase where the targets did not exist. Future briefings on this project should be written against current code, not against prior session memory.
+
+---
+
+## Phase 2 capture — 2026-05-04
+
+Captured before/after screenshots at library widths 620, 700, 900, 1400 for principle 18 (Shared Vocabulary, summary swap) and principle 2 (Anticipation, QuoteBlock swap). Output: `docs/recordings/phase2-2026-05-04/` with `log.json` for raw measurements.
+
+### Tooling note
+
+The Playwright MCP server in this user config is pinned to Chrome (`/Applications/Google Chrome.app`), which is not installed. Reconfigured to chromium via `claude mcp add playwright -s user -- npx @playwright/mcp@0.0.73 --browser chromium`, but the running MCP process holds the old config until Claude Code restarts. Worked around by writing a standalone Playwright script in `/tmp/cadence-playwright/capture.mjs` that uses `playwright-core` and points `executablePath` at the cached chromium binary at `~/Library/Caches/ms-playwright/chromium-1217/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`. Future runs can use the MCP tools directly once the session is restarted.
+
+### Library width is invariant for the card
+
+The expanded card's measured box is 372 × 480 px at every library width tested. State 5 fixes column tracks at 180px, so the 2-track expanded footprint is fixed at 372px wide. Row height is fixed at 234px (× 2 + 12px gap = 480px). The card geometry does not depend on library width above 600px.
+
+This is the first measurement that confirms it across multiple widths. The implication: the **height-jump regression target is invariant from 620 through 1400**. There is no width inside the side-by-side range where the jump is worse than another. The breakpoint where layout actually changes is `@container library (max-width: 600px)` — which is below the floor of this test set.
+
+### Measured deltas (motion → UI)
+
+| principle | region | width | regionHeight motion | regionHeight UI | delta |
+|---|---|---|---|---|---|
+| 18 Shared Vocabulary | `.expandedSummary` | 620  | 172.66 | 57.56 | **−115.10** |
+| 18 Shared Vocabulary | `.expandedSummary` | 700  | 172.69 | 57.56 | **−115.13** |
+| 18 Shared Vocabulary | `.expandedSummary` | 900  | 172.69 | 57.56 | **−115.13** |
+| 18 Shared Vocabulary | `.expandedSummary` | 1400 | 172.69 | 57.56 | **−115.13** |
+| 02 Anticipation | `QuoteBlock` (full) | 620  | 178.17 | 142.17 | **−36.00** |
+| 02 Anticipation | `QuoteBlock` (full) | 700  | 178.17 | 142.17 | **−36.00** |
+| 02 Anticipation | `QuoteBlock` (full) | 900  | 178.17 | 142.17 | **−36.00** |
+| 02 Anticipation | `QuoteBlock` (full) | 1400 | 178.17 | 142.17 | **−36.00** |
+
+`cardHeightDelta` is 0.00 in every row — the outer card box never grows or shrinks. The deltas are absorbed inside the card by the right-half flex column reflowing.
+
+### Surprises
+
+**P18 summary delta is larger than the brief estimated.** The scoping doc projected 60 to 80 px based on the character difference. The measured value is 115 px. The discrepancy is explained by the right-half being narrower than the brief assumed — 12px mono at the rendered column width wraps the 130-character `principle.summary` to nine lines, not five or six. The visible jump in `w620-p18-...-1-motion.png` vs `w620-p18-...-2-ui.png` shows the title block sliding from top to vertical center as the summary collapses, with the toggle button shifting up to follow. The displacement is large enough that the header (number badge + "Shared Vocabulary" title) reads as a different UI on toggle, not a stable frame around changing content.
+
+**P2 QuoteBlock delta is exactly the attribution line.** 36px ≈ 2 lines of body text. The motion-side quote includes "— Frank Thomas & Ollie Johnston, The Illusion of Life" (2 wrapped lines at 372px); the UI-side quote drops attribution. The token row (`duration.base · ease.spring`) is identical across both states, so the entire delta lives in the attribution presence/absence inside `quoteContent`. This confirms the brief's note that the `tokenRow` swap is a no-op.
+
+**Token row text is identical motion vs UI but the keyed `AnimatePresence` still mounts/unmounts on toggle.** Visible in screenshots: `duration.base · ease.spring` reads the same in `w620-p02-anticipation-1-motion.png` and `w620-p02-anticipation-2-ui.png`. The brief's call to drop the wrapper entirely is correct.
+
+**`See it in motion` button has wider intrinsic width than `See it in UI`.** Visible at every width: the toggle button reflows to two lines on the UI side at 372px card width because "See it in motion" exceeds the column. `text-wrap: balance` on the button label (already in scope item 4) addresses this.
+
+### Stack-grid pattern is the right answer
+
+The before/after pairs make the case visually. The taller-state height is the natural floor — pinning the column at the taller of the two states and crossfading opacity holds the meta row, title, and toggle at fixed Y. The QuoteBlock case is smaller in absolute pixels but more visually disruptive because the quote text and attribution are the focal content of the lower band; a 36px shift directly under the card divider reads as the bottom band growing or shrinking.
+
+Stack-grid both `.expandedSummary` and `quoteContent`. Drop `tokenRow`'s `AnimatePresence`. The scoping doc's items 1, 2, and 3 are correct as written.
+
+### Capture script
+
+`/tmp/cadence-playwright/capture.mjs`. Forces `[class*="_library_"]` to the target width via injected style override (sidesteps the TokenLab grid + App padding chain). Disables transitions and animations during capture so steady-state frames are clean. Crops each screenshot to the union of the before/after card bounding boxes so the two frames at a given width line up pixel-for-pixel for diffing. Re-runnable; output is reproducible because the override pins library width independent of viewport.

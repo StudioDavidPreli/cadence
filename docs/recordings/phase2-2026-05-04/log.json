@@ -1,0 +1,178 @@
+[
+  {
+    "width": 620,
+    "principle": "p18-shared-vocabulary",
+    "region": "expandedSummary",
+    "cardBefore": {
+      "x": 561,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 561,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 172.6875,
+    "regionHeightAfter": 57.5625,
+    "regionDelta": -115.125,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 620,
+    "principle": "p02-anticipation",
+    "region": "quoteBlock",
+    "cardBefore": {
+      "x": 561,
+      "y": 177,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 561,
+      "y": 177,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 178.171875,
+    "regionHeightAfter": 142.171875,
+    "regionDelta": -36,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 700,
+    "principle": "p18-shared-vocabulary",
+    "region": "expandedSummary",
+    "cardBefore": {
+      "x": 601,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 601,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 172.6875,
+    "regionHeightAfter": 57.5625,
+    "regionDelta": -115.125,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 700,
+    "principle": "p02-anticipation",
+    "region": "quoteBlock",
+    "cardBefore": {
+      "x": 601,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 601,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 178.171875,
+    "regionHeightAfter": 142.171875,
+    "regionDelta": -36,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 900,
+    "principle": "p18-shared-vocabulary",
+    "region": "expandedSummary",
+    "cardBefore": {
+      "x": 605,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 605,
+      "y": 555,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 172.6875,
+    "regionHeightAfter": 57.5625,
+    "regionDelta": -115.125,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 900,
+    "principle": "p02-anticipation",
+    "region": "quoteBlock",
+    "cardBefore": {
+      "x": 605,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 605,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 178.171875,
+    "regionHeightAfter": 142.171875,
+    "regionDelta": -36,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 1400,
+    "principle": "p18-shared-vocabulary",
+    "region": "expandedSummary",
+    "cardBefore": {
+      "x": 951,
+      "y": 240,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 951,
+      "y": 240,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 172.6875,
+    "regionHeightAfter": 57.5625,
+    "regionDelta": -115.125,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  },
+  {
+    "width": 1400,
+    "principle": "p02-anticipation",
+    "region": "quoteBlock",
+    "cardBefore": {
+      "x": 567,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "cardAfter": {
+      "x": 567,
+      "y": 163,
+      "w": 372,
+      "h": 480
+    },
+    "regionHeightBefore": 178.171875,
+    "regionHeightAfter": 142.171875,
+    "regionDelta": -36,
+    "cardHeightDelta": 0,
+    "toggleClicked": "See it in UI"
+  }
+]
