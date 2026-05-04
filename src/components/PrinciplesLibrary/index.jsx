@@ -17,8 +17,8 @@ const PRINCIPLES = [
   },
   {
     id: 2, title: 'Anticipation', category: 'classic',
-    summary: 'A small movement opposite to the main action prepares the viewer for what is coming.',
-    componentSummary: 'Component summary coming in Phase 2',
+    summary: 'Countermotion is what makes an action read as caused, not arbitrary.',
+    componentSummary: 'The drawer dips before it climbs. The motion announces itself.',
     animationQuote: 'A dancer jumping off the floor has to bend the knees first; a golfer making a swing has to swing the club back first.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Interfaces that skip the windup feel abrupt. A small reverse motion prepares the eye for arrival.',
@@ -28,7 +28,7 @@ const PRINCIPLES = [
   {
     id: 3, title: 'Staging', category: 'classic',
     summary: 'Direct attention to what matters. Clear the stage before the performance.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The modal opens. The backdrop dims. The page narrows to one thing.',
     animationQuote: 'The presentation of any idea so that it is completely and unmistakably clear.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The backdrop is not decoration. It is the stage management that tells the user where to look.',
@@ -38,7 +38,7 @@ const PRINCIPLES = [
   {
     id: 4, title: 'Straight Ahead & Pose to Pose', gridTitle: 'Pose to Pose', category: 'classic',
     summary: 'Two approaches to animation: frame by frame versus key poses with fills between.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Steps mark the poses. The bar fills between. Both are the same idea.',
     animationQuote: 'Straight ahead produces surprise. Pose to pose produces structure. Neither alone is enough.',
     animationQuoteAttribution: null,
     componentQuote: 'Steppers define the poses. The fill animation is the frames between. Both are the same argument.',
@@ -48,7 +48,7 @@ const PRINCIPLES = [
   {
     id: 5, title: 'Follow Through', category: 'classic',
     summary: 'Not everything stops at the same time. Secondary elements continue past the primary action.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Slide snaps. Dot catches up. The lag is how the system admits to mass.',
     animationQuote: 'When an object stops, all parts of it do not stop at the same time.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The slide arrives. The indicator follows. Secondary motion is how the interface says: that was real.',
@@ -58,7 +58,7 @@ const PRINCIPLES = [
   {
     id: 6, title: 'Slow In & Slow Out', category: 'classic',
     summary: 'Objects accelerate from rest and decelerate to rest. Nothing starts or stops instantly.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The bar fills, then settles at the end. Linear motion belongs to machines.',
     animationQuote: 'More drawings near the beginning and end of an action, fewer in the middle.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Linear motion belongs to machines. Easing curves are how software admits it has mass.',
@@ -68,7 +68,7 @@ const PRINCIPLES = [
   {
     id: 7, title: 'Arc', category: 'classic',
     summary: 'Natural movement follows curved paths, not straight lines.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The tooltip leaves the trigger and arcs into place. Not a straight line.',
     animationQuote: 'Most natural action tends to follow an arched trajectory.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'A tooltip that rises straight up arrives as a notification. One that arcs arrives as an answer.',
@@ -78,7 +78,7 @@ const PRINCIPLES = [
   {
     id: 8, title: 'Secondary Action', category: 'classic',
     summary: 'A supporting action that reinforces the main action without competing with it.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The menu opens. The chevron rotates with it. The rotation confirms.',
     animationQuote: 'Supporting gestures enrich the main action. They do not compete with it.',
     animationQuoteAttribution: null,
     componentQuote: 'The chevron rotates as the menu opens. The chevron is not the story. It confirms the story.',
@@ -88,7 +88,7 @@ const PRINCIPLES = [
   {
     id: 9, title: 'Timing', category: 'classic',
     summary: 'Duration determines weight and personality. More time means heavier, slower, more considered.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Same toggle. Different duration. The gesture changes character with it.',
     animationQuote: 'A variety of slow and fast timing within a scene adds texture and interest to the movement.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Have a known purpose for every animation in your interface.',
@@ -98,7 +98,7 @@ const PRINCIPLES = [
   {
     id: 10, title: 'Exaggeration', category: 'classic',
     summary: 'Amplify an action beyond reality to clarify or heighten its emotional truth.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The badge count climbs. The number overshoots before it lands.',
     animationQuote: 'Exaggeration is not extreme distortion, but a caricature of facial features, expressions, poses, attitudes and actions.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: "The notification doesn't just appear. It overshoots, and that overshoot is the alert.",
@@ -108,7 +108,7 @@ const PRINCIPLES = [
   {
     id: 11, title: 'Solid Drawing', category: 'classic',
     summary: 'Understand three-dimensional form, weight, and balance even in 2D.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The card lifts. Shadow grows. What was flat is now above the page.',
     animationQuote: 'Form, weight, volume solidity and the illusion of 3D apply to animation as it does to academic drawing.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'A flat element scales up. Shadow increases. Something that was on the page is now above it.',
@@ -118,7 +118,7 @@ const PRINCIPLES = [
   {
     id: 12, title: 'Appeal', category: 'classic',
     summary: 'The quality that makes an audience want to watch. Charm, clarity, magnetism.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Shapes drift, settle, drift again. Tuned easing. The grid holds the eye.',
     animationQuote: 'Where the live action actor has charisma, the animated character has appeal.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Appeal is what happens when every other principle is already working. It cannot be added later.',
@@ -128,7 +128,7 @@ const PRINCIPLES = [
   {
     id: 13, title: 'Systematization', category: 'extended',
     summary: 'Parts integrate into a coherent whole. The system is legible because its parts follow rules.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'One slider moves. Every component responds. The system has one voice.',
     animationQuote: 'A face is recognizable because every part knows what every other part is doing.',
     animationQuoteAttribution: null,
     componentQuote: 'Motion needs to live in the design system as a first-class citizen. Added at the end, it stays at the edges.',
@@ -138,7 +138,7 @@ const PRINCIPLES = [
   {
     id: 14, title: 'Hierarchy of Motion', category: 'extended',
     summary: 'One element drives another. Authority flows from parent to child.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The parent moves. The children follow. Authority flows downward.',
     animationQuote: 'The conductor moves. The orchestra follows. Reverse the hierarchy and the music breaks down.',
     animationQuoteAttribution: null,
     componentQuote: 'Parent elements carry authority. Children respond. When the hierarchy is wrong, the interface feels disobedient.',
@@ -148,7 +148,7 @@ const PRINCIPLES = [
   {
     id: 15, title: 'Economy', category: 'extended',
     summary: 'The minimum motion needed to communicate the intended meaning.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Three layers, three speeds. Depth from the smallest set of moves.',
     animationQuote: 'Three layers of parallax suggest an entire world. Thirty layers just suggest thirty layers.',
     animationQuoteAttribution: null,
     componentQuote: 'Motion earns its place by what it communicates. Motion added to empty time communicates nothing.',
@@ -157,8 +157,8 @@ const PRINCIPLES = [
   },
   {
     id: 16, title: 'Token Fidelity', category: 'extended',
-    summary: 'Animation values defined in a system should be used as intended. Deviation produces visible wrongness.',
-    componentSummary: 'Component summary coming in Phase 2',
+    summary: 'Deviation reads as incongruous. The motion is showing you a system problem.',
+    componentSummary: 'Wrong token. The motion reads off. Corrected through the system.',
     animationQuote: 'A character drawn with two left hands. The error is not in the drawing. It is in the reference.',
     animationQuoteAttribution: null,
     componentQuote: 'Hardcoded values drift. Token values hold. The system is only as reliable as its sources of truth.',
@@ -168,7 +168,7 @@ const PRINCIPLES = [
   {
     id: 17, title: 'Reduced Motion', category: 'extended',
     summary: 'The system must meet the user where they are. Accessibility is a design constraint that improves the whole system.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'Toggle flips. Motions soften and fall to rest. The system meets the user.',
     animationQuote: 'Two actors. One gestures wildly. The other stands still. Neither is wrong. They are just not yet meeting.',
     animationQuoteAttribution: null,
     componentQuote: "We don't need to eliminate animation. We need to apply it more thoughtfully.",
@@ -178,7 +178,7 @@ const PRINCIPLES = [
   {
     id: 18, title: 'Shared Vocabulary', category: 'extended',
     summary: 'Motion values that cannot be named cannot be systematized. Named presets are the minimum unit of design-engineering communication.',
-    componentSummary: 'Component summary coming in Phase 2',
+    componentSummary: 'The preset is Snappy. The numbers are the same. The name is the unit.',
     animationQuote: 'A hanzi spoken. A tree grown. The word and the thing were the same thing all along.',
     animationQuoteAttribution: null,
     componentQuote: 'A preset named "Snappy" is communicable. A preset named "300 60 120 200" is not.',
