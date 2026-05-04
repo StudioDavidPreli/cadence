@@ -8,9 +8,15 @@ import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-can
 import { useTheme } from '../../context/ThemeContext'
 import styles from './PrincipleAnimation.module.css'
 
-// Add entries here as .riv files are produced. Path is relative to /public.
-const RIV_PATHS = {
-  1: '/rive/squash-stretch.riv',
+// Add entries here as .riv files are produced. `src` is relative to /public.
+// `stateMachine` is the name of the state machine inside the .riv file —
+// authored in Rive, not derivable from the principle title (P1's machine is
+// named "squash&stretchSM" with the literal "&" character; future principles
+// may not follow a clean naming convention either, so each entry declares
+// its own).
+const RIV_FILES = {
+  1: { src: '/rive/squash-stretch.riv', stateMachine: 'squash&stretchSM' },
+  2: { src: '/rive/anticipation.riv',   stateMachine: 'anticipationSM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
@@ -29,14 +35,14 @@ const themeToInstanceName = {
 
 export function PrincipleAnimation({ principleId, className }) {
   const { theme } = useTheme()
-  const rivPath = RIV_PATHS[principleId]
+  const rivFile = RIV_FILES[principleId]
 
-  if (!rivPath) {
+  if (!rivFile) {
     console.warn(
       `Rive file not found for principle ${principleId}. ` +
       `Place the .riv file at /public/rive/[filename] ` +
-      `and add the path to RIV_PATHS in ` +
-      `PrincipleAnimation/index.jsx`
+      `and add the entry to RIV_FILES in ` +
+      `PrincipleAnimation/index.jsx (with the state machine name).`
     )
     return (
       <div className={[styles.fallback, className].filter(Boolean).join(' ')}>
@@ -47,7 +53,14 @@ export function PrincipleAnimation({ principleId, className }) {
     )
   }
 
-  return <RiveCanvas rivPath={rivPath} theme={theme} className={className} />
+  return (
+    <RiveCanvas
+      src={rivFile.src}
+      stateMachine={rivFile.stateMachine}
+      theme={theme}
+      className={className}
+    />
+  )
 }
 
 // ─── RiveCanvas ───────────────────────────────────────────────────────────────
@@ -67,10 +80,10 @@ export function PrincipleAnimation({ principleId, className }) {
 // changes. This is confirmed in the @rive-app/react-canvas source. No separate
 // useEffect is needed for binding — the hook handles it.
 
-function RiveCanvas({ rivPath, theme, className }) {
+function RiveCanvas({ src, stateMachine, theme, className }) {
   const { rive, RiveComponent } = useRive({
-    src: rivPath,
-    stateMachines: 'squash&stretchSM',
+    src,
+    stateMachines: stateMachine,
     autoplay: true,
     autoBind: false,
   })
