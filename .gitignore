@@ -7,6 +7,9 @@ dist/
 # Local references (not for repo)
 docs/references/animation-principles/
 
+# Playwright MCP capture artifacts (per-session, not for repo)
+.playwright-mcp/
+
 # macOS
 .DS_Store
 docs/.DS_Store

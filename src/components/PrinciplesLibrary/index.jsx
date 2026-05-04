@@ -8,7 +8,7 @@ const PRINCIPLES = [
   {
     id: 1, title: 'Squash & Stretch', category: 'classic',
     summary: 'Objects compress on impact and stretch on release, implying weight and flexibility.',
-    componentSummary: 'The button compresses on press, returns on release. Squash and stretch as interaction feedback — the press has weight.',
+    componentSummary: 'Press compresses. Release returns. The button has weight.',
     animationQuote: 'Squash and stretch is by far the most important discovery.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The press compresses. The release returns. A button with no give reads as image, not interface.',

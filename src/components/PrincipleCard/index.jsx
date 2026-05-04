@@ -12,11 +12,9 @@ const supportsHover =
   typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
 // Grid invariant. Mirrors grid-auto-rows: 234px in PrinciplesLibrary.module.css
-// — the target height the close animation lands on (one collapsed cell). The
-// expanded card's rendered height is read from getBoundingClientRect at the
-// start of each open/close, so it absorbs vertical growth at stacked widths
-// without needing a separate gap/ratio formula. cellWidth (the matching width
-// target) is dynamic and arrives as a prop from PrinciplesLibrary.
+// — the target height the close animation lands on (one collapsed cell).
+// cellWidth (the matching width target) is dynamic and arrives as a prop
+// from PrinciplesLibrary.
 const GRID_ROW_HEIGHT = 234
 
 // ─── getExpandedFootprint ─────────────────────────────────────────────────────
@@ -114,59 +112,54 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
 // Renders the quote, attribution, and token row below the expanded card's main
 // content area.
 //
-// When isStable is false (card is entering or exiting), content renders as plain
-// elements — no inner animations. When isStable is true (card fully expanded),
-// AnimatePresence activates and crossfades on uiMode toggle.
+// quoteContent is stack-grided: both motion-state and ui-state versions render
+// at the same grid cell, opacity-crossfaded on uiMode change. This pins the
+// quoteContent height at max(motion, ui), so the quoteBlock does not jump
+// vertically when toggling and the expandedContent above retains its space.
+//
+// The inner crossfade does not need to be gated by isStable. The expandedWrapper
+// itself fades opacity on enter/exit, so during the card's open/close the
+// QuoteBlock's children inherit the wrapper's opacity ramp regardless of their
+// own animate prop value.
+//
+// tokenRow is plain — principle.tokens is invariant across motion and ui, so
+// the previous AnimatePresence wrapper did no work and is removed.
 
-function QuoteBlock({ principle, uiMode, isStable, tokens: motionTokens }) {
-  const quote = uiMode ? principle.componentQuote : principle.animationQuote
-  const attribution = uiMode
-    ? principle.componentQuoteAttribution
-    : principle.animationQuoteAttribution
-
+function QuoteBlock({ principle, uiMode, tokens: motionTokens }) {
   return (
     <div className={styles.quoteBlock}>
-      {isStable ? (
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={uiMode ? 'component' : 'animation'}
-            className={styles.quoteContent}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
-          >
-            <p className={styles.quoteText}>{quote}</p>
-            {attribution && (
-              <p className={styles.quoteAttribution}>— {attribution}</p>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      ) : (
-        <div className={styles.quoteContent}>
-          <p className={styles.quoteText}>{quote}</p>
-          {attribution && (
-            <p className={styles.quoteAttribution}>— {attribution}</p>
+      <div className={styles.quoteStack}>
+        <motion.div
+          className={styles.quoteContent}
+          animate={{ opacity: uiMode ? 0 : 1 }}
+          transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
+          style={{ pointerEvents: uiMode ? 'none' : 'auto' }}
+          aria-hidden={uiMode}
+        >
+          <p className={styles.quoteText}>{principle.animationQuote}</p>
+          {principle.animationQuoteAttribution && (
+            <p className={styles.quoteAttribution}>
+              — {principle.animationQuoteAttribution}
+            </p>
           )}
-        </div>
-      )}
+        </motion.div>
+        <motion.div
+          className={styles.quoteContent}
+          animate={{ opacity: uiMode ? 1 : 0 }}
+          transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
+          style={{ pointerEvents: uiMode ? 'auto' : 'none' }}
+          aria-hidden={!uiMode}
+        >
+          <p className={styles.quoteText}>{principle.componentQuote}</p>
+          {principle.componentQuoteAttribution && (
+            <p className={styles.quoteAttribution}>
+              — {principle.componentQuoteAttribution}
+            </p>
+          )}
+        </motion.div>
+      </div>
 
-      {isStable ? (
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={uiMode ? 'ui-tokens' : 'anim-tokens'}
-            className={styles.tokenRow}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease.enter }}
-          >
-            {principle.tokens}
-          </motion.p>
-        </AnimatePresence>
-      ) : (
-        <p className={styles.tokenRow}>{principle.tokens}</p>
-      )}
+      <p className={styles.tokenRow}>{principle.tokens}</p>
     </div>
   )
 }
@@ -201,8 +194,10 @@ function QuoteBlock({ principle, uiMode, isStable, tokens: motionTokens }) {
 //             render isExpanded flips. The open useLayoutEffect snaps
 //             scaleX/Y to the cell ratio (visually 1×1 at frame 0), then
 //             animates them to 1.
-//   OPEN      isExpanded=true, isStable=true. Inner AnimatePresence
-//             crossfades on uiMode toggle are gated by isStable.
+//   OPEN      isExpanded=true, isStable=true. isStable persists in the
+//             zIndex calculation across the small tail after open completes;
+//             inner crossfades (summary, quoteContent) are stack-grided and
+//             animate opacity directly from uiMode without gating.
 //   CLOSING   isExpanded=false (set by parent), isClosing=true (set in
 //             handleClose). Both batch into one render. Footprint stays at
 //             2×2 via the (isExpanded || isClosing) guard. Wrapper stays at
@@ -329,13 +324,10 @@ export function PrincipleCard({
   // transformOrigin (set on the inline style via getExpandedFootprint)
   // anchors growth at the natural cell's corner.
   //
-  // The ratio targets are derived from the rendered bounding rect rather
-  // than the GRID_ROW_HEIGHT formula. At wide widths the rect equals the
-  // 2×2 footprint dims, so the ratio matches the formula exactly. At
-  // stacked widths (@container library < 600px in PrincipleCard.module.css)
-  // the card grows vertically beyond the 2×2 footprint to fit content;
-  // the rect captures that growth, and the close animation lands precisely
-  // on the single-cell target. scaleX/Y are at 1 at this moment (initial
+  // The ratio targets are derived from the rendered bounding rect. With
+  // State 5's fixed 180px column tracks and grid-auto-rows: 234px, the
+  // expanded card's rect equals 2×2 footprint dimensions at every library
+  // width where 2 columns fit. scaleX/Y are at 1 at this moment (initial
   // value, or set to 1 in the previous close's onComplete), so the rect
   // reflects the natural box.
   useLayoutEffect(() => {
@@ -388,8 +380,7 @@ export function PrincipleCard({
 
     // Same rect-based ratio as the open path. Footprint is held at 2×2 by
     // isClosing and scaleX/Y are at 1 (set in the prior open's onComplete),
-    // so the rect captures the card's natural rendered size — including any
-    // vertical growth at stacked widths.
+    // so the rect captures the card's natural rendered size.
     const rect = cardRef.current.getBoundingClientRect()
     const ratioX = cellWidth       / rect.width
     const ratioY = GRID_ROW_HEIGHT / rect.height
@@ -605,33 +596,39 @@ export function PrincipleCard({
 
                 <h2 className={styles.expandedTitle}>{principle.title}</h2>
 
-                {/* Summary crossfades on uiMode toggle only when isStable. */}
-                {isStable ? (
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.p
-                      key={uiMode ? 'component' : 'principle'}
-                      className={styles.expandedSummary}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: dur.fast, ease: tokens.ease.enter }}
-                    >
-                      {uiMode ? principle.componentSummary : principle.summary}
-                    </motion.p>
-                  </AnimatePresence>
-                ) : (
-                  <p className={styles.expandedSummary}>
-                    {uiMode ? principle.componentSummary : principle.summary}
-                  </p>
-                )}
+                {/* Stack-grid: both summaries render at the same grid cell,
+                    opacity-crossfaded on uiMode change. Pins height at the
+                    taller of the two states so the toggle below does not jump
+                    vertically when toggling. The expandedContent column is
+                    align-items: flex-start, so any contentHalf overflow falls
+                    downward (toward quoteBlock) rather than displacing the
+                    badge and title above. */}
+                <div className={styles.summaryStack}>
+                  <motion.p
+                    className={styles.expandedSummary}
+                    animate={{ opacity: uiMode ? 0 : 1 }}
+                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
+                    aria-hidden={uiMode}
+                  >
+                    {principle.summary}
+                  </motion.p>
+                  <motion.p
+                    className={styles.expandedSummary}
+                    animate={{ opacity: uiMode ? 1 : 0 }}
+                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
+                    aria-hidden={!uiMode}
+                  >
+                    {principle.componentSummary}
+                  </motion.p>
+                </div>
 
                 <button className={styles.stateToggle} onClick={handleStateToggle}>
-                  {uiMode ? 'See it in motion' : 'See it in UI'}
+                  {uiMode ? 'Motion' : 'UI'}
                 </button>
               </div>
             </div>
 
-            <QuoteBlock principle={principle} uiMode={uiMode} isStable={isStable} tokens={tokens} />
+            <QuoteBlock principle={principle} uiMode={uiMode} tokens={tokens} />
           </motion.div>
         )}
       </AnimatePresence>

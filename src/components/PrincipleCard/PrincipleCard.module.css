@@ -148,6 +148,12 @@
   overflow: hidden;
 }
 
+/* align-items: flex-start so any contentHalf overflow falls toward the
+   quoteBlock divider rather than displacing the badge and title above. With
+   align-items: center (the previous value) a 80 px summary collapse on toggle
+   slid the entire right-half block 40 px upward, which read as the card's
+   header repositioning rather than its body changing. Anchoring at the top
+   keeps the badge and title in a stable Y position across motion/UI toggle. */
 .expandedContent {
   display: flex;
   flex: 1;
@@ -155,7 +161,7 @@
   padding: 24px 32px;
   position: relative;
   box-sizing: border-box;
-  align-items: center;
+  align-items: flex-start;
   min-height: 0;
 }
 
@@ -269,15 +275,29 @@
   line-height: 1.2;
 }
 
+/* Stack-grid container for the two summary states. Both .expandedSummary
+   children render at grid-area: stack and crossfade opacity from uiMode.
+   Height pins at the taller of the two states so the toggle below holds a
+   stable Y across motion/UI toggle. text-wrap: pretty improves rag in the
+   narrow ~155 px right-half column. */
+.summaryStack {
+  display: grid;
+  grid-template-areas: 'stack';
+}
+
 .expandedSummary {
+  grid-area: stack;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--color-text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
+  text-wrap: pretty;
   margin: 0;
 }
 
-/* "See it in UI" / "See it in motion" toggle */
+/* Motion/UI toggle. text-wrap: balance keeps single-line labels balanced if
+   future copy ever exceeds the column width. The current Motion/UI labels
+   are short enough to never wrap. */
 .stateToggle {
   align-self: flex-start;
   padding: 6px 14px;
@@ -288,6 +308,7 @@
   font-size: 11px;
   font-weight: 500;
   color: var(--color-text-muted);
+  text-wrap: balance;
   cursor: pointer;
   transition: border-color 100ms var(--motion-ease-standard),
               color 100ms var(--motion-ease-standard),
@@ -366,9 +387,19 @@
   gap: 12px;
 }
 
+/* Stack-grid container for the two quoteContent states. Both children render
+   at grid-area: stack and crossfade opacity from uiMode. Height pins at the
+   taller of the two states so the quoteBlock holds a stable height across
+   motion/UI toggle. */
+.quoteStack {
+  display: grid;
+  grid-template-areas: 'stack';
+}
+
 /* quoteContent wraps quote text + optional attribution as a single crossfade
-   unit. AnimatePresence swaps the whole block on uiMode change. */
+   unit. */
 .quoteContent {
+  grid-area: stack;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -381,6 +412,7 @@
   font-weight: 400;
   color: var(--color-text-base);
   line-height: 1.4;
+  text-wrap: pretty;
   margin: 0;
 }
 
@@ -397,50 +429,4 @@
   color: var(--color-text-muted);
   margin: 0;
   margin-top: 4px;
-}
-
-/* ── Responsive stacked layout ───────────────────────────────────────────────
-   Below 600px the two-column expanded layout (animationHalf beside contentHalf)
-   compresses both halves below readability. @container flips to stacked:
-   animationHalf on top, contentHalf below. Container queries are correct here
-   because the library panel resizes independently of the viewport — a sidebar
-   collapse would not register in a media query.
-
-   The card geometry stays fixed at the 2×2 grid footprint at every viewport.
-   The column layout fits inside that fixed box: expandedContent flips to
-   stacked, and the two halves divide available height by their existing
-   flex-grow ratio (animationHalf 1.4 : contentHalf 1) — no min-height floor
-   on either half is needed, since either floor would over-claim space and
-   collapse the other half.
-
-   container-name: library is set on .library in PrinciplesLibrary.module.css.
-   CSS Modules hashes class names but not container-name values, so 'library'
-   is the same string in both files at runtime. */
-
-@container library (max-width: 600px) {
-  .expandedContent {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 24px;
-    gap: 20px;
-  }
-
-  /* min-height: 0 (replacing the previous 240px floor) lets flex distribute
-     the available height by flex-grow alone. The 240px floor over-claimed
-     vertical space at the card's fixed 480px height and forced contentHalf
-     to collapse to its zero-floor. */
-  .animationHalf {
-    max-height: none;
-    min-height: 0;
-    align-self: auto;
-  }
-
-  /* contentHalf also at min-height: 0 so it participates in the same flex
-     distribution. flex-shrink: 1 is the flex default but stated explicitly
-     here as a counterpart to animationHalf's relaxation — both halves
-     stretch and shrink together. */
-  .contentHalf {
-    min-height: 0;
-    flex-shrink: 1;
-  }
 }
