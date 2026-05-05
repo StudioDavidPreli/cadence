@@ -14,6 +14,14 @@ const ICON_CONFIG = {
     src: '/rive/principles_icon01.riv',
     stateMachine: 'squash&stretchIconSM',
   },
+  2: {
+    src: '/rive/principles_icon02.riv',
+    stateMachine: 'anticipationIconSM',
+  },
+  3: {
+    src: '/rive/principles_icon03.riv',
+    stateMachine: 'stagingIconSM',
+  },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in

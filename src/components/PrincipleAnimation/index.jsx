@@ -17,6 +17,7 @@ import styles from './PrincipleAnimation.module.css'
 const RIV_FILES = {
   1: { src: '/rive/squash-stretch.riv', stateMachine: 'squash&stretchSM' },
   2: { src: '/rive/anticipation.riv',   stateMachine: 'anticipationSM' },
+  3: { src: '/rive/staging.riv',        stateMachine: 'stagingSM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
