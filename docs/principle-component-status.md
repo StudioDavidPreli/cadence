@@ -20,7 +20,7 @@ Sources of truth for this table:
 - `src/components/PrincipleCard/index.jsx` (`getPrincipleComponent` switch)
 - `docs/references/principles-reference.md` (principle &rarr; component mapping)
 
-Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 wired).
+Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 + P12 wired).
 
 ---
 
@@ -39,7 +39,7 @@ Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 wired).
 | 09 | Timing                          | Same toggle. Different duration. The gesture changes character with it. | duration.fast, duration.base, duration.slow   | Toggle ×2 (Default + Cinematic presets) | Wired |
 | 10 | Exaggeration                    | The badge count climbs. The number overshoots before it lands.        | scale.expressive, ease.spring, duration.fast    | NotificationBadge        | Wired             |
 | 11 | Solid Drawing                   | The card lifts. Shadow grows. What was flat is now above the page.    | scale.lift, duration.base, ease.standard        | Card                     | Wired             |
-| 12 | Appeal                          | Shapes drift, settle, drift again. Tuned easing. The grid holds the eye. | All tokens in concert                        | Lava-lamp grid           | Not built         |
+| 12 | Appeal                          | Shapes drift, settle, drift again. Tuned easing. The grid holds the eye. | All tokens in concert                        | Card grid (drift+settle) | Wired             |
 
 ## Extended 6
 
@@ -75,6 +75,23 @@ Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 wired).
   controlled mode. The wrapper owns a single `step` counter that drives
   both demos: Stepper marks the poses; ProgressBar fills 0/25/50/75/100
   in lockstep. Same advance, two visualizations.
+- P12 Appeal extends the existing Card with three optional props
+  (`isSelected` controlled, `onSelect` callback, `dimmed`) — backward
+  compatible; P11 (Solid Drawing) keeps its uncontrolled internal
+  state. AppealDemo (inline in PrincipleCard) renders a 2x2 grid of
+  compact Cards. Each is wrapped in a `motion.div` that owns y-drift
+  (Y oscillation, ~5s cycle, per-card phase delay so the four never
+  sync). When any card is selected the wrapper switches to `y: 0`
+  (settle) and the unselected siblings dim via the new `dimmed` prop
+  (`scale.subtle` + opacity 0.55). Six tokens visible in one
+  composition: `duration.slower` (drift cycle), `duration.base`
+  (settle/lift/dim), `ease.standard` (neutral states), `ease.spring`
+  (selection), `scale.lift`, `scale.subtle`. The principle's "All
+  tokens in concert" line is then literal in the demo. Card titles
+  carry ASCII faces (`(ﾟ∩ﾟ)`, `(• ε •)`, `ʕ•̮͡•ʔ`, `(´°ω°`)`) rendered
+  in `ui-monospace` so the parens align — the demo's compact CSS
+  override flips Card's italic serif h3 to mono, normal weight,
+  centered.
 - P7 Arc uses a new Tooltip component (`src/components/Tooltip`). The
   bubble bends its trajectory through three keyframes for `x` and `y`:
   start below-right of rest, mid-keyframe above rest (biased right),

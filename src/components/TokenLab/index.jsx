@@ -47,7 +47,7 @@ const TABS = [
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
-  'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel', 'NotificationBadge', 'Modal'],
+  'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal'],
   'duration.slower':  ['Spinner', 'Stepper'],
   'easing':           ['Button', 'Card', 'NavItem', 'Toggle'],
   'delay.short':      ['Stepper'],
@@ -55,7 +55,7 @@ const TOKEN_COMPONENT_MAP = {
   'delay.long':       ['Stepper'],
   'scale.subtle':     [],
   'scale.base':       ['Button', 'Toggle'],
-  'scale.expressive': ['NotificationBadge'],
+  'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
 }
 
@@ -687,7 +687,7 @@ function NotificationBadgeDemo() {
 
   return (
     <DemoWrapper
-      componentName="NotificationBadge"
+      componentName="Notification Badge"
       instruction="Click New message. The number compresses, climbs past 1, holds, settles"
     >
       <div className={styles.demoRow}>

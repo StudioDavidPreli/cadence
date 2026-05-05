@@ -470,6 +470,77 @@
   overflow: hidden;
 }
 
+/* P12 Appeal — 2x2 grid of compact Cards.
+   The dashed frame holds the grid centered. The grid itself is square so
+   the four cards form an even composition; the demo column is taller than
+   wide so the grid sits in the upper-middle with vertical breathing room
+   below for the lift overshoot to read against.
+   No align-items: center on .appealDemo because the inner grid has its own
+   sizing — a stretched grid would crowd the dashed border. */
+.appealDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appealGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  /* The wider face — `(• ε •)` and `(´°ω°`)` — needs ~52 px at 11 px mono
+     including padding. 132 px grid - 8 px gap = 62 px per cell, comfortable. */
+  width: 100%;
+  max-width: 132px;
+  aspect-ratio: 1;
+}
+
+/* Wrapper owns the y-drift; Card inside owns scale + opacity. min-* zero
+   lets the grid cell constrain the wrapper without intrinsic-content
+   blowout. */
+.appealCardWrapper {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+/* Compact override applied via the className prop on Card. Flex centers the
+   face inside the cell on both axes; padding tightens to ~4 px so wider
+   faces fit. Selectors target Card's own h3 / p / span — specificity
+   (0,1,1) outranks Card.module.css's single-class selectors so no
+   !important needed. */
+.appealCard {
+  flex: 1;
+  padding: 4px 6px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appealCard h3 {
+  margin: 0;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* description is rendered by Card with the empty string we pass; hidden so
+   the face has the whole cell. */
+.appealCard p {
+  display: none;
+}
+
 /* P10 Exaggeration — NotificationBadge demo.
    The badge anchor is small; centering it leaves the overshoot legible
    against empty space (without surrounding chrome to compress it

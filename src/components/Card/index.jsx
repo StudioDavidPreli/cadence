@@ -7,13 +7,49 @@ import styles from './Card.module.css'
 // tag is optional. No children prop — keeping the API tight ensures visual
 // consistency across every card in the app.
 //
-// Selected state is managed internally (uncontrolled). If you ever need a parent
-// to control which card is selected — e.g. "only one card active at a time" —
-// replace useState here with isSelected and onSelect props, and lift the state up
-// to the parent component.
-export function Card({ title, description, tag, className = '', onClick, ...props }) {
-  const [isSelected, setIsSelected] = useState(false)
+// ── Controlled or uncontrolled ────────────────────────────────────────────────
+// `isSelected` is optional. When undefined, Card owns its own selection via
+// useState (the original Press & State, P11 behavior). When passed, parent
+// owns selection — used by the P12 Appeal demo to coordinate spotlight-style
+// reactions across a grid of Cards. `onSelect(next)` fires on every toggle
+// regardless of mode.
+//
+// ── dimmed ────────────────────────────────────────────────────────────────────
+// When true and not selected, the Card scales down to scale.subtle and dims
+// to opacity 0.55. Selected cards are never dimmed (selection wins). The
+// Appeal demo passes dimmed=true to all unselected siblings whenever any
+// card in the grid is selected, producing the "spotlight narrows" effect.
+export function Card({
+  title,
+  description,
+  tag,
+  className = '',
+  onClick,
+  isSelected: isSelectedProp,
+  onSelect,
+  dimmed = false,
+  ...props
+}) {
+  const [internalSelected, setInternalSelected] = useState(false)
+  const isControlled = isSelectedProp !== undefined
+  const isSelected = isControlled ? isSelectedProp : internalSelected
   const tokens = useMotionTokens()
+
+  // Selection wins over dim. When neither: rest. When dimmed and not
+  // selected: shrink to scale.subtle and ramp opacity down.
+  const targetScale = isSelected
+    ? tokens.scale.lift
+    : dimmed
+      ? tokens.scale.subtle
+      : 1
+  const targetOpacity = !isSelected && dimmed ? 0.55 : 1
+
+  function handleClick(e) {
+    const next = !isSelected
+    if (!isControlled) setInternalSelected(next)
+    onSelect?.(next)
+    onClick?.(e)
+  }
 
   return (
     <motion.div
@@ -27,7 +63,8 @@ export function Card({ title, description, tag, className = '', onClick, ...prop
       // can't interpolate CSS custom properties because it needs real color values
       // to tween between, not variable names.
       animate={{
-        scale: isSelected ? tokens.scale.lift : 1,
+        scale: targetScale,
+        opacity: targetOpacity,
       }}
       transition={{
         // Different curves for select vs deselect — spring in, standard out.
@@ -36,10 +73,7 @@ export function Card({ title, description, tag, className = '', onClick, ...prop
         duration: tokens.duration.base,
         ease: isSelected ? tokens.ease.spring : tokens.ease.standard,
       }}
-      onClick={(e) => {
-        setIsSelected(prev => !prev)
-        onClick?.(e)
-      }}
+      onClick={handleClick}
       aria-pressed={isSelected}
       {...props}
     >
