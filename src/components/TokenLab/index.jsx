@@ -49,7 +49,14 @@ const TOKEN_COMPONENT_MAP = {
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
   'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal'],
   'duration.slower':  ['Spinner', 'Stepper'],
-  'easing':           ['Button', 'Card', 'NavItem', 'Toggle'],
+  // Each easing slot lights its own consumers when its tab is active in the
+  // visualizer. Components that read from CSS variables (--motion-ease-*)
+  // OR from the React tokens object (tokens.ease.*) are listed under the
+  // slot they reference. A component that touches more than one slot
+  // appears in more than one list.
+  'easing.standard':  ['Button', 'Card', 'NavItem', 'Toggle'],
+  'easing.enter':     ['Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
+  'easing.exit':      ['Drawer', 'Modal', 'Stepper', 'Dropdown', 'Notification Badge'],
   'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper'],
@@ -69,7 +76,10 @@ function reducer(state, action) {
     case 'SET_DURATION':
       return { ...state, duration: { ...state.duration, [action.key]: action.value } }
     case 'SET_EASING':
-      return { ...state, easing: action.value }
+      return {
+        ...state,
+        easing: { ...state.easing, [action.slot]: action.value },
+      }
     case 'SET_DELAY':
       return { ...state, delay: { ...state.delay, [action.key]: action.value } }
     case 'SET_SCALE':
@@ -87,18 +97,23 @@ function reducer(state, action) {
 // Writes all token values to CSS custom properties in one pass.
 // Used by RESET_TO_DEFAULTS and LOAD_PRESET, which change every property at once.
 // Single-token changes still go through syncToCss (below) for efficiency.
+// Per-slot easing CSS string. Custom curves come in as four-number arrays;
+// preset keys map through EASING_CURVES.
+function easingCss(slotValue) {
+  return Array.isArray(slotValue)
+    ? `cubic-bezier(${slotValue.join(', ')})`
+    : EASING_CURVES[slotValue].css
+}
+
 function writeAllTokensToCss(state) {
   const el = document.documentElement
   el.style.setProperty('--motion-duration-fast',    `${state.duration.fast}ms`)
   el.style.setProperty('--motion-duration-base',    `${state.duration.base}ms`)
   el.style.setProperty('--motion-duration-slow',    `${state.duration.slow}ms`)
   el.style.setProperty('--motion-duration-slower',  `${state.duration.slower}ms`)
-  el.style.setProperty(
-    '--motion-ease-standard',
-    Array.isArray(state.easing)
-      ? `cubic-bezier(${state.easing.join(', ')})`
-      : EASING_CURVES[state.easing].css
-  )
+  el.style.setProperty('--motion-ease-standard',    easingCss(state.easing.standard))
+  el.style.setProperty('--motion-ease-enter',       easingCss(state.easing.enter))
+  el.style.setProperty('--motion-ease-exit',        easingCss(state.easing.exit))
   el.style.setProperty('--motion-delay-short',      `${state.delay.short}ms`)
   el.style.setProperty('--motion-delay-medium',     `${state.delay.medium}ms`)
   el.style.setProperty('--motion-delay-long',       `${state.delay.long}ms`)
@@ -116,12 +131,7 @@ function syncToCss(action) {
       el.style.setProperty(`--motion-duration-${action.key}`, `${action.value}ms`)
       break
     case 'SET_EASING':
-      el.style.setProperty(
-        '--motion-ease-standard',
-        Array.isArray(action.value)
-          ? `cubic-bezier(${action.value.join(', ')})`
-          : EASING_CURVES[action.value].css
-      )
+      el.style.setProperty(`--motion-ease-${action.slot}`, easingCss(action.value))
       break
     case 'SET_DELAY':
       el.style.setProperty(`--motion-delay-${action.key}`, `${action.value}ms`)
@@ -195,12 +205,19 @@ const SCALE_CONFIG_EXPLORE = {
 }
 
 // ─── Preset helpers ───────────────────────────────────────────────────────────
-// statesMatch compares two token states by value. Array easings (custom curves)
-// are compared element-by-element; named easings by string equality.
+// Slot equality: a slot's value is either a string (preset key) or an array
+// (custom curve). Compare strings by identity, arrays element-by-element.
+function easingSlotMatches(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) return a.join(',') === b.join(',')
+  return a === b
+}
+
+// statesMatch compares two token states by value across all three easing
+// slots and every duration / delay / scale key.
 function statesMatch(a, b) {
-  const easingA = Array.isArray(a.easing) ? a.easing.join(',') : a.easing
-  const easingB = Array.isArray(b.easing) ? b.easing.join(',') : b.easing
-  if (easingA !== easingB) return false
+  for (const slot of ['standard', 'enter', 'exit']) {
+    if (!easingSlotMatches(a.easing[slot], b.easing[slot])) return false
+  }
   for (const k of ['fast', 'base', 'slow', 'slower']) {
     if (a.duration[k] !== b.duration[k]) return false
   }
@@ -220,11 +237,35 @@ function getActivePresetId(state, presets) {
   return null
 }
 
+// Migrate a preset's `state.easing` from the old single-value shape to the
+// three-slot object shape. Older user presets persisted to localStorage
+// hold either a string preset key or a four-number array on `state.easing`;
+// we normalize those into `{ standard: <old>, enter: 'enter', exit: 'exit' }`
+// so the reducer and visualizer can read uniformly. Already-new presets
+// pass through unchanged.
+function migratePresetEasing(preset) {
+  const easing = preset?.state?.easing
+  const isOldShape = typeof easing === 'string' || Array.isArray(easing)
+  if (!isOldShape) return preset
+  return {
+    ...preset,
+    state: {
+      ...preset.state,
+      easing: { standard: easing, enter: 'enter', exit: 'exit' },
+    },
+  }
+}
+
 // Auto-generates a compact token summary for user preset tooltips.
 // Named easing keeps it readable; custom curves fall back to "custom".
+// The standard slot leads in the label because it's the most visible curve
+// across the system; users tuning enter/exit specifically can still read
+// the visualizer for their per-slot values.
 function generatePresetTooltip(state) {
-  const easingLabel = Array.isArray(state.easing) ? 'custom' : state.easing
-  return `fast ${state.duration.fast}ms · base ${state.duration.base}ms · ${easingLabel} easing`
+  const standardLabel = Array.isArray(state.easing.standard)
+    ? 'custom'
+    : state.easing.standard
+  return `fast ${state.duration.fast}ms · base ${state.duration.base}ms · ${standardLabel} easing`
 }
 
 // ─── HoverTip ────────────────────────────────────────────────────────────────
@@ -751,22 +792,54 @@ function ProgressBarDemo() {
 }
 
 // ─── EasingSection ────────────────────────────────────────────────────────────
-// Extracted so it can call useSetActiveToken() inside ActiveTokenProvider.
+// Three editable curves under one visualizer. The tab strip selects which
+// slot the visualizer reads / writes; preset buttons load into that same
+// slot. Slot-specific reset target (e.g. resetting the Enter slot returns
+// it to 'enter', not 'standard') keeps each slot's "go back to default"
+// path matching its own conceptual home.
+//
+// Active token dispatch is per-slot (`easing.standard`, `easing.enter`,
+// `easing.exit`) so the connection highlighting reflects which components
+// actually consume each curve — see TOKEN_COMPONENT_MAP.
+const EASING_TABS = [
+  { id: 'standard', label: 'Standard' },
+  { id: 'enter',    label: 'Enter'    },
+  { id: 'exit',     label: 'Exit'     },
+]
+
 function EasingSection({ rawState, dispatch }) {
   const setActiveToken = useSetActiveToken()
+  const [activeSlot, setActiveSlot] = useState('standard')
   const [resetHovered, setResetHovered] = useState(false)
 
-  const isCustom    = Array.isArray(rawState.easing)
-  const activeCurve = isCustom
-    ? rawState.easing
-    : EASING_CURVES[rawState.easing].fm
+  const slotValue   = rawState.easing[activeSlot]
+  const isCustom    = Array.isArray(slotValue)
+  const activeCurve = isCustom ? slotValue : EASING_CURVES[slotValue].fm
+
+  function setSlot(value) {
+    dispatch({ type: 'SET_EASING', slot: activeSlot, value })
+  }
 
   return (
     <>
+      <div className={styles.easingTabs} role="tablist">
+        {EASING_TABS.map(tab => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={activeSlot === tab.id}
+            className={`${styles.easingTab} ${activeSlot === tab.id ? styles.easingTabActive : ''}`}
+            onClick={() => setActiveSlot(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <AnimatePresence initial={false}>
         {isCustom && (
           <motion.div
-            key="curveValues"
+            key={`curveValues-${activeSlot}`}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -780,8 +853,8 @@ function EasingSection({ rawState, dispatch }) {
 
       <EasingVisualizer
         curve={activeCurve}
-        onCurveChange={(curve) => dispatch({ type: 'SET_EASING', value: curve })}
-        onDragStart={() => setActiveToken('easing')}
+        onCurveChange={curve => setSlot(curve)}
+        onDragStart={() => setActiveToken(`easing.${activeSlot}`)}
         onDragEnd={() => setActiveToken(null)}
       />
 
@@ -789,8 +862,8 @@ function EasingSection({ rawState, dispatch }) {
         {Object.entries(EASING_CURVES).map(([key, { label }]) => (
           <button
             key={key}
-            className={`${styles.easeButton} ${rawState.easing === key ? styles.easeButtonActive : ''}`}
-            onClick={() => dispatch({ type: 'SET_EASING', value: key })}
+            className={`${styles.easeButton} ${slotValue === key ? styles.easeButtonActive : ''}`}
+            onClick={() => setSlot(key)}
           >
             {label}
           </button>
@@ -805,7 +878,10 @@ function EasingSection({ rawState, dispatch }) {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
               className={`${styles.easeButton} ${styles.easeButtonCustom}`}
-              onClick={() => dispatch({ type: 'SET_EASING', value: 'standard' })}
+              // Reset returns the active slot to its own named default —
+              // Standard returns to 'standard', Enter to 'enter', Exit to
+              // 'exit'. Each slot's home is the curve that shares its name.
+              onClick={() => setSlot(activeSlot)}
               onMouseEnter={() => setResetHovered(true)}
               onMouseLeave={() => setResetHovered(false)}
             >
@@ -868,11 +944,16 @@ export function TokenLab() {
   // as a constant; user presets are merged with them at render time.
   const [userPresets, setUserPresets] = useState([])
 
-  // Load any saved user presets on mount.
+  // Load any saved user presets on mount. Presets saved before per-slot
+  // easing landed have a single value at `state.easing` (string or array);
+  // migrate those to the three-slot shape so they don't crash the reducer
+  // or render with `state.easing.standard` undefined.
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('cadence-presets') || '[]')
-      if (Array.isArray(stored)) setUserPresets(stored)
+      if (Array.isArray(stored)) {
+        setUserPresets(stored.map(migratePresetEasing))
+      }
     } catch (_) { /* ignore corrupt storage */ }
   }, [])
 

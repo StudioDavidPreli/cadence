@@ -52,4 +52,14 @@
   gap: 12px;
   padding: 24px;
   align-content: start;
+  /* Hard floor at 2 columns — single-column reflow is not a supported layout
+     state for this tool. 2 × 180 + 12 gap = 372 px of content; plus 24 px
+     padding on each side = 420 px border box. min-width applies to the
+     border box (project uses `* { box-sizing: border-box }` globally — see
+     src/tokens/color.css), so the value here must include padding. Below
+     this width the parent overflows horizontally rather than collapsing to
+     one column, which would force the expanded card's `span 2` footprint
+     into undefined behavior. The documented minimum desktop viewport
+     (574 px, see CLAUDE.md) sits comfortably above this floor. */
+  min-width: 420px;
 }

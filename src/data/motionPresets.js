@@ -18,9 +18,15 @@ export const EASING_CURVES = {
 // ─── Initial state ────────────────────────────────────────────────────────────
 // The "Default" preset's state. Defined separately so the Default entry in
 // BUILT_IN_PRESETS can reference it without duplicating values.
+//
+// `easing` holds three independent slots — standard / enter / exit — each
+// editable through the TokenLab bezier visualizer. Each value is either a
+// preset key (`'standard'`, `'enter'`, etc.) or a four-number bezier array
+// for a custom curve. Linear and Spring stay as constants in the runtime
+// (see stateToTokens below) and as quick-load preset buttons in the UI.
 export const INITIAL_STATE = {
   duration: { fast: 100, base: 200, slow: 400, slower: 600 },
-  easing:   'standard',
+  easing:   { standard: 'standard', enter: 'enter', exit: 'exit' },
   delay:    { short: 50, medium: 100, long: 200 },
   scale:    { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
 }
@@ -43,7 +49,10 @@ export const BUILT_IN_PRESETS = [
     tooltip: 'Short durations, spring easing, tight delays. High energy, confident.',
     state: {
       duration: { fast: 60, base: 120, slow: 200, slower: 350 },
-      easing:   'spring',
+      // Snappy is the personality where Standard reads as Spring — confident
+      // overshoot. Enter and Exit stay at their default decelerate / accelerate
+      // shapes; bending those would dilute the contrast Snappy is built on.
+      easing:   { standard: 'spring', enter: 'enter', exit: 'exit' },
       delay:    { short: 20, medium: 40, long: 80 },
       scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
     },
@@ -55,7 +64,10 @@ export const BUILT_IN_PRESETS = [
     tooltip: 'Long durations, decelerating easing, generous delays. Considered, editorial.',
     state: {
       duration: { fast: 200, base: 500, slow: 900, slower: 1400 },
-      easing:   'enter',
+      // Cinematic favours arrival — Standard becomes Enter so general motion
+      // decelerates into rest. Enter keeps that shape. Exit stays sharp so
+      // dismissals don't drag.
+      easing:   { standard: 'enter', enter: 'enter', exit: 'exit' },
       delay:    { short: 100, medium: 200, long: 400 },
       scale:    { subtle: 0.99, base: 0.97, expressive: 0.94, lift: 1.01 },
     },
@@ -63,14 +75,20 @@ export const BUILT_IN_PRESETS = [
 ]
 
 // ─── stateToTokens ────────────────────────────────────────────────────────────
-// Converts a preset's `state` object (CSS-side units: ms, named easing key,
-// unitless scale) into the React-side token shape that MotionTokensProvider
-// expects (seconds for duration/delay, four-number arrays for easing).
-export function stateToTokens(state) {
-  const activeCurve = Array.isArray(state.easing)
-    ? state.easing
-    : EASING_CURVES[state.easing].fm
+// Converts a preset's `state` object (CSS-side units: ms, named easing keys
+// or four-number arrays per slot, unitless scale) into the React-side token
+// shape that MotionTokensProvider expects (seconds for duration/delay,
+// four-number arrays for easing).
+//
+// Each editable slot resolves independently. Linear and Spring stay constant
+// because they are not editable through the UI — Linear has no draggable
+// handles (corners only) and Spring's Y > 1 control point falls outside the
+// visualizer's draggable region.
+function resolveCurve(slot) {
+  return Array.isArray(slot) ? slot : EASING_CURVES[slot].fm
+}
 
+export function stateToTokens(state) {
   return {
     duration: {
       fast:   state.duration.fast   / 1000,
@@ -80,9 +98,9 @@ export function stateToTokens(state) {
     },
     ease: {
       linear:   EASING_CURVES.linear.fm,
-      standard: activeCurve,
-      enter:    EASING_CURVES.enter.fm,
-      exit:     EASING_CURVES.exit.fm,
+      standard: resolveCurve(state.easing.standard),
+      enter:    resolveCurve(state.easing.enter),
+      exit:     resolveCurve(state.easing.exit),
       spring:   EASING_CURVES.spring.fm,
     },
     delay: {

@@ -322,6 +322,51 @@
 
 /* ── Easing selector ────────────────────────────────────────────────────── */
 
+/* ── Easing slot tabs ────────────────────────────────────────────────────────
+   Three-tab strip above the EasingVisualizer that selects which curve slot
+   the visualizer reads / writes (Standard / Enter / Exit). 1fr columns so
+   labels share width evenly. Visual register matches .easeButton — same
+   border, padding, hover surface — but the active tab shifts to the same
+   inverted treatment as .easeButtonActive so "active tab" reads as "active
+   selection" without inventing a new visual vocabulary. */
+.easingTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.easingTab {
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.easingTab:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+.easingTabActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.easingTabActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
 .easeGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
