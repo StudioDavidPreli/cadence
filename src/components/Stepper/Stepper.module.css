@@ -2,6 +2,26 @@
   width: 100%;
 }
 
+/* Compact: principle-card slot. Drops everything except the four circles +
+   connectors. Outer wrapper owns the trigger and "complete" affordance.
+   stepItem shrinks to circle width so the four poses fit a ~133 px frame.
+   stepperBody min-height is reset because the description and button —
+   the only reasons it had a 148 px floor — are hidden. */
+.stepperCompact .stepperBody {
+  min-height: 0;
+}
+
+.stepperCompact .stepItem {
+  width: 28px;
+  gap: 0;
+}
+
+.stepperCompact .stepLabel,
+.stepperCompact .stepDescription,
+.stepperCompact .nextButton {
+  display: none;
+}
+
 /* position: relative contains the absolutely-positioned completion overlay.
    min-height ensures the overlay has a visible area to fill even when the
    step content is sparse. */

@@ -434,6 +434,90 @@
   justify-content: flex-start;
 }
 
+/* P07 Arc — Tooltip demo.
+   The tooltip rests above its trigger and arcs through a mid-point that
+   sits ~10 px higher than rest. The frame is ~248 px tall interior; with
+   the 28 px trigger centered, the bubble has roughly 90 px of clear space
+   above rest before the dashed top edge — enough for the apex of the
+   curve to read without clipping. overflow stays at the default `visible`
+   so a bubble that grazes the apex limit is still drawn. */
+.tooltipDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* P03 Staging — scoped Modal demo.
+   Same frame recipe as .drawerDemo: position:relative anchors the Modal's
+   absolute backdrop and panel; overflow:hidden clips the panel's scaled
+   pre-entrance position so the entrance animation reads cleanly.
+   background-color gives the stage area visible contrast against the card
+   surface, and means the dimmed backdrop has something to dim. */
+.modalDemo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-active);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* P10 Exaggeration — NotificationBadge demo.
+   The badge anchor is small; centering it leaves the overshoot legible
+   against empty space (without surrounding chrome to compress it
+   visually). Two buttons stack vertically — New and Clear are short
+   enough to fit side by side, but the demo column is ~133 px and
+   stacking keeps the buttons' tap-targets generous. */
+.exaggerationDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.exaggerationButtonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* P04 Straight Ahead & Pose to Pose — vertical stack.
+   The animationHalf is taller than wide (~165 × ~280 px), so Stepper sits
+   above ProgressBar above a single Next/Reset trigger. Stepper renders in
+   compact mode (no labels, no description, no internal button); the bar
+   is unlabeled. justify-content: center holds the trio centered while the
+   surrounding frame stays generous. */
+.straightAheadDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.straightAheadButtonRow {
+  display: flex;
+  justify-content: center;
+}
+
 /* P9 Timing — two Toggles, one per preset (Default, Cinematic).
    Stacked vertically, each row has the toggle with its dynamic On/Off label
    and a small caption naming the preset that scopes its motion tokens. */

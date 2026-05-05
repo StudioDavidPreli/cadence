@@ -1,0 +1,49 @@
+/* Anchor: a labelled surface (Inbox, Notifications) the badge attaches to.
+   position: relative scopes the badge's absolute coordinates to this box.
+   Sized as a typical pill — it should read as a destination the count
+   refers to, not as the badge's container. */
+.anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-base);
+}
+
+.label {
+  /* Plain label — the anchor IS the visual element, this is just text inside. */
+}
+
+/* Badge: small accent pill in the top-right corner, partially overlapping
+   the anchor edge so it reads as attached, not contained.
+   transform-origin centers the spring overshoot — without this the badge
+   pivots from its top-left corner, biasing the bounce up and to the left. */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transform-origin: center;
+  /* Outline matches the anchor's surface so the badge reads as floating
+     above it. Without the ring the accent pill blurs into the anchor's
+     border at the corner overlap. */
+  box-shadow: 0 0 0 2px var(--color-surface-raised);
+}

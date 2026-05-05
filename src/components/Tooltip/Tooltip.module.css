@@ -1,0 +1,95 @@
+/* ── Container ────────────────────────────────────────────────────────────────
+   inline-block so the container hugs the trigger; relative anchors the
+   absolute bubble to the trigger's center. */
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+/* ── Trigger ──────────────────────────────────────────────────────────────────
+   Circular help-style indicator. Mono "?" reads as info universally. Hover
+   surface uses --color-surface-active to match other interactive triggers. */
+.trigger {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-base);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.trigger:hover {
+  background-color: var(--color-surface-active);
+  border-color: var(--color-border2);
+}
+
+/* ── Bubble ───────────────────────────────────────────────────────────────────
+   Above the trigger with a 10 px gap. Centered horizontally via CSS
+   `translate` (separate property from `transform`, so Framer Motion's
+   `x` and `y` animate without clobbering the centering).
+   pointer-events: none lets the user click through the bubble onto the
+   trigger to toggle it off. max-width caps the bubble in narrow demo
+   frames; line-height + text-align handle wrapped lines. */
+.bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  translate: -50% 0;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  /* width: max-content sizes the bubble to its natural content width and
+     overrides the shrink-to-fit calculation against the trigger container's
+     narrow width. max-width still caps the bubble in narrow demo frames. */
+  width: max-content;
+  max-width: 200px;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Arrow ────────────────────────────────────────────────────────────────────
+   Two stacked triangles using ::before and ::after — outer tracks the border
+   color; inner is offset 1 px upward and tracks the bubble background.
+   Together they read as a continuation of the bubble outline pointing at the
+   trigger. left: 50% + margin-left handles the centering since translate is
+   already used for the bubble itself. */
+.bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: var(--color-border);
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  margin-top: -1px;
+  border: 5px solid transparent;
+  border-top-color: var(--color-surface-raised);
+  z-index: 1;
+}

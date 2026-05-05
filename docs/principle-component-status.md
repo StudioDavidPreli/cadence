@@ -20,7 +20,7 @@ Sources of truth for this table:
 - `src/components/PrincipleCard/index.jsx` (`getPrincipleComponent` switch)
 - `docs/references/principles-reference.md` (principle &rarr; component mapping)
 
-Last refreshed: 2026-05-05 (post-wiring pass).
+Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 wired).
 
 ---
 
@@ -30,14 +30,14 @@ Last refreshed: 2026-05-05 (post-wiring pass).
 |----|---------------------------------|-----------------------------------------------------------------------|-------------------------------------------------|--------------------------|-------------------|
 | 01 | Squash & Stretch                | Press compresses. Release returns. The button has weight.             | scale.base, duration.fast, ease.spring          | Button                   | Wired             |
 | 02 | Anticipation                    | The drawer dips before it climbs. The motion announces itself.        | duration.base, ease.spring                      | Drawer                   | Wired             |
-| 03 | Staging                         | The modal opens. The backdrop dims. The page narrows to one thing.    | duration.slow, ease.enter                       | Modal / Dialog           | Not built         |
-| 04 | Straight Ahead & Pose to Pose   | Steps mark the poses. The bar fills between. Both are the same idea.  | duration.slow, delay.short, delay.medium        | Stepper + ProgressBar    | Built, not wired  |
+| 03 | Staging                         | The modal opens. The backdrop dims. The page narrows to one thing.    | duration.slow, ease.enter                       | Modal                    | Wired             |
+| 04 | Straight Ahead & Pose to Pose   | Steps mark the poses. The bar fills between. Both are the same idea.  | duration.slow, delay.short, delay.medium        | Stepper (compact) + ProgressBar | Wired      |
 | 05 | Follow Through                  | Slide snaps. Dot catches up. The lag is how the system admits to mass.| duration.base, ease.spring                      | Carousel (compact)       | Wired             |
 | 06 | Slow In & Slow Out              | The bar fills, then settles at the end. Linear motion belongs to machines. | ease.standard, duration.slow               | ProgressBar              | Wired             |
-| 07 | Arc                             | The tooltip leaves the trigger and arcs into place. Not a straight line. | duration.fast, ease.enter                    | Tooltip                  | Not built         |
+| 07 | Arc                             | The tooltip leaves the trigger and arcs into place. Not a straight line. | duration.base, ease.enter                    | Tooltip                  | Wired             |
 | 08 | Secondary Action                | The menu opens. The chevron rotates with it. The rotation confirms.   | duration.fast, ease.standard                    | Dropdown                 | Wired             |
 | 09 | Timing                          | Same toggle. Different duration. The gesture changes character with it. | duration.fast, duration.base, duration.slow   | Toggle ×2 (Default + Cinematic presets) | Wired |
-| 10 | Exaggeration                    | The badge count climbs. The number overshoots before it lands.        | scale.expressive, ease.spring, duration.fast    | Notification Badge       | Not built         |
+| 10 | Exaggeration                    | The badge count climbs. The number overshoots before it lands.        | scale.expressive, ease.spring, duration.fast    | NotificationBadge        | Wired             |
 | 11 | Solid Drawing                   | The card lifts. Shadow grows. What was flat is now above the page.    | scale.lift, duration.base, ease.standard        | Card                     | Wired             |
 | 12 | Appeal                          | Shapes drift, settle, drift again. Tuned easing. The grid holds the eye. | All tokens in concert                        | Lava-lamp grid           | Not built         |
 
@@ -68,6 +68,50 @@ Last refreshed: 2026-05-05 (post-wiring pass).
   and Cinematic presets through `MotionTokensProvider`. Preset data lives
   in `src/data/motionPresets.js` (extracted from TokenLab to break a
   circular import).
+- P4 Straight Ahead & Pose to Pose stacks Stepper above ProgressBar above
+  a single Next/Reset trigger. Stepper gained a `compact` prop (hides
+  labels, description, internal Next, completion overlay; shrinks
+  stepItem to circle width) and an optional `currentStep` prop for
+  controlled mode. The wrapper owns a single `step` counter that drives
+  both demos: Stepper marks the poses; ProgressBar fills 0/25/50/75/100
+  in lockstep. Same advance, two visualizations.
+- P7 Arc uses a new Tooltip component (`src/components/Tooltip`). The
+  bubble bends its trajectory through three keyframes for `x` and `y`:
+  start below-right of rest, mid-keyframe above rest (biased right),
+  end at rest. Two segments meeting at an elbow form the arc; ease.enter
+  decelerates each segment. duration.base (200 ms) gives the bend time
+  to read. Centered above trigger via CSS `translate` (separate from
+  `transform`, so Framer Motion's `x`/`y` offsets compose with the
+  centering). Bubble is sized with `width: max-content` to override the
+  shrink-to-fit calculation against the trigger's narrow container.
+  Lives in TokenLab's Enter & Exit between Modal and Dropdown.
+  TokenLab also gained a local rename: the in-file `Tooltip` helper
+  (a 400 ms hover-delay tip used on preset and Explore labels) is now
+  `HoverTip` to avoid colliding with the new exported component.
+  P07's principle data updated `duration.fast → duration.base` to match
+  what the demo uses.
+- P3 Staging uses a new Modal component (`src/components/Modal`).
+  Backdrop fades opacity 0 → 0.8; panel scales 0.96 → 1 + opacity 0 → 1.
+  Asymmetric durations: enter `duration.slow` + `ease.enter`; exit
+  `duration.base` + `ease.exit`. Backdrop click and Escape both close.
+  Centering uses CSS `top: 50%; left: 50%; translate: -50% -50%` (the
+  CSS `translate` property — separate from `transform` — so Framer
+  Motion's `scale` animation composes cleanly without overwriting the
+  centering). Same `scoped` recipe as Drawer. Lives in TokenLab's Enter
+  & Exit between Drawer and Dropdown. `TOKEN_COMPONENT_MAP` lights it
+  up on `duration.slow` and `duration.base`; the easing slider only
+  edits `--motion-ease-standard`, so Modal is correctly NOT in the
+  `easing` row pending the deferred Standard / Enter / Exit tabs in
+  the bezier visualizer (logged in tracker known issues). Focus trap
+  is deferred (documented in component header).
+- P10 Exaggeration uses a new NotificationBadge component
+  (`src/components/NotificationBadge`). The badge re-keys on count change
+  so the spring runs every increment. Initial scale is `scale.expressive`
+  (0.9, a compress); it animates to 1 with `ease.spring`, whose bezier
+  carries the value above 1 before settling. Compress + curve combine to
+  produce the alert. Lives in TokenLab's Press & State tab next to Toggle
+  and Spinner; `scale.expressive` and `duration.fast` now light it up
+  in `TOKEN_COMPONENT_MAP`.
 - The shells under `src/principles/<Name>/index.jsx` (one per classic 12)
   all return `null` and are not part of the rendered tree. They are
   scaffolding for future per-principle composition logic and do not affect

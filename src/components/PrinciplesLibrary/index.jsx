@@ -73,7 +73,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'A tooltip that rises straight up arrives as a notification. One that arcs arrives as an answer.',
     componentQuoteAttribution: null,
-    tokens: 'duration.fast · ease.enter',
+    tokens: 'duration.base · ease.enter',
   },
   {
     id: 8, title: 'Secondary Action', category: 'classic',
@@ -103,7 +103,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: "The notification doesn't just appear. It overshoots, and that overshoot is the alert.",
     componentQuoteAttribution: null,
-    tokens: 'scale.expressive · ease.spring · duration.fast',
+    tokens: 'scale.expressive · ease.spring · duration.slow',
   },
   {
     id: 11, title: 'Solid Drawing', category: 'classic',

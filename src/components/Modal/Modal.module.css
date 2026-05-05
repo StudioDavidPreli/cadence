@@ -1,0 +1,120 @@
+/* ── Backdrop ─────────────────────────────────────────────────────────────────
+   Full-viewport dimming layer. background-color is --color-bg (the page
+   background in each theme). Opacity is animated by Framer Motion 0 → 0.8;
+   the CSS class only sets the base color. cursor: pointer signals the
+   click-to-close affordance. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  z-index: 60;
+  cursor: pointer;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────────────
+   Center-anchored. CSS `translate` keeps Framer Motion's `transform: scale()`
+   from clobbering the centering — see component header for full reasoning.
+   max-* caps prevent the panel from exceeding the viewport on small screens. */
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 61;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-accent);
+  border-radius: 12px;
+  padding: 20px 24px 24px;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  /* Soft elevation — the panel is the figure; the dimmed page is the ground. */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Scoped mode ──────────────────────────────────────────────────────────────
+   Anchors backdrop and panel to the nearest positioned ancestor. Parent
+   needs position:relative and overflow:hidden. Caps shrink to fit the
+   demo frame; padding tightens to match. */
+
+.backdropScoped {
+  position: absolute;
+  z-index: 1;
+}
+
+.panelScoped {
+  position: absolute;
+  z-index: 2;
+  min-width: 0;
+  /* The principle card's animationHalf is ~165 px wide. 92% leaves a small
+     margin so the panel reads as floating above the dimmed frame, not
+     replacing it. max-height sized to leave room for the backdrop above
+     and below the panel. */
+  max-width: 92%;
+  max-height: 80%;
+  padding: 14px 16px 16px;
+  border-radius: 8px;
+  /* Drop the heavy elevation shadow inside the small frame — at this scale
+     the shadow reads as crud rather than depth. The accent border carries
+     the figure/ground separation. */
+  box-shadow: none;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-base);
+  font-family: inherit;
+  line-height: 1.3;
+}
+
+.panelScoped .title {
+  font-size: 12px;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  flex-shrink: 0;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.closeButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* ── Content ──────────────────────────────────────────────────────────────── */
+.content {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.panelScoped .content {
+  font-size: 11px;
+  line-height: 1.4;
+}

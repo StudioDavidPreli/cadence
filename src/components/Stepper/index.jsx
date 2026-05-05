@@ -48,10 +48,19 @@ const STEPS = [
 // correctly during the render that introduces the new currentStep value.
 // useEffect then updates the ref after the render so it's correct for the next.
 
-export function Stepper() {
+// `compact` strips labels, the step description, the internal Next button,
+// and the completion overlay. The wrapper takes responsibility for advancing
+// state and presenting "complete" feedback in its own surface.
+//
+// `currentStep` is optional. When undefined the Stepper owns its own counter
+// (the TokenLab demo). When provided the parent owns state — used by the P04
+// principle demo to drive Stepper and ProgressBar from a single trigger.
+export function Stepper({ compact = false, currentStep: currentStepProp }) {
   const tokens = useMotionTokens()
-  const [currentStep, setCurrentStep] = useState(0)
-  const prevStepRef = useRef(0)
+  const [internalStep, setInternalStep] = useState(0)
+  const isControlled = currentStepProp !== undefined
+  const currentStep = isControlled ? currentStepProp : internalStep
+  const prevStepRef = useRef(currentStep)
 
   // completed is derived, not separate state — avoids synchronization bugs.
   const completed = currentStep >= STEPS.length
@@ -75,7 +84,7 @@ export function Stepper() {
   const completionDelay = beat1Duration + tokens.delay.long
 
   function advance() {
-    setCurrentStep(s => s + 1)
+    if (!isControlled) setInternalStep(s => s + 1)
   }
 
   function reset() {
@@ -83,26 +92,35 @@ export function Stepper() {
     // isAdvancing = false on the next render (0 > 0 = false).
     // If we only used useEffect, the ref would still hold the old value
     // during the reset render, causing isAdvancing to be incorrectly true.
-    prevStepRef.current = 0
-    setCurrentStep(0)
+    if (!isControlled) {
+      prevStepRef.current = 0
+      setInternalStep(0)
+    }
   }
 
+  const rootClass = compact
+    ? `${styles.stepper} ${styles.stepperCompact}`
+    : styles.stepper
+
   return (
-    <div className={styles.stepper}>
+    <div className={rootClass}>
       {/* stepperBody is position:relative so the completion overlay can be
           positioned absolutely inside it, overlapping the step content. */}
       <div className={styles.stepperBody}>
 
         {/* Steps view — stays mounted so layout height is preserved while the
             completion overlay appears on top. Fades out after completionDelay
-            so it's still visible during the full cascade before disappearing. */}
+            so it's still visible during the full cascade before disappearing.
+            In compact mode there is no completion overlay, so the fade is
+            suppressed: all four checkmarks remain visible alongside the bar
+            at 100 % until the wrapper resets. */}
         <motion.div
-          animate={{ opacity: completed ? 0 : 1 }}
+          animate={{ opacity: !compact && completed ? 0 : 1 }}
           transition={{
             duration: tokens.duration.fast,
-            delay: completed ? completionDelay : 0,
+            delay: !compact && completed ? completionDelay : 0,
           }}
-          style={{ pointerEvents: completed ? 'none' : 'auto' }}
+          style={{ pointerEvents: !compact && completed ? 'none' : 'auto' }}
         >
 
           {/* ── Circle row ─────────────────────────────────────────────── */}
@@ -240,9 +258,11 @@ export function Stepper() {
         {/* Absolutely positioned inside stepperBody so it overlaps the fading
             step view rather than pushing it down. AnimatePresence handles the
             enter (completionDelay) and exit (ease.exit — returning to default
-            state is a deliberate action, not a casual dismiss). */}
+            state is a deliberate action, not a casual dismiss).
+            Suppressed in compact: the wrapper presents its own "complete"
+            state (e.g. ProgressBar at 100% + Reset button). */}
         <AnimatePresence>
-          {completed && (
+          {!compact && completed && (
             <motion.div
               key="completion"
               className={styles.completion}

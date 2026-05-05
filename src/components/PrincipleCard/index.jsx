@@ -9,6 +9,10 @@ import { ProgressBar } from '../ProgressBar'
 import { Dropdown } from '../Dropdown'
 import { Toggle } from '../Toggle'
 import { Card } from '../Card'
+import { Stepper } from '../Stepper'
+import { NotificationBadge } from '../NotificationBadge'
+import { Modal } from '../Modal'
+import { Tooltip } from '../Tooltip'
 import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import styles from './PrincipleCard.module.css'
@@ -117,6 +121,79 @@ function TogglePresetSlot({ presetLabel, presetTokens }) {
   )
 }
 
+// P04 Straight Ahead & Pose to Pose. Single trigger drives both demos:
+// the compact Stepper marks the four poses; the ProgressBar fills 0/25/50/
+// 75/100 in lockstep. Same advance, two visualizations — pose-to-pose
+// above, straight-ahead below. State lives here (controlled Stepper)
+// because the principle is the synchrony.
+const STRAIGHT_AHEAD_TOTAL = 4
+
+function StraightAheadDemo() {
+  const [step, setStep] = useState(0)
+  const completed = step >= STRAIGHT_AHEAD_TOTAL
+  const progress = (Math.min(step, STRAIGHT_AHEAD_TOTAL) / STRAIGHT_AHEAD_TOTAL) * 100
+
+  function onClick() {
+    setStep(s => (s >= STRAIGHT_AHEAD_TOTAL ? 0 : s + 1))
+  }
+
+  return (
+    <div className={styles.straightAheadDemo}>
+      <Stepper compact currentStep={step} />
+      <ProgressBar value={progress} showLabel={false} />
+      <div className={styles.straightAheadButtonRow}>
+        <Button onClick={onClick}>{completed ? 'Reset' : 'Next'}</Button>
+      </div>
+    </div>
+  )
+}
+
+// P03 Staging. Scoped Modal inside a position:relative; overflow:hidden
+// frame. Open trigger raises the panel; backdrop dims the frame. Local
+// state is sufficient — when the card collapses, the wrapper unmounts and
+// isOpen resets. Modal handles its own Escape and backdrop-click closes.
+function StagingDemo() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className={styles.modalDemo}>
+      <button
+        className={styles.drawerTrigger}
+        onClick={() => setIsOpen(true)}
+      >
+        Open modal
+      </button>
+      <Modal
+        scoped
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Discard changes?"
+      >
+        <p>
+          The backdrop dims. The page narrows to one decision.
+        </p>
+      </Modal>
+    </div>
+  )
+}
+
+// P10 Exaggeration. The badge's overshoot on increment is the alert. Two
+// triggers in the narrow demo column: New (climb) and Clear (return to
+// rest). Disabling Clear at zero prevents a no-op press from looking like
+// nothing happened.
+function ExaggerationDemo() {
+  const [count, setCount] = useState(0)
+  return (
+    <div className={styles.exaggerationDemo}>
+      <NotificationBadge count={count} label="Inbox" />
+      <div className={styles.exaggerationButtonRow}>
+        <Button onClick={() => setCount(c => c + 1)}>New</Button>
+        <Button onClick={() => setCount(0)}>Clear</Button>
+      </div>
+    </div>
+  )
+}
+
 function TimingDemo() {
   return (
     <div className={styles.timingDemo}>
@@ -166,10 +243,20 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
           </Drawer>
         </div>
       )
+    case 3:
+      return <StagingDemo />
+    case 4:
+      return <StraightAheadDemo />
     case 5:
       return (
         <div className={styles.carouselDemo}>
           <Carousel compact />
+        </div>
+      )
+    case 7:
+      return (
+        <div className={styles.tooltipDemo}>
+          <Tooltip text="Hello!" />
         </div>
       )
     case 6:
@@ -182,6 +269,8 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
       )
     case 9:
       return <TimingDemo />
+    case 10:
+      return <ExaggerationDemo />
     case 11:
       return (
         <div className={styles.cardDemo}>

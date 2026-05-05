@@ -14,8 +14,11 @@ import { Spinner } from '../Spinner'
 import { ProgressBar } from '../ProgressBar'
 import { Stepper } from '../Stepper'
 import { Drawer } from '../Drawer'
+import { Modal } from '../Modal'
+import { Tooltip } from '../Tooltip'
 import { Dropdown } from '../Dropdown'
 import { Carousel } from '../Carousel'
+import { NotificationBadge } from '../NotificationBadge'
 import {
   EASING_CURVES,
   INITIAL_STATE,
@@ -42,9 +45,9 @@ const TABS = [
 // Empty array means the token has no connected demo component anywhere in the
 // tool — the "Token unused by present components." note is shown in all groups.
 const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown'],
-  'duration.base':    ['Card', 'Drawer'],
-  'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
+  'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel', 'NotificationBadge', 'Modal'],
   'duration.slower':  ['Spinner', 'Stepper'],
   'easing':           ['Button', 'Card', 'NavItem', 'Toggle'],
   'delay.short':      ['Stepper'],
@@ -52,7 +55,7 @@ const TOKEN_COMPONENT_MAP = {
   'delay.long':       ['Stepper'],
   'scale.subtle':     [],
   'scale.base':       ['Button', 'Toggle'],
-  'scale.expressive': [],
+  'scale.expressive': ['NotificationBadge'],
   'scale.lift':       ['Card', 'Carousel'],
 }
 
@@ -224,19 +227,22 @@ function generatePresetTooltip(state) {
   return `fast ${state.duration.fast}ms · base ${state.duration.base}ms · ${easingLabel} easing`
 }
 
-// ─── Tooltip ─────────────────────────────────────────────────────────────────
-// 400ms hover delay prevents tooltips from firing on accidental pass-throughs.
-// AnimatePresence fades the panel in/out.
+// ─── HoverTip ────────────────────────────────────────────────────────────────
+// 400ms hover delay prevents tips from firing on accidental pass-throughs.
+// AnimatePresence fades the panel in/out. Distinct from the Tooltip component
+// imported from `../Tooltip` — that one demonstrates Arc with a click trigger
+// and an arcing entrance. HoverTip is the local TokenLab helper for preset
+// labels and mode explanations.
 //
 // Why createPortal:
 // .controls has overflow-y: auto, which establishes a stacking context that
-// clips absolutely-positioned descendants at the column boundary. A tooltip
+// clips absolutely-positioned descendants at the column boundary. A tip
 // anchored inside this column is cut off the moment it extends past the edge.
-// createPortal appends the tooltip to document.body, outside the clipping
+// createPortal appends the tip to document.body, outside the clipping
 // ancestor entirely. Position is calculated from getBoundingClientRect() at
 // hover time and expressed as fixed coordinates so it lands correctly
 // regardless of scroll or nesting.
-function Tooltip({ text, children }) {
+function HoverTip({ text, children }) {
   const [visible, setVisible]  = useState(false)
   const [coords, setCoords]    = useState({ top: 0, right: 0 })
   const wrapperRef = useRef(null)
@@ -316,7 +322,7 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave }) {
 
       <div className={styles.presetsList}>
         {allPresets.map(preset => (
-          <Tooltip key={preset.id} text={preset.tooltip}>
+          <HoverTip key={preset.id} text={preset.tooltip}>
             <button
               className={`${styles.presetItem} ${activePresetId === preset.id ? styles.presetItemActive : ''}`}
               onClick={() => onLoad(preset)}
@@ -336,7 +342,7 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave }) {
                 </span>
               )}
             </button>
-          </Tooltip>
+          </HoverTip>
         ))}
       </div>
 
@@ -631,6 +637,78 @@ function DrawerDemo() {
   )
 }
 
+// ─── ModalDemo ────────────────────────────────────────────────────────────────
+// Sits in Enter & Exit between DrawerDemo and Dropdown. Same family of
+// motion (panel + backdrop) but a different grammar than Drawer — Modal
+// rises from rest at the center instead of sliding from an edge.
+function ModalDemo() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <DemoWrapper
+      componentName="Modal"
+      instruction="Open the modal. Backdrop fades; panel rises from 0.96 to 1"
+    >
+      <button
+        className={styles.demoTrigger}
+        onClick={() => setIsOpen(true)}
+      >
+        Open Modal
+      </button>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Discard changes?"
+      >
+        <p>
+          The page narrows to one decision. <strong>duration.slow</strong> with{' '}
+          <strong>ease.enter</strong> brings the panel up; the backdrop dims
+          underneath. Exit drops to <strong>duration.base</strong> with{' '}
+          <strong>ease.exit</strong>. Once you've decided, the system gets out
+          of the way.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          Click the backdrop or press Escape to close.
+        </p>
+      </Modal>
+    </DemoWrapper>
+  )
+}
+
+// ─── NotificationBadgeDemo ────────────────────────────────────────────────────
+// Lives in Press & State next to Toggle and Spinner — a small status indicator
+// whose motion is its alert mechanism. Increment fires the badge's compress →
+// spring animation. Clear is the symmetric off-ramp that lets the user replay
+// the gesture from zero. Local count state because, like ProgressBar's value,
+// the count is display data, not a token.
+function NotificationBadgeDemo() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <DemoWrapper
+      componentName="NotificationBadge"
+      instruction="Click New message. The number compresses, climbs past 1, holds, settles"
+    >
+      <div className={styles.demoRow}>
+        <NotificationBadge count={count} label="Inbox" />
+        <button
+          className={styles.demoTrigger}
+          onClick={() => setCount(c => c + 1)}
+        >
+          New message
+        </button>
+        <button
+          className={styles.demoTrigger}
+          onClick={() => setCount(0)}
+        >
+          Clear
+        </button>
+      </div>
+    </DemoWrapper>
+  )
+}
+
 // ─── ProgressBarDemo ──────────────────────────────────────────────────────────
 // Manages local state for the progress value slider in the Sequence & Progress tab.
 //
@@ -864,12 +942,12 @@ export function TokenLab() {
 
         {/* Controls header — title on left, Explore toggle on right.
             The toggle resets all sliders to defaults and expands their ranges.
-            Tooltip fires after 400ms hover delay to avoid accidental activation. */}
+            Tip fires after 400ms hover delay to avoid accidental activation. */}
         <div className={styles.controlsHeader}>
           <span className={styles.controlsTitle}>Tokens</span>
-          <Tooltip text="Explore mode removes range limits. Toggle off to return to defaults.">
+          <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
             <Toggle mode="expressive" label="Explore" onChange={handleExploreToggle} />
-          </Tooltip>
+          </HoverTip>
         </div>
 
         {/* Presets — always visible, above the collapsible token sections.
@@ -1041,11 +1119,27 @@ export function TokenLab() {
                   </div>
                 </DemoWrapper>
 
+                <NotificationBadgeDemo />
+
               </div>
             ) : activeTab === 'enter-exit' ? (
               <div className={styles.demoContent}>
 
                 <DrawerDemo />
+
+                <ModalDemo />
+
+                <DemoWrapper
+                  componentName="Tooltip"
+                  instruction="Click the ? The bubble arcs into place along a curved path, not a straight line"
+                >
+                  {/* Centered so the bubble has runway on both sides — flush
+                      against demoContent's left padding the bubble's left half
+                      gets clipped by .demoPanel's overflow:hidden. */}
+                  <div className={styles.tooltipDemoRow}>
+                    <Tooltip text="Natural motion follows arcs" />
+                  </div>
+                </DemoWrapper>
 
                 <DemoWrapper
                   componentName="Dropdown"

@@ -526,6 +526,15 @@
   align-items: flex-start;
 }
 
+/* Centered trigger row for the Tooltip demo. The bubble centers above
+   its trigger and extends ~100 px to each side, so a flush-left trigger
+   gets its left bubble-half clipped by .demoPanel's overflow:hidden. */
+.tooltipDemoRow {
+  display: flex;
+  justify-content: center;
+  padding-top: 32px;
+}
+
 .demoCards {
   display: flex;
   gap: 12px;
