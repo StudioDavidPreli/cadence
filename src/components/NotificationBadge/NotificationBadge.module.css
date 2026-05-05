@@ -12,7 +12,12 @@
   border: 1px solid var(--color-border);
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--color-text-base);
+  /* --color-surface stays dark across all themes (it's the dark interactive
+     surface). --color-text-primary is its paired text token, also constant
+     across themes (light). Pairing with --color-text-base would invert the
+     text in light and HC modes, making it invisible against the dark
+     surface. */
+  color: var(--color-text-primary);
 }
 
 .label {

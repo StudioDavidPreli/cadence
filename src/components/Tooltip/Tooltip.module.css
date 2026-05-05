@@ -15,7 +15,10 @@
   border-radius: 50%;
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
-  color: var(--color-text-base);
+  /* --color-text-primary pairs with --color-surface (both are constant
+     across themes). --color-text-base flips with theme and would make the
+     "?" invisible against the dark surface in light and HC modes. */
+  color: var(--color-text-primary);
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 500;
