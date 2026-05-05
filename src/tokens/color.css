@@ -12,6 +12,21 @@ body {
      and controls use the mono stack. Apply var(--font-serif) directly on
      display headings where editorial weight is appropriate. */
   font-family: var(--font-mono);
+  /* App-shell layout. The page itself does not scroll — TokenLab's two
+     columns own their scroll containers and the tool fills the viewport.
+     See docs/decisions/tokenlab-scroll-architecture-2026-05-05.md. The
+     media query below unlocks for narrow / short viewports (phones,
+     tablets, and users zoomed past ~200 %), where natural body scroll is
+     better than a clipped tool. */
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (max-width: 720px), (max-height: 600px) {
+  body {
+    height: auto;
+    overflow: visible;
+  }
 }
 
 /* ─── Typography tokens (theme-independent) ──────────────────────────────────
@@ -44,6 +59,14 @@ body {
    accent3 (#e8b86d) on surface-raised (#1e1e1e)   9.1:1  AAA ✓ */
 :root,
 :root[data-theme="dark"] {
+  /* Tells the browser this surface is dark so default scrollbars, focus
+     rings, and form-control chrome render in dark-mode appropriate styling.
+     Without this, scrollbars in particular paint with light-theme defaults
+     (translucent gray thumb) which are nearly invisible against the dark
+     surface. Mirrors the data-theme attribute one-for-one across all three
+     theme blocks. */
+  color-scheme: dark;
+
   --color-bg:             #141414;  /* page background */
   --color-bg2:            #1a1a1a;  /* secondary background layer */
 
@@ -92,6 +115,8 @@ body {
    accent3 (#905e18) on surface-raised (#ffffff)    5.5:1  AA  ✓  ← noDemoNote text
    accent3 (#905e18) on bg (#f5f5f5)               5.1:1  AA  ✓ */
 :root[data-theme="light"] {
+  color-scheme: light;
+
   --color-bg:             #f5f5f5;
   --color-bg2:            #ebebeb;
 
@@ -134,6 +159,8 @@ body {
    accent2 (#5a4fcf) on bg (#ffffff)               6.1:1  AA  ✓  (SVG stroke — 3:1 threshold)
    accent3 (#6b4400) on bg (#ffffff)               8.6:1  AAA ✓ */
 :root[data-theme="high-contrast"] {
+  color-scheme: light;
+
   --color-bg:             #ffffff;
   --color-bg2:            #f0f0f0;
 

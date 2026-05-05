@@ -1,19 +1,16 @@
 /* ── Library container ───────────────────────────────────────────────────────
-   Fills the full panel height (TabPanel sets height:100% on .tabPanelInner).
-   overflow-y: auto allows the card grid to scroll when it exceeds panel height.
-   scrollbar-gutter: stable reserves the scrollbar lane whether the scrollbar is
-   visible or not. Without this, gaining a row from a 2x2 expansion could cause
-   the scrollbar to appear mid-animation — reducing .library's width, which
-   triggers auto-fit to recount columns, resizing every card while the layout
-   animation is in flight. Stable gutter keeps available width constant.
+   Vertical scroll lives one level up on .tabPanelInner now (see the app-shell
+   refactor in docs/decisions/tokenlab-scroll-architecture-2026-05-05.md).
+   Hoisting the scroll preserves the scrollbar-stability protection that
+   prevents auto-fit recount during a 2x2 expansion: as long as the
+   scroll-owning ancestor reserves the scrollbar lane, .library's inner
+   width is constant regardless of scrollbar state. .tabPanelInner declares
+   `scrollbar-gutter: stable` for that reason.
    container-type: inline-size enables @container queries in PrincipleCard.module.css.
    container-name: library is a CSS property value (not a class name), so CSS
    Modules does not hash it — both files agree on the name at runtime. */
 
 .library {
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   container-type: inline-size;
   container-name: library;
 }

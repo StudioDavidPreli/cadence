@@ -1,0 +1,46 @@
+/* App-shell layout. The page does not scroll — the tool inside it scrolls.
+   Each TokenLab column owns its own scroll container, so sliders stay in
+   view while components in the demo column scroll independently. The
+   reasoning is documented in
+   docs/decisions/tokenlab-scroll-architecture-2026-05-05.md.
+
+   Height chain: body fills the viewport, .appShell fills body, .tool
+   takes the remaining space below the ThemeSwitcher. min-height: 0 on
+   .tool is the standard flex-child override that lets it shrink below
+   its content size, which in turn lets descendants own the scroll.
+
+   Below 720 px wide or 600 px tall, the layout unlocks: body regains
+   natural overflow, .appShell switches to min-height so it can grow
+   beyond the viewport, and .tool drops its flex bound. This catches
+   phones, narrow tablets, and users who zoom past 200 % on a desktop. */
+
+.appShell {
+  height: 100vh;
+  background-color: var(--color-bg);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  /* min-height: 0 isn't strictly required at this level (height is fixed),
+     but documenting intent: this is a flex container whose child needs to
+     shrink. */
+  min-height: 0;
+}
+
+.tool {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 720px), (max-height: 600px) {
+  .appShell {
+    height: auto;
+    min-height: 100vh;
+  }
+  .tool {
+    flex: 0 1 auto;
+    min-height: 0;
+  }
+}

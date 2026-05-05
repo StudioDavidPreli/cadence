@@ -1,8 +1,24 @@
 .tokenLab {
   display: grid;
   grid-template-columns: 300px 1fr;
+  /* grid-template-rows: minmax(0, 1fr) is the load-bearing piece of the
+     app-shell layout. The minmax-with-0 minimum is the grid analogue of
+     `min-height: 0` on a flex item: without the explicit 0 floor, `1fr`
+     resolves to `minmax(min-content, 1fr)`, and the row track is allowed
+     to grow past 1fr to fit its content. With minmax(0, 1fr) the row is
+     bounded to the grid container's height, the columns inherit a
+     definite height, and their overflow-y: auto containers actually
+     scroll instead of pushing past the viewport. */
+  grid-template-rows: minmax(0, 1fr);
   gap: 0;
-  min-height: 480px;
+  /* App-shell layout: TokenLab fills the parent's available height and each
+     column scrolls inside itself. height: 100% requires the parent to have a
+     bounded height (App.jsx sets that up via the .tool flex child of
+     .appShell). min-height: 0 lets this grid item shrink below its content
+     in the parent flex chain, so the columns' scroll containers actually
+     receive a definite height to scroll inside. */
+  height: 100%;
+  min-height: 0;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
@@ -18,6 +34,10 @@
 .controls {
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
+  /* min-height: 0 — flex/grid item override so this column can shrink below
+     its content height. Without it, the column would push the parent grid
+     past the viewport instead of scrolling internally. */
+  min-height: 0;
   background-color: var(--color-bg);
 }
 
@@ -488,14 +508,28 @@
 /* ── Panel wrapper ──────────────────────────────────────────────────────── */
 
 /* Stretches to fill the remaining column height. overflow: hidden clips the
-   AnimatePresence fade to the panel boundary. */
+   AnimatePresence horizontal slide between tabs to the panel boundary.
+   min-height: 0 lets this grid item shrink below its content so the inner
+   pane can own the scroll. */
 .demoPanel {
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
+/* The scroll container for each tab's content. Lives one level inside the
+   AnimatePresence horizontal slide (.demoPanel clips the slide; this child
+   handles vertical overflow only). scrollbar-gutter: stable reserves the
+   scrollbar lane regardless of visibility — without it, an expansion that
+   gains a row inside the principles grid could cause the scrollbar to
+   appear mid-animation, reducing the inner width and triggering auto-fit
+   to recount columns. The same protection PrinciplesLibrary.module.css
+   used to provide on .library, now hoisted so all tabs benefit. */
 .tabPanelInner {
   height: 100%;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-gutter: stable;
 }
 
 /* Tab content — restores the left-heavy padding that was on .demo before the

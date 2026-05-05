@@ -1,21 +1,20 @@
 // Root application shell.
-// TokenLab and Principles Library will be wired in here as routing is added.
+// Layout: app-shell pattern. body and .appShell are bounded to the viewport
+// so the tool fills the screen rather than living inside a scrolling page.
+// Each TokenLab column owns its own scroll. Reasoning lives in
+// docs/decisions/tokenlab-scroll-architecture-2026-05-05.md.
 
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { TokenLab } from './components/TokenLab'
+import styles from './App.module.css'
 
 export default function App() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'var(--color-bg)',
-      padding: '40px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px',
-    }}>
+    <div className={styles.appShell}>
       <ThemeSwitcher />
-      <TokenLab />
+      <div className={styles.tool}>
+        <TokenLab />
+      </div>
     </div>
   )
 }
