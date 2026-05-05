@@ -7,6 +7,29 @@
   user-select: none;
 }
 
+/* Compact variant — used by the Follow Through principle demo where the
+   carousel sits in a ~165 px column. Slide padding tightens, min-height
+   drops, and the description is omitted in JSX. The result is a horizontal
+   strip of slide titles plus the dot indicator: enough to read drag → snap
+   → indicator-follow without overflowing the demo frame. */
+.carouselCompact .slide {
+  min-height: 0;
+  padding: 16px 14px;
+  gap: 4px;
+}
+
+.carouselCompact .slideTitle {
+  font-size: 16px;
+}
+
+/* Shrink the edge-fade overlays in compact mode. The 48 px default is half the
+   visible viewport width here, so the slide content reads as smothered. 16 px
+   still hints at adjacent slides without consuming the legible center. */
+.carouselCompact .fadeLeft,
+.carouselCompact .fadeRight {
+  width: 16px;
+}
+
 /* ── Viewport ────────────────────────────────────────────────────────────── */
 
 /* overflow: hidden clips all slides except the current one.

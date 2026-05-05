@@ -24,7 +24,10 @@ import styles from './ProgressBar.module.css'
 // perceptually distinguishable even at the same duration, which makes the
 // direction of change legible from peripheral vision.
 
-export function ProgressBar({ value }) {
+// showLabel: when false, the trailing percentage span is omitted. Used by the
+// principle card demo where the bar is the only signal; the percentage is noise
+// in that context.
+export function ProgressBar({ value, showLabel = true }) {
   const tokens = useMotionTokens()
 
   // Track previous value to determine direction during each render.
@@ -60,7 +63,7 @@ export function ProgressBar({ value }) {
         {/* Percentage label — updates instantly with value, no animation.
             font-mono for technical legibility; tabular-nums prevents layout
             shift as the digit count changes (e.g. 9% → 10%). */}
-        <span className={styles.label}>{value}%</span>
+        {showLabel && <span className={styles.label}>{value}%</span>}
       </div>
     </div>
   )

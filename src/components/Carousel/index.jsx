@@ -83,7 +83,13 @@ const SLIDES = [
 // slideWidth is set synchronously after DOM commit, so the browser only
 // ever paints the correctly-sized layout.
 
-export function Carousel() {
+// compact: when true, the slide description is omitted and slide padding is
+// tightened. Used by the Follow Through principle demo where the carousel sits
+// in a ~165 px column inside the principle card. Full slide copy needs ~300 px
+// of width to render legibly; squeezing it produces 15+ wrapped lines that
+// overflow vertically. In compact mode the slide title plus the dot indicator
+// are enough to demonstrate the principle (drag → snap → indicator follows).
+export function Carousel({ compact = false }) {
   const tokens      = useMotionTokens()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideWidth, setSlideWidth]     = useState(0)
@@ -162,8 +168,12 @@ export function Carousel() {
     goToSlide(next)
   }
 
+  const carouselClass = compact
+    ? `${styles.carousel} ${styles.carouselCompact}`
+    : styles.carousel
+
   return (
-    <div className={styles.carousel}>
+    <div className={carouselClass}>
 
       {/* ── Slide viewport ──────────────────────────────────────────────── */}
       {/* overflow:hidden clips the non-active slides out of view.
@@ -193,7 +203,9 @@ export function Carousel() {
               transition={{ duration: tokens.duration.fast, ease: tokens.ease.standard }}
             >
               <h3 className={styles.slideTitle}>{slide.title}</h3>
-              <p  className={styles.slideDescription}>{slide.description}</p>
+              {!compact && (
+                <p className={styles.slideDescription}>{slide.description}</p>
+              )}
             </motion.div>
           ))}
         </motion.div>

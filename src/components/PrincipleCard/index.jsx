@@ -4,6 +4,13 @@ import { PrincipleAnimation } from '../PrincipleAnimation'
 import { PrincipleIcon } from '../PrincipleIcon'
 import { Button } from '../Button'
 import { Drawer } from '../Drawer'
+import { Carousel } from '../Carousel'
+import { ProgressBar } from '../ProgressBar'
+import { Dropdown } from '../Dropdown'
+import { Toggle } from '../Toggle'
+import { Card } from '../Card'
+import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
+import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import styles from './PrincipleCard.module.css'
 
 // Hover animations only apply to pointer devices. Touch devices have no hover
@@ -58,6 +65,67 @@ function getExpandedFootprint(index, columnCount, totalCards) {
 }
 
 
+// ProgressBar is presentational and accepts `value` from its parent. The demo
+// owns the value so the user can trigger fill and reset and see ease.standard
+// vs ease.exit applied to the same fill. Declared at module scope so React
+// does not treat it as a new component on every render of getPrincipleComponent.
+//
+// showLabel={false} because the principle is about acceleration and
+// deceleration of the fill, not the numeric percentage. The bar is the
+// signal here.
+function ProgressBarDemo() {
+  const [value, setValue] = useState(0)
+  const filled = value > 0
+  return (
+    <div className={styles.progressDemo}>
+      <ProgressBar value={value} showLabel={false} />
+      <div className={styles.progressDemoButtonRow}>
+        <Button onClick={() => setValue(filled ? 0 : 100)}>
+          {filled ? 'Reset' : 'Fill'}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Pre-resolved token shapes for the two presets used by the Timing demo. We
+// resolve once at module load (not per render) because BUILT_IN_PRESETS is
+// static and stateToTokens is a pure transform. find() returns the matching
+// preset object; we feed its `state` to stateToTokens to get the React-shape
+// tokens that MotionTokensProvider expects.
+const DEFAULT_TOKENS = stateToTokens(
+  BUILT_IN_PRESETS.find(p => p.id === 'default').state
+)
+const CINEMATIC_TOKENS = stateToTokens(
+  BUILT_IN_PRESETS.find(p => p.id === 'cinematic').state
+)
+
+// One Toggle scoped to a specific preset's motion tokens. Toggle owns its own
+// on/off state internally; we mirror it here via onChange so the adjacent
+// label can display "On" / "Off" reactively. The duplication is harmless: the
+// two booleans only ever flip together because the parent never sets state
+// except in response to the Toggle's onChange.
+function TogglePresetSlot({ presetLabel, presetTokens }) {
+  const [on, setOn] = useState(false)
+  return (
+    <MotionTokensProvider tokens={presetTokens}>
+      <div className={styles.timingRow}>
+        <span className={styles.timingPresetLabel}>{presetLabel}</span>
+        <Toggle label={on ? 'On' : 'Off'} mode="expressive" onChange={setOn} />
+      </div>
+    </MotionTokensProvider>
+  )
+}
+
+function TimingDemo() {
+  return (
+    <div className={styles.timingDemo}>
+      <TogglePresetSlot presetLabel="Default"   presetTokens={DEFAULT_TOKENS} />
+      <TogglePresetSlot presetLabel="Cinematic" presetTokens={CINEMATIC_TOKENS} />
+    </div>
+  )
+}
+
 // ─── getPrincipleComponent ────────────────────────────────────────────────────
 //
 // Returns the UI component demo for a given principle. Add cases here as
@@ -66,7 +134,9 @@ function getExpandedFootprint(index, columnCount, totalCards) {
 // drawerOpen / setDrawerOpen are passed for principles that use the Drawer.
 // Each principle that needs local UI state receives it from PrincipleCard
 // rather than managing its own state, keeping the state lifecycle tied to
-// the card's isExpanded / uiMode resets.
+// the card's isExpanded / uiMode resets. Components whose state is purely
+// internal (Dropdown, Toggle, Card, Carousel) need no such threading: the
+// demo unmounts on card collapse and the component's own useState resets.
 
 function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
   switch (principleId) {
@@ -94,6 +164,33 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
             The drawer dips slightly downward before sliding up. That small
             reverse motion is anticipation — preparing the eye for arrival.
           </Drawer>
+        </div>
+      )
+    case 5:
+      return (
+        <div className={styles.carouselDemo}>
+          <Carousel compact />
+        </div>
+      )
+    case 6:
+      return <ProgressBarDemo />
+    case 8:
+      return (
+        <div className={styles.dropdownDemo}>
+          <Dropdown label="Options" />
+        </div>
+      )
+    case 9:
+      return <TimingDemo />
+    case 11:
+      return (
+        <div className={styles.cardDemo}>
+          <Card
+            className={styles.cardDemoCard}
+            title="Solid drawing"
+            description="Click to lift."
+            tag="Demo"
+          />
         </div>
       )
     default:

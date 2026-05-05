@@ -20,7 +20,7 @@ Sources of truth for this table:
 - `src/components/PrincipleCard/index.jsx` (`getPrincipleComponent` switch)
 - `docs/references/principles-reference.md` (principle &rarr; component mapping)
 
-Last refreshed: 2026-05-05.
+Last refreshed: 2026-05-05 (post-wiring pass).
 
 ---
 
@@ -32,13 +32,13 @@ Last refreshed: 2026-05-05.
 | 02 | Anticipation                    | The drawer dips before it climbs. The motion announces itself.        | duration.base, ease.spring                      | Drawer                   | Wired             |
 | 03 | Staging                         | The modal opens. The backdrop dims. The page narrows to one thing.    | duration.slow, ease.enter                       | Modal / Dialog           | Not built         |
 | 04 | Straight Ahead & Pose to Pose   | Steps mark the poses. The bar fills between. Both are the same idea.  | duration.slow, delay.short, delay.medium        | Stepper + ProgressBar    | Built, not wired  |
-| 05 | Follow Through                  | Slide snaps. Dot catches up. The lag is how the system admits to mass.| duration.base, ease.spring                      | Carousel                 | Built, not wired  |
-| 06 | Slow In & Slow Out              | The bar fills, then settles at the end. Linear motion belongs to machines. | ease.standard, duration.slow               | ProgressBar              | Built, not wired  |
+| 05 | Follow Through                  | Slide snaps. Dot catches up. The lag is how the system admits to mass.| duration.base, ease.spring                      | Carousel (compact)       | Wired             |
+| 06 | Slow In & Slow Out              | The bar fills, then settles at the end. Linear motion belongs to machines. | ease.standard, duration.slow               | ProgressBar              | Wired             |
 | 07 | Arc                             | The tooltip leaves the trigger and arcs into place. Not a straight line. | duration.fast, ease.enter                    | Tooltip                  | Not built         |
-| 08 | Secondary Action                | The menu opens. The chevron rotates with it. The rotation confirms.   | duration.fast, ease.standard                    | Dropdown                 | Built, not wired  |
-| 09 | Timing                          | Same toggle. Different duration. The gesture changes character with it. | duration.fast, duration.base, duration.slow   | Toggle                   | Built, not wired  |
+| 08 | Secondary Action                | The menu opens. The chevron rotates with it. The rotation confirms.   | duration.fast, ease.standard                    | Dropdown                 | Wired             |
+| 09 | Timing                          | Same toggle. Different duration. The gesture changes character with it. | duration.fast, duration.base, duration.slow   | Toggle ×2 (Default + Cinematic presets) | Wired |
 | 10 | Exaggeration                    | The badge count climbs. The number overshoots before it lands.        | scale.expressive, ease.spring, duration.fast    | Notification Badge       | Not built         |
-| 11 | Solid Drawing                   | The card lifts. Shadow grows. What was flat is now above the page.    | scale.lift, duration.base, ease.standard        | Card                     | Built, not wired  |
+| 11 | Solid Drawing                   | The card lifts. Shadow grows. What was flat is now above the page.    | scale.lift, duration.base, ease.standard        | Card                     | Wired             |
 | 12 | Appeal                          | Shapes drift, settle, drift again. Tuned easing. The grid holds the eye. | All tokens in concert                        | Lava-lamp grid           | Not built         |
 
 ## Extended 6
@@ -59,6 +59,15 @@ Last refreshed: 2026-05-05.
 - "Wired" today means there is a `case` in
   `getPrincipleComponent(principleId, ...)` returning the demo. The default
   branch returns the "Component example coming in Phase 2" placeholder.
+- P5 Carousel renders in a new `compact` mode: slide description omitted,
+  slide padding tightened, edge-fade overlays shrunk from 48 px to 16 px.
+  The full Carousel still renders in TokenLab's Gesture tab unchanged.
+- P6 ProgressBar gained a `showLabel` prop (default `true`) so the demo
+  can hide the percentage in this context.
+- P9 Timing's two Toggles run with token sets resolved from the Default
+  and Cinematic presets through `MotionTokensProvider`. Preset data lives
+  in `src/data/motionPresets.js` (extracted from TokenLab to break a
+  circular import).
 - The shells under `src/principles/<Name>/index.jsx` (one per classic 12)
   all return `null` and are not part of the rendered tree. They are
   scaffolding for future per-principle composition logic and do not affect
