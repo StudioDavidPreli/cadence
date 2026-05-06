@@ -42,15 +42,21 @@ import styles from './Toggle.module.css'
 // centering (the thumb looks optically centered at 18px of travel).
 const THUMB_TRAVEL = 18
 
-export function Toggle({ label, mode = 'subtle', onChange }) {
-  const [on, setOn] = useState(false)
+// `on` is optional. When undefined, Toggle owns its own state via useState
+// (the original behavior used everywhere except the P13 Systematization demo).
+// When passed, parent owns state; click still fires onChange so the parent
+// can update. Mirrors the controlled/uncontrolled split in Card.
+export function Toggle({ label, mode = 'subtle', onChange, on: onProp }) {
+  const [internalOn, setInternalOn] = useState(false)
+  const isControlled = onProp !== undefined
+  const on = isControlled ? onProp : internalOn
   const tokens = useMotionTokens()
 
   const isExpressive = mode === 'expressive'
 
   function handleClick() {
     const next = !on
-    setOn(next)
+    if (!isControlled) setInternalOn(next)
     onChange?.(next)
   }
 

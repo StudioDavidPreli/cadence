@@ -640,6 +640,66 @@
   max-width: 100%;
 }
 
+/* P13 Systematization — one tempo slider, three responding components.
+   Vertical stack: tempo slider, Toggle, compact Card, ProgressBar. The Card
+   carries no description so its empty <p> is hidden; padding tightens so the
+   stack fits the ~280 px column. */
+.systemDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.systemSliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.systemSliderLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.systemSlider {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+/* Compact Card override: the empty description <p> is removed from the box
+   so the title sits alone. Padding gives the card real height (it would
+   otherwise read as a button at one line of mono text). Width is pulled
+   in from the frame edge so the demo-scoped scale.lift (1.08) has room
+   to breathe without clipping against the dashed border. */
+.systemCard {
+  align-self: center;
+  width: 88%;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.systemCard p {
+  display: none;
+}
+
+.systemCard h3 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* ── Quote block ─────────────────────────────────────────────────────────────
    Sits below expandedContent as a natural-height sibling inside expandedWrapper.
    Padding matches expandedContent's left/right (32px) for visual alignment. */
