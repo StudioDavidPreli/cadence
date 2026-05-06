@@ -794,6 +794,52 @@
   justify-content: center;
 }
 
+/* P16 Token Fidelity — three identical pills, one off-system.
+   Pills are full text-base color (no gradient — this principle is not
+   about depth) so they read as identical. The motion difference is the
+   demonstration. Controls stack vertically below the pills: Run / Reset
+   trigger above the "Use token" toggle. */
+.fidelityDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.fidelityStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fidelityPill {
+  width: 60%;
+  height: 10px;
+  background-color: var(--color-text-base);
+  border-radius: 999px;
+}
+
+.fidelityControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Scale the Toggle (track, thumb, label) down to 85 % so it doesn't
+   compete with the Run button visually. transform: scale shrinks both
+   the chrome and the label proportionally — a single value handles both
+   without modifying the Toggle component itself. */
+.fidelityToggleScale {
+  transform: scale(0.85);
+  transform-origin: center;
+}
+
 /* ── Quote block ─────────────────────────────────────────────────────────────
    Sits below expandedContent as a natural-height sibling inside expandedWrapper.
    Padding matches expandedContent's left/right (32px) for visual alignment. */
