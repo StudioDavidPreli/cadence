@@ -15,7 +15,7 @@ import { Modal } from '../Modal'
 import { Tooltip } from '../Tooltip'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
-import { MotionTokensProvider } from '../../context/MotionTokensContext'
+import { MotionTokensProvider, reduceMotion } from '../../context/MotionTokensContext'
 import styles from './PrincipleCard.module.css'
 
 // Hover animations only apply to pointer devices. Touch devices have no hover
@@ -113,7 +113,10 @@ const CINEMATIC_TOKENS = stateToTokens(
 function TogglePresetSlot({ presetLabel, presetTokens }) {
   const [on, setOn] = useState(false)
   return (
-    <MotionTokensProvider tokens={presetTokens}>
+    // respectReducedMotion={false}: this slot exists to demonstrate a preset's
+    // motion personality. Flattening it under OS reduce-motion would erase the
+    // distinction between Default and Cinematic and defeat the demo.
+    <MotionTokensProvider tokens={presetTokens} respectReducedMotion={false}>
       <div className={styles.timingRow}>
         <span className={styles.timingPresetLabel}>{presetLabel}</span>
         <Toggle label={on ? 'On' : 'Off'} mode="expressive" onChange={setOn} />
@@ -285,6 +288,69 @@ function TimingDemo() {
       <TogglePresetSlot presetLabel="Default"   presetTokens={DEFAULT_TOKENS} />
       <TogglePresetSlot presetLabel="Cinematic" presetTokens={CINEMATIC_TOKENS} />
     </div>
+  )
+}
+
+// P17 Reduced Motion. A "Reduce" toggle controls whether the demo's two
+// motion components (a Card that lifts, a ProgressBar that fills) animate
+// normally or snap instantly. The system meets the user — when reduce is
+// on, durations collapse to ~10 ms and every component reading from the
+// scoped provider stops moving and starts arriving.
+//
+// ── Why the demo opts out of OS prefers-reduced-motion ───────────────────
+// The provider passes respectReducedMotion={false}, so the demo's local
+// toggle is the single source of truth within its scope. This lets users
+// see both the "before" and "after" states regardless of their OS setting.
+// The rest of the app honors the OS preference automatically — that is
+// what the principle's wiring does globally. The demo is the tiny
+// exception that proves the rule.
+//
+// ── Why useMotionTokens is called with respectReducedMotion: false ───────
+// The demo needs an unreduced baseline to compute "reduced" from. If the
+// hook returned already-flattened tokens (as it does for the rest of the
+// app when the OS pref is reduce), the demo's "Full" state would also be
+// flat. Reading raw tokens keeps both states meaningful.
+//
+// Architecture decision: docs/decisions/reduced-motion-2026-05-06.md
+function ReducedMotionDemo() {
+  const rawTokens = useMotionTokens({ respectReducedMotion: false })
+  const [reduced, setReduced] = useState(false)
+  const [running, setRunning] = useState(false)
+
+  // Demo-scoped scale.lift override: 1.02 (system default) is too subtle in
+  // a small principle frame where the user is meant to perceive the lift's
+  // arrival as the system's response. 1.08 exaggerates the lift so the
+  // contrast against the reduced state is unambiguous. Same pattern used by
+  // P13 SystematizationDemo.
+  const baseTokens = reduced ? reduceMotion(rawTokens) : rawTokens
+  const tokens = {
+    ...baseTokens,
+    scale: { ...baseTokens.scale, lift: 1.08 },
+  }
+
+  return (
+    <MotionTokensProvider tokens={tokens} respectReducedMotion={false}>
+      <div className={styles.reducedDemo}>
+        <Card
+          className={styles.reducedCard}
+          title="CARD"
+          description=""
+          isSelected={running}
+        />
+        <ProgressBar value={running ? 100 : 0} showLabel={false} />
+        <Button onClick={() => setRunning(r => !r)}>
+          {running ? 'Reset' : 'Run'}
+        </Button>
+        <div className={styles.reducedToggleRow}>
+          <Toggle
+            label="Reduce"
+            mode="expressive"
+            on={reduced}
+            onChange={setReduced}
+          />
+        </div>
+      </div>
+    </MotionTokensProvider>
   )
 }
 
@@ -500,7 +566,10 @@ function SystematizationDemo() {
   }), [baseTokens, tempo])
 
   return (
-    <MotionTokensProvider tokens={tokens}>
+    // respectReducedMotion={false}: the Tempo slider needs to drive visible
+    // change across the three demo components. Flattening would freeze the
+    // demo and obscure the principle.
+    <MotionTokensProvider tokens={tokens} respectReducedMotion={false}>
       <div className={styles.systemDemo}>
         <label className={styles.systemSliderRow}>
           <span className={styles.systemSliderLabel}>Tempo</span>
@@ -623,6 +692,8 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen) {
       return <EconomyDemo />
     case 16:
       return <FidelityDemo />
+    case 17:
+      return <ReducedMotionDemo />
     default:
       return (
         <div className={styles.demoArea}>

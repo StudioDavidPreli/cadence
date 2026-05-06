@@ -840,6 +840,55 @@
   transform-origin: center;
 }
 
+/* P17 Reduced Motion — toggle, Card, ProgressBar, Run button.
+   The demo's local toggle drives a scoped MotionTokensProvider whose
+   tokens are either the raw values or reduceMotion()-flattened. With
+   respectReducedMotion={false} on the provider, the local toggle is the
+   single source of truth within this scope (independent of OS pref). */
+.reducedDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.reducedToggleRow {
+  display: flex;
+  justify-content: center;
+  transform: scale(0.9);
+  transform-origin: center;
+}
+
+/* Card width matches the ProgressBar (full demo column interior) so the
+   two responding components share a horizontal rhythm. The exaggerated
+   scale.lift (1.08, set in the scoped tokens) does push the Card slightly
+   past the dashed frame on lift; the dashed border is decorative, so the
+   minor overflow reads as the lift breaching its container, which fits
+   the principle's visual argument. */
+.reducedCard {
+  align-self: stretch;
+  padding: 18px 16px;
+  text-align: center;
+}
+
+.reducedCard p {
+  display: none;
+}
+
+.reducedCard h3 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* ── Quote block ─────────────────────────────────────────────────────────────
    Sits below expandedContent as a natural-height sibling inside expandedWrapper.
    Padding matches expandedContent's left/right (32px) for visual alignment. */

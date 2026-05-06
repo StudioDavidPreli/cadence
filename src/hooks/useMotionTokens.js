@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
-import { MotionTokensContext } from '../context/MotionTokensContext'
+import { useReducedMotion } from 'framer-motion'
+import { MotionTokensContext, reduceMotion } from '../context/MotionTokensContext'
 
 // --- Parsers ---
 // Each token type comes out of getPropertyValue as a string and needs
@@ -56,12 +57,22 @@ const FALLBACKS = {
 // fail (DOM not ready on SSR or first paint) or re-run on every render with
 // no way to store the result. A hook can schedule the read at the right moment
 // and return stable values across renders via useState.
-export function useMotionTokens() {
-  // Check for a context override first.
-  // TokenLab wraps its demo area in MotionTokensProvider with live reducer state.
-  // When that context is present, return it directly — no CSS read needed.
-  // Everywhere else in the app, the context is null and we fall through to CSS.
+//
+// ── respectReducedMotion ──────────────────────────────────────────────────────
+// When the user has OS-level prefers-reduced-motion enabled and there is no
+// MotionTokensProvider in scope, the hook flattens the CSS-read tokens via
+// reduceMotion() so every component reading useMotionTokens() automatically
+// honors the preference. Pass { respectReducedMotion: false } to read raw
+// tokens without flattening — used by the P17 demo so it can construct both
+// the "before" and "after" states regardless of OS setting.
+//
+// When a provider IS in scope, the hook trusts the provider — the provider
+// has already decided whether to apply reduceMotion via its own
+// respectReducedMotion prop. This keeps the responsibility in one place and
+// avoids double-flattening.
+export function useMotionTokens({ respectReducedMotion = true } = {}) {
   const override = useContext(MotionTokensContext)
+  const prefersReduced = useReducedMotion()
 
   const [tokens, setTokens] = useState(FALLBACKS)
 
@@ -108,6 +119,11 @@ export function useMotionTokens() {
   // this effect re-runs but immediately returns (the guard above). If override
   // disappears (TokenLab unmounts), the effect re-runs and re-reads from CSS.
 
-  // Return context override if present, otherwise return CSS-read values.
-  return override ?? tokens
+  // Provider in scope: trust it. The provider already applied (or skipped)
+  // reduceMotion based on its own respectReducedMotion prop.
+  if (override) return override
+
+  // No provider: apply reduceMotion ourselves when the caller hasn't opted
+  // out and the OS pref is reduce.
+  return (respectReducedMotion && prefersReduced) ? reduceMotion(tokens) : tokens
 }

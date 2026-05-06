@@ -1122,8 +1122,12 @@ export function TokenLab() {
       {/* ── Right column: demo area ───────────────────────────────────── */}
       {/* MotionTokensProvider wraps only this column — DemoTabs and TabPanel
           call useMotionTokens() and receive liveTokens, so the tab indicator
-          spring and panel fade both respond to the token sliders in real time. */}
-      <MotionTokensProvider tokens={liveTokens}>
+          spring and panel fade both respond to the token sliders in real time.
+          respectReducedMotion={false}: TokenLab is a motion-exploration tool;
+          the user is here specifically to perceive motion. Honoring OS-level
+          prefers-reduced-motion would flatten every preview to instant and
+          defeat the tool's purpose. See docs/decisions/reduced-motion-2026-05-06.md. */}
+      <MotionTokensProvider tokens={liveTokens} respectReducedMotion={false}>
         <div className={styles.demo}>
 
           <DemoTabs
