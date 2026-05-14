@@ -30,6 +30,10 @@ const ICON_CONFIG = {
     src: '/rive/principles_icon05.riv',
     stateMachine: 'followThroughIconSM',
   },
+  6: {
+    src: '/rive/principles_icon06.riv',
+    stateMachine: 'slowInSlowOutIconSM',
+  },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in
