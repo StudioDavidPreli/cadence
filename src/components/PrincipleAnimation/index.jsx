@@ -19,6 +19,7 @@ const RIV_FILES = {
   2: { src: '/rive/anticipation.riv',   stateMachine: 'anticipationSM' },
   3: { src: '/rive/staging.riv',        stateMachine: 'stagingSM' },
   4: { src: '/rive/pose2pose.riv',     stateMachine: 'pose2poseSM' },
+  5: { src: '/rive/follow-through.riv', stateMachine: 'followThroughSM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
