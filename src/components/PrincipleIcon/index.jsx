@@ -34,6 +34,10 @@ const ICON_CONFIG = {
     src: '/rive/principles_icon06.riv',
     stateMachine: 'slowInSlowOutIconSM',
   },
+  7: {
+    src: '/rive/principles_icon07.riv',
+    stateMachine: 'arcIconSM',
+  },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in
