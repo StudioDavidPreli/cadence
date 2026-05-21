@@ -23,7 +23,10 @@ const RIV_FILES = {
   6: { src: '/rive/slowinslowout.riv', stateMachine: 'slowInSlowOutSM' },
   7: { src: '/rive/arc.riv',          stateMachine: 'arcSM' },
   8: { src: '/rive/secondaryaction.riv', stateMachine: 'secondaryActionSM' },
-  9: { src: '/rive/timing.riv',          stateMachine: 'timingSM' },
+  9:  { src: '/rive/timing.riv',          stateMachine: 'timingSM' },
+  10: { src: '/rive/exaggeration.riv',   stateMachine: 'exaggerationSM' },
+  11: { src: '/rive/solid-drawing.riv',  stateMachine: 'solidDrawingSM' },
+  12: { src: '/rive/appeal.riv',         stateMachine: 'appealSM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
