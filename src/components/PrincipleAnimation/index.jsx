@@ -27,6 +27,8 @@ const RIV_FILES = {
   10: { src: '/rive/exaggeration.riv',   stateMachine: 'exaggerationSM' },
   11: { src: '/rive/solid-drawing.riv',  stateMachine: 'solidDrawingSM' },
   12: { src: '/rive/appeal.riv',         stateMachine: 'appealSM' },
+  13: { src: '/rive/systematization.riv', stateMachine: 'systematizationSM' },
+  14: { src: '/rive/hierarchyofmotion.riv', stateMachine: 'hierarchyOfMotionSM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
