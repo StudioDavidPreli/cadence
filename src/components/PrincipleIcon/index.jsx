@@ -66,6 +66,10 @@ const ICON_CONFIG = {
     src: '/rive/principles_icon14.riv',
     stateMachine: 'hierarchyOfMotionSM',
   },
+  15: {
+    src: '/rive/principles_icon15.riv',
+    stateMachine: 'economyIconSM',
+  },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in
