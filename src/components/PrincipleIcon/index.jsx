@@ -70,6 +70,18 @@ const ICON_CONFIG = {
     src: '/rive/principles_icon15.riv',
     stateMachine: 'economyIconSM',
   },
+  16: {
+    src: '/rive/principles_icon16.riv',
+    stateMachine: 'tokenFidelityIconSM',
+  },
+  17: {
+    src: '/rive/principles_icon17.riv',
+    stateMachine: 'reducedMotionIconSM',
+  },
+  18: {
+    src: '/rive/principles_icon18.riv',
+    stateMachine: 'sharedVocabularyIconSM',
+  },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in
