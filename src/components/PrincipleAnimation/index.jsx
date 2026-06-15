@@ -30,6 +30,7 @@ const RIV_FILES = {
   13: { src: '/rive/systematization.riv', stateMachine: 'systematizationSM' },
   14: { src: '/rive/hierarchyofmotion.riv', stateMachine: 'hierarchyOfMotionSM' },
   15: { src: '/rive/economy.riv',           stateMachine: 'economySM' },
+  18: { src: '/rive/sharedvocabulary.riv',  stateMachine: 'sharedVocabularySM' },
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
