@@ -30,6 +30,7 @@ const RIV_FILES = {
   13: { src: '/rive/systematization.riv', stateMachine: 'systematizationSM' },
   14: { src: '/rive/hierarchyofmotion.riv', stateMachine: 'hierarchyOfMotionSM' },
   15: { src: '/rive/economy.riv',           stateMachine: 'economySM' },
+  17: { src: '/rive/reducedMotion.riv',     stateMachine: 'reducedMotionSM' },
   18: { src: '/rive/sharedvocabulary.riv',  stateMachine: 'sharedVocabularySM' },
 }
 

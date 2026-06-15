@@ -8,6 +8,10 @@ Architecture decision for the global wiring: `docs/decisions/reduced-motion-2026
 
 A "Reduce" toggle sits below a Run button, a ProgressBar, and a compact Card. Click Run: Card lifts and ProgressBar fills smoothly. Toggle Reduce on, reset, then Run: both snap to their end states in ~10 ms. The demo's local toggle is the single source of truth for motion within the scoped provider. The OS preference does not override inside the demo, so both states are visible regardless of the user's actual setting.
 
+## Animation
+
+`/public/rive/reducedMotion.riv`, state machine `reducedMotionSM`. View model `ViewModel1` with `Light`, `Dark`, `Contrast` instances. Wired in `PrincipleAnimation` as principle 17.
+
 ## Icon
 
 `/public/rive/principles_icon17.riv`, state machine `reducedMotionIconSM`. Wired in `PrincipleIcon` as principle 17.
