@@ -6,6 +6,10 @@ Animation values defined in a system should be used as intended. Deviation produ
 
 Three identical pills stacked vertically. Click Run: top and bottom translate 40 px with `duration.base` and `ease.standard`. The middle pill defaults to a hardcoded 600 ms linear, a value not in the token set. It arrives later and slides at constant velocity, reading as mechanical. The "harmonize" toggle swaps the middle pill's transition to the system pair. On the next Run, the three move in lockstep.
 
+## Animation
+
+`/public/rive/tokenfidelity.riv`, state machine `tokenFidelitySM`. View model `ViewModel1` with `Light`, `Dark`, `Contrast` instances. Wired in `PrincipleAnimation` as principle 16.
+
 ## Icon
 
 `/public/rive/principles_icon16.riv`, state machine `tokenFidelityIconSM`. Wired in `PrincipleIcon` as principle 16.
