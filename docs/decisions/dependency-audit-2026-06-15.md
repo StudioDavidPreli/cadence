@@ -9,10 +9,14 @@ the fix applied, and what was deliberately deferred.
 
 `npm audit fix` was run after confirming the target update was not tied
 to any known supply-chain breach. It bumped PostCSS from 8.5.9 to 8.5.15,
-clearing one alert. Vulnerability count dropped from 4 to 2. The two
-remaining alerts are esbuild issues pulled in through Vite 5; they only
-clear with a Vite major upgrade, which was deferred to the Week 8 polish
-pass rather than forced now.
+clearing the PostCSS alert. Within hours, two newly disclosed Vite
+advisories landed (see "Late additions" below), so GitHub's open count
+read 5 by session end rather than the 2 the local `npm audit` showed. The
+discrepancy is advisory-database sync lag, not a regression: the PostCSS
+fix is confirmed resolved on both sides. Every remaining alert is a
+Vite/esbuild dev-toolchain issue, and all of them clear with a single
+deliberate Vite major upgrade, deferred to the Week 8 polish pass rather
+than forced now.
 
 ## The four original alerts
 
@@ -107,17 +111,40 @@ Verification after the fix:
   the registry tarball would fail `npm ci` rather than install silently.
 - `npm run build` passes clean (439 modules, built in ~1.1s, no errors).
 
+## Late additions (disclosed during the session)
+
+Shortly after the PostCSS fix was pushed, GitHub's open count read 5
+rather than the expected 2. The cause was two newly disclosed Vite
+advisories, not a problem with the fix. The full open set at session end:
+
+| Severity | Package | Advisory | Disclosed | Note |
+|----------|---------|----------|-----------|------|
+| high | esbuild | GHSA-gv7w-rqvm-qjhr | 2026-06-13 | Deno-loader RCE; not applicable (no Deno) |
+| high | vite | GHSA-fx2h-pf6j-xcff | 2026-06-16 | newly disclosed |
+| moderate | vite | GHSA-v6wh-96g9-6wx3 | 2026-06-16 | newly disclosed |
+| moderate | vite | GHSA-4w7w-66w2-5vf9 | 2026-05-15 | path traversal, dev server |
+| moderate | esbuild | GHSA-67mh-4wv8-2f99 | 2026-05-15 | dev server CORS |
+
+The PostCSS advisory (GHSA-qx2v-qp2m-jg93) is no longer in the open set
+on either GitHub or local `npm audit`, confirming the fix took on both
+sides. Local `npm audit` reported only 2 high at session end because
+npm's advisory database had not yet synced the June 16 GHSAs that GitHub
+surfaced first. All five remaining alerts are Vite/esbuild and live in
+the dev toolchain; none ship in the built artifact. The June 16 high
+(GHSA-fx2h-pf6j-xcff) should be read in full when Week 8 starts to
+confirm it is also dev-scoped.
+
 ## What was deferred, and why
 
-The two remaining alerts (esbuild Deno RCE and esbuild dev-server) only
-clear by moving off Vite 5. `npm audit fix --force` wants to jump
-straight to Vite 8, four majors up from 5.4.21, which would break the
-config. That was not run.
+The five remaining alerts (the two esbuild issues plus three Vite issues,
+including the two disclosed June 16) only clear by moving off Vite 5.
+`npm audit fix --force` wants to jump straight to Vite 8, four majors up
+from 5.4.21, which would break the config. That was not run.
 
 Plan for Week 8 (Integration + Polish): upgrade Vite intentionally to 6.x
 or 7.x, read its migration notes, and run the app to confirm no
 regression. That single upgrade pulls patched esbuild and vite
-transitively and clears both remaining alerts. Re-run the supply-chain
+transitively and clears all five remaining alerts. Re-run the supply-chain
 verification above against whatever versions the upgrade actually
 resolves, since a Vite major pulls in a larger, newer transitive set and
 today's all-clear does not automatically carry forward.
@@ -129,3 +156,5 @@ today's all-clear does not automatically carry forward.
 - Strobes, TanStack npm Supply Chain Attack 2026: https://strobes.co/blog/tanstack-npm-supply-chain-attack/
 - StepSecurity, node-ipc npm supply chain attack: https://www.stepsecurity.io/blog/node-ipc-npm-supply-chain-attack
 - PostCSS XSS advisory GHSA-qx2v-qp2m-jg93: https://github.com/advisories/GHSA-qx2v-qp2m-jg93
+- Vite advisory GHSA-fx2h-pf6j-xcff (high, disclosed 2026-06-16): https://github.com/advisories/GHSA-fx2h-pf6j-xcff
+- Vite advisory GHSA-v6wh-96g9-6wx3 (disclosed 2026-06-16): https://github.com/advisories/GHSA-v6wh-96g9-6wx3
