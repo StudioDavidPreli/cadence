@@ -27,7 +27,13 @@ import styles from './ProgressBar.module.css'
 // showLabel: when false, the trailing percentage span is omitted. Used by the
 // principle card demo where the bar is the only signal; the percentage is noise
 // in that context.
-export function ProgressBar({ value, showLabel = true }) {
+//
+// easeOverride: when provided (a four-number bezier array from the token set),
+// it replaces the directional standard/exit curve for BOTH directions. The P06
+// Slow In & Slow Out demo passes tokens.ease.linear here to put a linear fill
+// side by side against the system curve. Omitted everywhere else, so the
+// directional behavior below is the default.
+export function ProgressBar({ value, showLabel = true, easeOverride }) {
   const tokens = useMotionTokens()
 
   // Track previous value to determine direction during each render.
@@ -55,7 +61,7 @@ export function ProgressBar({ value, showLabel = true }) {
             animate={{ width: `${value}%` }}
             transition={{
               duration: tokens.duration.slow,
-              ease: isIncreasing ? tokens.ease.standard : tokens.ease.exit,
+              ease: easeOverride ?? (isIncreasing ? tokens.ease.standard : tokens.ease.exit),
             }}
           />
         </div>

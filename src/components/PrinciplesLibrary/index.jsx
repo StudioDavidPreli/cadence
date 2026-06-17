@@ -63,7 +63,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Linear motion belongs to machines. Easing curves are how software admits it has mass.',
     componentQuoteAttribution: null,
-    tokens: 'ease.standard · duration.slow',
+    tokens: 'ease.standard · ease.linear · duration.slow',
   },
   {
     id: 7, title: 'Arc', category: 'classic',

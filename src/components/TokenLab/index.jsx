@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
+import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
@@ -524,6 +525,25 @@ function DemoWrapper({ componentName, instruction, children }) {
 // The spring parameters come from the live token values so the tab indicator
 // responds to whatever duration.fast and ease.spring the user has dialed in.
 //
+// The controls panel title. Reads the pulse counter from TitlePulseContext and
+// re-plays a one-shot accent pulse whenever it changes. Changing the `key`
+// remounts the span so the CSS animation restarts (same key-to-replay pattern
+// as Spinner). The pulse class is only applied once pulseId has advanced past
+// its initial 0, so the title is static on first load and only pulses when the
+// P06 card fires the trigger. The animation reads motion tokens from CSS custom
+// properties and is disabled under prefers-reduced-motion (see the stylesheet).
+function ControlsTitle() {
+  const pulseId = useTitlePulse()
+  return (
+    <span
+      key={pulseId}
+      className={`${styles.controlsTitle} ${pulseId > 0 ? styles.controlsTitlePulse : ''}`}
+    >
+      Tokens
+    </span>
+  )
+}
+
 // DemoTabs renders inside MotionTokensProvider, so useMotionTokens() returns
 // the live overrides rather than the CSS-read defaults.
 function DemoTabs({ tabs, activeTab, onTabChange }) {
@@ -1016,6 +1036,7 @@ export function TokenLab() {
 
   return (
     <ActiveTokenProvider>
+    <TitlePulseProvider>
     <div className={styles.tokenLab}>
 
       {/* ── Left column: controls ─────────────────────────────────────── */}
@@ -1025,7 +1046,7 @@ export function TokenLab() {
             The toggle resets all sliders to defaults and expands their ranges.
             Tip fires after 400ms hover delay to avoid accidental activation. */}
         <div className={styles.controlsHeader}>
-          <span className={styles.controlsTitle}>Tokens</span>
+          <ControlsTitle />
           <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
             <Toggle mode="expressive" label="Explore" onChange={handleExploreToggle} />
           </HoverTip>
@@ -1272,6 +1293,7 @@ export function TokenLab() {
       </MotionTokensProvider>
 
     </div>
+    </TitlePulseProvider>
     </ActiveTokenProvider>
   )
 }

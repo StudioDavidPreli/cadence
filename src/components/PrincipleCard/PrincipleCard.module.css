@@ -419,6 +419,13 @@
   justify-content: center;
 }
 
+/* P06 Slow In & Slow Out — the curve toggle (System vs Linear) sits between
+   the bar and the Fill/Reset button, centered to match the button row. */
+.easeToggleRow {
+  display: flex;
+  justify-content: center;
+}
+
 /* P8 Secondary Action — Dropdown demo.
    Top-aligned so the menu has room to expand downward without clipping at
    the bottom of the dashed frame. */

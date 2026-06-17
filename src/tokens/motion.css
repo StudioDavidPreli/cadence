@@ -44,4 +44,13 @@
   --motion-scale-base:        0.95;
   --motion-scale-expressive:  0.9;
   --motion-scale-lift:        1.02;
+
+  /* System-feedback cue — NOT part of the editable token scale.
+     The "Tokens" title flash, fired when the P06 demo points back at this
+     panel. Deliberately decoupled from the --motion-* tokens above: in Explore
+     mode the user can drag --motion-duration-* down to near zero, which would
+     make the cue an imperceptible blink. This holds the flash visible for a
+     fixed 3s no matter what the editable tokens are set to. TokenLab only ever
+     writes --motion-* properties, so it never overwrites this. */
+  --feedback-flash-duration: 3000ms;
 }

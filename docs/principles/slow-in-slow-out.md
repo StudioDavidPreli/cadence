@@ -4,7 +4,9 @@ Objects accelerate from rest and decelerate to rest. Nothing starts or stops ins
 
 ## UI demonstration
 
-The expanded card renders a ProgressBar with a fill animation that decelerates as it approaches its target. A toggle below the bar lets the user switch between `ease.standard` and linear, side by side against the same duration. The contrast is the lesson: identical timing, different curves, categorically different character.
+The expanded card renders a ProgressBar with a fill animation that decelerates as it approaches its target. A `Tokens` / `Linear` toggle below the bar swaps the fill curve at the same duration: `Tokens` follows the curve held in the controls panel (`ease.standard`), `Linear` overrides it with `ease.linear`. The contrast is the lesson: identical timing, different curve, categorically different character. The toggle drives `easeOverride`, an optional prop on ProgressBar; when omitted elsewhere the component keeps its directional `ease.standard` / `ease.exit` behavior, so TokenLab and the P04 Stepper are untouched.
+
+When the user opens the UI view, or returns the toggle to `Tokens`, the demo flashes the controls panel's "Tokens" title once. This draws the thread between the toggle word and where the value originates. The flash uses a dedicated `--feedback-flash-duration` (a fixed 3s, decoupled from the editable `--motion-*` tokens so an Explore-mode edit cannot shrink it to an imperceptible blink) and holds statically under `prefers-reduced-motion`.
 
 ## Animation
 

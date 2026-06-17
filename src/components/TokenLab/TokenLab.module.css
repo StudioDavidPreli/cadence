@@ -59,6 +59,59 @@
   color: var(--color-text-muted);
 }
 
+/* Title flash — fired when the P06 (Slow In & Slow Out) card expands and again
+   whenever its toggle returns to "Tokens", to show that the demo's curve
+   originates in this panel. An accent ring; --color-accent is the system's
+   "currently connected" color, and a ring (not text) keeps it within the
+   contrast audit's 3:1 UI-element rule.
+
+   Timing is deliberately OUTSIDE the editable token scale: it uses
+   --feedback-flash-duration (a fixed 3s, see motion.css) and a plain ease-out,
+   NOT the --motion-* tokens. A user dragging duration tokens to near zero in
+   Explore mode must not be able to shrink this cue into an imperceptible blink.
+   The ring fades in fast, holds for most of the 3s, then fades out.
+
+   inline-block + padding give the ring room around the short title without
+   disturbing the header layout. P06-specific, not a general rule. */
+.controlsTitlePulse {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: 5px;
+  animation: controlsTitlePulse var(--feedback-flash-duration) ease-in-out;
+}
+
+/* Four breathing pulses across the fixed 3s window: the accent ring grows in
+   and recedes four times, ending transparent. ~1.3 pulses/sec, well under the
+   WCAG three-flash threshold. ease-in-out on the shorthand smooths each
+   grow/recede so it reads as breathing rather than blinking. */
+@keyframes controlsTitlePulse {
+  0%    { box-shadow: 0 0 0 0 transparent; }
+  12.5% { box-shadow: 0 0 0 3px var(--color-accent); }
+  25%   { box-shadow: 0 0 0 0 transparent; }
+  37.5% { box-shadow: 0 0 0 3px var(--color-accent); }
+  50%   { box-shadow: 0 0 0 0 transparent; }
+  62.5% { box-shadow: 0 0 0 3px var(--color-accent); }
+  75%   { box-shadow: 0 0 0 0 transparent; }
+  87.5% { box-shadow: 0 0 0 3px var(--color-accent); }
+  100%  { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Under reduced motion the cue still needs to be obvious, so it is not dropped.
+   Instead it holds the ring statically for the full 3s and then removes it in a
+   single step, with no fade movement. steps(1) snaps between keyframes. */
+@media (prefers-reduced-motion: reduce) {
+  .controlsTitlePulse {
+    animation: controlsTitlePulseStatic var(--feedback-flash-duration) steps(1, end);
+  }
+}
+
+@keyframes controlsTitlePulseStatic {
+  0%   { box-shadow: 0 0 0 3px var(--color-accent); }
+  99%  { box-shadow: 0 0 0 3px var(--color-accent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
 /* ── Presets section ─────────────────────────────────────────────────────── */
 
 /* Always-visible, no collapse. Sits between the header and Duration section. */
