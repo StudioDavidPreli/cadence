@@ -13,3 +13,14 @@ docs/references/animation-principles/
 # macOS
 .DS_Store
 docs/.DS_Store
+
+# Working artifacts — backed up externally, not needed for the app to build or run
+componentSummary-drafts.txt
+docs/browser-project/
+docs/cover-letter-reference.md
+docs/recordings/current-2026-05-04/
+docs/recordings/breakpointLayout.jpg
+*.mp4
+
+# Python bytecode cache
+__pycache__/
