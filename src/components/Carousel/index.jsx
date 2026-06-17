@@ -1,29 +1,78 @@
 import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react'
 import { motion, animate, useMotionValue } from 'framer-motion'
+import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
+import { useTheme } from '../../context/ThemeContext'
 import styles from './Carousel.module.css'
 
 // ─── Slide content ────────────────────────────────────────────────────────────
 // Four principles selected because they're directly observable in this
 // component's own behavior — the carousel demonstrates what the slides describe.
+// Each slide carries an optional `riv` reference: a static Rive image authored
+// with the same theme view-model convention as the principle animations
+// (ViewModel1 + Light/Dark/Contrast instances), so the slide art tracks the
+// active theme. `stateMachine` is the machine name inside the .riv file —
+// authored in Rive, not derivable from the title (note the literal "&" in the
+// squash file name and machine name). Slides without a `riv` render no
+// image; the compact variant ignores `riv` entirely (it omits the placeholder).
 const SLIDES = [
   {
     title:       'Follow Through',
     description: 'The drag carries momentum. The snap follows through to rest — overshooting the target before settling, the way a door swings past its frame.',
+    riv: { src: '/rive/carouselStatics/followthrough_static.riv', stateMachine: 'followThrough_staticSM' },
   },
   {
     title:       'Slow In / Slow Out',
     description: 'Deceleration on snap imitates physical objects losing energy. Nothing in nature stops instantly. The spring easing makes this visible.',
+    riv: { src: '/rive/carouselStatics/slowinslowout_static.riv', stateMachine: 'slowInSlowOut_staticSM' },
   },
   {
     title:       'Squash & Stretch',
     description: 'The drag compresses the stack at boundaries — dragElastic: 0.1 lets the slides yield slightly before pushing back. Resistance communicates the edge. The system has shape.',
+    riv: { src: '/rive/carouselStatics/squash&stretch_static.riv', stateMachine: 'squash&stretch_staticSM' },
   },
   {
     title:       'Imitation of Life',
     description: 'Gesture-driven motion earns trust by matching physical intuition. The carousel responds to velocity, not just position — the same way objects do.',
+    riv: { src: '/rive/carouselStatics/imitationoflife_static.riv', stateMachine: 'imitationOfLife_staticSM' },
   },
 ]
+
+// Map ThemeContext theme values to the view model instance names in the .riv
+// files. Identical to PrincipleAnimation's map — ThemeContext uses
+// 'high-contrast', the Rive instance is named 'Contrast'.
+const themeToInstanceName = {
+  dark: 'Dark',
+  light: 'Light',
+  'high-contrast': 'Contrast',
+}
+
+// ─── SlideImage ───────────────────────────────────────────────────────────────
+//
+// Isolated useRive boundary for a single slide's static image, one per visible
+// slide. Mirrors PrincipleAnimation/RiveCanvas: all Rive hook calls live here,
+// not in Carousel, so each canvas's lifecycle is tied to its own element and
+// cleaned up correctly as slides mount/unmount. React's only job is theme
+// synchronization via the view model instance; the image itself is static.
+function SlideImage({ src, stateMachine, theme }) {
+  const { rive, RiveComponent } = useRive({
+    src,
+    stateMachines: stateMachine,
+    autoplay: true,
+    autoBind: false,
+  })
+
+  const viewModel = useViewModel(rive, { name: 'ViewModel1' })
+
+  // Passing { rive } rebinds the instance whenever the name changes (theme
+  // switch). No manual useEffect needed — same pattern as PrincipleAnimation.
+  useViewModelInstance(viewModel, {
+    name: themeToInstanceName[theme],
+    rive,
+  })
+
+  return <RiveComponent className={styles.slideImage} />
+}
 
 // ─── Carousel ─────────────────────────────────────────────────────────────────
 //
@@ -89,8 +138,13 @@ const SLIDES = [
 // of width to render legibly; squeezing it produces 15+ wrapped lines that
 // overflow vertically. In compact mode the slide title plus the dot indicator
 // are enough to demonstrate the principle (drag → snap → indicator follows).
-export function Carousel({ compact = false }) {
+// slides defaults to the module-level SLIDES so existing call sites keep
+// working. A caller can pass its own array to vary content per instance
+// (option 1 from the tracker's carousel note) — the P5 principle demo and the
+// TokenLab Gesture tab currently share this default.
+export function Carousel({ compact = false, slides = SLIDES }) {
   const tokens      = useMotionTokens()
+  const { theme }   = useTheme()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideWidth, setSlideWidth]     = useState(0)
 
@@ -130,8 +184,8 @@ export function Carousel({ compact = false }) {
   // useMemo produces a stable reference that only changes when slideWidth
   // changes (once, after the initial useLayoutEffect measurement).
   const dragConstraints = useMemo(
-    () => ({ left: -(SLIDES.length - 1) * slideWidth, right: 0 }),
-    [slideWidth]
+    () => ({ left: -(slides.length - 1) * slideWidth, right: 0 }),
+    [slides.length, slideWidth]
   )
 
   function goToSlide(index) {
@@ -157,7 +211,7 @@ export function Carousel({ compact = false }) {
 
     // Advance forward: fast leftward flick OR sufficient leftward distance
     if (velocity.x < -500 || offset.x < -50) {
-      next = Math.min(currentSlide + 1, SLIDES.length - 1)
+      next = Math.min(currentSlide + 1, slides.length - 1)
     }
     // Advance backward: fast rightward flick OR sufficient rightward distance
     else if (velocity.x > 500 || offset.x > 50) {
@@ -191,7 +245,7 @@ export function Carousel({ compact = false }) {
           style={{ x }}
           onDragEnd={handleDragEnd}
         >
-          {SLIDES.map((slide, i) => (
+          {slides.map((slide, i) => (
             // Each slide is a motion.div so it can animate scale independently.
             // scale.lift (default 1.02) gives the active slide a subtle elevation
             // above its neighbors — physical affordance: the current item is "up."
@@ -202,10 +256,29 @@ export function Carousel({ compact = false }) {
               animate={{ scale: currentSlide === i ? tokens.scale.lift : 1 }}
               transition={{ duration: tokens.duration.fast, ease: tokens.ease.standard }}
             >
-              <h3 className={styles.slideTitle}>{slide.title}</h3>
+              {/* Image (top) — full mode only. A 4:5 portrait frame holding the
+                  slide's static Rive art, which tracks the active theme. The
+                  frame renders even if a slide has no `riv` (graceful empty
+                  frame). aria-hidden: the title/description carry the meaning. */}
               {!compact && (
-                <p className={styles.slideDescription}>{slide.description}</p>
+                <div className={styles.slidePlaceholder} aria-hidden="true">
+                  {slide.riv && (
+                    <SlideImage
+                      src={slide.riv.src}
+                      stateMachine={slide.riv.stateMachine}
+                      theme={theme}
+                    />
+                  )}
+                </div>
               )}
+              {/* Text (below the image). Wrapped so the slide can stack image
+                  over text as a portrait card. */}
+              <div className={styles.slideText}>
+                <h3 className={styles.slideTitle}>{slide.title}</h3>
+                {!compact && (
+                  <p className={styles.slideDescription}>{slide.description}</p>
+                )}
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -230,7 +303,7 @@ export function Carousel({ compact = false }) {
           opacity animation on newly-mounted tab panels, leaving them at
           opacity: 0 until page reload. CSS transitions are immune to this. */}
       <div className={styles.dots}>
-        {SLIDES.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             className={styles.dotButton}
