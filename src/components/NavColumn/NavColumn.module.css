@@ -1,0 +1,129 @@
+/* Middle navigation column. Sits between the controls (tool bar) and the demo
+   area, with its own border and scroll so a long category list never pushes the
+   layout. Background matches the controls column so the two read as one
+   "operating surface" framing the demo area. */
+.nav {
+  border-right: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  overflow-y: auto;
+  min-height: 0;
+  padding: 8px 0;
+}
+
+/* ── Section header ───────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  transition: color var(--feedback-nav-duration) ease;
+}
+
+/* text-base, not text-primary: text-primary is #ffffff in the light theme (it
+   is the on-dark-surface color) and would vanish on the light nav background.
+   text-base is the full-contrast on-background color and is AA+ in all three
+   themes (14.1:1 dark, 15.9:1 light, 21:1 HC). */
+.header:hover {
+  color: var(--color-text-base);
+}
+
+/* Active = this tool is the current destination. Stronger than hover so the
+   open-but-not-active and open-and-active states are distinguishable. */
+.headerActive {
+  color: var(--color-text-base);
+}
+
+/* Disclosure caret — a CSS triangle that rotates from pointing right (closed)
+   to pointing down (open). Pure transform so it animates on the same fixed
+   nav duration. */
+.caret {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform var(--feedback-nav-duration) ease;
+  flex-shrink: 0;
+}
+
+.caret[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+/* ── Accordion body ───────────────────────────────────────────────────────── */
+
+/* The grid-template-rows 0fr -> 1fr animation. The track collapses to zero
+   height when closed and resolves to content height when open; .bodyInner
+   clips the overflow so the rows are hidden, not just zero-height. */
+.body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--feedback-nav-duration) ease;
+}
+
+.bodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.bodyInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Leaf row ─────────────────────────────────────────────────────────────── */
+
+.row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 20px 10px 32px;  /* extra left indent reads as nested */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  transition: color var(--feedback-nav-duration) ease,
+              background-color var(--feedback-nav-duration) ease;
+}
+
+.row:hover {
+  color: var(--color-text-base);
+}
+
+/* Active leaf. The earlier draft filled the row with --color-accent and put
+   --color-bg text on it; that reused the old tab-pill pairing, which fails AA
+   in the light theme (light text on the lighter light-theme green is ~3:1, and
+   accent is explicitly "insufficient for text" in light per CLAUDE.md). The
+   contrast-safe form keeps accent only where it is allowed as a graphical
+   stroke: a 3px inset bar (accent meets the 3:1 UI threshold as an outline in
+   all three themes). Text is --color-text-base (AA+ everywhere) and the
+   background is the faint accent-subtle tint. Weight bumps to 600 so selection
+   is signalled by more than color (WCAG 1.4.1). */
+.rowActive,
+.rowActive:hover {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+/* Reduced motion: hold the accordion and caret states statically, no animated
+   expand or rotate. Color changes still snap, which carries no motion. */
+@media (prefers-reduced-motion: reduce) {
+  .body,
+  .caret {
+    transition: none;
+  }
+}

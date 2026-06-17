@@ -212,9 +212,25 @@ const PRINCIPLES = [
 // ── No LayoutGroup needed ─────────────────────────────────────────────────────
 // Cards use the layout prop with no layoutId. No FLIP scope to isolate.
 
-export function PrinciplesLibrary() {
+// filter: 'all' | 'classic' | 'extended'. Subsets the grid by the principle's
+// own `category` field. The nav column's Classic / Extended rows drive this;
+// 'all' (the default) shows every principle.
+export function PrinciplesLibrary({ filter = 'all' }) {
   const tokens = useMotionTokens()
   const [selectedId, setSelectedId] = useState(null)
+
+  // The principles actually rendered for the active filter. index, totalCards,
+  // and the grid's auto-fit math all derive from THIS list, not the full set,
+  // so the expanded-footprint geometry stays correct within a filtered grid.
+  const visiblePrinciples =
+    filter === 'all' ? PRINCIPLES : PRINCIPLES.filter(p => p.category === filter)
+
+  // If the expanded card is filtered out from under the user, collapse it so a
+  // stale selection can't leave an invisible card "expanded". Keyed on filter
+  // so it only fires when the filter changes, not on every selection.
+  useEffect(() => {
+    setSelectedId(null)
+  }, [filter])
   const [columnCount, setColumnCount] = useState(6)
   // cellWidth: pixel width of one grid column, read from the resolved
   // grid-template-columns. PrincipleCard uses it to compute the scale ratio
@@ -254,12 +270,12 @@ export function PrinciplesLibrary() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const totalCards = PRINCIPLES.length
+  const totalCards = visiblePrinciples.length
 
   return (
     <div className={styles.library}>
       <div className={styles.grid} ref={gridRef}>
-        {PRINCIPLES.map((principle, index) => (
+        {visiblePrinciples.map((principle, index) => (
           <PrincipleCard
             key={principle.id}
             principle={principle}

@@ -1,0 +1,31 @@
+/* The demo column. Positioned so the crossfade layers can stack absolutely
+   inside it. overflow: hidden clips a layer's fade to the column bounds. */
+.demoArea {
+  position: relative;
+  background-color: var(--color-surface-raised);
+  min-width: 0; /* prevent grid blowout */
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Each destination is a full-bleed absolute layer with its own vertical scroll.
+   scrollbar-gutter: stable reserves the scrollbar lane so an expansion inside
+   the principles grid that gains a row can't make the scrollbar appear
+   mid-animation, shrink the inner width, and trigger auto-fit to recount
+   columns. This is the protection the old .tabPanelInner provided, now on the
+   layer that owns the scroll. */
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-gutter: stable;
+  /* Opaque background is load-bearing for the crossfade. Each layer must fully
+     cover the one beneath it, or the incoming layer's transparent regions (grid
+     gaps, the space below the cards) reveal the outgoing content until it
+     unmounts — which reads as a hard cut at the end of the fade. With a solid
+     surface here, fading the incoming layer in covers the outgoing completely
+     and its removal underneath is hidden. Matches the demo column's own color,
+     so there is no visible change at rest. */
+  background-color: var(--color-surface-raised);
+}

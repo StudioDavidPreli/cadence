@@ -1,6 +1,10 @@
 .tokenLab {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  /* Three columns: controls (tool bar) | navigation | demo area. The nav
+     column is fixed-width like the controls; the demo area takes the rest.
+     The tool bar stays mounted across both tools so the Principles demos keep
+     reading live token values. */
+  grid-template-columns: 300px 220px 1fr;
   /* grid-template-rows: minmax(0, 1fr) is the load-bearing piece of the
      app-shell layout. The minmax-with-0 minimum is the grid analogue of
      `min-height: 0` on a flex item: without the explicit 0 floor, `1fr`
@@ -500,113 +504,17 @@
   color: var(--color-accent);
 }
 
-/* ── Demo column ────────────────────────────────────────────────────────── */
+/* ── Demo content ───────────────────────────────────────────────────────── */
 
-/* Outer column wrapper — background only. Padding lives in .demoContent so
-   the tab bar can span edge-to-edge with its own horizontal padding. */
-.demo {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-surface-raised);
-  min-width: 0; /* prevent grid blowout */
-}
-
-/* ── Tab bar ────────────────────────────────────────────────────────────── */
-
-.demoTabBar {
-  display: flex;
-  padding: 0 48px;  /* matches the left-heavy demoContent indent */
-  border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0;
-}
-
-/* Each button is a positioned container so the sliding pill (position: absolute)
-   is constrained inside it. Framer Motion's layoutId detects when the pill's
-   DOM parent changes and animates between the two bounding boxes. */
-.tabButton {
-  position: relative;
-  padding: 12px 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* The sliding pill — behind the label (z-index below .tabLabel).
-   Inset gives it a slight vertical margin so it reads as a chip, not a block. */
-.tabPill {
-  position: absolute;
-  inset: 5px 4px;
-  background-color: var(--color-accent);
-  border-radius: 5px;
-}
-
-.tabLabel {
-  position: relative;
-  z-index: 1;  /* renders above the absolute pill */
-  color: var(--color-text-muted);
-  transition: color 100ms;
-}
-
-/* Dark text on the green accent pill. --color-bg (#141414) gives 8.5:1 against
-   --color-accent (#76c17d) in dark — AAA. Light and HC themes also verified. */
-.tabLabelActive {
-  color: var(--color-bg);
-}
-
-/* ── Panel wrapper ──────────────────────────────────────────────────────── */
-
-/* Stretches to fill the remaining column height. overflow: hidden clips the
-   AnimatePresence horizontal slide between tabs to the panel boundary.
-   min-height: 0 lets this grid item shrink below its content so the inner
-   pane can own the scroll. */
-.demoPanel {
-  flex: 1;
-  overflow: hidden;
-  min-height: 0;
-}
-
-/* The scroll container for each tab's content. Lives one level inside the
-   AnimatePresence horizontal slide (.demoPanel clips the slide; this child
-   handles vertical overflow only). scrollbar-gutter: stable reserves the
-   scrollbar lane regardless of visibility — without it, an expansion that
-   gains a row inside the principles grid could cause the scrollbar to
-   appear mid-animation, reducing the inner width and triggering auto-fit
-   to recount columns. The same protection PrinciplesLibrary.module.css
-   used to provide on .library, now hoisted so all tabs benefit. */
-.tabPanelInner {
-  height: 100%;
-  overflow-y: auto;
-  min-height: 0;
-  scrollbar-gutter: stable;
-}
-
-/* Tab content — restores the left-heavy padding that was on .demo before the
-   tab layout restructure. gap between demo groups preserved from prior design. */
+/* Wraps each category's demos. The demo area's scroll and the scrollbar-gutter
+   protection live on DemoArea's .layer; this just owns the padding and the
+   vertical rhythm between demo groups. The left-heavy padding is carried over
+   from the previous tab layout. */
 .demoContent {
   padding: 32px 40px 32px 48px;
   display: flex;
   flex-direction: column;
   gap: 40px;
-}
-
-/* Shown for tabs without content yet. Centered within the panel height. */
-.placeholderPane {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 320px;
-  padding: 32px 48px;
-}
-
-.placeholderText {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  font-style: italic;
 }
 
 /* Trigger button used in demo wrappers (e.g. DrawerDemo) where importing

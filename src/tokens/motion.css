@@ -53,4 +53,13 @@
      fixed 3s no matter what the editable tokens are set to. TokenLab only ever
      writes --motion-* properties, so it never overwrites this. */
   --feedback-flash-duration: 3000ms;
+
+  /* Navigation chrome timing — also NOT part of the editable token scale, and
+     for the same reason as the flash above. The hero/content crossfade and the
+     accordion expand/collapse read this fixed value so Explore mode (which can
+     drag the --motion-duration-* tokens to near zero) can never collapse a
+     navigation transition into an imperceptible jump and make the tool feel
+     broken. Structural navigation should not be at the mercy of the values the
+     tool exists to let people experiment with. */
+  --feedback-nav-duration: 360ms;
 }

@@ -1,12 +1,16 @@
 import { useReducer, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
+import { useNavState } from '../../context/NavigationContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
+import { NavColumn } from '../NavColumn'
+import { DemoArea } from '../DemoArea'
+import { HeroAnimation } from '../HeroAnimation'
 import { Button } from '../Button'
 import { Card } from '../Card'
 import { NavItem } from '../NavItem'
@@ -27,18 +31,6 @@ import {
   stateToTokens,
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
-
-// ─── Tab definitions ──────────────────────────────────────────────────────────
-// Behavior-named tabs group demo components by motion concept rather than by
-// component type. "Press & State" is populated now; the others are placeholders
-// for future content.
-const TABS = [
-  { id: 'press-state',       label: 'Press & State' },
-  { id: 'enter-exit',        label: 'Enter & Exit' },
-  { id: 'sequence-progress', label: 'Sequence & Progress' },
-  { id: 'gesture',           label: 'Gesture' },
-  { id: 'principles',        label: 'Principles' },
-]
 
 // ─── Token → Component map ────────────────────────────────────────────────────
 // Maps each slider's token key to the component names it affects across all tabs.
@@ -512,19 +504,7 @@ function DemoWrapper({ componentName, instruction, children }) {
   )
 }
 
-// ─── DemoTabs ─────────────────────────────────────────────────────────────────
-// Tab bar with a sliding pill indicator driven by Framer Motion's layoutId.
-//
-// How layoutId produces the sliding behavior:
-// The pill (<motion.span layoutId="tabPill">) only renders inside the active
-// tab's button. When the active tab changes, React unmounts the pill from the
-// old button and mounts it in the new one. Framer Motion intercepts this —
-// it recognises that the same layoutId has appeared in a new DOM position,
-// measures both bounding boxes, and animates the element between them using
-// a layout transition. No position tracking, no coordinate math, no refs.
-// The spring parameters come from the live token values so the tab indicator
-// responds to whatever duration.fast and ease.spring the user has dialed in.
-//
+// ─── ControlsTitle ────────────────────────────────────────────────────────────
 // The controls panel title. Reads the pulse counter from TitlePulseContext and
 // re-plays a one-shot accent pulse whenever it changes. Changing the `key`
 // remounts the span so the CSS animation restarts (same key-to-replay pattern
@@ -541,117 +521,6 @@ function ControlsTitle() {
     >
       Tokens
     </span>
-  )
-}
-
-// DemoTabs renders inside MotionTokensProvider, so useMotionTokens() returns
-// the live overrides rather than the CSS-read defaults.
-function DemoTabs({ tabs, activeTab, onTabChange }) {
-  const tokens = useMotionTokens()
-
-  // LayoutGroup scopes the tabPill layoutId so its FLIP animation does not
-  // trigger a global ProjectionNode snapshot. Without this, every tab switch
-  // causes Framer Motion to snapshot ALL motion elements in the page —
-  // including the PanelSlide motion.div that is in the middle of its
-  // opacity: 0 → 1 enter animation. That snapshot can corrupt the animation,
-  // leaving the panel stuck at opacity: 0 until page reload.
-  return (
-    <LayoutGroup id="demo-tabs">
-      <nav className={styles.demoTabBar}>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={styles.tabButton}
-            onClick={() => onTabChange(tab.id)}
-          >
-            {activeTab === tab.id && (
-              <motion.span
-                layoutId="tabPill"
-                className={styles.tabPill}
-                transition={{
-                  duration: tokens.duration.fast,
-                  ease: tokens.ease.spring,
-                }}
-              />
-            )}
-            <span className={[
-              styles.tabLabel,
-              activeTab === tab.id ? styles.tabLabelActive : '',
-            ].join(' ')}>
-              {tab.label}
-            </span>
-          </button>
-        ))}
-      </nav>
-    </LayoutGroup>
-  )
-}
-
-// ─── PanelSlide ───────────────────────────────────────────────────────────────
-// Each AnimatePresence child must be a separate component so it has its own
-// React identity. PanelSlide reads its content from contentMap[tabId] — a ref
-// slot that only updates while that tab is active. See TabPanel for why.
-function PanelSlide({ tabId, contentMap, tokens }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{
-        duration: tokens.duration.fast,
-        ease: tokens.ease.standard,
-      }}
-      className={styles.tabPanelInner}
-    >
-      {contentMap.current[tabId]}
-    </motion.div>
-  )
-}
-
-// ─── TabPanel ─────────────────────────────────────────────────────────────────
-// Wraps tab content with an AnimatePresence cross-fade.
-//
-// ── Why the contentMap snapshot pattern ──────────────────────────────────────
-// The children prop is computed in TokenLab based on activeTab. Without
-// intervention, when activeTab changes, BOTH the exiting panel and the entering
-// panel receive the NEW tab's children simultaneously (React re-renders all
-// currently rendered children of AnimatePresence on every parent re-render).
-//
-// This causes the same components — Toggle with layoutId "toggleThumb-Subtle",
-// etc. — to exist in two places at once. Framer Motion's ProjectionNode tree
-// (a module-level singleton) records conflicting position snapshots for the
-// same layoutId from two different DOM locations. The snapshot corruption
-// persists until page reload because the ProjectionNode tree is never reset.
-//
-// Fix: contentMapRef stores a snapshot of children per tab key. The snapshot
-// for a given key only updates while THAT tab is active. The exiting panel
-// reads contentMap[itsOwnKey], which hasn't been updated since it became
-// inactive — so it always shows its original content, never the new tab's.
-// Each layoutId element exists in exactly one panel at a time.
-//
-// The active tab's content still updates correctly: when tokens change or
-// internal state changes, contentMap[activeTab] is updated and PanelSlide
-// re-renders. React reconciles against the same component instances (same
-// position in the tree), so local state (Toggle on/off, etc.) is preserved.
-function TabPanel({ activeTab, children }) {
-  const tokens = useMotionTokens()
-
-  // Only write to the slot for the currently active tab.
-  // The exiting tab's slot is frozen from its last active render.
-  const contentMap = useRef({})
-  contentMap.current[activeTab] = children
-
-  return (
-    <div className={styles.demoPanel}>
-      <AnimatePresence initial={false}>
-        <PanelSlide
-          key={activeTab}
-          tabId={activeTab}
-          contentMap={contentMap}
-          tokens={tokens}
-        />
-      </AnimatePresence>
-    </div>
   )
 }
 
@@ -951,9 +820,11 @@ export function TokenLab() {
   const [openSections, setOpenSections] = useState(
     new Set(['duration', 'easing', 'scale'])
   )
-  // Tab state is ephemeral UI state — no reducer involvement.
-  const [activeTab, setActiveTab] = useState('press-state')
-  // NavItem demo selection — local to the Press & State tab.
+  // Which Principles filter is active comes from NavigationContext (the nav
+  // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
+  // The destination itself is read by DemoArea, not here.
+  const { principleFilter } = useNavState()
+  // NavItem demo selection — local to the Press & State category.
   const [activeNav, setActiveNav] = useState('Token Lab')
 
   // Explore mode: expands slider ranges to 50–2000ms / 0–1000ms / 0.5–1.2.
@@ -1033,6 +904,135 @@ export function TokenLab() {
   }
 
   const liveTokens = stateToTokens(rawState)
+
+  // The four Token Lab category demos, keyed by category id. DemoArea renders
+  // exactly one based on the navigation destination and freezes the rest. These
+  // are React elements (cheap to build); only the active one is mounted. Keys
+  // match data/navigation CATEGORIES.
+  const categoryContent = {
+    'press-state': (
+      <div className={styles.demoContent}>
+        <DemoWrapper
+          componentName="Button"
+          instruction="Press to see scale and easing"
+        >
+          <div className={styles.demoRow}>
+            <Button>Press me</Button>
+            <Button>Action</Button>
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Card"
+          instruction="Click to toggle selected state"
+        >
+          <div className={styles.demoCards}>
+            <Card
+              tag="Principle"
+              title="Squash & Stretch"
+              description="The illusion of weight and flexibility."
+              style={{ maxWidth: '220px' }}
+            />
+            <Card
+              title="Timing"
+              description="Duration gives weight and personality."
+              style={{ maxWidth: '220px' }}
+            />
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="NavItem"
+          instruction="Click to see active transition"
+        >
+          <div className={styles.demoNavList}>
+            {DEMO_NAV_ITEMS.map(item => (
+              <NavItem
+                key={item}
+                label={item}
+                isActive={activeNav === item}
+                onClick={() => setActiveNav(item)}
+              />
+            ))}
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Toggle"
+          instruction="Toggle to compare subtle vs expressive signaling"
+        >
+          <div className={styles.demoRow}>
+            <Toggle label="Subtle"     mode="subtle" />
+            <Toggle label="Expressive" mode="expressive" />
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Spinner"
+          instruction="Duration slider controls rotation speed"
+        >
+          <div className={styles.demoRow}>
+            <Spinner size="medium" />
+          </div>
+        </DemoWrapper>
+
+        <NotificationBadgeDemo />
+      </div>
+    ),
+
+    'enter-exit': (
+      <div className={styles.demoContent}>
+        <DrawerDemo />
+
+        <ModalDemo />
+
+        <DemoWrapper
+          componentName="Tooltip"
+          instruction="Click the ? The bubble arcs into place along a curved path, not a straight line"
+        >
+          {/* Centered so the bubble has runway on both sides — flush against
+              demoContent's left padding the bubble's left half gets clipped
+              by the demo layer's overflow. */}
+          <div className={styles.tooltipDemoRow}>
+            <Tooltip text="Natural motion follows arcs" />
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Dropdown"
+          instruction="Open the menu — duration.fast keeps functional UI snappy"
+        >
+          <div className={styles.demoRow}>
+            <Dropdown label="Context Menu" />
+          </div>
+        </DemoWrapper>
+      </div>
+    ),
+
+    'sequence-progress': (
+      <div className={styles.demoContent}>
+        <ProgressBarDemo />
+
+        <DemoWrapper
+          componentName="Stepper"
+          instruction="Click Next to see the three-beat cascade — delay sliders control the gaps"
+        >
+          <Stepper />
+        </DemoWrapper>
+      </div>
+    ),
+
+    'gesture': (
+      <div className={styles.demoContent}>
+        <DemoWrapper
+          componentName="Carousel"
+          instruction="Drag to advance — flick fast or drag far enough to commit"
+        >
+          <Carousel />
+        </DemoWrapper>
+      </div>
+    ),
+  }
 
   return (
     <ActiveTokenProvider>
@@ -1140,156 +1140,27 @@ export function TokenLab() {
 
       </aside>
 
+      {/* ── Middle column: navigation ─────────────────────────────────── */}
+      {/* Outside MotionTokensProvider on purpose: the nav reads no motion
+          tokens. Its transitions use the fixed --feedback-nav-duration so
+          Explore mode can't collapse them. */}
+      <NavColumn />
+
       {/* ── Right column: demo area ───────────────────────────────────── */}
-      {/* MotionTokensProvider wraps only this column — DemoTabs and TabPanel
-          call useMotionTokens() and receive liveTokens, so the tab indicator
-          spring and panel fade both respond to the token sliders in real time.
+      {/* MotionTokensProvider wraps only this column — every demo inside
+          DemoArea (the category demos and the Principles grid) calls
+          useMotionTokens() and receives liveTokens, so the previews respond to
+          the token sliders in real time.
           respectReducedMotion={false}: TokenLab is a motion-exploration tool;
           the user is here specifically to perceive motion. Honoring OS-level
           prefers-reduced-motion would flatten every preview to instant and
           defeat the tool's purpose. See docs/decisions/reduced-motion-2026-05-06.md. */}
       <MotionTokensProvider tokens={liveTokens} respectReducedMotion={false}>
-        <div className={styles.demo}>
-
-          <DemoTabs
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
-          <TabPanel activeTab={activeTab}>
-            {activeTab === 'press-state' ? (
-              <div className={styles.demoContent}>
-
-                <DemoWrapper
-                  componentName="Button"
-                  instruction="Press to see scale and easing"
-                >
-                  <div className={styles.demoRow}>
-                    <Button>Press me</Button>
-                    <Button>Action</Button>
-                  </div>
-                </DemoWrapper>
-
-                <DemoWrapper
-                  componentName="Card"
-                  instruction="Click to toggle selected state"
-                >
-                  <div className={styles.demoCards}>
-                    <Card
-                      tag="Principle"
-                      title="Squash & Stretch"
-                      description="The illusion of weight and flexibility."
-                      style={{ maxWidth: '220px' }}
-                    />
-                    <Card
-                      title="Timing"
-                      description="Duration gives weight and personality."
-                      style={{ maxWidth: '220px' }}
-                    />
-                  </div>
-                </DemoWrapper>
-
-                <DemoWrapper
-                  componentName="NavItem"
-                  instruction="Click to see active transition"
-                >
-                  <div className={styles.demoNavList}>
-                    {DEMO_NAV_ITEMS.map(item => (
-                      <NavItem
-                        key={item}
-                        label={item}
-                        isActive={activeNav === item}
-                        onClick={() => setActiveNav(item)}
-                      />
-                    ))}
-                  </div>
-                </DemoWrapper>
-
-                <DemoWrapper
-                  componentName="Toggle"
-                  instruction="Toggle to compare subtle vs expressive signaling"
-                >
-                  <div className={styles.demoRow}>
-                    <Toggle label="Subtle"     mode="subtle" />
-                    <Toggle label="Expressive" mode="expressive" />
-                  </div>
-                </DemoWrapper>
-
-                <DemoWrapper
-                  componentName="Spinner"
-                  instruction="Duration slider controls rotation speed"
-                >
-                  <div className={styles.demoRow}>
-                    <Spinner size="medium" />
-                  </div>
-                </DemoWrapper>
-
-                <NotificationBadgeDemo />
-
-              </div>
-            ) : activeTab === 'enter-exit' ? (
-              <div className={styles.demoContent}>
-
-                <DrawerDemo />
-
-                <ModalDemo />
-
-                <DemoWrapper
-                  componentName="Tooltip"
-                  instruction="Click the ? The bubble arcs into place along a curved path, not a straight line"
-                >
-                  {/* Centered so the bubble has runway on both sides — flush
-                      against demoContent's left padding the bubble's left half
-                      gets clipped by .demoPanel's overflow:hidden. */}
-                  <div className={styles.tooltipDemoRow}>
-                    <Tooltip text="Natural motion follows arcs" />
-                  </div>
-                </DemoWrapper>
-
-                <DemoWrapper
-                  componentName="Dropdown"
-                  instruction="Open the menu — duration.fast keeps functional UI snappy"
-                >
-                  <div className={styles.demoRow}>
-                    <Dropdown label="Context Menu" />
-                  </div>
-                </DemoWrapper>
-
-              </div>
-            ) : activeTab === 'sequence-progress' ? (
-              <div className={styles.demoContent}>
-
-                <ProgressBarDemo />
-
-                <DemoWrapper
-                  componentName="Stepper"
-                  instruction="Click Next to see the three-beat cascade — delay sliders control the gaps"
-                >
-                  <Stepper />
-                </DemoWrapper>
-
-              </div>
-            ) : activeTab === 'gesture' ? (
-              <div className={styles.demoContent}>
-
-                <DemoWrapper
-                  componentName="Carousel"
-                  instruction="Drag to advance — flick fast or drag far enough to commit"
-                >
-                  <Carousel />
-                </DemoWrapper>
-
-              </div>
-            ) : activeTab === 'principles' ? (
-              // PrinciplesLibrary manages its own padding and layout.
-              // No demoContent wrapper — the component fills the full panel area.
-              <PrinciplesLibrary />
-            ) : null}
-
-          </TabPanel>
-
-        </div>
+        <DemoArea
+          categoryContent={categoryContent}
+          principlesContent={<PrinciplesLibrary filter={principleFilter} />}
+          hero={<HeroAnimation />}
+        />
       </MotionTokensProvider>
 
     </div>

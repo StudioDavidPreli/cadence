@@ -1,0 +1,30 @@
+/* Fills the demo layer and centers the canvas. position: relative so the
+   fallback prompt and the canvas can stack. */
+.hero {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* The Rive canvas fills the area; the .riv's own fit/alignment handles scaling
+   of the artwork within it. */
+.canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Centered behind the canvas. Visible only while the canvas is empty (loading
+   or missing asset); a loaded hero paints over it. */
+.fallbackText {
+  position: absolute;
+  max-width: 320px;
+  padding: 0 48px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
