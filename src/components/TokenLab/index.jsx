@@ -6,11 +6,13 @@ import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../co
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState } from '../../context/NavigationContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
 import { NavColumn } from '../NavColumn'
 import { DemoArea } from '../DemoArea'
 import { HeroAnimation } from '../HeroAnimation'
+import { RailDrawer } from '../RailDrawer'
 import { Button } from '../Button'
 import { Card } from '../Card'
 import { NavItem } from '../NavItem'
@@ -827,6 +829,25 @@ export function TokenLab() {
   // NavItem demo selection — local to the Press & State category.
   const [activeNav, setActiveNav] = useState('Token Lab')
 
+  // Responsive collapse. The nav column collapses to a rail at ≤1024px; the tool
+  // bar (controls) collapses too at ≤720px. Breakpoints mirror the grid media
+  // queries in TokenLab.module.css.
+  const navCollapsed      = useMediaQuery('(max-width: 1024px)')
+  const controlsCollapsed = useMediaQuery('(max-width: 720px)')
+
+  // Which rail's drawer is open: 'tokens' | 'nav' | null. A single value makes
+  // the two drawers mutually exclusive — opening one closes the other, which is
+  // exactly the requested behavior. Clearing it when its breakpoint passes keeps
+  // a drawer from being "open" in a form that no longer renders.
+  const [openDrawer, setOpenDrawer] = useState(null)
+  useEffect(() => {
+    if (!navCollapsed && openDrawer === 'nav') setOpenDrawer(null)
+    if (!controlsCollapsed && openDrawer === 'tokens') setOpenDrawer(null)
+  }, [navCollapsed, controlsCollapsed, openDrawer])
+
+  const toggleDrawer = id => setOpenDrawer(prev => (prev === id ? null : id))
+  const closeDrawer  = () => setOpenDrawer(null)
+
   // Explore mode: expands slider ranges to 50–2000ms / 0–1000ms / 0.5–1.2.
   // Toggling always resets to defaults first so sliders start within the new range.
   const [exploreMode, setExploreMode] = useState(false)
@@ -1034,117 +1055,145 @@ export function TokenLab() {
     ),
   }
 
+  // The tool bar's inner content, rendered either in the full .controls aside
+  // (wide) or inside the "Tokens" RailDrawer (≤720px). The token reducer lives
+  // in this component and never unmounts, so token VALUES persist even while the
+  // drawer (and thus these sliders) is closed; only transient slider UI state
+  // resets when the drawer reopens.
+  const controlsContent = (
+    <>
+      {/* Controls header — title on left, Explore toggle on right.
+          The toggle resets all sliders to defaults and expands their ranges.
+          Tip fires after 400ms hover delay to avoid accidental activation. */}
+      <div className={styles.controlsHeader}>
+        <ControlsTitle />
+        <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
+          <Toggle mode="expressive" label="Explore" onChange={handleExploreToggle} />
+        </HoverTip>
+      </div>
+
+      {/* Presets — always visible, above the collapsible token sections.
+          Active preset is detected by value-comparing rawState against each
+          preset's stored state, so no "loaded preset" variable is needed. */}
+      <PresetsSection
+        rawState={rawState}
+        allPresets={allPresets}
+        onLoad={handleLoadPreset}
+        onDelete={handleDeletePreset}
+        onSave={handleSavePreset}
+      />
+
+      <ControlSection
+        label="Duration"
+        isOpen={openSections.has('duration')}
+        onToggle={() => toggleSection('duration')}
+      >
+        {Object.entries(durationConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.duration[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_DURATION', key, value })}
+            tokenKey={`duration.${key}`}
+          />
+        ))}
+      </ControlSection>
+
+      <ControlSection
+        label="Easing"
+        isOpen={openSections.has('easing')}
+        onToggle={() => toggleSection('easing')}
+      >
+        {/*
+          ── Shared Vocabulary ────────────────────────────────────────────
+          Named presets exist because design and engineering need a shared
+          language. "Use spring easing on the modal" is a complete, precise
+          instruction. "Use cubic-bezier(0.34, 1.56, 0.64, 1) on the modal"
+          is the same instruction, but opaque to anyone not holding a
+          reference sheet.
+
+          Production design systems (Material Design, Primer, Spectrum) all
+          name their easing curves for this reason. The names are vocabulary;
+          the bezier values are implementation details.
+
+          Dragging the control points above creates a custom curve — valid
+          for exploration, but a curve without a name can't be systematized.
+          If a custom curve is worth keeping, it should become a named token.
+        */}
+        <EasingSection rawState={rawState} dispatch={dispatch} />
+      </ControlSection>
+
+      <ControlSection
+        label="Delay"
+        isOpen={openSections.has('delay')}
+        onToggle={() => toggleSection('delay')}
+      >
+        {Object.entries(delayConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.delay[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_DELAY', key, value })}
+            tokenKey={`delay.${key}`}
+          />
+        ))}
+      </ControlSection>
+
+      <ControlSection
+        label="Scale"
+        isOpen={openSections.has('scale')}
+        onToggle={() => toggleSection('scale')}
+      >
+        {Object.entries(scaleConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.scale[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_SCALE', key, value })}
+            tokenKey={`scale.${key}`}
+          />
+        ))}
+      </ControlSection>
+    </>
+  )
+
   return (
     <ActiveTokenProvider>
     <TitlePulseProvider>
     <div className={styles.tokenLab}>
 
-      {/* ── Left column: controls ─────────────────────────────────────── */}
-      <aside className={styles.controls}>
-
-        {/* Controls header — title on left, Explore toggle on right.
-            The toggle resets all sliders to defaults and expands their ranges.
-            Tip fires after 400ms hover delay to avoid accidental activation. */}
-        <div className={styles.controlsHeader}>
-          <ControlsTitle />
-          <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
-            <Toggle mode="expressive" label="Explore" onChange={handleExploreToggle} />
-          </HoverTip>
-        </div>
-
-        {/* Presets — always visible, above the collapsible token sections.
-            Active preset is detected by value-comparing rawState against each
-            preset's stored state, so no "loaded preset" variable is needed. */}
-        <PresetsSection
-          rawState={rawState}
-          allPresets={allPresets}
-          onLoad={handleLoadPreset}
-          onDelete={handleDeletePreset}
-          onSave={handleSavePreset}
-        />
-
-        <ControlSection
-          label="Duration"
-          isOpen={openSections.has('duration')}
-          onToggle={() => toggleSection('duration')}
+      {/* ── Left column: controls (tool bar) ──────────────────────────── */}
+      {/* ≤720px the tool bar collapses into a "Tokens" rail that opens the same
+          controls as a drawer, sharing the mutually-exclusive drawer state with
+          the nav. Above 720px it is the full always-visible column. */}
+      {controlsCollapsed ? (
+        <RailDrawer
+          label="Tokens"
+          drawerId="tokens-drawer"
+          open={openDrawer === 'tokens'}
+          onToggle={() => toggleDrawer('tokens')}
+          onClose={closeDrawer}
         >
-          {Object.entries(durationConfig).map(([key, config]) => (
-            <SliderRow
-              key={key}
-              name={key}
-              value={rawState.duration[key]}
-              config={config}
-              onChange={value => dispatch({ type: 'SET_DURATION', key, value })}
-              tokenKey={`duration.${key}`}
-            />
-          ))}
-        </ControlSection>
-
-        <ControlSection
-          label="Easing"
-          isOpen={openSections.has('easing')}
-          onToggle={() => toggleSection('easing')}
-        >
-          {/*
-            ── Shared Vocabulary ────────────────────────────────────────────
-            Named presets exist because design and engineering need a shared
-            language. "Use spring easing on the modal" is a complete, precise
-            instruction. "Use cubic-bezier(0.34, 1.56, 0.64, 1) on the modal"
-            is the same instruction, but opaque to anyone not holding a
-            reference sheet.
-
-            Production design systems (Material Design, Primer, Spectrum) all
-            name their easing curves for this reason. The names are vocabulary;
-            the bezier values are implementation details.
-
-            Dragging the control points above creates a custom curve — valid
-            for exploration, but a curve without a name can't be systematized.
-            If a custom curve is worth keeping, it should become a named token.
-          */}
-          <EasingSection rawState={rawState} dispatch={dispatch} />
-        </ControlSection>
-
-        <ControlSection
-          label="Delay"
-          isOpen={openSections.has('delay')}
-          onToggle={() => toggleSection('delay')}
-        >
-          {Object.entries(delayConfig).map(([key, config]) => (
-            <SliderRow
-              key={key}
-              name={key}
-              value={rawState.delay[key]}
-              config={config}
-              onChange={value => dispatch({ type: 'SET_DELAY', key, value })}
-              tokenKey={`delay.${key}`}
-            />
-          ))}
-        </ControlSection>
-
-        <ControlSection
-          label="Scale"
-          isOpen={openSections.has('scale')}
-          onToggle={() => toggleSection('scale')}
-        >
-          {Object.entries(scaleConfig).map(([key, config]) => (
-            <SliderRow
-              key={key}
-              name={key}
-              value={rawState.scale[key]}
-              config={config}
-              onChange={value => dispatch({ type: 'SET_SCALE', key, value })}
-              tokenKey={`scale.${key}`}
-            />
-          ))}
-        </ControlSection>
-
-      </aside>
+          {controlsContent}
+        </RailDrawer>
+      ) : (
+        <aside className={styles.controls}>{controlsContent}</aside>
+      )}
 
       {/* ── Middle column: navigation ─────────────────────────────────── */}
       {/* Outside MotionTokensProvider on purpose: the nav reads no motion
           tokens. Its transitions use the fixed --feedback-nav-duration so
-          Explore mode can't collapse them. */}
-      <NavColumn />
+          Explore mode can't collapse them. Collapse + drawer state are owned
+          here so the Tokens and Navigation drawers stay mutually exclusive. */}
+      <NavColumn
+        collapsed={navCollapsed}
+        open={openDrawer === 'nav'}
+        onToggle={() => toggleDrawer('nav')}
+        onClose={closeDrawer}
+      />
 
       {/* ── Right column: demo area ───────────────────────────────────── */}
       {/* MotionTokensProvider wraps only this column — every demo inside

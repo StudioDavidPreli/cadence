@@ -100,6 +100,28 @@ Hash-based, no router dependency, via a `useHashRoute` hook that syncs navigatio
 
 Section, category, and filter routing is in scope for this build. Deep-linking to a specific expanded principle is the most involved piece, because `PrinciplesLibrary` currently owns its expansion state internally and it has to sync that to the hash. If it grows past a clean change it ships as a follow-up; the rest of the routing lands regardless.
 
-## Deferred: responsive
+## Desktop width handling (resolved 2026-06-17)
 
-The third column changes the layout's width budget. The minimum desktop viewport (574px) and the existing `max-width: 720px` / `max-height: 600px` unlock queries were sized for the two-column shell. Handling the three-column responsive behavior (the navigation column collapsing to a top bar or stacking) is deferred to the separate "Responsive behavior on mobile" Week 8 item. This build must not regress the existing breakpoints.
+The third column changes the width budget. With `300px` controls + `220px` nav fixed, a plain `1fr` demo area collapses toward zero around `~600px` viewport and drops below the principles grid's `420px` floor by `~1020px`. The two fixed columns were eating the width the demo area needs.
+
+This is a desktop-first tool, so the stance is: **the demo area is the star and never yields.** The pieces, by breakpoint:
+
+- **Demo floor (always).** The demo column is `minmax(420px, 1fr)`, so it never shrinks below the principles grid's floor.
+- **≤1024px — nav collapses.** The last width where `300 + 220 + 420 + 80 padding ≈ 1020` fits. The nav column becomes a 44px "Navigation" rail; the full controls stay.
+- **≤720px — controls collapse too.** The tool bar becomes a 44px "Tokens" rail, sitting left of the Navigation rail. Below this both columns are rails (`44 + 44 + 420 + 80`), so the demo area still has its full floor.
+
+Each rail opens its content (the controls, or the nav accordion) as a drawer over the demo area. The two drawers are **mutually exclusive**: TokenLab owns a single `openDrawer` value (`'tokens' | 'nav' | null`), so opening one closes the other, which is the requested switch behavior. The generic `RailDrawer` component renders both. The earlier column-trim (Option C) was dropped; the collapses solve the width pressure more completely.
+
+**Drawers open over the demo, not over the controls.** The backdrop and drawer start at `--drawer-left` (the combined width of the rail strip to their left: `344px` while controls are full, `88px` once both collapse), so the rails to their left stay uncovered and clickable. That is what lets you click the other rail to switch while a drawer is open; a full-width backdrop would trap you in one drawer.
+
+The horizontal pan (`overflow-x: auto` on `.tool`) remains only as a deep fallback below ~588px, where even two rails plus the demo floor no longer fit. The body-scroll unlock is now **height-only** (`max-height: 600px`): the old `max-width: 720px` trigger was removed because it released the height lock at 720px wide and ballooned the controls column to full content height. Narrow width is handled by the collapses and the pan instead.
+
+A documented side effect: because the demo column can no longer fall below `420px`, the principles grid always resolves to at least two columns, so the latent `getExpandedFootprint` `columnCount === 1` edge case can no longer trigger.
+
+### Drawer behavior and accessibility
+
+Each rail is a grid item; its drawer and backdrop are absolutely positioned against `.tokenLab` (`position: relative`), so they sit outside grid flow and add no column. The drawer is `role="dialog"` / `aria-modal`, takes focus on open, restores focus to its rail on close, contains Tab within itself (a focus trap), and closes on Escape or backdrop click. Rail clicks toggle (and close the sibling). Drawers animate on the fixed `--feedback-nav-duration` and snap under `prefers-reduced-motion`. `useMediaQuery` drives each collapse so the rendered form matches the grid width at the same breakpoint.
+
+Because the controls live inside the Tokens drawer when collapsed, they unmount while it is closed; the token reducer lives in TokenLab and never unmounts, so token VALUES persist (only transient slider UI state, like the active easing slot, resets on reopen).
+
+Known gap: the `max-height: 600px` unlock makes `.tokenLab` auto-height, which collapses the demo area's absolutely-positioned crossfade layers. Short viewports are unaddressed and pair with the future true-phone layout work (vertical stacking of all three regions).

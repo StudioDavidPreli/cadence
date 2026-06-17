@@ -1,51 +1,77 @@
 import { useNavState, useNavActions } from '../../context/NavigationContext'
+import { RailDrawer } from '../RailDrawer'
 import { SECTIONS, CATEGORIES, FILTERS } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
 // ─── NavColumn ──────────────────────────────────────────────────────────────
 //
-// The middle column. A single-open accordion holding the two tools. A vertical
-// column (not the old horizontal tab strip) so each category owns a full-width
-// row: long labels wrap inside their row instead of competing for horizontal
-// space, and adding a category adds a row.
+// The navigation column. Above 1024px it is a single-open accordion inline in
+// its own column. At/below 1024px (controlled by the parent via `collapsed`) it
+// becomes a "Navigation" rail that opens the same accordion as a drawer.
 //
-// Two sections behave differently because their content models differ:
-//   Token Lab  — disclosure only. Expands to four category rows; the hero stays
-//                until a category is clicked.
-//   Principles — disclosure AND destination. Opening it shows the grid and
-//                reveals the Classic / Extended filters.
-// That asymmetry lives in the reducer (see NavigationContext); this component
-// just renders the current state and dispatches the section/leaf clicks.
+// Collapse and drawer state are owned by TokenLab, not here, so the Tokens and
+// Navigation drawers are mutually exclusive: opening one closes the other. This
+// component just renders the form the parent asks for.
 
 const PRINCIPLE_FILTERS = [
   { id: FILTERS.CLASSIC,  label: 'Classic'  },
   { id: FILTERS.EXTENDED, label: 'Extended' },
 ]
 
-export function NavColumn() {
+export function NavColumn({ collapsed, open, onToggle, onClose }) {
+  if (!collapsed) {
+    return (
+      <nav className={styles.nav} aria-label="Tools and categories">
+        <NavAccordion />
+      </nav>
+    )
+  }
+
+  return (
+    <RailDrawer
+      label="Navigation"
+      drawerId="nav-drawer"
+      open={open}
+      onToggle={onToggle}
+      onClose={onClose}
+    >
+      {/* Choosing a destination closes the drawer; toggling a section open does
+          not (the user is about to pick within it). */}
+      <NavAccordion onNavigate={onClose} />
+    </RailDrawer>
+  )
+}
+
+// ─── NavAccordion ─────────────────────────────────────────────────────────────
+// The two-section accordion, shared by the inline column and the drawer. In the
+// drawer, onNavigate closes it when a destination is chosen — but NOT when the
+// Token Lab header is toggled, since that is pure disclosure (the user is about
+// to pick a category). In the inline column onNavigate is undefined (no close).
+function NavAccordion({ onNavigate }) {
   const { section, destination, expandedSection, principleFilter } = useNavState()
   const { selectCategory, toggleSection, setFilter } = useNavActions()
 
   const tokenLabOpen   = expandedSection === SECTIONS.TOKEN_LAB
   const principlesOpen = expandedSection === SECTIONS.PRINCIPLES
 
-  // Stable ids so each header's aria-controls points at the region it expands.
   const tokenLabBodyId   = 'nav-section-token-lab'
   const principlesBodyId = 'nav-section-principles'
 
+  const pickCategory    = id => { selectCategory(id); onNavigate?.() }
+  const pickFilter      = f  => { setFilter(f); onNavigate?.() }
+  const clickPrinciples = () => { toggleSection(SECTIONS.PRINCIPLES); onNavigate?.() }
+  const clickTokenLab   = () => toggleSection(SECTIONS.TOKEN_LAB) // disclosure only
+
   return (
-    <nav className={styles.nav} aria-label="Tools and categories">
+    <>
       {/* ── Token Lab ─────────────────────────────────────────────────── */}
       <SectionHeader
         label="Token Lab"
         open={tokenLabOpen}
         bodyId={tokenLabBodyId}
-        // "Active" (the current tool) only once a category is selected; the
-        // header itself loads nothing. aria-current lives on the selected
-        // category row, not the header, so it is not flagged current here.
         active={section === SECTIONS.TOKEN_LAB && destination !== null}
         current={false}
-        onClick={() => toggleSection(SECTIONS.TOKEN_LAB)}
+        onClick={clickTokenLab}
       />
       <AccordionBody id={tokenLabBodyId} open={tokenLabOpen}>
         {CATEGORIES.map(cat => (
@@ -54,7 +80,7 @@ export function NavColumn() {
             label={cat.label}
             active={destination === cat.id}
             tabbable={tokenLabOpen}
-            onClick={() => selectCategory(cat.id)}
+            onClick={() => pickCategory(cat.id)}
           />
         ))}
       </AccordionBody>
@@ -64,11 +90,9 @@ export function NavColumn() {
         label="Principles"
         open={principlesOpen}
         bodyId={principlesBodyId}
-        // The Principles header IS the destination (the grid), so it is both
-        // active styling AND the current location for assistive tech.
         active={section === SECTIONS.PRINCIPLES}
         current={section === SECTIONS.PRINCIPLES}
-        onClick={() => toggleSection(SECTIONS.PRINCIPLES)}
+        onClick={clickPrinciples}
       />
       <AccordionBody id={principlesBodyId} open={principlesOpen}>
         {PRINCIPLE_FILTERS.map(f => (
@@ -77,11 +101,11 @@ export function NavColumn() {
             label={f.label}
             active={principleFilter === f.id}
             tabbable={principlesOpen}
-            onClick={() => setFilter(f.id)}
+            onClick={() => pickFilter(f.id)}
           />
         ))}
       </AccordionBody>
-    </nav>
+    </>
   )
 }
 

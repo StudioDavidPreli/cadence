@@ -22,7 +22,10 @@ body {
   overflow: hidden;
 }
 
-@media (max-width: 720px), (max-height: 600px) {
+/* Height-only unlock (see App.module.css for the full rationale). Narrow width
+   is handled by the collapsing tool bar / nav rails and the horizontal pan, so
+   only a short viewport reverts the page to natural scroll. */
+@media (max-height: 600px) {
   body {
     height: auto;
     overflow: visible;

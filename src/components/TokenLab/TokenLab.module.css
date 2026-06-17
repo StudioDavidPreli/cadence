@@ -3,8 +3,23 @@
   /* Three columns: controls (tool bar) | navigation | demo area. The nav
      column is fixed-width like the controls; the demo area takes the rest.
      The tool bar stays mounted across both tools so the Principles demos keep
-     reading live token values. */
-  grid-template-columns: 300px 220px 1fr;
+     reading live token values.
+
+     The demo column uses minmax(420px, 1fr), not 1fr: 420px is the principles
+     grid's floor (2 × 180 + gap + padding). Without the floor, the two fixed
+     columns eat the width budget and the demo area collapses toward zero below
+     ~1020px. With it, the demo area never shrinks below a usable size.
+
+     At ≤1024px (the last width where 300 + 220 + 420 + 80 padding fits) the nav
+     column collapses to a 44px rail that opens the accordion as a drawer (see
+     NavColumn). That frees the nav's width back to the demo area, so the full
+     three-column layout only exists above 1024px. The horizontal pan (.tool
+     owns overflow-x in App.module.css) remains as a deep fallback for the rare
+     case below ~844px where even the collapsed layout no longer fits. */
+  grid-template-columns: 300px 220px minmax(420px, 1fr);
+  /* position: relative anchors the nav drawer + backdrop, which are absolutely
+     positioned against this box (and clipped to its rounded corners). */
+  position: relative;
   /* grid-template-rows: minmax(0, 1fr) is the load-bearing piece of the
      app-shell layout. The minmax-with-0 minimum is the grid analogue of
      `min-height: 0` on a flex item: without the explicit 0 floor, `1fr`
@@ -31,6 +46,31 @@
      clips the children back from the edges, exposing the container behind them).
      In light mode this appeared as a white outline along the left edge where
      the controls column (--color-bg) was clipped but the white container showed. */
+}
+
+/* ≤1024px: the nav column collapses to a 44px rail; the full controls column
+   stays. ≤720px: the controls collapse to a rail too, so both rails sit side by
+   side (Tokens left of Navigation). The freed width goes to the demo area, so no
+   horizontal scroll appears in the normal desktop range. Breakpoints must mirror
+   the useMediaQuery calls in TokenLab/index.jsx.
+
+   --drawer-left is the combined width of the persistent rail strip to the left
+   of the drawers: controls(300) + nav-rail(44) = 344 while the controls are
+   full, then tokens-rail(44) + nav-rail(44) = 88 once both collapse. The
+   drawers and backdrop start there (RailDrawer.module.css) so they cover only
+   the demo area and leave the rails clickable to switch between them. */
+@media (max-width: 1024px) {
+  .tokenLab {
+    grid-template-columns: 300px 44px minmax(420px, 1fr);
+    --drawer-left: 344px;
+  }
+}
+
+@media (max-width: 720px) {
+  .tokenLab {
+    grid-template-columns: 44px 44px minmax(420px, 1fr);
+    --drawer-left: 88px;
+  }
 }
 
 /* ── Controls column ────────────────────────────────────────────────────── */

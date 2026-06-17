@@ -1,0 +1,59 @@
+/* The slim rail that replaces a collapsed column. Fills its grid column (44px);
+   the label reads vertically up the rail. text-muted on bg is AA in every theme.
+   The rail sits LEFT of the backdrop (which starts at --drawer-left), so it is
+   never overlapped and stays clickable while another drawer is open. */
+.rail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  background-color: var(--color-bg);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: color var(--feedback-nav-duration) ease;
+}
+
+.rail:hover {
+  color: var(--color-text-base);
+}
+
+.railLabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* read bottom-to-top */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Backdrop and drawer are absolutely positioned against .tokenLab
+   (position: relative), so they sit outside grid flow and add no column. Both
+   start at --drawer-left — the combined width of the persistent rail strip to
+   their left — so they cover only the demo area and leave the rails clickable.
+   High z-index clears the demo-area crossfade layers. */
+.backdrop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--drawer-left, 0);
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--drawer-left, 0);
+  width: 300px;
+  z-index: 1001;
+  background-color: var(--color-bg);
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  padding: 8px 0;
+}

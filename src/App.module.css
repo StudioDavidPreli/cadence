@@ -9,10 +9,15 @@
    .tool is the standard flex-child override that lets it shrink below
    its content size, which in turn lets descendants own the scroll.
 
-   Below 720 px wide or 600 px tall, the layout unlocks: body regains
-   natural overflow, .appShell switches to min-height so it can grow
-   beyond the viewport, and .tool drops its flex bound. This catches
-   phones, narrow tablets, and users who zoom past 200 % on a desktop. */
+   The unlock below is HEIGHT-only (≤600px tall): body regains natural
+   overflow, .appShell switches to min-height so it can grow beyond the
+   viewport, and .tool drops its flex bound, so a short window scrolls
+   rather than clipping the tool. Narrow WIDTH is handled differently now:
+   the controls collapse to a "Tokens" rail at ≤720px and the nav to a
+   rail at ≤1024px (and the tool pans horizontally below ~588px), so the
+   layout never needs to unlock on width. The old max-width: 720px trigger
+   was removed because it ballooned the controls column to full height at
+   720px wide before the collapse existed. */
 
 .appShell {
   height: 100vh;
@@ -62,9 +67,16 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  /* Horizontal pan for narrow desktop widths. The tokenLab grid holds a
+     minimum width (its fixed columns plus the demo area's 420px floor); when
+     the viewport is narrower than that, the whole tool scrolls sideways as one
+     unit rather than letting the demo area collapse. Desktop-first: the layout
+     keeps its integrity and the window pans. Vertical scroll still lives inside
+     each column, so this only engages on the horizontal axis. */
+  overflow-x: auto;
 }
 
-@media (max-width: 720px), (max-height: 600px) {
+@media (max-height: 600px) {
   .appShell {
     height: auto;
     min-height: 100vh;

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavState } from '../../context/NavigationContext'
+import { navDurationSeconds } from '../../utils/feedbackDuration'
 import styles from './DemoArea.module.css'
 
 // ─── DemoArea ─────────────────────────────────────────────────────────────────
@@ -18,17 +19,9 @@ import styles from './DemoArea.module.css'
 // --motion-* tokens. Explore mode can drag those to near zero; navigation chrome
 // must not be collapsible into an imperceptible jump. See motion.css.
 
-function navDurationSeconds() {
-  // prefers-reduced-motion: snap with no fade.
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return 0
-  const ms = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue('--feedback-nav-duration'),
-  )
-  return (Number.isFinite(ms) ? ms : 360) / 1000
-}
-
 export function DemoArea({ categoryContent, principlesContent, hero }) {
   const { destination } = useNavState()
+  const reduce = useReducedMotion()
   const activeKey = destination ?? 'hero'
 
   // Frozen content snapshot per key. During the crossfade BOTH layers are
@@ -58,7 +51,7 @@ export function DemoArea({ categoryContent, principlesContent, hero }) {
     prevKeyRef.current = activeKey
   }
 
-  const navDur = navDurationSeconds()
+  const navDur = navDurationSeconds(reduce)
 
   return (
     <div className={styles.demoArea}>
