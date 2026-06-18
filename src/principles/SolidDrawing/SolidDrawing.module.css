@@ -1,0 +1,20 @@
+/* P11 Solid Drawing — Card demo.
+   Card sits at its natural content size, centered inside a generous dashed
+   frame. The Card cannot fill the frame: scale.lift is only 1.02 (a 2 % grow),
+   and growing into the frame edge produces no perceivable change. Centering
+   leaves clear empty space so the lift reads against the surrounding void. */
+.cardDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardDemoCard {
+  /* No flex / width overrides — Card sizes to its own content. */
+  max-width: 100%;
+}

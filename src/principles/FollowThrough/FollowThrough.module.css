@@ -1,0 +1,21 @@
+/* P5 Follow Through — Carousel demo.
+   Carousel was designed for TokenLab's wider demo cell. In the principle
+   card's narrower left half it needs to claim the full width and signal
+   draggability. flex-direction: column lets the slides + dot indicator stack
+   vertically inside the dashed frame. */
+.carouselDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: grab;
+  overflow: hidden;
+}
+
+.carouselDemo:active {
+  cursor: grabbing;
+}

@@ -1,0 +1,12 @@
+/* Dashed placeholder stage for the component demo (left half State 2).
+   flex: 1 fills the animationState container. Shared recipe with the
+   Phase 2 fallback frame in PrincipleCard. */
+.demoArea {
+  flex: 1;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}

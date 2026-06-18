@@ -1,0 +1,78 @@
+/* P18 Shared Vocabulary — two track/label blocks above a Cycle button.
+   Each track is a 12 px positioning context for the absolutely-positioned
+   dot. Dots loop in ping-pong (repeatType: 'reverse'). The label sits
+   BELOW the track so the eye reads motion-first, descriptor-second —
+   underscoring that the descriptor (name vs numbers) is annotation on
+   the same underlying motion.
+
+   Padding shrunk on the horizontal axis (10 px) so the 19-character
+   bezier string fits on one line. Gap of 32 px between the demonstration
+   stack and the Cycle button creates breathing room so the controls feel
+   distinct from the content they affect. */
+.vocabDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 22px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+}
+
+.vocabStack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vocabBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vocabCycleButton {
+  align-self: center;
+  transform: scale(0.85);
+  transform-origin: center;
+}
+
+.vocabName {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+  text-align: center;
+}
+
+.vocabNumbers {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.vocabTrack {
+  position: relative;
+  height: 12px;
+}
+
+/* Dot's resting "0 translation" position is the track's horizontal center.
+   The animation translates from -VOCAB_TRAVEL/2 to +VOCAB_TRAVEL/2 so the
+   ping-pong path is symmetric about the centerline of the frame. */
+.vocabDot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  background-color: var(--color-text-base);
+  border-radius: 50%;
+}

@@ -1,0 +1,27 @@
+/* P6 Slow In/Out — ProgressBar demo.
+   Stacks the bar above its trigger (vs a centered single child). Gap is tight
+   so the trigger reads as plumbing for the bar, not a peer. */
+.progressDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.progressDemoButtonRow {
+  display: flex;
+  justify-content: center;
+}
+
+/* P06 Slow In & Slow Out — the curve toggle (Tokens vs Linear) sits between
+   the bar and the Fill/Reset button, centered to match the button row. */
+.easeToggleRow {
+  display: flex;
+  justify-content: center;
+}

@@ -1,0 +1,53 @@
+/* P14 Hierarchy of Motion — parent pill above three indented child rows.
+   Vertical tree shape using `└` glyphs on the children so the hierarchy
+   reads before any click. Only parent is interactive; children are
+   pure followers (no cursor:pointer, no hover). */
+.hierarchyDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hierarchyParent {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.hierarchyParent:hover {
+  background-color: var(--color-surface-active);
+  border-color: var(--color-text-muted);
+}
+
+/* Children use --color-surface-raised, not --color-surface. The latter is
+   the inverted/interactive surface that stays dark in light theme and goes
+   black in HC; pairing it with --color-text-muted produces black-on-black
+   in HC and gray-on-dark in light. surface-raised inverts correctly per
+   theme and is audit-safe with text-muted (≥5.5:1 in every theme). */
+.hierarchyChild {
+  align-self: flex-start;
+  margin-left: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 10px;
+}

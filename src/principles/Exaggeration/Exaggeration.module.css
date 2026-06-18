@@ -1,0 +1,24 @@
+/* P10 Exaggeration — NotificationBadge demo.
+   The badge anchor is small; centering it leaves the overshoot legible
+   against empty space (without surrounding chrome to compress it
+   visually). Two buttons stack vertically — New and Clear are short
+   enough to fit side by side, but the demo column is ~133 px and
+   stacking keeps the buttons' tap-targets generous. */
+.exaggerationDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.exaggerationButtonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

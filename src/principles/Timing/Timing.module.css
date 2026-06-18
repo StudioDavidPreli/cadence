@@ -1,0 +1,29 @@
+/* P9 Timing — two Toggles, one per preset (Default, Cinematic).
+   Stacked vertically, each row has the toggle with its dynamic On/Off label
+   and a small caption naming the preset that scopes its motion tokens. */
+.timingDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.timingRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.timingPresetLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

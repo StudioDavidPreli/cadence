@@ -1,0 +1,17 @@
+/* P07 Arc — Tooltip demo.
+   The tooltip rests above its trigger and arcs through a mid-point that
+   sits ~10 px higher than rest. The frame is ~248 px tall interior; with
+   the 28 px trigger centered, the bubble has roughly 90 px of clear space
+   above rest before the dashed top edge — enough for the apex of the
+   curve to read without clipping. overflow stays at the default `visible`
+   so a bubble that grazes the apex limit is still drawn. */
+.tooltipDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

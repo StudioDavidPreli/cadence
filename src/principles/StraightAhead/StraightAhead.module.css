@@ -1,0 +1,22 @@
+/* P04 Straight Ahead & Pose to Pose — vertical stack.
+   The animationHalf is taller than wide (~165 × ~280 px), so Stepper sits
+   above ProgressBar above a single Next/Reset trigger. Stepper renders in
+   compact mode (no labels, no description, no internal button); the bar
+   is unlabeled. justify-content: center holds the trio centered while the
+   surrounding frame stays generous. */
+.straightAheadDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.straightAheadButtonRow {
+  display: flex;
+  justify-content: center;
+}

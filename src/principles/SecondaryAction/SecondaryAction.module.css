@@ -1,0 +1,14 @@
+/* P8 Secondary Action — Dropdown demo.
+   Top-aligned so the menu has room to expand downward without clipping at
+   the bottom of the dashed frame. */
+.dropdownDemo {
+  flex: 1;
+  align-self: stretch;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}

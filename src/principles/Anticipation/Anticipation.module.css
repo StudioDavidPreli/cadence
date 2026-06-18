@@ -1,0 +1,34 @@
+/* Scoped Drawer demo container. position:relative is the anchor for the
+   scoped Drawer's position:absolute backdrop and panel. overflow:hidden clips
+   the pre-entrance Drawer position. background-color gives the stage area
+   visible contrast against the card surface. */
+.drawerDemo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-active);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.drawerTrigger {
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-base);
+  cursor: pointer;
+  transition:
+    background-color 100ms var(--motion-ease-standard),
+    border-color 100ms var(--motion-ease-standard);
+}
+
+.drawerTrigger:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-text-muted);
+}
