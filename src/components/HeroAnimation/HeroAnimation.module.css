@@ -1,9 +1,21 @@
-/* Fills the demo layer and centers the canvas. position: relative so the
-   fallback prompt and the canvas can stack. */
+/* Fills the demo layer as a vertical stack: the Rive artwork on top, the text
+   description beneath it. */
 .hero {
-  position: relative;
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The Rive container. Takes the remaining vertical space above the description
+   and centers the canvas. position: relative so the fallback prompt and the
+   canvas can stack. min-height: 0 lets it shrink inside the flex column instead
+   of pushing the description out of view. */
+.riveContainer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,4 +39,29 @@
   color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* Description block beneath the artwork. flex: none keeps it at its natural
+   height so the Rive container absorbs all the flex give above. */
+.description {
+  flex: none;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 48px 40px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Purpose statement reads as primary content: full-contrast body color. */
+.descPurpose {
+  margin: 0 0 12px;
+  color: var(--color-text-base);
+}
+
+/* Instruction line is the secondary, helper register: muted for hierarchy.
+   Both colors meet WCAG AA for body text in every theme. */
+.descStart {
+  margin: 0;
+  color: var(--color-text-muted);
 }

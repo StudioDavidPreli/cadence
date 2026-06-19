@@ -149,6 +149,49 @@ verification above against whatever versions the upgrade actually
 resolves, since a Vite major pulls in a larger, newer transitive set and
 today's all-clear does not automatically carry forward.
 
+## Upgrade applied (2026-06-18)
+
+The deferred Vite major upgrade was done. Versions:
+
+- `vite` 5.4.21 to 7.3.5
+- `@vitejs/plugin-react` 4.3.1 to 5.2.0
+- added `vitest` 4.1.9 and a `test` script (the upgrade was sequenced ahead of
+  adding the test harness so Vitest pins once against the final Vite major)
+
+Vite 7 was chosen over the latest Vite 8 on purpose. Vite 8's matched plugin
+(`@vitejs/plugin-react` 6.x) peer-depends on `@rolldown/plugin-babel` and
+`babel-plugin-react-compiler`, toolchain surface this project does not need.
+`@vitejs/plugin-react` 5.2.0 spans Vite 7 and 8, so a later step to 8 stays open
+without re-pinning the plugin.
+
+Result. The four original alerts and the two Vite advisories disclosed June 16 all
+cleared, confirming the prediction above. One new advisory remained after the upgrade:
+
+| Severity | Package | Advisory | Note |
+|----------|---------|----------|------|
+| low | esbuild | GHSA-g7r4-m6w7-qqqr | arbitrary file read via the dev server on Windows; esbuild 0.27.3–0.28.0 |
+
+It was left in place, not forced. It is low severity, scoped to the dev server on
+Windows (this project is developed on macOS), and absent from the build output like
+every other toolchain advisory here. `npm audit fix` without `--force` cannot clear it
+because the patched esbuild sits outside Vite 7's pinned range; forcing it would pull
+esbuild out of the range Vite 7 was tested against for no real gain. esbuild resolved
+at 0.27.7.
+
+Supply-chain re-verification (required above, since a Vite major pulls a larger
+transitive set):
+
+- None of the 2026-compromised packages (axios/plain-crypto-js, node-ipc, @tanstack/*,
+  @redhat-cloud-services/*, node-gyp) appear anywhere in the tree.
+- Every dependency resolves from `registry.npmjs.org`; no off-registry URLs in the
+  lockfile.
+- All entries carry SRI integrity hashes, so `npm ci` fails closed on tampering.
+- New transitive majors: vite 7.3.5, @vitejs/plugin-react 5.2.0, vitest 4.1.9,
+  esbuild 0.27.7, rollup 4.60.1.
+
+Build verified clean on Vite 7: 486 modules, 517.87 kB JS (161.65 kB gzipped), no
+regression from the pre-upgrade 516 kB.
+
 ## Sources
 
 - Microsoft, Mitigating the Axios npm supply chain compromise: https://www.microsoft.com/en-us/security/blog/2026/04/01/mitigating-the-axios-npm-supply-chain-compromise/

@@ -2,7 +2,7 @@
 
 A motion design system explorer built for designers learning how animation tokens drive UI behavior.
 
-Cadence demonstrates the relationship between design tokens and motion through two interactive tools: a live token editor and an interactive library of the 12 principles of animation applied to UI components.
+Cadence demonstrates the relationship between design tokens and motion through two interactive tools: a live token editor and an interactive library of animation principles applied to UI components, the classic 12 plus 6 extended design-engineering principles.
 
 **Built with:** React, Framer Motion, CSS Custom Properties, Vite
 
@@ -16,7 +16,7 @@ Cadence demonstrates the relationship between design tokens and motion through t
 A live editor for motion design tokens — duration, easing, delay, scale. Adjusting token values updates components across the UI in real time. The relationship between token and behavior is visible and immediate.
 
 ### Principles Library
-The 12 principles of animation, each demonstrated through a real UI component. Each principle is interactive, isolated, and driven by the token system. Principles covered:
+Animation principles, each demonstrated through a real UI component. Each principle is interactive, isolated, and driven by the token system. The classic 12 principles of animation:
 
 1. Squash and Stretch
 2. Anticipation
@@ -30,6 +30,15 @@ The 12 principles of animation, each demonstrated through a real UI component. E
 10. Exaggeration
 11. Solid Drawing
 12. Appeal
+
+Six extended design-engineering principles that bridge animation and systems thinking:
+
+13. Systematization
+14. Hierarchy of Motion
+15. Economy
+16. Token Fidelity
+17. Reduced Motion
+18. Shared Vocabulary
 
 ---
 
