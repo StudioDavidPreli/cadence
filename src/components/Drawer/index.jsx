@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import styles from './Drawer.module.css'
@@ -7,26 +8,20 @@ import styles from './Drawer.module.css'
 // A bottom-entry drawer with a dimming backdrop. Positioned fixed so it renders
 // over the full viewport regardless of where in the DOM it is mounted.
 //
-// ── Asymmetric duration ───────────────────────────────────────────────────────
-// Enter uses tokens.duration.slow. Exit uses tokens.duration.base.
-// This asymmetry is deliberate and has a perceptual basis:
+// ── Equal duration, asymmetric character ─────────────────────────────────────
+// Enter and exit both run on tokens.duration.slow. The asymmetry is not in the
+// time budget, it is in the easing and where the keyframes sit inside it.
 //
-// Arrival deserves more time than departure.
+// Enter uses ease.enter with times [0, 0.7, 1]: the panel spends most of the
+// slow duration rising, overshoots a few percent near the end, then settles.
+// The eye tracks it in and it arrives at rest gently.
 //
-// When a drawer opens, the user needs a moment to reorient — content is
-// entering the visual field and competing for attention. A slower enter gives
-// the eye time to track the panel before it settles, reducing the cognitive
-// jolt of content appearing suddenly. It also communicates that what's
-// arriving has weight — it matters enough to take up space.
+// Exit uses ease.exit with times [0, 0.2, 1]: a short dip in the first fifth,
+// then it accelerates down and clears the frame over the rest. Same clock,
+// opposite shape. The dip reads as intent before the panel leaves.
 //
-// When a drawer closes, the user has already decided they're done with it.
-// Keeping it on screen any longer than necessary introduces friction. A faster
-// exit clears the path immediately. The user's intent was expressed in the
-// close action; the animation should honor that intent and get out of the way.
-//
-// This pattern appears throughout well-considered UI systems: modals open
-// slowly, dismiss quickly. Tooltips appear with a delay, vanish instantly.
-// The direction of the animation carries meaning — arrival vs. departure.
+// Two motions can share a duration and still feel unrelated. The curve and the
+// keyframe spacing carry the character, not the length.
 //
 // ── Two AnimatePresence children, independent timing ─────────────────────────
 // The backdrop and the drawer panel are both direct keyed children of a single
@@ -42,23 +37,30 @@ import styles from './Drawer.module.css'
 
 // scoped=true anchors the Drawer to its nearest positioned ancestor instead of
 // the viewport. The parent container must have position:relative and
-// overflow:hidden for correct containment. Default false preserves the existing
-// fixed-to-viewport behavior used in Token Lab.
-export function Drawer({ isOpen, onClose, title, children, scoped = false }) {
+// overflow:hidden for correct containment. Default false is fixed-to-viewport.
+//
+// portalTarget (a DOM node) renders the Drawer into that node instead of in
+// place, and implies scoped: Token Lab passes its demo-area overlay node so the
+// drawer fills the visible demo column rather than escaping it to the viewport.
+// When portalTarget is null the Drawer renders in place (the principle-card use,
+// which anchors to the card frame).
+export function Drawer({ isOpen, onClose, title, children, scoped = false, portalTarget = null }) {
   const tokens = useMotionTokens()
+  const anchored = scoped || portalTarget != null
 
-  return (
+  const tree = (
     <AnimatePresence>
       {/* Backdrop — dims the page behind the drawer, closes on click */}
       {isOpen && (
         <motion.div
           key="drawer-backdrop"
-          className={[styles.backdrop, scoped && styles.backdropScoped].filter(Boolean).join(' ')}
+          className={[styles.backdrop, anchored && styles.backdropScoped].filter(Boolean).join(' ')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
           exit={{ opacity: 0 }}
-          // Symmetric timing — the backdrop fade should feel ambient, not weighted.
-          // Using duration.base matches the drawer's exit speed so they clear together.
+          // The backdrop fades on duration.base, faster than the panel's duration.slow,
+          // so the dimming lifts while the panel is still on its way out. Ambient, not
+          // weighted: the backdrop is atmosphere, the panel is the event.
           transition={{ duration: tokens.duration.base, ease: tokens.ease.enter }}
           onMouseDown={onClose}
         />
@@ -68,7 +70,7 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false }) {
       {isOpen && (
         <motion.div
           key="drawer-panel"
-          className={[styles.drawer, scoped && styles.drawerScoped].filter(Boolean).join(' ')}
+          className={[styles.drawer, anchored && styles.drawerScoped].filter(Boolean).join(' ')}
           initial={{ y: '100%', opacity: 0 }}
           animate={{
             y: ['100%', '-4%', '0%'],
@@ -117,4 +119,6 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false }) {
       )}
     </AnimatePresence>
   )
+
+  return portalTarget ? createPortal(tree, portalTarget) : tree
 }

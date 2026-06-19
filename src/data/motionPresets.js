@@ -196,6 +196,30 @@ export function toFlatJson(state) {
   return JSON.stringify(doc, null, 2)
 }
 
+// CSS custom properties mirroring src/tokens/motion.css: a `:root` block of the
+// editable `--motion-*` tokens, ready to paste into a stylesheet. Durations and
+// delays carry `ms` units, easing serializes as `cubic-bezier()`, scale is
+// unitless. Only the editable token scale is emitted — the `--feedback-*` vars
+// in motion.css are tool chrome, not part of the exported token document. This
+// is export-only: importTokens reads JSON, not CSS.
+export function toCssVars(state) {
+  const t = stateToExport(state)
+  // Each family becomes a run of `  --motion-<family>-<key>: <value>;` lines.
+  // The families are separated by a blank line, matching motion.css's grouping.
+  const block = (family, group, fmt) =>
+    Object.entries(group).map(([k, v]) => `  --motion-${family}-${k}: ${fmt(v)};`)
+  const lines = [
+    ...block('duration', t.duration, ms => `${ms}ms`),
+    '',
+    ...block('ease', t.easing, bezierCss),
+    '',
+    ...block('delay', t.delay, ms => `${ms}ms`),
+    '',
+    ...block('scale', t.scale, n => n),
+  ]
+  return `:root {\n${lines.join('\n')}\n}`
+}
+
 // ─── Token import ─────────────────────────────────────────────────────────────
 // Import is the strict inverse of export, plus validation. The export pipeline
 // discarded nothing the editor needs, so a Cadence file round-trips losslessly;

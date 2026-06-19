@@ -29,3 +29,21 @@
      so there is no visible change at rest. */
   background-color: var(--color-surface-raised);
 }
+
+/* Mount node for scoped overlay demos (Drawer, Modal) that portal up out of the
+   scrolling .layer. Fills the column and clips to it via .demoArea's
+   overflow: hidden, so the overlay reads as "inside the demo area" rather than
+   over the whole viewport.
+
+   z-index 100 clears the crossfade layers, whose z-index counts up from 1 (one
+   step per navigation, realistically a small number in any session).
+
+   pointer-events: none so this full-bleed box never intercepts clicks meant for
+   the demos beneath it when no overlay is open. The portaled backdrop and panel
+   re-enable pointer events for themselves (see Drawer/Modal scoped styles). */
+.overlayRoot {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}

@@ -4,6 +4,7 @@ import {
   stateToExport,
   toDtcgJson,
   toFlatJson,
+  toCssVars,
   importTokens,
   INITIAL_STATE,
   BUILT_IN_PRESETS,
@@ -120,6 +121,33 @@ describe('toFlatJson', () => {
     const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, 0.2, 0.3, 0.4] } }
     const doc = JSON.parse(toFlatJson(state))
     expect(doc.easing.standard).toBe('cubic-bezier(0.1, 0.2, 0.3, 0.4)')
+  })
+})
+
+// toCssVars emits a :root block of the editable --motion-* tokens. Its lines must
+// match the variable names and units in src/tokens/motion.css exactly, so an
+// export is a drop-in replacement for that block.
+describe('toCssVars', () => {
+  it('emits a :root block with the canonical --motion-* names and units', () => {
+    const css = toCssVars(INITIAL_STATE)
+    expect(css.startsWith(':root {')).toBe(true)
+    expect(css.trimEnd().endsWith('}')).toBe(true)
+    expect(css).toContain('--motion-duration-base: 200ms;')
+    expect(css).toContain('--motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);')
+    expect(css).toContain('--motion-delay-short: 50ms;')
+    expect(css).toContain('--motion-scale-lift: 1.02;')
+  })
+
+  it('carries the non-editable constants linear, spring, and delay.none', () => {
+    const css = toCssVars(INITIAL_STATE)
+    expect(css).toContain('--motion-ease-linear: cubic-bezier(0, 0, 1, 1);')
+    expect(css).toContain('--motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);')
+    expect(css).toContain('--motion-delay-none: 0ms;')
+  })
+
+  it('serializes a custom bezier slot as a cubic-bezier() value', () => {
+    const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, 0.2, 0.3, 0.4] } }
+    expect(toCssVars(state)).toContain('--motion-ease-standard: cubic-bezier(0.1, 0.2, 0.3, 0.4);')
   })
 })
 

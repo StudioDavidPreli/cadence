@@ -11,6 +11,9 @@ import { EasingVisualizer } from '../EasingVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
 import { NavColumn } from '../NavColumn'
 import { DemoArea } from '../DemoArea'
+import { useDemoOverlay } from '../DemoArea/overlayContext'
+import { CodeBlock } from '../CodeBlock'
+import { DEMO_SNIPPETS } from './demoSnippets'
 import { HeroAnimation } from '../HeroAnimation'
 import { RailDrawer } from '../RailDrawer'
 import { Button } from '../Button'
@@ -33,6 +36,7 @@ import {
   stateToTokens,
   toDtcgJson,
   toFlatJson,
+  toCssVars,
   importTokens,
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
@@ -361,9 +365,10 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   const [isSaving, setIsSaving] = useState(false)
   const [saveName, setSaveName]  = useState('')
   const fileInputRef = useRef(null)
-  // Export format: 'dtcg' (W3C Design Tokens) or 'flat' (CSS-mirroring JSON).
-  // Both serialize from the same stateToExport object, so the toggle only
-  // selects which stringifier runs at export time.
+  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), or
+  // 'css' (a drop-in :root block). All three serialize from the same
+  // stateToExport object, so the toggle only selects which stringifier runs at
+  // export time. Import handles dtcg/flat only; css is export-only.
   const [exportFormat, setExportFormat] = useState('dtcg')
   const [copied, setCopied] = useState(false)
   const activePresetId = getActivePresetId(rawState, allPresets)
@@ -379,14 +384,21 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   // The current token state serialized in the selected format. Computed on
   // demand (export and copy both call it) rather than held in state.
   function exportText() {
-    return exportFormat === 'dtcg' ? toDtcgJson(rawState) : toFlatJson(rawState)
+    if (exportFormat === 'dtcg') return toDtcgJson(rawState)
+    if (exportFormat === 'css')  return toCssVars(rawState)
+    return toFlatJson(rawState)
   }
 
   function handleExport() {
     // DTCG files conventionally carry the .tokens.json extension; the flat
-    // shape is a plain .json.
-    const filename = exportFormat === 'dtcg' ? 'cadence.tokens.json' : 'cadence-tokens.json'
-    downloadTextFile(filename, exportText())
+    // shape is a plain .json; the css block is a .css with the matching mime so
+    // the download opens as a stylesheet rather than plain text.
+    const file = {
+      dtcg: { name: 'cadence.tokens.json', mime: 'application/json' },
+      flat: { name: 'cadence-tokens.json', mime: 'application/json' },
+      css:  { name: 'cadence.tokens.css',  mime: 'text/css' },
+    }[exportFormat]
+    downloadTextFile(file.name, exportText(), file.mime)
   }
 
   async function handleCopy() {
@@ -505,6 +517,14 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             aria-pressed={exportFormat === 'flat'}
           >
             Flat
+          </button>
+          <button
+            type="button"
+            className={`${styles.exportFormatOption} ${exportFormat === 'css' ? styles.exportFormatOptionActive : ''}`}
+            onClick={() => setExportFormat('css')}
+            aria-pressed={exportFormat === 'css'}
+          >
+            CSS
           </button>
         </div>
         <button type="button" className={styles.exportButton} onClick={handleExport}>
@@ -659,8 +679,13 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
 // The warning triggers when this component is not in the affected list —
 // not only when the list is globally empty. A token that affects Stepper but
 // not Drawer should tell the Drawer: "Token unused by present components."
-function DemoWrapper({ componentName, instruction, children }) {
+// `code` (optional) is the source snippet for this demo. When present, a </>
+// toggle sits beside the component name and reveals a CodeBlock below the demo.
+// On-demand per demo: nothing renders until the user asks, so the column is not
+// buried in syntax. See CodeBlock for the live-value behavior.
+function DemoWrapper({ componentName, instruction, children, code }) {
   const activeToken = useActiveToken()
+  const [showCode, setShowCode] = useState(false)
 
   let state = 'idle'
   if (activeToken !== null) {
@@ -679,7 +704,20 @@ function DemoWrapper({ componentName, instruction, children }) {
         state === 'highlighted' ? styles.demoGroupHighlighted : '',
       ].join(' ')}
     >
-      <div className={styles.demoLabel}>{componentName}</div>
+      <div className={styles.demoLabelRow}>
+        <span className={styles.demoLabel}>{componentName}</span>
+        {code && (
+          <button
+            type="button"
+            className={`${styles.codeToggle} ${showCode ? styles.codeToggleActive : ''}`}
+            onClick={() => setShowCode(s => !s)}
+            aria-expanded={showCode}
+            aria-label={showCode ? 'Hide code' : 'Show code'}
+          >
+            {'</>'}
+          </button>
+        )}
+      </div>
       {children}
       {state !== 'no-demo' && instruction && (
         <p className={styles.demoInstruction}>{instruction}</p>
@@ -687,6 +725,22 @@ function DemoWrapper({ componentName, instruction, children }) {
       {state === 'no-demo' && (
         <p className={styles.noDemoNote}>Token unused by present components.</p>
       )}
+      {/* Reveal mirrors the Presets save-area reveal: height-auto at the 0.15s
+          tool-chrome timing, not an editable token. */}
+      <AnimatePresence initial={false}>
+        {code && showCode && (
+          <motion.div
+            key="code"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <CodeBlock code={code} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -713,15 +767,18 @@ function ControlsTitle() {
 
 // ─── DrawerDemo ───────────────────────────────────────────────────────────────
 // Manages local open/close state for the Drawer demo in the Enter & Exit tab.
-// The Drawer renders position:fixed so it overlays the full viewport — this
-// is intentional and demonstrates real production behavior.
+// portalTarget is the demo-area overlay node (see DemoArea.useDemoOverlay), so
+// the drawer fills the visible demo column instead of overlaying the whole
+// viewport and drawing under the navigation.
 function DrawerDemo() {
   const [isOpen, setIsOpen] = useState(false)
+  const overlay = useDemoOverlay()
 
   return (
     <DemoWrapper
       componentName="Drawer"
-      instruction="Open the drawer — duration.slow enters, duration.base exits"
+      instruction="Open the drawer. ease.enter brings it in, ease.exit takes it out, both on duration.slow"
+      code={DEMO_SNIPPETS.Drawer}
     >
       <button
         className={styles.demoTrigger}
@@ -734,20 +791,21 @@ function DrawerDemo() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Enter & Exit"
+        scoped
+        portalTarget={overlay}
       >
         <p>
-          This drawer enters with <strong>duration.slow</strong> and{' '}
-          <strong>ease.enter</strong> — arrival is deliberate, giving the eye
-          time to track the panel before it settles.
+          The drawer arrives on <strong>ease.enter</strong>. It rises past
+          its mark, then settles, so the eye catches it before it lands.
         </p>
         <p style={{ marginTop: '12px' }}>
-          It exits with <strong>duration.base</strong> and{' '}
-          <strong>ease.exit</strong> — departure is quick. The user has already
-          decided to close; keeping the panel on screen any longer is friction.
+          It leaves on <strong>ease.exit</strong>. Same{' '}
+          <strong>duration.slow</strong>, a different shape: a short dip, then
+          it drops and clears the frame.
         </p>
         <p style={{ marginTop: '12px' }}>
-          Drag the duration sliders to feel the difference between a slow,
-          considered entrance and a snappy exit.
+          Drag <strong>duration.slow</strong> and both halves retime together.
+          Drag the enter and exit curves and they pull apart.
         </p>
       </Drawer>
     </DemoWrapper>
@@ -760,6 +818,7 @@ function DrawerDemo() {
 // rises from rest at the center instead of sliding from an edge.
 function ModalDemo() {
   const [isOpen, setIsOpen] = useState(false)
+  const overlay = useDemoOverlay()
 
   return (
     <DemoWrapper
@@ -777,6 +836,8 @@ function ModalDemo() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Discard changes?"
+        scoped
+        portalTarget={overlay}
       >
         <p>
           The page narrows to one decision. <strong>duration.slow</strong> with{' '}

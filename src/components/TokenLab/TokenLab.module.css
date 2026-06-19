@@ -312,7 +312,7 @@
   border-top: 1px solid var(--color-border);
 }
 
-/* Segmented DTCG | Flat toggle. One bordered shell, two options sharing it. */
+/* Segmented DTCG | Flat | CSS toggle. One bordered shell, the options share it. */
 .exportFormatToggle {
   display: inline-flex;
   border: 1px solid var(--color-border);
@@ -332,7 +332,8 @@
   transition: background-color 100ms, color 100ms;
 }
 
-.exportFormatOption:first-child {
+/* A divider after every option but the last, so the segments read as one unit. */
+.exportFormatOption:not(:last-child) {
   border-right: 1px solid var(--color-border);
 }
 
@@ -755,13 +756,51 @@
   color: var(--color-text-primary);
 }
 
+/* Label row holds the component name and, when the demo has a code view, the
+   </> toggle. margin-bottom matches the old .demoLabel spacing so demos that
+   have no toggle are unaffected. */
+.demoLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
 .demoLabel {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  margin-bottom: 12px;
+}
+
+/* </> toggle for the per-demo code view. Monospace glyph, bordered, sits at the
+   right end of the label row. Active state mirrors the loaded-preset / active
+   export-format pill (filled surface). */
+.codeToggle {
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.codeToggle:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-border2);
+}
+
+.codeToggleActive,
+.codeToggleActive:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border2);
 }
 
 .demoGroup {

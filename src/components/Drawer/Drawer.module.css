@@ -45,11 +45,17 @@
 .backdropScoped {
   position: absolute;
   z-index: 1;
+  /* Re-enable interaction: when portaled into Token Lab's overlay mount (which
+     is pointer-events:none so it never blocks the demos), the backdrop must
+     still capture the click that closes the drawer. Harmless in the in-place
+     principle-card use, where the parent is interactive anyway. */
+  pointer-events: auto;
 }
 
 .drawerScoped {
   position: absolute;
   z-index: 2;
+  pointer-events: auto;
   /* Leave 30% of container height above the drawer so the backdrop is visible
      and clickable, and the anticipation overshoot reads against empty space.
      The viewport-mode 60vh constraint serves the same purpose at viewport scale. */

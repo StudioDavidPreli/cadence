@@ -1,0 +1,83 @@
+/* Read-only code view for a Token Lab demo. Sunken surface (--color-bg, one step
+   below the demo area's --color-surface-raised) so it reads as a distinct panel.
+   No syntax highlighter by design: source in the base text color, resolved-value
+   comments in the muted color. Theme-safe in dark, light, and HC without an
+   accent-as-text contrast risk. */
+.block {
+  position: relative;
+  margin-top: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  color: var(--color-text-base);
+}
+
+.pre {
+  margin: 0;
+  padding: 12px 14px;
+  /* Room for the Copy button so a long first line does not run under it. */
+  padding-right: 56px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Each source line. white-space: pre keeps the snippet's own indentation; the
+   trailing comment sits on the same line after the source. */
+.line {
+  white-space: pre;
+}
+
+.source {
+  color: var(--color-text-base);
+}
+
+/* Live resolved-value comment. Muted so it reads as annotation, not source.
+   Contrast against --color-bg exceeds the AA body minimum in every theme. The
+   transition lets the green chip ease in and, more importantly, fade back out
+   when a flash ends so a preset/curve change reads as a flash, not a hard blink.
+   Fixed tool-chrome timing, matching the Copy button's transition. */
+.comment {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+/* While its slider is being dragged, the value lights up green. The green lives
+   in the BACKGROUND (--color-accent-subtle, the highlight-background token), not
+   the text — the same "active" idiom the selected nav item and PrincipleCard use.
+   This sidesteps the light-mode accent-as-text failure (#4a9e52 is 3.3:1 on white,
+   below the 4.5:1 text bar) while still reading as the accent green in every theme.
+   Text lifts from muted to base for contrast on the tint, and the weight bump
+   stays. Transient: the drag ends, activeToken clears, and the value drops back to
+   muted weight 400. Trailing on the line, so the chip's padding shifts nothing. */
+.commentActive {
+  font-weight: 700;
+  color: var(--color-text-base);
+  background-color: var(--color-accent-subtle);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.copy:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-border2);
+}

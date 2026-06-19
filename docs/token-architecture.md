@@ -56,13 +56,14 @@ The order matters. Defining the token first means step 2 has something to point 
 
 Token Lab exports the live token state as a downloadable file. Export is the inverse of the addition workflow: the addition workflow brings a value into the system, export hands the whole system back out in a portable form.
 
-The export pipeline is three pure functions in `src/data/motionPresets.js`:
+The export pipeline is four pure functions in `src/data/motionPresets.js`:
 
 1. `stateToExport(state)` normalizes the editor's `rawState` into a format-agnostic object in CSS-side units (ms numbers, four-number bezier arrays, unitless scale). It emits the complete token set, including the members the editor never exposes as sliders: `ease.linear`, `ease.spring`, and `delay.none`. An export that dropped those would be a partial file, not a usable one.
 2. `toDtcgJson(state)` serializes that object to the W3C Design Tokens Community Group format, wrapping each leaf in `$type` / `$value` under a top-level `motion` namespace. This is the shape Style Dictionary, Tokens Studio, and Figma Variables consume. The draft spec has no motion-specific delay type, so delays serialize as `duration`.
 3. `toFlatJson(state)` serializes the same object to a flat JSON mirroring the CSS variable names: ms strings, `cubic-bezier()` strings, bare scale numbers.
+4. `toCssVars(state)` serializes the same object to a `:root` block of the editable `--motion-*` custom properties, in the exact variable names and units used by `src/tokens/motion.css`. It is a drop-in replacement for that block. Only the editable token scale is emitted; the `--feedback-*` chrome timings in `motion.css` are not design tokens and are left out.
 
-Both stringifiers read from the single `stateToExport` object, so the two outputs cannot drift apart. The Presets section UI (`PresetsSection` in `src/components/TokenLab/index.jsx`) picks the format and downloads via `downloadTextFile`, a client-side Blob download with no server round-trip. DTCG files use the `.tokens.json` extension; flat files use `.json`.
+All three stringifiers read from the single `stateToExport` object, so the outputs cannot drift apart. The Presets section UI (`PresetsSection` in `src/components/TokenLab/index.jsx`) picks the format and downloads via `downloadTextFile`, a client-side Blob download with no server round-trip. DTCG files use the `.tokens.json` extension, flat files use `.json`, and the CSS block uses `.tokens.css` with a `text/css` mime. CSS is export-only: `importTokens` reads the DTCG and flat JSON shapes, not CSS.
 
 ---
 

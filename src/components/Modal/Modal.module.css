@@ -41,11 +41,26 @@
 .backdropScoped {
   position: absolute;
   z-index: 1;
+  /* Re-enable interaction inside Token Lab's pointer-events:none overlay mount
+     so the backdrop still closes the dialog on click. Harmless in the in-place
+     principle-card use. */
+  pointer-events: auto;
+}
+
+/* Portaled into Token Lab's demo-column overlay: absolute (not fixed) so it
+   centers within the column, while keeping the full default panel sizing. The
+   column is much wider than a principle card, so panelScoped's 92% shrink would
+   read as an oversized dialog here. */
+.panelAnchored {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .panelScoped {
   position: absolute;
   z-index: 2;
+  pointer-events: auto;
   min-width: 0;
   /* The principle card's animationHalf is ~165 px wide. 92% leaves a small
      margin so the panel reads as floating above the dimmed frame, not

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import styles from './Modal.module.css'
@@ -56,9 +57,14 @@ import styles from './Modal.module.css'
 // the panel's focusable elements and does not restore focus to the trigger on
 // close, which is acceptable for the surfaces this Modal serves here.
 
-export function Modal({ isOpen, onClose, title, children, scoped = false }) {
+// portalTarget (a DOM node) renders the Modal into that node and implies scoped:
+// Token Lab's Enter & Exit demo passes its demo-area overlay node so the modal
+// centers within the visible demo column instead of the viewport. Null renders
+// in place (the principle-card use and the app-level import report).
+export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null }) {
   const tokens = useMotionTokens()
   const panelRef = useRef(null)
+  const anchored = scoped || portalTarget != null
 
   // Escape closes — standard dialog affordance.
   useEffect(() => {
@@ -98,12 +104,12 @@ export function Modal({ isOpen, onClose, title, children, scoped = false }) {
     return () => panel.removeEventListener('keydown', onKeyDown)
   }, [isOpen])
 
-  return (
+  const tree = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           key="modal-backdrop"
-          className={[styles.backdrop, scoped && styles.backdropScoped].filter(Boolean).join(' ')}
+          className={[styles.backdrop, anchored && styles.backdropScoped].filter(Boolean).join(' ')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
           exit={{
@@ -120,7 +126,14 @@ export function Modal({ isOpen, onClose, title, children, scoped = false }) {
           key="modal-panel"
           ref={panelRef}
           tabIndex={-1}
-          className={[styles.panel, scoped && styles.panelScoped].filter(Boolean).join(' ')}
+          // Portaled into the demo column (portalTarget): absolute but keep the
+          // full 420px dialog sizing — the column is far wider than a principle
+          // card, where panelScoped's 92% shrink belongs. Card use (scoped, no
+          // portal) keeps the shrink.
+          className={[
+            styles.panel,
+            portalTarget ? styles.panelAnchored : scoped && styles.panelScoped,
+          ].filter(Boolean).join(' ')}
           role="dialog"
           aria-modal="true"
           aria-label={title}
@@ -152,4 +165,6 @@ export function Modal({ isOpen, onClose, title, children, scoped = false }) {
       )}
     </AnimatePresence>
   )
+
+  return portalTarget ? createPortal(tree, portalTarget) : tree
 }

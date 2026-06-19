@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavState } from '../../context/NavigationContext'
 import { navDurationSeconds } from '../../utils/feedbackDuration'
+import { DemoOverlayContext } from './overlayContext'
 import styles from './DemoArea.module.css'
 
 // ─── DemoArea ─────────────────────────────────────────────────────────────────
@@ -53,24 +54,36 @@ export function DemoArea({ categoryContent, principlesContent, hero }) {
 
   const navDur = navDurationSeconds(reduce)
 
+  // The overlay mount node, captured by a callback ref into state so consumers
+  // re-render once it exists. Overlay demos only open on user click, well after
+  // mount, so the node is always present by then.
+  const [overlayNode, setOverlayNode] = useState(null)
+
   return (
     <div className={styles.demoArea}>
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={activeKey}
-          className={styles.layer}
-          style={{ zIndex: zMap.current[activeKey] }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          // Hold fully visible, then remove once the incoming layer is opaque.
-          // delay = navDur keeps the outgoing layer mounted under the incoming
-          // fade; duration 0 makes its actual removal instant and hidden.
-          exit={{ opacity: 0, transition: { delay: navDur, duration: 0 } }}
-          transition={{ duration: navDur, ease: 'easeInOut' }}
-        >
-          {frozen.current[activeKey]}
-        </motion.div>
-      </AnimatePresence>
+      <DemoOverlayContext.Provider value={overlayNode}>
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={activeKey}
+            className={styles.layer}
+            style={{ zIndex: zMap.current[activeKey] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            // Hold fully visible, then remove once the incoming layer is opaque.
+            // delay = navDur keeps the outgoing layer mounted under the incoming
+            // fade; duration 0 makes its actual removal instant and hidden.
+            exit={{ opacity: 0, transition: { delay: navDur, duration: 0 } }}
+            transition={{ duration: navDur, ease: 'easeInOut' }}
+          >
+            {frozen.current[activeKey]}
+          </motion.div>
+        </AnimatePresence>
+      </DemoOverlayContext.Provider>
+
+      {/* Overlay mount for scoped Drawer/Modal demos. Rendered after the layers
+          so it stacks above them, fills the column (inset: 0), and is
+          click-through when empty (see .overlayRoot). */}
+      <div ref={setOverlayNode} className={styles.overlayRoot} />
     </div>
   )
 }
