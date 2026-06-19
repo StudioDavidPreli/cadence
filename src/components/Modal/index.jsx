@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import styles from './Modal.module.css'
@@ -48,14 +48,17 @@ import styles from './Modal.module.css'
 // Standard dialog affordance. The listener is gated by isOpen so we don't
 // burn a global keydown handler when closed.
 //
-// ── Deferred ──────────────────────────────────────────────────────────────────
-// Focus trap. Real production modals trap Tab/Shift-Tab so focus cannot
-// escape to the page behind. The demo doesn't need this for visual
-// demonstration; it does need it before this Modal is used in any real
-// product surface.
+// ── Focus trap ────────────────────────────────────────────────────────────────
+// Tab/Shift-Tab are kept inside the panel so focus cannot escape to the page
+// behind while the dialog is open. On open, focus moves to the first focusable
+// element (or the panel itself). Added when the Token import report made this a
+// real product surface rather than a visual demo. Minimal by design: it cycles
+// the panel's focusable elements and does not restore focus to the trigger on
+// close, which is acceptable for the surfaces this Modal serves here.
 
 export function Modal({ isOpen, onClose, title, children, scoped = false }) {
   const tokens = useMotionTokens()
+  const panelRef = useRef(null)
 
   // Escape closes — standard dialog affordance.
   useEffect(() => {
@@ -66,6 +69,34 @@ export function Modal({ isOpen, onClose, title, children, scoped = false }) {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [isOpen, onClose])
+
+  // Focus trap. Runs while open; cleans up its keydown listener on close.
+  useEffect(() => {
+    if (!isOpen) return
+    const panel = panelRef.current
+    if (!panel) return
+    const selector =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    const focusables = () => Array.from(panel.querySelectorAll(selector))
+    // Move focus into the dialog on open.
+    ;(focusables()[0] || panel).focus()
+    function onKeyDown(e) {
+      if (e.key !== 'Tab') return
+      const items = focusables()
+      if (items.length === 0) { e.preventDefault(); return }
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    panel.addEventListener('keydown', onKeyDown)
+    return () => panel.removeEventListener('keydown', onKeyDown)
+  }, [isOpen])
 
   return (
     <AnimatePresence>
@@ -87,6 +118,8 @@ export function Modal({ isOpen, onClose, title, children, scoped = false }) {
       {isOpen && (
         <motion.div
           key="modal-panel"
+          ref={panelRef}
+          tabIndex={-1}
           className={[styles.panel, scoped && styles.panelScoped].filter(Boolean).join(' ')}
           role="dialog"
           aria-modal="true"

@@ -31,6 +31,9 @@ import {
   INITIAL_STATE,
   BUILT_IN_PRESETS,
   stateToTokens,
+  toDtcgJson,
+  toFlatJson,
+  importTokens,
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
 
@@ -116,6 +119,21 @@ function writeAllTokensToCss(state) {
   el.style.setProperty('--motion-scale-base',       `${state.scale.base}`)
   el.style.setProperty('--motion-scale-expressive', `${state.scale.expressive}`)
   el.style.setProperty('--motion-scale-lift',       `${state.scale.lift}`)
+}
+
+// Triggers a client-side file download for a text payload. Builds a Blob, points
+// a temporary object URL at it, clicks a synthetic <a download>, then revokes the
+// URL so it is not leaked. Entirely in-browser: the exported token file never
+// touches a server.
+function downloadTextFile(filename, text, mime = 'application/json') {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }
 
 // ─── CSS sync (Channel 1) ─────────────────────────────────────────────────────
@@ -339,9 +357,15 @@ function HoverTip({ text, children }) {
 //
 // The save flow is intentionally minimal: show a text input inline rather than
 // opening a modal or panel. The Escape key cancels without saving.
-function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave }) {
+function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImport }) {
   const [isSaving, setIsSaving] = useState(false)
   const [saveName, setSaveName]  = useState('')
+  const fileInputRef = useRef(null)
+  // Export format: 'dtcg' (W3C Design Tokens) or 'flat' (CSS-mirroring JSON).
+  // Both serialize from the same stateToExport object, so the toggle only
+  // selects which stringifier runs at export time.
+  const [exportFormat, setExportFormat] = useState('dtcg')
+  const [copied, setCopied] = useState(false)
   const activePresetId = getActivePresetId(rawState, allPresets)
 
   function handleSave() {
@@ -350,6 +374,38 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave }) {
     onSave(trimmed)
     setSaveName('')
     setIsSaving(false)
+  }
+
+  // The current token state serialized in the selected format. Computed on
+  // demand (export and copy both call it) rather than held in state.
+  function exportText() {
+    return exportFormat === 'dtcg' ? toDtcgJson(rawState) : toFlatJson(rawState)
+  }
+
+  function handleExport() {
+    // DTCG files conventionally carry the .tokens.json extension; the flat
+    // shape is a plain .json.
+    const filename = exportFormat === 'dtcg' ? 'cadence.tokens.json' : 'cadence-tokens.json'
+    downloadTextFile(filename, exportText())
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(exportText())
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard API is unavailable in insecure contexts; the download button
+      // is the reliable path, so a failed copy is a silent no-op.
+    }
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    // Reset the input so selecting the same file again still fires onChange.
+    e.target.value = ''
+    if (!file) return
+    file.text().then(text => onImport(importTokens(text)))
   }
 
   return (
@@ -424,6 +480,135 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Export the live token state as a downloadable file. The format toggle
+          picks the serialization; Export downloads, Copy puts the same string on
+          the clipboard. */}
+      <div className={styles.exportRow}>
+        <div
+          className={styles.exportFormatToggle}
+          role="group"
+          aria-label="Export format"
+        >
+          <button
+            type="button"
+            className={`${styles.exportFormatOption} ${exportFormat === 'dtcg' ? styles.exportFormatOptionActive : ''}`}
+            onClick={() => setExportFormat('dtcg')}
+            aria-pressed={exportFormat === 'dtcg'}
+          >
+            DTCG
+          </button>
+          <button
+            type="button"
+            className={`${styles.exportFormatOption} ${exportFormat === 'flat' ? styles.exportFormatOptionActive : ''}`}
+            onClick={() => setExportFormat('flat')}
+            aria-pressed={exportFormat === 'flat'}
+          >
+            Flat
+          </button>
+        </div>
+        <button type="button" className={styles.exportButton} onClick={handleExport}>
+          Export
+        </button>
+        <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+
+      {/* Import a token file (DTCG or flat). The hidden input is triggered by the
+          button; format is auto-detected. The result, including any clamped,
+          filled, or ignored tokens, is reported back through onImport. */}
+      <div className={styles.importRow}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className={styles.importInput}
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          className={styles.importButton}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Import tokens
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── ImportReport ─────────────────────────────────────────────────────────────
+// The body of the import-complete modal. Renders only the sections that have
+// something to say, with a terse summary line for the clean case. Failure (a
+// fatal parse / validation error) shows the error message instead.
+function ImportReport({ result }) {
+  if (!result.ok) {
+    return <p className={styles.importError}>{result.error}</p>
+  }
+
+  const { format, total, clamped, filled, ignored, curvesOutOfRange } = result.report
+  const loaded = total - filled.length
+  const formatLabel = format === 'dtcg' ? 'DTCG' : 'flat'
+
+  return (
+    <div className={styles.importReport}>
+      <p className={styles.importSummary}>
+        Loaded {loaded} of {total} tokens from a {formatLabel} file
+        {filled.length > 0 && `, filled ${filled.length} from defaults`}.
+      </p>
+
+      {clamped.length > 0 && (
+        <ImportReportSection title="Clamped to range">
+          {clamped.map(c => (
+            <li key={c.path} className={styles.importRow2}>
+              <code>{c.path}</code>
+              <span>{c.from} → {c.to}</span>
+            </li>
+          ))}
+        </ImportReportSection>
+      )}
+
+      {filled.length > 0 && (
+        <ImportReportSection title="Missing in file, set to default">
+          {filled.map(f => (
+            <li key={f.path} className={styles.importRow2}>
+              <code>{f.path}</code>
+              <span>{String(f.to)}</span>
+            </li>
+          ))}
+        </ImportReportSection>
+      )}
+
+      {curvesOutOfRange.length > 0 && (
+        <ImportReportSection title="Loaded, not editable in the curve editor">
+          {curvesOutOfRange.map(c => (
+            <li key={c.slot} className={styles.importRow2}>
+              <code>easing.{c.slot}</code>
+              <span>control point outside the draggable region</span>
+            </li>
+          ))}
+        </ImportReportSection>
+      )}
+
+      {ignored.length > 0 && (
+        <ImportReportSection title="Ignored (not editable here)">
+          {ignored.map(i => (
+            <li key={i.path} className={styles.importRow2}>
+              <code>{i.path}</code>
+            </li>
+          ))}
+        </ImportReportSection>
+      )}
+    </div>
+  )
+}
+
+function ImportReportSection({ title, children }) {
+  return (
+    <div className={styles.importSection}>
+      <div className={styles.importSectionTitle}>{title}</div>
+      <ul className={styles.importList}>{children}</ul>
     </div>
   )
 }
@@ -924,6 +1109,33 @@ export function TokenLab() {
     localStorage.setItem('cadence-presets', JSON.stringify(next))
   }
 
+  // Import result for the report modal. null = closed.
+  const [importResult, setImportResult] = useState(null)
+
+  function handleImport(result) {
+    if (result.ok) {
+      // Always flip to Explore so the widened ranges can represent any imported
+      // value (a 1500ms duration is unreachable on a constrained slider).
+      setExploreMode(true)
+      // Land the import in a single reserved "Imported" preset, replacing any
+      // previous one, so the user can switch between a built-in preset, their
+      // own exploration, and the import. generatePresetTooltip summarizes it.
+      const imported = {
+        id: 'imported',
+        label: 'Imported',
+        isBuiltIn: false,
+        tooltip: generatePresetTooltip(result.state),
+        state: result.state,
+      }
+      const next = [...userPresets.filter(p => p.id !== 'imported'), imported]
+      setUserPresets(next)
+      localStorage.setItem('cadence-presets', JSON.stringify(next))
+      // LOAD_PRESET fires both channels: CSS variables and the reducer state.
+      dispatch({ type: 'LOAD_PRESET', payload: result.state })
+    }
+    setImportResult(result)
+  }
+
   const liveTokens = stateToTokens(rawState)
 
   // The four Token Lab category demos, keyed by category id. DemoArea renders
@@ -1068,7 +1280,7 @@ export function TokenLab() {
       <div className={styles.controlsHeader}>
         <ControlsTitle />
         <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
-          <Toggle mode="expressive" label="Explore" onChange={handleExploreToggle} />
+          <Toggle mode="expressive" label="Explore" on={exploreMode} onChange={handleExploreToggle} />
         </HoverTip>
       </div>
 
@@ -1081,6 +1293,7 @@ export function TokenLab() {
         onLoad={handleLoadPreset}
         onDelete={handleDeletePreset}
         onSave={handleSavePreset}
+        onImport={handleImport}
       />
 
       <ControlSection
@@ -1211,6 +1424,16 @@ export function TokenLab() {
           hero={<HeroAnimation />}
         />
       </MotionTokensProvider>
+
+      {/* Import report. Opens after any import attempt; the title reflects
+          success vs a fatal parse / validation failure. */}
+      <Modal
+        isOpen={importResult !== null}
+        onClose={() => setImportResult(null)}
+        title={importResult?.ok ? 'Import complete' : 'Import failed'}
+      >
+        {importResult && <ImportReport result={importResult} />}
+      </Modal>
 
     </div>
     </TitlePulseProvider>

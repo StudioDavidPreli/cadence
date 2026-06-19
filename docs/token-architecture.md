@@ -49,3 +49,33 @@ When adding any new token to the project, follow this sequence:
 3. Replace any hardcoded value in the component with the new token reference. The component now reads from the system.
 
 The order matters. Defining the token first means step 2 has something to point at; doing step 2 before step 3 means the component swap is a one-line change rather than a coordinated edit.
+
+---
+
+## Token export
+
+Token Lab exports the live token state as a downloadable file. Export is the inverse of the addition workflow: the addition workflow brings a value into the system, export hands the whole system back out in a portable form.
+
+The export pipeline is three pure functions in `src/data/motionPresets.js`:
+
+1. `stateToExport(state)` normalizes the editor's `rawState` into a format-agnostic object in CSS-side units (ms numbers, four-number bezier arrays, unitless scale). It emits the complete token set, including the members the editor never exposes as sliders: `ease.linear`, `ease.spring`, and `delay.none`. An export that dropped those would be a partial file, not a usable one.
+2. `toDtcgJson(state)` serializes that object to the W3C Design Tokens Community Group format, wrapping each leaf in `$type` / `$value` under a top-level `motion` namespace. This is the shape Style Dictionary, Tokens Studio, and Figma Variables consume. The draft spec has no motion-specific delay type, so delays serialize as `duration`.
+3. `toFlatJson(state)` serializes the same object to a flat JSON mirroring the CSS variable names: ms strings, `cubic-bezier()` strings, bare scale numbers.
+
+Both stringifiers read from the single `stateToExport` object, so the two outputs cannot drift apart. The Presets section UI (`PresetsSection` in `src/components/TokenLab/index.jsx`) picks the format and downloads via `downloadTextFile`, a client-side Blob download with no server round-trip. DTCG files use the `.tokens.json` extension; flat files use `.json`.
+
+---
+
+## Token import
+
+Import is the inverse of export, plus validation. `importTokens(text)` in `src/data/motionPresets.js` parses a file, detects the format (DTCG or flat), and returns a discriminated result. It never throws to the caller: internal helpers throw a named `ImportError` for fatal cases, caught at the boundary and returned as `{ ok: false, error }`. A successful import returns `{ ok: true, state, report }`.
+
+The rules:
+
+- **Always flips to Explore.** The widened slider ranges (`EXPLORE_BOUNDS`) double as the clamp bounds, so the flip is also what lets an imported value be displayed and edited. A 1500ms duration is unreachable on a constrained slider; in Explore it sits on the track.
+- **Clamps scalars, never curves.** Duration, delay, and scale values outside `EXPLORE_BOUNDS` are pulled to the nearest edge and reported. Easing curves are not clamped: a control point with `y` outside `[0,1]` renders outside the visualizer's draggable region (the same state the Spring preset is in), so it loads and is reported as not-editable rather than bent. A curve with `x` outside `[0,1]` is a structural error (CSS rejects it) and fails the import.
+- **Fills missing tokens from Default** and reports each, so a partial file imports rather than failing.
+- **Re-canonicalizes easing.** Export flattens named curves to arrays; import maps a matching array back to its named key, so a round-tripped preset keeps its identity and lights up as active.
+- **Reports foreign keys** but suppresses the three expected constants (`ease.linear`, `ease.spring`, `delay.none`) so a clean round trip shows nothing.
+
+On success, TokenLab writes the result into a single reserved "Imported" preset (replacing any previous one), loads it via `LOAD_PRESET`, and opens a report modal (`ImportReport`) listing every clamp, fill, ignored key, and non-editable curve. Fatal failures open the same modal with the error message. The shared `Modal` component gained a focus trap in this pass, since the report made it a real dialog rather than a visual demo.

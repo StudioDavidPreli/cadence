@@ -301,6 +301,177 @@
   color: var(--color-text-primary);
 }
 
+/* ── Token export ────────────────────────────────────────────────────────────
+   Sits at the foot of the presets section. Format toggle on the left, Export
+   and Copy actions on the right. */
+.exportRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Segmented DTCG | Flat toggle. One bordered shell, two options sharing it. */
+.exportFormatToggle {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.exportFormatOption {
+  padding: 5px 8px;
+  border: none;
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms;
+}
+
+.exportFormatOption:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.exportFormatOption:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* Active format — dark fill, matching the loaded-preset and active-ease pills. */
+.exportFormatOptionActive,
+.exportFormatOptionActive:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* Export is the primary action: solid fill. Copy is secondary: bordered. */
+.exportButton {
+  margin-left: auto;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 100ms;
+}
+
+.exportButton:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.exportCopyButton {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.exportCopyButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-border2);
+}
+
+/* ── Token import ────────────────────────────────────────────────────────────
+   Import sits below export: a file is input, not output, so it gets its own
+   row. The native file input is hidden; the styled button triggers it. */
+.importRow {
+  display: flex;
+}
+
+.importInput {
+  display: none;
+}
+
+.importButton {
+  flex: 1;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px dashed var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 100ms, color 100ms;
+}
+
+.importButton:hover {
+  border-color: var(--color-border2);
+  color: var(--color-text-base);
+}
+
+/* ── Import report (modal body) ──────────────────────────────────────────── */
+.importReport {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.importSummary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-base);
+}
+
+.importError {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-base);
+}
+
+.importSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.importSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.importList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.importRow2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-base);
+}
+
+.importRow2 code {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
 /* ── Tooltip ─────────────────────────────────────────────────────────────── */
 
 /* inline-flex preserves the trigger element's intrinsic dimensions.
