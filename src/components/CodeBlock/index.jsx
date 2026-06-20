@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useActiveToken } from '../../context/ActiveTokenContext'
-import { TOKEN_REF, resolveTokenDisplay, tokenPathMatchesActive } from './resolveToken'
+import { TOKEN_REF, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
 import styles from './CodeBlock.module.css'
 
 // How long the flash chip holds before the CSS transition on .comment fades it
@@ -100,7 +100,19 @@ export function CodeBlock({ code }) {
     // drops any unresolved path defensively; the guard test prevents that case.
     const paths = [...line.matchAll(TOKEN_REF)].map(m => `${m[1]}.${m[2]}`)
     const comment = paths.length
-      ? '// ' + paths.map(p => resolveTokenDisplay(p, tokens)).filter(Boolean).join(' · ')
+      ? '// ' + paths
+          .map(p => {
+            const value = resolveTokenDisplay(p, tokens)
+            if (!value) return null // filter(Boolean) below; guard test prevents this
+            // Tokens no slider can reach (ease.linear, ease.spring, delay.none)
+            // are tagged so their never-changing value reads as a fixed reference,
+            // not a dead live comment. Per-token, not per-line, because one line
+            // can mix the two (Notification Badge: ease.spring fixed, ease.standard
+            // editable). See isEditableToken.
+            return isEditableToken(p) ? value : `${value} (fixed)`
+          })
+          .filter(Boolean)
+          .join(' · ')
       : ''
     // Lit if its token is under an active drag (sustained) or mid-flash (transient).
     const isActive = paths.some(

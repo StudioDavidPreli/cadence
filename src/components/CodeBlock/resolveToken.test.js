@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { extractTokenPaths, resolveTokenDisplay, tokenPathMatchesActive } from './resolveToken'
+import { extractTokenPaths, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
 import { DEMO_SNIPPETS } from '../TokenLab/demoSnippets'
+import { EDITABLE_TOKEN_SCHEMA, FIXED_REFERENCE_PATHS } from '../../data/motionPresets'
+
+// The schema and the fixed set use control-layer naming (`easing`); snippets and
+// the runtime tokens use `ease`. These convert between the two so the partition
+// can be checked in one naming space (same boundary isEditableToken crosses).
+const toRuntime = p => (p.startsWith('easing.') ? p.replace(/^easing\./, 'ease.') : p)
+const toControl = p => (p.startsWith('ease.') ? p.replace(/^ease\./, 'easing.') : p)
 
 // A tokens object in the exact shape useMotionTokens() returns: seconds for
 // duration/delay, four-number bezier arrays for ease, unitless scale. Mirrors
@@ -73,6 +80,77 @@ describe('demo snippet token references resolve', () => {
     it(`${name} references only real tokens`, () => {
       for (const path of extractTokenPaths(code)) {
         expect(resolveTokenDisplay(path, TOKENS), `${name}: ${path}`).not.toBeNull()
+      }
+    })
+  }
+})
+
+describe('isEditableToken', () => {
+  it('is true for tokens the tool bar renders a control for', () => {
+    expect(isEditableToken('duration.slow')).toBe(true)
+    expect(isEditableToken('delay.short')).toBe(true)
+    expect(isEditableToken('scale.lift')).toBe(true)
+  })
+
+  it('normalizes the runtime "ease." family to the schema\'s "easing."', () => {
+    expect(isEditableToken('ease.standard')).toBe(true)
+    expect(isEditableToken('ease.enter')).toBe(true)
+    expect(isEditableToken('ease.exit')).toBe(true)
+  })
+
+  it('is false for fixed reference tokens no slider can reach', () => {
+    expect(isEditableToken('ease.linear')).toBe(false)
+    expect(isEditableToken('ease.spring')).toBe(false)
+    expect(isEditableToken('delay.none')).toBe(false)
+  })
+
+  it('is false for a path that is not a token at all', () => {
+    expect(isEditableToken('color.accent')).toBe(false)
+  })
+})
+
+// The lock: the editable schema and the fixed-reference set must together
+// classify every token the runtime carries, with no overlap and nothing left
+// over. If someone adds a token to stateToTokens without giving it a slider
+// (editable) or listing it as a fixed reference, this fails — the code view
+// would otherwise show an unclassified token with no "(fixed)" marker and no
+// slider behind it.
+describe('every runtime token is classified editable or fixed', () => {
+  // All token paths the runtime carries, in runtime naming, derived from the
+  // TOKENS shape above (which mirrors stateToTokens / useMotionTokens output).
+  const runtimePaths = Object.entries(TOKENS).flatMap(([group, keys]) =>
+    Object.keys(keys).map(k => `${group}.${k}`)
+  )
+  const editable = Object.entries(EDITABLE_TOKEN_SCHEMA).flatMap(([family, keys]) =>
+    keys.map(k => toRuntime(`${family}.${k}`))
+  )
+  const fixed = [...FIXED_REFERENCE_PATHS].map(toRuntime)
+
+  it('editable and fixed sets do not overlap', () => {
+    const overlap = editable.filter(p => fixed.includes(p))
+    expect(overlap).toEqual([])
+  })
+
+  it('editable ∪ fixed covers exactly the runtime tokens', () => {
+    expect(new Set([...editable, ...fixed])).toEqual(new Set(runtimePaths))
+  })
+
+  it('isEditableToken agrees with the schema for every runtime token', () => {
+    for (const path of runtimePaths) {
+      const expected = editable.includes(path)
+      expect(isEditableToken(path), path).toBe(expected)
+    }
+  })
+})
+
+// Every token a snippet reads must be classifiable, so the code view never
+// renders a token with neither a live slider nor a "(fixed)" tag.
+describe('every demo snippet token is classified', () => {
+  for (const [name, code] of Object.entries(DEMO_SNIPPETS)) {
+    it(`${name} reads only editable or fixed-reference tokens`, () => {
+      for (const path of extractTokenPaths(code)) {
+        const classified = isEditableToken(path) || FIXED_REFERENCE_PATHS.has(toControl(path))
+        expect(classified, `${name}: ${path}`).toBe(true)
       }
     })
   }

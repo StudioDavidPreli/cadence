@@ -9,6 +9,8 @@
 //   scale            → unitless number
 // so resolution is a lookup plus a per-group display format.
 
+import { EDITABLE_TOKEN_SCHEMA } from '../../data/motionPresets'
+
 // Matches `tokens.<group>.<key>` for the four editable families. Global so a
 // single line with two reads (rare, snippets put one read per line) is fully
 // scanned. matchAll does not depend on lastIndex carry-over, so sharing this
@@ -37,6 +39,24 @@ export function tokenPathMatchesActive(path, activeToken) {
     ? activeToken.replace(/^easing\./, 'ease.')
     : activeToken
   return normalized === path
+}
+
+// Can the tool bar edit this token, or is it a fixed reference?
+//
+// EDITABLE_TOKEN_SCHEMA (data/motionPresets.js) is the single source of truth for
+// what the editor exposes a control for. A token whose key is not in the schema
+// for its family is a fixed reference: ease.linear and ease.spring (constant
+// curves the bezier visualizer can't reach) and delay.none. The code view marks
+// those so a comment that never moves while sliders are dragged (Spinner's
+// ease.linear is the clearest case) reads as intentional, not broken.
+//
+// Same naming boundary as tokenPathMatchesActive: a snippet path names the easing
+// family "ease"; the schema (control layer) names it "easing". Normalize before
+// the lookup. A path the regex would never produce (unknown group) returns false.
+export function isEditableToken(path) {
+  const [group, key] = path.split('.')
+  const controlGroup = group === 'ease' ? 'easing' : group
+  return Boolean(EDITABLE_TOKEN_SCHEMA[controlGroup]?.includes(key))
 }
 
 // Resolve one `group.key` path to its display string given a live tokens object.

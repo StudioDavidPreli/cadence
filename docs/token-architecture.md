@@ -35,8 +35,25 @@ Defined in `src/tokens/motion.css`.
   --motion-scale-subtle: 0.98;
   --motion-scale-base: 0.95;
   --motion-scale-expressive: 0.9;
+  --motion-scale-lift: 1.02;
 }
 ```
+
+---
+
+## Editable vs fixed reference tokens
+
+Not every token is a dial. The token set splits in two, and the split governs how Token Lab and the live code view behave.
+
+**Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the three easing slots (standard, enter, exit), the three delays (short, medium, long), and the four scales (subtle, base, expressive, lift). `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
+
+**Fixed reference tokens** are real tokens components use, but no control reaches them: `ease.linear`, `ease.spring`, and `delay.none`. `stateToTokens` wires these to constants instead of editor state, and `FIXED_REFERENCE_PATHS` lists them as the exact complement of the editable schema.
+
+They are anchors, not dials. `ease.linear` is "no easing" itself, the constant-velocity baseline a curve is measured against, so a slider that bent it would unname it. `ease.spring` is a fixed expressive signature, the same overshoot every spring read shares. `delay.none` is the system's named zero, so a component that starts immediately can say so in token terms: the Stepper's first beat reads `tokens.delay.none`, not a literal `0`. Make any of the three editable and it stops anchoring the thing it names.
+
+This is why a value in the live code view can sit still while the sliders move. The code view tags every fixed read `(fixed)`. Spinner's rotation reads `tokens.ease.linear`, so its easing comment holds at `[0, 0, 1, 1]` no matter what the easing tabs do, while its duration comment still ticks. `isEditableToken` in `src/components/CodeBlock/resolveToken.js` makes the call, and a guard test in `resolveToken.test.js` asserts the editable schema and the fixed set together classify every token the runtime carries, with no overlap and none left over.
+
+One naming seam to know. The control layer (the sliders, the schema) calls the easing family `easing`; the runtime token object components read calls it `ease`. The two are normalized to each other only at the point a path is compared. Duration, delay, and scale use the same word on both sides.
 
 ---
 

@@ -153,10 +153,13 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
                             exit={{ scale: 0, opacity: 0 }}
                             transition={{
                               duration: tokens.duration.slow,
-                              // Beat 1: starts immediately. initial={false} ensures this
-                              // only plays when the step first becomes completed, not on
-                              // every render or on initial mount.
-                              delay: 0,
+                              // Beat 1: starts immediately. delay.none is the system's
+                              // named zero (a fixed reference token), used here instead
+                              // of a literal 0 so even "no delay" is sourced from the
+                              // token layer. initial={false} ensures this only plays when
+                              // the step first becomes completed, not on every render or
+                              // on initial mount.
+                              delay: tokens.delay.none,
                             }}
                           >✓</motion.span>
                         ) : (

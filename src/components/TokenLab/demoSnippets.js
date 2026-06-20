@@ -45,6 +45,217 @@ const Drawer = `const tokens = useMotionTokens()
   }}
 />`
 
+const Button = `const tokens = useMotionTokens()
+
+// Press dips the button to a smaller scale, then releases
+// back to rest. Short and neutral: feedback, not flourish.
+<motion.button
+  whileTap={{
+    scale: tokens.scale.base,
+    transition: {
+      duration: tokens.duration.fast,
+      ease: tokens.ease.standard,
+    },
+  }}
+/>`
+
+const Card = `const tokens = useMotionTokens()
+
+// Selection lifts the card a couple percent; clicking again
+// returns it to rest. Spring in reads as "chosen"; standard
+// out reads as "returning". Two curves, one toggle.
+<motion.div
+  animate={{ scale: isSelected ? tokens.scale.lift : 1 }}
+  transition={{
+    duration: tokens.duration.base,
+    ease: isSelected ? tokens.ease.spring : tokens.ease.standard,
+  }}
+/>`
+
+const NavItem = `const tokens = useMotionTokens()
+
+// Active nudges the label 3px toward its left-border marker.
+// enter decelerates in on arrival; exit accelerates out on
+// leaving. The direction of travel picks the curve.
+<motion.button
+  animate={{ x: isActive ? 3 : 0 }}
+  transition={{
+    duration: tokens.duration.fast,
+    ease: isActive ? tokens.ease.enter : tokens.ease.exit,
+  }}
+/>`
+
+const Toggle = `const tokens = useMotionTokens()
+
+// The thumb slides between slots. spring overshoots slightly
+// before settling, so the switch feels physical. The track
+// color CSS transition mirrors duration.fast to stay in sync.
+<motion.span
+  className={styles.thumb}
+  animate={{ x: on ? THUMB_TRAVEL : 0 }}
+  transition={{
+    duration: tokens.duration.fast,
+    ease: tokens.ease.spring,
+  }}
+/>`
+
+const Spinner = `const tokens = useMotionTokens()
+
+// A continuous rotation. linear holds the speed constant, so
+// there is no eased pulse each turn. key remounts on a duration
+// change: Framer Motion will not restart an infinite loop when
+// only the transition prop updates.
+<motion.div
+  key={tokens.duration.slower}
+  initial={{ rotate: 0 }}
+  animate={{ rotate: 360 }}
+  transition={{
+    duration: tokens.duration.slower,
+    ease: tokens.ease.linear,
+    repeat: Infinity,
+  }}
+/>`
+
+const NotificationBadge = `const tokens = useMotionTokens()
+
+// The badge re-keys on the count, so this runs on every
+// increment. It compresses, climbs past 1 (the 1.2 peak is a
+// literal, not a token — that overshoot is the principle
+// breaking its own rule), holds, then settles.
+<motion.span
+  key={count}
+  initial={{ scale: tokens.scale.expressive }}
+  animate={{ scale: [tokens.scale.expressive, 1.2, 1.2, 1] }}
+  transition={{
+    duration: tokens.duration.slow,
+    times: [0, 0.3, 0.6, 1],
+    ease: [tokens.ease.spring, tokens.ease.linear, tokens.ease.standard],
+  }}
+/>`
+
+const ProgressBar = `const tokens = useMotionTokens()
+
+// The fill animates to the new width. Increasing uses standard
+// (eased at both ends); decreasing uses exit. The direction of
+// change carries a different meaning, so it gets a different curve.
+<motion.div
+  animate={{ width: \`\${value}%\` }}
+  transition={{
+    duration: tokens.duration.slow,
+    ease: isIncreasing ? tokens.ease.standard : tokens.ease.exit,
+  }}
+/>`
+
+const Stepper = `const tokens = useMotionTokens()
+
+// The cascade is built from cumulative delays, all measured from
+// the click. Each beat waits on the one before it plus a delay
+// token, so the gaps between steps stay editable.
+const beat1 = tokens.duration.slow
+const beat2 = beat1 + tokens.delay.short
+const beat3 = beat2 + tokens.delay.medium
+const completion = beat1 + tokens.delay.long
+
+// A step's connector fills once that step completes.
+<motion.div
+  animate={{ scaleX: isStepCompleted ? 1 : 0 }}
+  transition={{
+    duration: tokens.duration.slow,
+    ease: tokens.ease.standard,
+  }}
+/>`
+
+const Tooltip = `const tokens = useMotionTokens()
+
+// The bubble travels along an arc: three keyframes per axis, so
+// the midpoint sits off the straight line between start and end.
+// enter brings it in on duration.base; exit takes it out faster.
+<motion.div
+  initial={{ opacity: 0, x: 24, y: 16 }}
+  animate={{ opacity: [0, 1, 1], x: [24, 8, 0], y: [16, -10, 0] }}
+  transition={{
+    duration: tokens.duration.base,
+    times: [0, 0.6, 1],
+    ease: tokens.ease.enter,
+  }}
+  exit={{
+    opacity: 0, x: 12, y: 8,
+    transition: { duration: tokens.duration.fast, ease: tokens.ease.exit },
+  }}
+/>`
+
+const Dropdown = `const tokens = useMotionTokens()
+
+// The menu drops in and lifts back out a short distance.
+// duration.fast keeps functional UI snappy. enter on the way in,
+// exit on the way out. The chevron rotates via a CSS transition,
+// not Framer Motion.
+<motion.ul
+  initial={{ opacity: 0, y: -6 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
+  exit={{
+    opacity: 0, y: -6,
+    transition: { duration: tokens.duration.fast, ease: tokens.ease.exit },
+  }}
+/>`
+
+const Carousel = `const tokens = useMotionTokens()
+
+// Snapping to a slide animates a MotionValue directly (no scope,
+// no broadcast). spring overshoots and settles, so the slide
+// arrives with weight.
+animate(x, index * -slideWidth, {
+  duration: tokens.duration.slow,
+  ease: tokens.ease.spring,
+})
+
+// Each slide scales up slightly when it becomes current.
+<motion.div
+  animate={{ scale: isCurrent ? tokens.scale.lift : 1 }}
+  transition={{
+    duration: tokens.duration.fast,
+    ease: tokens.ease.standard,
+  }}
+/>`
+
+const Modal = `const tokens = useMotionTokens()
+
+// Backdrop fades to 0.8. Panel rises from 0.96 to 1 as it fades
+// in. enter on duration.slow brings both in; exit drops to
+// duration.base so leaving feels inevitable, not a slow rewind.
+<motion.div /* backdrop */
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 0.8 }}
+  transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
+  exit={{
+    opacity: 0,
+    transition: { duration: tokens.duration.base, ease: tokens.ease.exit },
+  }}
+/>
+
+<motion.div /* panel */
+  initial={{ scale: 0.96, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
+  exit={{
+    scale: 0.98, opacity: 0,
+    transition: { duration: tokens.duration.base, ease: tokens.ease.exit },
+  }}
+/>`
+
 export const DEMO_SNIPPETS = {
   Drawer,
+  Button,
+  Card,
+  NavItem,
+  Toggle,
+  Spinner,
+  NotificationBadge,
+  ProgressBar,
+  Stepper,
+  Tooltip,
+  Dropdown,
+  Carousel,
+  Modal,
 }

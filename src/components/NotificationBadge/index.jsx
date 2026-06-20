@@ -50,7 +50,11 @@ export function NotificationBadge({ count = 0, label = 'Inbox' }) {
             duration: tokens.duration.slow,
             // 0 → 0.3: launch. 0.3 → 0.6: hold at peak. 0.6 → 1: settle.
             times: [0, 0.3, 0.6, 1],
-            ease: [tokens.ease.spring, 'linear', tokens.ease.standard],
+            // The middle segment is a hold (peak → peak), so its curve has no
+            // visible effect, but it reads tokens.ease.linear rather than the
+            // Framer 'linear' string to keep every easing in this file sourced
+            // from the token layer (token fidelity — same curve Spinner reads).
+            ease: [tokens.ease.spring, tokens.ease.linear, tokens.ease.standard],
           }}
           aria-label={`${count} unread`}
         >

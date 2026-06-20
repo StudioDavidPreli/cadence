@@ -46,24 +46,37 @@ import styles from './TokenLab.module.css'
 // DemoWrapper uses this to highlight or dim groups when a slider is active.
 // Empty array means the token has no connected demo component anywhere in the
 // tool — the "Token unused by present components." note is shown in all groups.
+// Maps each editable token to the demo components that read it. DemoWrapper uses
+// this to highlight (green border) the demos a slider is connected to, and to show
+// the "Token unused by present components" note on the rest. For easing, each slot
+// lights its own consumers when that tab is active in the visualizer.
+//
+// Policy: a component is listed under a token if its source reads that token
+// (tokens.<group>.<key>, or the matching --motion-* CSS variable). Objective and
+// greppable. Fixed reference tokens have no slider, so reads of ease.linear and
+// ease.spring produce no entry here. Two reads are wired but not exercised by the
+// TokenLab demo itself — Card's scale.subtle (its dimmed branch, used by the Appeal
+// principle) and Stepper's scale.base — and are listed because the component
+// consumes them even though this demo never triggers that path.
+//
+// Rebuilt 2026-06-20 against each component's actual reads in the Token Fidelity
+// audit. The prior table had drifted: NavItem was under easing.standard (it reads
+// enter/exit), Toggle under easing.standard + scale.base (it reads only
+// duration.fast + the fixed ease.spring), Card under duration.slow (it reads base),
+// and Notification Badge under easing.exit (it reads standard, not exit).
 const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
-  'duration.slow':    ['Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal'],
+  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer'],
   'duration.slower':  ['Spinner', 'Stepper'],
-  // Each easing slot lights its own consumers when its tab is active in the
-  // visualizer. Components that read from CSS variables (--motion-ease-*)
-  // OR from the React tokens object (tokens.ease.*) are listed under the
-  // slot they reference. A component that touches more than one slot
-  // appears in more than one list.
-  'easing.standard':  ['Button', 'Card', 'NavItem', 'Toggle'],
-  'easing.enter':     ['Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
-  'easing.exit':      ['Drawer', 'Modal', 'Stepper', 'Dropdown', 'Notification Badge'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar'],
   'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper'],
-  'scale.subtle':     [],
-  'scale.base':       ['Button', 'Toggle'],
+  'scale.subtle':     ['Card'],
+  'scale.base':       ['Button', 'Stepper'],
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
 }
@@ -824,6 +837,7 @@ function ModalDemo() {
     <DemoWrapper
       componentName="Modal"
       instruction="Open the modal. Backdrop fades; panel rises from 0.96 to 1"
+      code={DEMO_SNIPPETS.Modal}
     >
       <button
         className={styles.demoTrigger}
@@ -867,6 +881,7 @@ function NotificationBadgeDemo() {
     <DemoWrapper
       componentName="Notification Badge"
       instruction="Click New message. The number compresses, climbs past 1, holds, settles"
+      code={DEMO_SNIPPETS.NotificationBadge}
     >
       <div className={styles.demoRow}>
         <NotificationBadge count={count} label="Inbox" />
@@ -904,6 +919,7 @@ function ProgressBarDemo() {
     <DemoWrapper
       componentName="ProgressBar"
       instruction="Drag the value slider — watch easing change direction on increase vs decrease"
+      code={DEMO_SNIPPETS.ProgressBar}
     >
       {/* Demo value control — not a token slider. Uses the same visual style as
           token sliders for consistency, but does NOT dispatch to the reducer.
@@ -1209,6 +1225,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Button"
           instruction="Press to see scale and easing"
+          code={DEMO_SNIPPETS.Button}
         >
           <div className={styles.demoRow}>
             <Button>Press me</Button>
@@ -1219,6 +1236,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Card"
           instruction="Click to toggle selected state"
+          code={DEMO_SNIPPETS.Card}
         >
           <div className={styles.demoCards}>
             <Card
@@ -1238,6 +1256,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="NavItem"
           instruction="Click to see active transition"
+          code={DEMO_SNIPPETS.NavItem}
         >
           <div className={styles.demoNavList}>
             {DEMO_NAV_ITEMS.map(item => (
@@ -1254,6 +1273,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Toggle"
           instruction="Toggle to compare subtle vs expressive signaling"
+          code={DEMO_SNIPPETS.Toggle}
         >
           <div className={styles.demoRow}>
             <Toggle label="Subtle"     mode="subtle" />
@@ -1264,6 +1284,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Spinner"
           instruction="Duration slider controls rotation speed"
+          code={DEMO_SNIPPETS.Spinner}
         >
           <div className={styles.demoRow}>
             <Spinner size="medium" />
@@ -1283,6 +1304,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Tooltip"
           instruction="Click the ? The bubble arcs into place along a curved path, not a straight line"
+          code={DEMO_SNIPPETS.Tooltip}
         >
           {/* Centered so the bubble has runway on both sides — flush against
               demoContent's left padding the bubble's left half gets clipped
@@ -1295,6 +1317,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Dropdown"
           instruction="Open the menu — duration.fast keeps functional UI snappy"
+          code={DEMO_SNIPPETS.Dropdown}
         >
           <div className={styles.demoRow}>
             <Dropdown label="Context Menu" />
@@ -1310,6 +1333,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Stepper"
           instruction="Click Next to see the three-beat cascade — delay sliders control the gaps"
+          code={DEMO_SNIPPETS.Stepper}
         >
           <Stepper />
         </DemoWrapper>
@@ -1321,6 +1345,7 @@ export function TokenLab() {
         <DemoWrapper
           componentName="Carousel"
           instruction="Drag to advance — flick fast or drag far enough to commit"
+          code={DEMO_SNIPPETS.Carousel}
         >
           <Carousel />
         </DemoWrapper>

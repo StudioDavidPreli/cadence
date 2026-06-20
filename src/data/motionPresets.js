@@ -250,9 +250,15 @@ export const EXPLORE_BOUNDS = {
   scale:    { min: 0.5, max: 1.2  },
 }
 
-// The editable token schema — the exact keys each family carries in rawState.
-// easing slots are beziers (no scalar clamp); the rest are clamped scalars.
-const IMPORT_SCHEMA = {
+// The editable token schema — the exact keys each family carries in rawState,
+// which is also the exact set the tool bar renders a control for. This is the
+// single source of truth for "can the user tune this token?": the importer
+// validates against it, and the live code view reads it (via isEditableToken in
+// CodeBlock/resolveToken.js) to mark any token a slider cannot reach as a fixed
+// reference. easing slots are beziers (no scalar clamp); the rest are clamped
+// scalars. Uses control-layer naming (`easing`); the runtime token layer calls
+// the same family `ease` (see the easing/ease note in resolveToken.js).
+export const EDITABLE_TOKEN_SCHEMA = {
   duration: ['fast', 'base', 'slow', 'slower'],
   easing:   ['standard', 'enter', 'exit'],
   delay:    ['short', 'medium', 'long'],
@@ -262,8 +268,11 @@ const IMPORT_SCHEMA = {
 // Paths a Cadence export legitimately carries but the editor cannot hold: the
 // non-editable constants. They are dropped on import WITHOUT being reported as
 // foreign, so a clean round trip shows an empty "ignored" list instead of three
-// rows of expected noise.
-const EXPECTED_EXTRA_PATHS = new Set(['easing.linear', 'easing.spring', 'delay.none'])
+// rows of expected noise. This is the exact complement of EDITABLE_TOKEN_SCHEMA:
+// together they classify every token the runtime carries, which the drift guard
+// in resolveToken.test.js asserts. Control-layer naming (`easing.`, matching the
+// schema), normalized to the runtime `ease.` where it meets a token path.
+export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'easing.spring', 'delay.none'])
 
 function clampScalar(n, { min, max }) {
   return Math.max(min, Math.min(max, n))
@@ -332,7 +341,7 @@ function detectFormat(parsed) {
     throw new ImportError('Unrecognized token file: expected a JSON object.')
   }
   if (parsed.motion && typeof parsed.motion === 'object') return 'dtcg'
-  if (IMPORT_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale)) {
+  if (EDITABLE_TOKEN_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale)) {
     return 'flat'
   }
   throw new ImportError('Unrecognized token file: expected a Cadence DTCG or flat export.')
@@ -350,7 +359,7 @@ function buildState(parsed, format) {
   for (const family of ['duration', 'delay', 'scale']) {
     const bounds = EXPLORE_BOUNDS[family]
     const group = getGroup(parsed, format, family)
-    for (const key of IMPORT_SCHEMA[family]) {
+    for (const key of EDITABLE_TOKEN_SCHEMA[family]) {
       const path = `${family}.${key}`
       const leaf = group?.[key]
       if (leaf === undefined) {
@@ -366,7 +375,7 @@ function buildState(parsed, format) {
   }
 
   const easingGroup = getGroup(parsed, format, 'easing')
-  for (const slot of IMPORT_SCHEMA.easing) {
+  for (const slot of EDITABLE_TOKEN_SCHEMA.easing) {
     const path = `easing.${slot}`
     const leaf = easingGroup?.[slot]
     if (leaf === undefined) {
@@ -392,7 +401,7 @@ function collectForeign(parsed, format) {
   const root = format === 'dtcg' ? parsed.motion : parsed
   const foreign = []
   for (const [family, group] of Object.entries(root || {})) {
-    const known = IMPORT_SCHEMA[family]
+    const known = EDITABLE_TOKEN_SCHEMA[family]
     if (!known) {
       foreign.push({ path: family })
       continue
@@ -400,7 +409,7 @@ function collectForeign(parsed, format) {
     if (group && typeof group === 'object') {
       for (const key of Object.keys(group)) {
         const path = `${family}.${key}`
-        if (known.includes(key) || EXPECTED_EXTRA_PATHS.has(path)) continue
+        if (known.includes(key) || FIXED_REFERENCE_PATHS.has(path)) continue
         foreign.push({ path })
       }
     }
@@ -410,10 +419,10 @@ function collectForeign(parsed, format) {
 
 // Total editable tokens, for the report's summary line.
 const TOTAL_TOKENS =
-  IMPORT_SCHEMA.duration.length +
-  IMPORT_SCHEMA.easing.length +
-  IMPORT_SCHEMA.delay.length +
-  IMPORT_SCHEMA.scale.length
+  EDITABLE_TOKEN_SCHEMA.duration.length +
+  EDITABLE_TOKEN_SCHEMA.easing.length +
+  EDITABLE_TOKEN_SCHEMA.delay.length +
+  EDITABLE_TOKEN_SCHEMA.scale.length
 
 export function importTokens(text) {
   let parsed
