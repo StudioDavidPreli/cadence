@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { SECTIONS, CATEGORY_IDS, FILTERS } from '../data/navigation'
+import { SECTIONS, CATEGORY_IDS, FILTERS, TOKEN_LAB_GUIDE } from '../data/navigation'
 
 // ─── Hash routing ─────────────────────────────────────────────────────────────
 //
@@ -11,7 +11,7 @@ import { SECTIONS, CATEGORY_IDS, FILTERS } from '../data/navigation'
 //
 // Route grammar:
 //   #/                              landing (hero)
-//   #/token-lab                     Token Lab open, no category (hero in demo)
+//   #/token-lab                     Token Lab open, guide in demo
 //   #/token-lab/<categoryId>        a Token Lab category demo
 //   #/principles                    grid, all eighteen
 //   #/principles/<filter>           grid filtered to classic | extended
@@ -45,12 +45,14 @@ export function parseHash(hash) {
   const [first, second] = path.split('/')
 
   if (first === SECTIONS.TOKEN_LAB) {
-    // #/token-lab or #/token-lab/<categoryId>
+    // #/token-lab (guide) or #/token-lab/<categoryId> (a demo). A non-category
+    // tail (or none) falls back to the guide, so a stale category id lands on
+    // the guide rather than a blank demo.
     const isCategory = second && CATEGORY_IDS.includes(second)
     return {
       section: SECTIONS.TOKEN_LAB,
       expandedSection: SECTIONS.TOKEN_LAB,
-      destination: isCategory ? second : null,
+      destination: isCategory ? second : TOKEN_LAB_GUIDE,
       principleFilter: FILTERS.ALL,
     }
   }
@@ -74,7 +76,9 @@ export function parseHash(hash) {
 // Serialize navigation state back into a hash string (with leading '#').
 export function stateToHash(state) {
   if (state.section === SECTIONS.TOKEN_LAB) {
-    return state.destination
+    // Only a real category fills the tail. The guide (and any non-category
+    // destination) serializes to the bare #/token-lab.
+    return CATEGORY_IDS.includes(state.destination)
       ? `#/${SECTIONS.TOKEN_LAB}/${state.destination}`
       : `#/${SECTIONS.TOKEN_LAB}`
   }

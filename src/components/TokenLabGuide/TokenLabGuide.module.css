@@ -1,0 +1,91 @@
+/* The guide is a readable document inside the scrolling demo layer. The .layer
+   ancestor (DemoArea) owns the vertical scroll and the surface color, so this
+   component only sets a readable measure and the type rhythm.
+
+   Text is left-aligned, not centered like the hero: this is reading copy, not a
+   landing statement, and left-aligned long-form is easier to track line to line. */
+.guide {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+  color: var(--color-text-base);
+}
+
+/* Editorial serif for the one display heading, matching the Card titles and the
+   rest of the project's "editorial moment" treatment. */
+.title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+/* Lede sits a step up from body text in size, full-contrast, as the orientation
+   line before the sections begin. */
+.lede {
+  margin: 0 0 32px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+.section {
+  margin: 0 0 28px;
+}
+
+/* Section headings use the mono stack (the project's default body face) at a
+   slightly raised weight so they read as headings without a second display
+   font fighting the title. */
+/* --color-text-base, not text-primary: text-primary is #ffffff in light AND
+   high-contrast (it is for text on dark interactive surfaces), which would be
+   white-on-white against the white demo surface. text-base is the correct
+   on-surface heading color and meets AA in every theme. */
+.heading {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text-base);
+}
+
+/* --color-text-muted (not muted2): muted2 is #888888 in light, ~3.5:1 on white,
+   below the 4.5:1 floor for normal text. muted is AA-safe in every theme and
+   gives body copy a step down from the full-contrast headings. */
+.body {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text-muted);
+}
+
+.body:last-child {
+  margin-bottom: 0;
+}
+
+/* FAQ question. Full-contrast and weighted so the question/answer pairs are
+   scannable. Extra top margin separates each pair; the first question sits flush
+   under the "Questions" heading. */
+.question {
+  margin: 20px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-text-base);
+}
+
+.question:first-of-type {
+  margin-top: 0;
+}
+
+/* Inline code: token names and snippets. Mono is already the base face, so this
+   only adds a quiet surface and the accent color that the tool uses for "this is
+   a token / a system value." */
+.guide code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-size: 0.9em;
+}

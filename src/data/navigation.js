@@ -10,6 +10,13 @@ export const SECTIONS = {
   PRINCIPLES: 'principles',
 }
 
+// The Token Lab guide is a destination, not a category. Opening the Token Lab
+// header shows it, and the "Overview" nav leaf routes back to it. It is the
+// destination value for the bare #/token-lab route (a category id fills
+// #/token-lab/<id>). Kept distinct from CATEGORY_IDS so the router can tell a
+// category from the guide: 'overview' is not in the category list.
+export const TOKEN_LAB_GUIDE = 'overview'
+
 // Token Lab's four behavior categories, in display order.
 export const CATEGORIES = [
   { id: 'press-state',       label: 'Press & State' },

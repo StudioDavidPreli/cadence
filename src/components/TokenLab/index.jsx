@@ -15,6 +15,7 @@ import { useDemoOverlay } from '../DemoArea/overlayContext'
 import { CodeBlock } from '../CodeBlock'
 import { DEMO_SNIPPETS } from './demoSnippets'
 import { HeroAnimation } from '../HeroAnimation'
+import { TokenLabGuide } from '../TokenLabGuide'
 import { RailDrawer } from '../RailDrawer'
 import { Button } from '../Button'
 import { Card } from '../Card'
@@ -1508,6 +1509,7 @@ export function TokenLab() {
           categoryContent={categoryContent}
           principlesContent={<PrinciplesLibrary filter={principleFilter} />}
           hero={<HeroAnimation />}
+          guide={<TokenLabGuide />}
         />
       </MotionTokensProvider>
 

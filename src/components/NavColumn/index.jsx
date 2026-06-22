@@ -1,6 +1,6 @@
 import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { RailDrawer } from '../RailDrawer'
-import { SECTIONS, CATEGORIES, FILTERS } from '../../data/navigation'
+import { SECTIONS, CATEGORIES, FILTERS, TOKEN_LAB_GUIDE } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
 // ─── NavColumn ──────────────────────────────────────────────────────────────
@@ -60,7 +60,11 @@ function NavAccordion({ onNavigate }) {
   const pickCategory    = id => { selectCategory(id); onNavigate?.() }
   const pickFilter      = f  => { setFilter(f); onNavigate?.() }
   const clickPrinciples = () => { toggleSection(SECTIONS.PRINCIPLES); onNavigate?.() }
-  const clickTokenLab   = () => toggleSection(SECTIONS.TOKEN_LAB) // disclosure only
+  // Opening Token Lab now shows the guide as its destination, so the header is a
+  // destination like Principles. The drawer still stays open on toggle (the user
+  // is about to pick a category from the revealed list); the guide shows behind
+  // it and the Overview leaf is the explicit way back.
+  const clickTokenLab   = () => toggleSection(SECTIONS.TOKEN_LAB)
 
   return (
     <>
@@ -69,11 +73,19 @@ function NavAccordion({ onNavigate }) {
         label="Token Lab"
         open={tokenLabOpen}
         bodyId={tokenLabBodyId}
-        active={section === SECTIONS.TOKEN_LAB && destination !== null}
-        current={false}
+        active={section === SECTIONS.TOKEN_LAB}
+        current={section === SECTIONS.TOKEN_LAB}
         onClick={clickTokenLab}
       />
       <AccordionBody id={tokenLabBodyId} open={tokenLabOpen}>
+        {/* Overview routes to the guide (the Token Lab landing). Sits above the
+            four categories as the explicit way back to it after a demo. */}
+        <NavRow
+          label="Overview"
+          active={destination === TOKEN_LAB_GUIDE}
+          tabbable={tokenLabOpen}
+          onClick={() => pickCategory(TOKEN_LAB_GUIDE)}
+        />
         {CATEGORIES.map(cat => (
           <NavRow
             key={cat.id}

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavState } from '../../context/NavigationContext'
+import { TOKEN_LAB_GUIDE } from '../../data/navigation'
 import { navDurationSeconds } from '../../utils/feedbackDuration'
 import { DemoOverlayContext } from './overlayContext'
 import styles from './DemoArea.module.css'
@@ -20,7 +21,7 @@ import styles from './DemoArea.module.css'
 // --motion-* tokens. Explore mode can drag those to near zero; navigation chrome
 // must not be collapsible into an imperceptible jump. See motion.css.
 
-export function DemoArea({ categoryContent, principlesContent, hero }) {
+export function DemoArea({ categoryContent, principlesContent, hero, guide }) {
   const { destination } = useNavState()
   const reduce = useReducedMotion()
   const activeKey = destination ?? 'hero'
@@ -35,9 +36,11 @@ export function DemoArea({ categoryContent, principlesContent, hero }) {
   frozen.current[activeKey] =
     activeKey === 'hero'
       ? hero
-      : activeKey === 'principles'
-        ? principlesContent
-        : (categoryContent[activeKey] ?? null)
+      : activeKey === TOKEN_LAB_GUIDE
+        ? guide
+        : activeKey === 'principles'
+          ? principlesContent
+          : (categoryContent[activeKey] ?? null)
 
   // Monotonic z-index so the newest layer always paints on top of the one it is
   // replacing, regardless of AnimatePresence's DOM ordering. Bumped only when

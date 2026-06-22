@@ -1,0 +1,98 @@
+# Cadence — Pre-Deploy Checklist
+
+Run this before deployment. The risk for a system like Cadence is not a missing
+component. It is a missing state, or a principle whose State 2 demo reads as
+arbitrary. This checklist targets those.
+
+Tick each item per component where it applies. Not every row applies to every
+component; mark N/A and move on.
+
+---
+
+## Principle legibility (the real audit)
+
+The test: a hiring manager landing on a card with no label should name the
+principle from the motion alone.
+
+- [ ] Squash and Stretch (Button): press compression and spring release read as weight
+- [ ] Anticipation (Drawer): the negative-y wind-up is visible, not swallowed
+- [ ] Staging (Modal): backdrop and focus containment direct the eye to one place
+- [ ] Pose to Pose (Stepper): the discrete poses are legible against a straight-ahead reading
+- [ ] Follow Through (Carousel): the dot offset trails the slide, not synced to it
+- [ ] Slow In/Slow Out (Progress Bar): deceleration to target is perceptible
+- [ ] Arc (Tooltip): the entrance traces an arc from the trigger, not a straight line
+- [ ] Secondary Action (Dropdown): chevron rotation reads as subordinate to the menu open
+- [ ] Timing (Toggle): the duration change visibly changes character
+- [ ] Exaggeration (Badge): the overshoot on increment is unmistakable
+- [ ] Solid Drawing (Card): the lift implies elevation, a real z-axis
+- [ ] Appeal (Lava-lamp grid): all tokens reading together, coherent
+- [ ] Systematization: one token change propagates across components on screen
+- [ ] Hierarchy of Motion: parent drives child, the order is legible
+- [ ] Economy: parallax layering reads as restraint, not decoration
+- [ ] Token Fidelity: the wrong-value correction is visible as a correction
+- [ ] Reduced Motion: the toggle shows reduced ambition, not absence of motion
+- [ ] Shared Vocabulary: the preset name communicates what the numbers cannot
+
+---
+
+## Landing, guide, and navigation (added 2026-06-22)
+
+Surfaces added after the first draft. The guide is the project's largest block of
+body text, the landing is the first thing a hiring manager sees, and the nav was
+rebuilt to open Token Lab to the guide.
+
+- [ ] Landing renders the final `hero.riv`, not the fallback prompt
+- [ ] Token Lab guide: heading and body text meet 4.5:1 in light, dark, and high-contrast
+- [ ] Token Lab guide: copy reads in David's voice, em-dash count zero
+- [ ] Token Lab guide: inline `code` chips legible in every theme (the accent-subtle background sets its own text color)
+- [ ] Navigation keyboard operable: Tab into the accordion, Overview and category leaves reachable, Enter/Space activate
+- [ ] Opening Token Lab shows the guide; the Overview leaf returns to it after a category
+- [ ] Deep links resolve: `#/token-lab` (guide), `#/token-lab/<category>` (demo), back button traverses
+
+---
+
+## Interaction states
+
+For every interactive demo (Button, Toggle, Dropdown, Stepper, sliders, tabs):
+
+- [ ] Disabled state defined and visually distinct
+- [ ] Focus-visible ring present and meeting 3:1 against adjacent colors
+- [ ] Keyboard operable: Tab order correct, Enter/Space/Arrow where expected
+- [ ] Hover state does not depend on hover alone to convey meaning
+- [ ] Active/pressed state distinct from hover
+
+## In-flight and absent states
+
+- [ ] Loading state where a component can be mid-action (Progress Bar, any async demo)
+- [ ] Error state where a value can be invalid (Token Lab inputs out of range)
+- [ ] Empty state where a demo could render with no data
+- [ ] Out-of-range token input is handled, not silently dropped
+
+## Theme and motion parity
+
+- [ ] Light and dark parity on every component
+- [ ] Every `background-color` rule also sets `color` (no inherited-color assumption)
+- [ ] `--color-accent` reads as active/connected only, never decorative
+- [ ] Reduced-motion mode verified against `prefers-reduced-motion`
+- [ ] Theme switch re-reads tokens (Framer Motion values do not re-read on their own)
+
+## Token integrity (the core argument, under test)
+
+- [ ] No hardcoded duration, easing, or delay in any component
+- [ ] Every animated value traces to a CSS custom property
+- [ ] Token Lab changes propagate to all consuming components live
+- [ ] Constrained vs Explore mode toggles behave correctly per section
+
+## Accessibility floors
+
+- [ ] 4.5:1 contrast on normal text, every theme
+- [ ] 3:1 on large text and UI components, every theme
+- [ ] Reduced motion does not strand a user without feedback
+- [ ] Focus never lost into a closed Modal or Drawer
+
+## Build hygiene
+
+- [ ] Repo self-contained, no orphaned code
+- [ ] Commits clean between changes
+- [ ] SVG State 1 placeholders flagged where Rive will replace them post-launch
+- [ ] Known latent edge cases documented (single-column grid below 574px)

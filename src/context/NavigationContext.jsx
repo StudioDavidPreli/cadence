@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useReducer } from 'react'
-import { SECTIONS, FILTERS } from '../data/navigation'
+import { SECTIONS, FILTERS, TOKEN_LAB_GUIDE } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
 // ─── Navigation state ─────────────────────────────────────────────────────────
@@ -29,8 +29,9 @@ const NavActionsContext = createContext(null)
 
 function navReducer(state, action) {
   switch (action.type) {
-    // Token Lab category leaf clicked. Always opens Token Lab and sets the
-    // category as the destination.
+    // A Token Lab leaf clicked: one of the four categories, or the Overview leaf
+    // (which passes TOKEN_LAB_GUIDE). Always opens Token Lab and sets the leaf as
+    // the destination.
     case 'SELECT_CATEGORY':
       return {
         section: SECTIONS.TOKEN_LAB,
@@ -56,12 +57,15 @@ function navReducer(state, action) {
           principleFilter: FILTERS.ALL,
         }
       }
-      // Opening Token Lab is disclosure only: it reveals the four categories
-      // but selects none, so the hero stays until a category is clicked.
+      // Opening Token Lab reveals the four categories AND shows the guide as
+      // its destination, symmetric to Principles opening to the grid. The guide
+      // is the Token Lab landing: a how-to that crossfades in from the hero. A
+      // category click then swaps the guide for that demo (SELECT_CATEGORY), and
+      // the Overview leaf routes back here.
       return {
         section: SECTIONS.TOKEN_LAB,
         expandedSection: SECTIONS.TOKEN_LAB,
-        destination: null,
+        destination: TOKEN_LAB_GUIDE,
         principleFilter: FILTERS.ALL,
       }
     }
