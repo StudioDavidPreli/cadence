@@ -1,7 +1,26 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { PrincipleCard } from '../PrincipleCard'
+import { Modal } from '../Modal'
+import { useDemoOverlay } from '../DemoArea/overlayContext'
 import styles from './PrinciplesLibrary.module.css'
+
+// ─── First-visit intro ────────────────────────────────────────────────────────
+// The modal that fires the first time the library opens, explaining that the
+// tool bar's tokens drive the components inside these cards. Persisted in
+// localStorage so it shows once, with the header "How this works" button as the
+// reopen path. Same try/catch storage pattern as ThemeContext — localStorage
+// throws in private-mode / sandboxed contexts, so every access is guarded.
+const INTRO_SEEN_KEY = 'cadence-principles-intro-v1'
+
+function introAlreadySeen() {
+  try {
+    return localStorage.getItem(INTRO_SEEN_KEY) === 'true'
+  } catch {
+    // Storage unavailable: treat as not-yet-seen so the explainer still shows.
+    return false
+  }
+}
 
 // ─── Principles data ──────────────────────────────────────────────────────────
 const PRINCIPLES = [
@@ -219,6 +238,39 @@ export function PrinciplesLibrary({ filter = 'all' }) {
   const tokens = useMotionTokens()
   const [selectedId, setSelectedId] = useState(null)
 
+  // The demo column's overlay mount node. Passing it to Modal's portalTarget
+  // centers the dialog inside the demo column instead of the viewport — the
+  // same pattern Token Lab's Enter & Exit demo uses. useDemoOverlay returns
+  // null until DemoArea's callback ref has captured the node (and outside a
+  // DemoArea entirely), so it is null on the very first render.
+  const overlay = useDemoOverlay()
+
+  // Intro modal. Auto-opens on the first visit, then the header button reopens
+  // it. Dismissing (close button, backdrop, or Escape — all routed through
+  // closeIntro) records the visit in localStorage; reopening does not clear it.
+  const [introOpen, setIntroOpen] = useState(false)
+
+  // Why an effect rather than a lazy `useState(() => !introAlreadySeen())`:
+  // the auto-open must wait for `overlay` to exist. If it opened on the first
+  // render (overlay still null), the Modal would mount viewport-fixed, then
+  // re-render into the portal once the node arrived — restarting the enter
+  // animation and flashing the dialog from the page center to the column
+  // center. Gating the open on `overlay` makes the Modal mount into the column
+  // on its first frame. Runs once the node is captured; the storage check keeps
+  // it to genuine first visits.
+  useEffect(() => {
+    if (overlay && !introAlreadySeen()) setIntroOpen(true)
+  }, [overlay])
+
+  const closeIntro = () => {
+    setIntroOpen(false)
+    try {
+      localStorage.setItem(INTRO_SEEN_KEY, 'true')
+    } catch {
+      // Best-effort persistence; ignore storage failures.
+    }
+  }
+
   // The principles actually rendered for the active filter. index, totalCards,
   // and the grid's auto-fit math all derive from THIS list, not the full set,
   // so the expanded-footprint geometry stays correct within a filtered grid.
@@ -274,6 +326,39 @@ export function PrinciplesLibrary({ filter = 'all' }) {
 
   return (
     <div className={styles.library}>
+      {/* Reopen affordance for the intro. Persistent so a returning visitor,
+          past the one-time auto-open, can still find the explanation. */}
+      <div className={styles.header}>
+        <button
+          type="button"
+          className={styles.infoButton}
+          onClick={() => setIntroOpen(true)}
+        >
+          <span className={styles.infoGlyph} aria-hidden="true">i</span>
+          How this works
+        </button>
+      </div>
+
+      <Modal
+        isOpen={introOpen}
+        onClose={closeIntro}
+        title="The tool bar drives these cards"
+        scoped
+        portalTarget={overlay}
+      >
+        <div className={styles.introBody}>
+          <p>
+            Every card here runs on the same tokens the tool bar controls.
+            Move a duration or swap an easing curve and the buttons, toggles,
+            and modals inside them answer on the new value.
+          </p>
+          <p>
+            Open any card to watch one principle up close. The tool bar stays
+            live the whole time.
+          </p>
+        </div>
+      </Modal>
+
       <div className={styles.grid} ref={gridRef}>
         {visiblePrinciples.map((principle, index) => (
           <PrincipleCard

@@ -6,6 +6,7 @@
 
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useTheme } from '../../context/ThemeContext'
+import { useHCContrastColors } from '../../hooks/useHCContrastColors'
 import styles from './PrincipleAnimation.module.css'
 
 // Add entries here as .riv files are produced. `src` is relative to /public.
@@ -36,11 +37,14 @@ const RIV_FILES = {
 }
 
 // Map ThemeContext theme values to the view model instance names defined in the
-// .riv files. ThemeContext uses 'high-contrast', not 'hc'.
+// .riv files. Both high-contrast themes bind the single authored 'Contrast'
+// instance; high-contrast-dark flips its stroke/fill at runtime via
+// useHCContrastColors rather than needing a separate 'ContrastDark' instance.
 const themeToInstanceName = {
   dark: 'Dark',
   light: 'Light',
-  'high-contrast': 'Contrast',
+  'high-contrast-light': 'Contrast',
+  'high-contrast-dark': 'Contrast',
 }
 
 // ─── PrincipleAnimation ───────────────────────────────────────────────────────
@@ -109,10 +113,13 @@ function RiveCanvas({ src, stateMachine, theme, className }) {
   // Passing { rive } causes the hook to call rive.bindViewModelInstance when
   // the instance is found, and to rebind automatically when name changes (i.e.
   // when theme changes). No manual useEffect required.
-  useViewModelInstance(viewModel, {
+  const instance = useViewModelInstance(viewModel, {
     name: themeToInstanceName[theme],
     rive,
   })
+
+  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
+  useHCContrastColors(instance, theme)
 
   return (
     <div className={[styles.animationContainer, className].filter(Boolean).join(' ')}>

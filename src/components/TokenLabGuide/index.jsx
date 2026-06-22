@@ -114,10 +114,12 @@ export function TokenLabGuide() {
         <p className={styles.body}>
           React's one job is the theme. Each file holds three view model instances,
           Light, Dark, and Contrast, and the stroke and fill colors live inside
-          Rive, not in the stylesheet. When you switch the theme, React binds the
-          matching instance and the artwork repaints in the new palette. The
-          display mode you choose in the top bar reaches all the way into the
-          artwork.
+          Rive, not in the stylesheet. Light, dark, and high-contrast light each
+          bind one of these instances. High-contrast dark reuses the Contrast
+          instance, and React flips its stroke and fill at runtime, so one set of
+          artwork serves both high-contrast modes. Switch the mode and the canvas
+          repaints in the new palette. The display mode you choose in the top bar
+          reaches all the way into the artwork.
         </p>
       </section>
 

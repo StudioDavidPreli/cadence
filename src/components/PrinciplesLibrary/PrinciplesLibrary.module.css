@@ -15,6 +15,71 @@
   container-name: library;
 }
 
+/* ── Library header ──────────────────────────────────────────────────────────
+   Holds the "How this works" reopen button. Right-aligned above the grid so it
+   reads as a utility, not part of the card content. Padding matches the grid's
+   horizontal 24px so the button lines up with the rightmost column edge. */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px 24px 0;
+}
+
+/* Small muted pill. Border + muted text rather than accent fill: accent (green)
+   is reserved for active/connected state in this project, and this control is
+   neutral. Background is set together with color on hover per the contrast rule
+   (any background-color change also sets color). */
+.infoButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.infoButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-text-muted);
+}
+
+/* The "i" mark in its own circle so it reads as an info glyph next to the
+   label without an icon dependency. */
+.infoGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 9px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Intro modal copy. The Modal's .content sets size and color; this only
+   restores paragraph spacing (the global reset zeroes p margins). */
+.introBody p {
+  margin: 0;
+}
+
+.introBody p + p {
+  margin-top: 12px;
+}
+
 /* ── Card grid ───────────────────────────────────────────────────────────────
    auto-fit + minmax(180px, 1fr): responsive columns with no JavaScript width
    math. The browser computes column count at every container width — 1 column

@@ -5,6 +5,7 @@
 
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useTheme } from '../../context/ThemeContext'
+import { useHCContrastColors } from '../../hooks/useHCContrastColors'
 import styles from './PrincipleIcon.module.css'
 
 // Catalog of collapsed-state icons. Add entries as principles_iconNN.riv files
@@ -85,12 +86,13 @@ const ICON_CONFIG = {
 }
 
 // Map ThemeContext theme values to the view model instance names defined in
-// the .riv files. ThemeContext uses 'high-contrast', not 'hc' — see
-// divergence note in the briefing.
+// the .riv files. Both high-contrast themes bind the single 'Contrast' instance;
+// high-contrast-dark flips its stroke/fill at runtime (useHCContrastColors).
 const themeToInstanceName = {
   dark: 'Dark',
   light: 'Light',
-  'high-contrast': 'Contrast',
+  'high-contrast-light': 'Contrast',
+  'high-contrast-dark': 'Contrast',
 }
 
 // Module-level Set so missing-config warnings fire once per principleId across
@@ -151,10 +153,13 @@ function RiveIcon({ src, stateMachine, theme, className }) {
   // Passing { rive } causes the hook to call rive.bindViewModelInstance when
   // the instance is found, and to rebind automatically when name changes (i.e.
   // when theme changes). No manual useEffect required.
-  useViewModelInstance(viewModel, {
+  const instance = useViewModelInstance(viewModel, {
     name: themeToInstanceName[theme],
     rive,
   })
+
+  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
+  useHCContrastColors(instance, theme)
 
   return (
     <div

@@ -14,14 +14,17 @@
     <script>
       (function () {
         try {
-          var valid = ['light', 'dark', 'high-contrast']
+          var valid = ['light', 'dark', 'high-contrast-light', 'high-contrast-dark']
           var stored = localStorage.getItem('cadence-theme')
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
           var theme
           if (valid.indexOf(stored) !== -1) {
             theme = stored
           } else if (window.matchMedia('(prefers-contrast: more)').matches) {
-            theme = 'high-contrast'
-          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            // High-contrast request still honors the OS light/dark preference so
+            // the contrast bump does not also flip the user's day/night choice.
+            theme = prefersLight ? 'high-contrast-light' : 'high-contrast-dark'
+          } else if (prefersLight) {
             theme = 'light'
           } else {
             theme = 'dark'

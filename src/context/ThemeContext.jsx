@@ -6,7 +6,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 // and throw a helpful error rather than silently returning garbage.
 const ThemeContext = createContext(null)
 
-export const THEMES = ['light', 'dark', 'high-contrast']
+export const THEMES = ['light', 'dark', 'high-contrast-light', 'high-contrast-dark']
 
 // The localStorage key the choice is persisted under. The pre-paint script in
 // index.html reads the same key, so the two must agree.

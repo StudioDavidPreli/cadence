@@ -149,8 +149,8 @@ body {
   --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
 }
 
-/* ─── High-contrast theme ────────────────────────────────────────────────────
-   Applied when data-theme="high-contrast" on :root.
+/* ─── High-contrast light theme ──────────────────────────────────────────────
+   Applied when data-theme="high-contrast-light" on :root.
    Maximum contrast — no grays, pure black/white surfaces.
 
    Verified contrast ratios
@@ -161,7 +161,7 @@ body {
    accent (#006810) on bg (#ffffff)                7.0:1  AAA ✓
    accent2 (#5a4fcf) on bg (#ffffff)               6.1:1  AA  ✓  (SVG stroke — 3:1 threshold)
    accent3 (#6b4400) on bg (#ffffff)               8.6:1  AAA ✓ */
-:root[data-theme="high-contrast"] {
+:root[data-theme="high-contrast-light"] {
   color-scheme: light;
 
   --color-bg:             #ffffff;
@@ -190,4 +190,51 @@ body {
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
+}
+
+/* ─── High-contrast dark theme ───────────────────────────────────────────────
+   Applied when data-theme="high-contrast-dark" on :root.
+   The surface/text inversion of high-contrast-light: pure black/white swapped,
+   no grays. The accents are not literal hex inversions (inverting a hue is
+   meaningless) — they are the bright high-contrast siblings of the dark theme's
+   accents, re-verified against the black background. The Rive icons reuse the
+   'Contrast' instance with its stroke/fill flipped at runtime (white stroke,
+   black fill); see useHCContrastColors and CLAUDE.md.
+
+   Verified contrast ratios (background #000000; ratio on pure black = 20·L + 1)
+   ─────────────────────────────────────────────────────────────────────────────
+   text-base (#ffffff) on bg (#000000)            21.0:1  AAA ✓
+   text-muted (#ffffff) on surface-active (#0f0f0f) 19.2:1 AAA ✓
+   text-primary (#000000) on surface (#ffffff)    21.0:1  AAA ✓
+   accent (#3ee06a) on bg (#000000)               12.1:1  AAA ✓
+   accent2 (#c2b6ff) on bg (#000000)              11.4:1  AAA ✓  (SVG stroke — 3:1 threshold)
+   accent3 (#f5c563) on bg (#000000)              13.0:1  AAA ✓ */
+:root[data-theme="high-contrast-dark"] {
+  color-scheme: dark;
+
+  --color-bg:             #000000;
+  --color-bg2:            #0f0f0f;
+
+  --color-surface:        #ffffff;
+  --color-surface-hover:  #ffffff;
+  --color-surface-press:  #ffffff;
+  --color-surface-raised: #000000;
+  --color-surface-active: #0f0f0f;  /* white text reads at 19.2:1 against this */
+
+  --color-border:         #ffffff;
+  --color-border2:        #ffffff;
+
+  --color-text-primary:   #000000;  /* text on white interactive surfaces */
+  --color-text-base:      #ffffff;
+  --color-text-muted:     #ffffff;  /* no grays in high-contrast */
+  --color-text-muted2:    #ffffff;
+
+  /* Bright accents, AAA-verified against #000000. accent2 clears AAA here (the
+     light-theme HC variant could only reach AA on white); it is still used only
+     as an SVG stroke, so the 3:1 graphical threshold is met with wide margin. */
+  --color-accent:         #3ee06a;  /* 12.1:1 AAA */
+  --color-accent-subtle:  rgba(62, 224, 106, 0.12);
+  --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
+  --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
+  --color-accent3:        #f5c563;  /* 13.0:1 AAA */
 }

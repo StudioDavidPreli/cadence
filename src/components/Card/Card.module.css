@@ -76,22 +76,26 @@
   opacity: 0.75;
 }
 
-/* ── High-contrast selected ─────────────────────────────────────────────── */
+/* ── High-contrast selected ─────────────────────────────────────────────────
+   [data-theme^="high-contrast"] matches both high-contrast-light and
+   high-contrast-dark. The rules are token-driven, so they hold in both: the
+   selected card takes the page-inverting surface and primary text in whichever
+   direction the theme defines (black-on-white in light, white-on-black in dark). */
 
-:root[data-theme="high-contrast"] .selected {
-  background-color: var(--color-surface);      /* #000000 */
+:root[data-theme^="high-contrast"] .selected {
+  background-color: var(--color-surface);
   border-color: var(--color-surface);
 }
 
-:root[data-theme="high-contrast"] .selected:hover {
-  background-color: var(--color-surface-hover); /* #000000 */
+:root[data-theme^="high-contrast"] .selected:hover {
+  background-color: var(--color-surface-hover);
   border-color: var(--color-surface-hover);
 }
 
-:root[data-theme="high-contrast"] .selected .tag,
-:root[data-theme="high-contrast"] .selected .title,
-:root[data-theme="high-contrast"] .selected .description {
-  color: var(--color-text-primary);  /* #ffffff */
+:root[data-theme^="high-contrast"] .selected .tag,
+:root[data-theme^="high-contrast"] .selected .title,
+:root[data-theme^="high-contrast"] .selected .description {
+  color: var(--color-text-primary);
   opacity: 1;  /* HC: no opacity reductions — maximum legibility */
 }
 

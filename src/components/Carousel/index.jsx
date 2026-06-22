@@ -3,6 +3,7 @@ import { motion, animate, useMotionValue } from 'framer-motion'
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useTheme } from '../../context/ThemeContext'
+import { useHCContrastColors } from '../../hooks/useHCContrastColors'
 import styles from './Carousel.module.css'
 
 // ─── Slide content ────────────────────────────────────────────────────────────
@@ -39,12 +40,14 @@ const SLIDES = [
 ]
 
 // Map ThemeContext theme values to the view model instance names in the .riv
-// files. Identical to PrincipleAnimation's map — ThemeContext uses
-// 'high-contrast', the Rive instance is named 'Contrast'.
+// files. Identical to PrincipleAnimation's map — both high-contrast themes bind
+// the single 'Contrast' instance; high-contrast-dark flips its stroke/fill at
+// runtime (useHCContrastColors).
 const themeToInstanceName = {
   dark: 'Dark',
   light: 'Light',
-  'high-contrast': 'Contrast',
+  'high-contrast-light': 'Contrast',
+  'high-contrast-dark': 'Contrast',
 }
 
 // ─── SlideImage ───────────────────────────────────────────────────────────────
@@ -66,10 +69,13 @@ function SlideImage({ src, stateMachine, theme }) {
 
   // Passing { rive } rebinds the instance whenever the name changes (theme
   // switch). No manual useEffect needed — same pattern as PrincipleAnimation.
-  useViewModelInstance(viewModel, {
+  const instance = useViewModelInstance(viewModel, {
     name: themeToInstanceName[theme],
     rive,
   })
+
+  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
+  useHCContrastColors(instance, theme)
 
   return <RiveComponent className={styles.slideImage} />
 }

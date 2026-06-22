@@ -59,9 +59,17 @@ import styles from './Modal.module.css'
 // close, which is acceptable for the surfaces this Modal serves here.
 
 // portalTarget (a DOM node) renders the Modal into that node and implies scoped:
-// Token Lab's Enter & Exit demo passes its demo-area overlay node so the modal
-// centers within the visible demo column instead of the viewport. Null renders
-// in place (the principle-card use and the app-level import report).
+// Token Lab's Enter & Exit demo and the Principles Library intro pass the demo
+// overlay node (useDemoOverlay) so the modal centers within the visible demo
+// column instead of the viewport. Null renders in place (the principle-card use
+// and the app-level import report).
+//
+// Consumer rule: any Modal rendered inside DemoArea should take its target from
+// useDemoOverlay() rather than defaulting to the viewport. useDemoOverlay()
+// returns null on the first render (the node is captured by a callback ref), so
+// a Modal that auto-opens on mount must gate its open on the node existing —
+// otherwise it mounts viewport-fixed for a frame, then jumps into the column.
+// Full rationale: CLAUDE.md "Modal centering — viewport vs demo column".
 export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null }) {
   const tokens = useMotionTokens()
   const panelRef = useRef(null)

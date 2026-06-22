@@ -74,28 +74,31 @@
 }
 
 /* ── High-contrast thumb overrides ─────────────────────────────────────────
-   Applied only when data-theme="high-contrast" is on :root.
+   [data-theme^="high-contrast"] matches both high-contrast-light and
+   high-contrast-dark. Token-driven, so the descriptions below hold in either
+   direction: text-primary and text-base swap black/white with the theme.
    Expressive and subtle require different approaches (see comment above). */
 
-/* Expressive HC: white thumb reads against both black (off) and green (on) tracks. */
-:root[data-theme="high-contrast"] .trackExpressive .thumb {
+/* Expressive HC: thumb is text-primary, which reads against both the off and
+   the green (on) tracks in both high-contrast themes. */
+:root[data-theme^="high-contrast"] .trackExpressive .thumb {
   background-color: var(--color-text-primary);
 }
 
-/* Subtle HC: thumb stays black (matches text-base) but gets a white inset
-   ring so it separates from the black track. outline-offset pushes the ring
-   inside the circle boundary so it doesn't clip against the track edges. */
-:root[data-theme="high-contrast"] .thumb {
+/* Subtle HC: thumb stays text-base but gets a text-primary inset ring so it
+   separates from the track. outline-offset pushes the ring inside the circle
+   boundary so it doesn't clip against the track edges. */
+:root[data-theme^="high-contrast"] .thumb {
   outline: 1.5px solid var(--color-text-primary);
   outline-offset: -2px;
 }
 
-/* The expressive rule above sets background-color: --color-text-primary (white).
-   That rule's selector is more specific, so it wins over the base .thumb rule.
-   But the outline rule immediately above applies to ALL HC thumbs — including
-   expressive. A white outline on a white thumb is invisible and harmless, but
-   reset it anyway for clarity. */
-:root[data-theme="high-contrast"] .trackExpressive .thumb {
+/* The expressive rule above sets background-color: --color-text-primary. That
+   rule's selector is more specific, so it wins over the base .thumb rule. But
+   the outline rule immediately above applies to ALL HC thumbs — including
+   expressive. A same-color outline on a same-color thumb is invisible and
+   harmless, but reset it anyway for clarity. */
+:root[data-theme^="high-contrast"] .trackExpressive .thumb {
   outline: none;
 }
 

@@ -10,6 +10,7 @@
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { useHCContrastColors } from '../../hooks/useHCContrastColors'
 import styles from './HeroAnimation.module.css'
 
 // The landing .riv. stateMachine is the author's choice in Rive — rename here to
@@ -17,10 +18,13 @@ import styles from './HeroAnimation.module.css'
 // Light / Dark / Contrast instances and colorPropertyFill / colorPropertyStroke.
 const HERO_RIV = { src: '/rive/hero.riv', stateMachine: 'heroSM' }
 
+// Both high-contrast themes bind the single 'Contrast' instance; high-contrast-
+// dark flips its stroke/fill at runtime (useHCContrastColors).
 const themeToInstanceName = {
   dark: 'Dark',
   light: 'Light',
-  'high-contrast': 'Contrast',
+  'high-contrast-light': 'Contrast',
+  'high-contrast-dark': 'Contrast',
 }
 
 export function HeroAnimation() {
@@ -40,10 +44,13 @@ export function HeroAnimation() {
   const viewModel = useViewModel(rive, { name: 'ViewModel1' })
   // { rive } makes the hook bind the instance and rebind when the name (theme)
   // changes. No manual useEffect needed — same as RiveCanvas.
-  useViewModelInstance(viewModel, {
+  const instance = useViewModelInstance(viewModel, {
     name: themeToInstanceName[theme],
     rive,
   })
+
+  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
+  useHCContrastColors(instance, theme)
 
   return (
     <div className={styles.hero}>
