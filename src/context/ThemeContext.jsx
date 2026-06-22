@@ -8,21 +8,50 @@ const ThemeContext = createContext(null)
 
 export const THEMES = ['light', 'dark', 'high-contrast']
 
+// The localStorage key the choice is persisted under. The pre-paint script in
+// index.html reads the same key, so the two must agree.
+const STORAGE_KEY = 'cadence-theme'
+
+// Resolve the theme to start in. The pre-paint script in index.html already
+// resolved it (stored choice, else OS preference, else dark) and wrote it to
+// data-theme, so the primary source is that attribute: adopting it keeps React
+// and the DOM in agreement with no second, possibly-divergent resolution. The
+// localStorage and defaultTheme fallbacks only matter if that script did not run
+// (tests, or a stripped index.html), where a one-frame flash is acceptable.
+function resolveInitialTheme(defaultTheme) {
+  if (typeof document !== 'undefined') {
+    const attr = document.documentElement.getAttribute('data-theme')
+    if (THEMES.includes(attr)) return attr
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (THEMES.includes(stored)) return stored
+  } catch {
+    // localStorage can throw in private-mode / sandboxed contexts; fall through.
+  }
+  return defaultTheme
+}
+
 // ThemeProvider holds the theme state and broadcasts it to the whole tree.
 // Wrap this around your root component so every descendant can access the theme.
-// defaultTheme prop lets tests or demos start in a specific theme.
+// defaultTheme prop is the last-resort fallback (tests, demos); the real app
+// resolves from the pre-paint attribute or localStorage first.
 export function ThemeProvider({ children, defaultTheme = 'dark' }) {
-  const [theme, setTheme] = useState(defaultTheme)
+  // Lazy initializer so the resolution runs once, not on every render.
+  const [theme, setTheme] = useState(() => resolveInitialTheme(defaultTheme))
 
   useEffect(() => {
-    // Sync the theme state to the DOM attribute that color.css reads.
-    // This lives in useEffect (not directly in render) because it's a side
-    // effect — it touches the DOM outside React's control. React's render
-    // phase should be pure; side effects belong in useEffect.
+    // Sync the theme state to the DOM attribute that color.css reads, and persist
+    // the choice so the next load restores it. Both are side effects (they touch
+    // the DOM and storage outside React's control), so they belong in useEffect,
+    // not the render phase. Re-runs whenever theme changes; runs once on mount.
     document.documentElement.setAttribute('data-theme', theme)
+    try {
+      localStorage.setItem(STORAGE_KEY, theme)
+    } catch {
+      // Persistence is best-effort; ignore storage failures.
+    }
   }, [theme])
-  // The dependency array [theme] means this effect re-runs whenever theme
-  // changes. On the first render it runs once to set the initial attribute.
 
   return (
     // ThemeContext.Provider broadcasts { theme, setTheme, themes } to all

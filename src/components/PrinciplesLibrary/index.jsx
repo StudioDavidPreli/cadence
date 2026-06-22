@@ -58,7 +58,7 @@ const PRINCIPLES = [
   {
     id: 6, title: 'Slow In & Slow Out', category: 'classic',
     summary: 'Objects accelerate from rest and decelerate to rest. Nothing starts or stops instantly.',
-    componentSummary: 'The bar fills, then settles at the end. Linear motion belongs to machines.',
+    componentSummary: 'The bar fills, then settles at the end. Tokens is adjusted with the tool bar.',
     animationQuote: 'More drawings near the beginning and end of an action, fewer in the middle.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Linear motion belongs to machines. Easing curves are how software admits it has mass.',
@@ -88,7 +88,7 @@ const PRINCIPLES = [
   {
     id: 9, title: 'Timing', category: 'classic',
     summary: 'Duration determines weight and personality. More time means heavier, slower, more considered.',
-    componentSummary: 'Same toggle. Different duration. The gesture changes character with it.',
+    componentSummary: 'The character of the component changes when varying the easing duration.',
     animationQuote: 'A variety of slow and fast timing within a scene adds texture and interest to the movement.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Have a known purpose for every animation in your interface.',

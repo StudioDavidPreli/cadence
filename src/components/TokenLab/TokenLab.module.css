@@ -156,6 +156,23 @@
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
+/* forced-colors suppresses box-shadow, so both pulse variants above would be
+   invisible and the "the value lives here" cue would be lost. Re-express it as an
+   outline in the Highlight system color for the duration of the flash, snapped
+   on then off (no breathing — outline cannot animate its spread). Held for the
+   fixed flash window, then removed. */
+@media (forced-colors: active) {
+  .controlsTitlePulse {
+    animation: controlsTitlePulseForced var(--feedback-flash-duration) steps(1, end);
+  }
+}
+
+@keyframes controlsTitlePulseForced {
+  0%   { outline: 2px solid Highlight; outline-offset: 2px; }
+  99%  { outline: 2px solid Highlight; outline-offset: 2px; }
+  100% { outline: 2px solid transparent; outline-offset: 2px; }
+}
+
 /* ── Presets section ─────────────────────────────────────────────────────── */
 
 /* Always-visible, no collapse. Sits between the header and Duration section. */
@@ -856,6 +873,17 @@
   margin: -12px;
   outline: 1px solid var(--color-accent);
   transition: opacity 150ms;
+}
+
+/* forced-colors flattens the accent outline and the subtle background to system
+   colors, so "this component is connected to the slider" would stop reading as a
+   distinct state. The outline survives (forced-colors keeps outlines), so move it
+   to the Highlight system color and thicken it; the dimmed siblings keep their
+   opacity (forced-colors preserves opacity), so the highlight/dim contrast holds. */
+@media (forced-colors: active) {
+  .demoGroupHighlighted {
+    outline: 2px solid Highlight;
+  }
 }
 
 /* All other demo groups step back — reduce contrast without hiding. */

@@ -14,7 +14,18 @@
   justify-content: center;
 }
 
+/* Uniform scale-down wrapper. transform: scale keeps the Card's aspect exactly
+   while making the resting state smaller, and composes with the Card's own
+   scale.lift animation (different element, no conflict with Framer's transform).
+   Sized so the lifted state (0.65 × 1.35 ≈ 0.88 of natural) stays within the
+   dashed frame. transform-origin is center by default, so it stays centered. */
+.cardScale {
+  transform: scale(0.65);
+}
+
 .cardDemoCard {
-  /* No flex / width overrides — Card sizes to its own content. */
+  /* No flex / width overrides — Card sizes to its own content, keeping its
+     original aspect. The resting size is set by .cardScale; the weighty
+     start→finish difference comes from the scoped scale.lift (1.35) in index.jsx. */
   max-width: 100%;
 }

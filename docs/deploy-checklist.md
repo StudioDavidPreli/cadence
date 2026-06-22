@@ -1,4 +1,4 @@
-# Cadence — Pre-Deploy Checklist
+1# Cadence — Pre-Deploy Checklist
 
 Run this before deployment. The risk for a system like Cadence is not a missing
 component. It is a missing state, or a principle whose State 2 demo reads as
@@ -14,24 +14,24 @@ component; mark N/A and move on.
 The test: a hiring manager landing on a card with no label should name the
 principle from the motion alone.
 
-- [ ] Squash and Stretch (Button): press compression and spring release read as weight
+- [x] Squash and Stretch (Button): press compression and spring release read as weight
 - [ ] Anticipation (Drawer): the negative-y wind-up is visible, not swallowed
-- [ ] Staging (Modal): backdrop and focus containment direct the eye to one place
-- [ ] Pose to Pose (Stepper): the discrete poses are legible against a straight-ahead reading
-- [ ] Follow Through (Carousel): the dot offset trails the slide, not synced to it
+- [x] Staging (Modal): backdrop and focus containment direct the eye to one place
+- [x] Pose to Pose (Stepper): the discrete poses are legible against a straight-ahead reading
+- [x] Follow Through (Carousel): the dot offset trails the slide, not synced to it
 - [ ] Slow In/Slow Out (Progress Bar): deceleration to target is perceptible
-- [ ] Arc (Tooltip): the entrance traces an arc from the trigger, not a straight line
-- [ ] Secondary Action (Dropdown): chevron rotation reads as subordinate to the menu open
+- [x] Arc (Tooltip): the entrance traces an arc from the trigger, not a straight line
+- [x] Secondary Action (Dropdown): chevron rotation reads as subordinate to the menu open
 - [ ] Timing (Toggle): the duration change visibly changes character
-- [ ] Exaggeration (Badge): the overshoot on increment is unmistakable
+- [x] Exaggeration (Badge): the overshoot on increment is unmistakable
 - [ ] Solid Drawing (Card): the lift implies elevation, a real z-axis
-- [ ] Appeal (Lava-lamp grid): all tokens reading together, coherent
-- [ ] Systematization: one token change propagates across components on screen
-- [ ] Hierarchy of Motion: parent drives child, the order is legible
-- [ ] Economy: parallax layering reads as restraint, not decoration
-- [ ] Token Fidelity: the wrong-value correction is visible as a correction
-- [ ] Reduced Motion: the toggle shows reduced ambition, not absence of motion
-- [ ] Shared Vocabulary: the preset name communicates what the numbers cannot
+- [x] Appeal (Lava-lamp grid): all tokens reading together, coherent
+- [x] Systematization: one token change propagates across components on screen
+- [x] Hierarchy of Motion: parent drives child, the order is legible
+- [x] Economy: parallax layering reads as restraint, not decoration
+- [x] Token Fidelity: the wrong-value correction is visible as a correction
+- [x] Reduced Motion: the toggle shows reduced ambition, not absence of motion
+- [x] Shared Vocabulary: the preset name communicates what the numbers cannot
 
 ---
 
@@ -75,6 +75,9 @@ For every interactive demo (Button, Toggle, Dropdown, Stepper, sliders, tabs):
 - [ ] `--color-accent` reads as active/connected only, never decorative
 - [ ] Reduced-motion mode verified against `prefers-reduced-motion`
 - [ ] Theme switch re-reads tokens (Framer Motion values do not re-read on their own)
+- [ ] forced-colors (Windows HCM): accent/box-shadow state cues survive (nav active leaf, Token Lab connection ring, title pulse) via outline + system colors
+- [ ] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim, not the translucent 0.8
+- [ ] First load with no stored choice follows the OS (prefers-color-scheme / prefers-contrast); a stored choice is restored without a flash
 
 ## Token integrity (the core argument, under test)
 

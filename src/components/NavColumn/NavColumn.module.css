@@ -119,6 +119,19 @@
   box-shadow: inset 3px 0 0 var(--color-accent);
 }
 
+/* forced-colors (Windows High Contrast Mode) suppresses box-shadow and replaces
+   the accent-subtle background with a system color, so the selected leaf would
+   lose its marker (only the 600 weight would remain). Restore it with an outline
+   in the Highlight system color, which forced-colors preserves and is the OS's
+   own "selected" color. */
+@media (forced-colors: active) {
+  .rowActive,
+  .rowActive:hover {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
 /* Reduced motion: hold the accordion and caret states statically, no animated
    expand or rotate. Color changes still snap, which carries no motion. */
 @media (prefers-reduced-motion: reduce) {

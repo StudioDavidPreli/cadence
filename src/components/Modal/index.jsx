@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import styles from './Modal.module.css'
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -66,6 +67,14 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
   const panelRef = useRef(null)
   const anchored = scoped || portalTarget != null
 
+  // prefers-reduced-transparency: take the backdrop to a fully opaque scrim
+  // instead of the translucent 0.8. The backdrop color is --color-bg, so opacity
+  // 1 hides the page behind it entirely, which is the point of the preference.
+  // The opacity is animated inline by Framer Motion, so this is set in JS rather
+  // than overridden in CSS (CSS cannot beat the inline style).
+  const reduceTransparency = useMediaQuery('(prefers-reduced-transparency: reduce)')
+  const backdropOpacity = reduceTransparency ? 1 : 0.8
+
   // Escape closes — standard dialog affordance.
   useEffect(() => {
     if (!isOpen) return
@@ -111,7 +120,7 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
           key="modal-backdrop"
           className={[styles.backdrop, anchored && styles.backdropScoped].filter(Boolean).join(' ')}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.8 }}
+          animate={{ opacity: backdropOpacity }}
           exit={{
             opacity: 0,
             transition: { duration: tokens.duration.base, ease: tokens.ease.exit },

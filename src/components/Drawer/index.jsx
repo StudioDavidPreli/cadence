@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import styles from './Drawer.module.css'
 
 // ─── Drawer ───────────────────────────────────────────────────────────────────
@@ -48,6 +49,13 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
   const tokens = useMotionTokens()
   const anchored = scoped || portalTarget != null
 
+  // prefers-reduced-transparency: opaque scrim (1) instead of the translucent
+  // 0.8. Same reasoning as Modal — the backdrop is --color-bg, so full opacity
+  // hides the page behind it. Set in JS because Framer Motion animates opacity
+  // inline, where CSS cannot override it.
+  const reduceTransparency = useMediaQuery('(prefers-reduced-transparency: reduce)')
+  const backdropOpacity = reduceTransparency ? 1 : 0.8
+
   const tree = (
     <AnimatePresence>
       {/* Backdrop — dims the page behind the drawer, closes on click */}
@@ -56,7 +64,7 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
           key="drawer-backdrop"
           className={[styles.backdrop, anchored && styles.backdropScoped].filter(Boolean).join(' ')}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.8 }}
+          animate={{ opacity: backdropOpacity }}
           exit={{ opacity: 0 }}
           // The backdrop fades on duration.base, faster than the panel's duration.slow,
           // so the dimming lifts while the panel is still on its way out. Ambient, not
@@ -73,11 +81,11 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
           className={[styles.drawer, anchored && styles.drawerScoped].filter(Boolean).join(' ')}
           initial={{ y: '100%', opacity: 0 }}
           animate={{
-            y: ['100%', '-4%', '0%'],
+            y: ['100%', '-10%', '0%'],
             opacity: [0, 1, 1],
           }}
           exit={{
-            y: ['0%', '-4%', '100%'],
+            y: ['0%', '-10%', '100%'],
             opacity: [1, 1, 0],
             transition: {
               duration: tokens.duration.slow,

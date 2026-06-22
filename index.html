@@ -4,6 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadence</title>
+    <!-- Resolve the theme before first paint so the OS preference is honored and a
+         stored choice never flashes the default palette. Runs synchronously in
+         <head>, setting data-theme before any CSS applies. Resolution order:
+         stored choice, then OS prefers-contrast / prefers-color-scheme, else dark.
+         ThemeContext adopts this same attribute on mount (resolveInitialTheme),
+         so React and the DOM agree with no second resolution. Keep the order here
+         in sync with src/context/ThemeContext.jsx. -->
+    <script>
+      (function () {
+        try {
+          var valid = ['light', 'dark', 'high-contrast']
+          var stored = localStorage.getItem('cadence-theme')
+          var theme
+          if (valid.indexOf(stored) !== -1) {
+            theme = stored
+          } else if (window.matchMedia('(prefers-contrast: more)').matches) {
+            theme = 'high-contrast'
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light'
+          } else {
+            theme = 'dark'
+          }
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
     <!-- IBM Plex Mono: token values, code, monospaced labels (400 regular, 500 medium) -->
     <!-- DM Serif Display: editorial headings — ital@0;1 loads both upright and italic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
