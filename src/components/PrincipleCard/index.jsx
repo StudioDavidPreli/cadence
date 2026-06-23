@@ -268,6 +268,7 @@ export function PrincipleCard({
   cellWidth,
   totalCards,
   selectedId,
+  iconsPaused,
 }) {
   // Drop all animation durations to 0 when the user has prefers-reduced-motion set.
   const prefersReducedMotion = useReducedMotion()
@@ -513,7 +514,7 @@ export function PrincipleCard({
           transition={{ duration: dur.base, ease: tokens.ease.standard }}
         >
           <div className={styles.placeholderIcon}>
-            <PrincipleIcon principleId={principle.id} />
+            <PrincipleIcon principleId={principle.id} paused={iconsPaused} />
           </div>
 
           <div className={styles.cardMeta}>

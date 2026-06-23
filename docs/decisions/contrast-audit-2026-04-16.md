@@ -150,3 +150,55 @@ rgba(0, 122, 12, 0.10) → rgba(0, 104, 16, 0.10). The subtle tint matches the n
 
 **All verified ratios added as inline comments**
 Each theme block now documents the tested combinations and their computed ratios so future token edits have a baseline to compare against rather than requiring a re-audit from scratch.
+
+---
+
+## Accent palette change — 2026-06-22
+
+`--color-accent` was repurposed from a single hue (green) to a per-theme hue:
+green in dark (unchanged), purple in light, amber in both high-contrast themes.
+The role is unchanged: accent still means active, connected, currently affecting
+the system. Only the hue varies by theme.
+
+David specified the dark theme's `accent2` (`#B9B0FF`) for light and the dark
+theme's `accent3` (`#E8B86D`) for both contrasts. Both are tuned for dark
+backgrounds and fail on light surfaces:
+
+| Proposed | Background | Ratio | Bar | Result |
+|----------|-----------|-------|-----|--------|
+| `#B9B0FF` (light) | `#ffffff` / `#f5f5f5` | 2.0:1 / 1.8:1 | 3:1 UI | fail |
+| `#E8B86D` (HC-light) | `#ffffff` | 1.8:1 | 3:1 UI | fail |
+| `#E8B86D` (HC-dark) | `#000000` | 11.5:1 | AAA | pass |
+
+The two light-background cases were retuned to contrast-safe members of the same
+hue family; HC-dark took the value as given. `--color-accent` is used only as
+UI / graphical strokes in this project (outlines, the carousel, the
+DurationVisualizer dots), never as text, so the governing bar is 3:1. Final
+values, computed from first principles:
+
+| Theme | `--color-accent` | Background | Ratio | Standard |
+|-------|------------------|-----------|-------|----------|
+| dark | `#76c17d` (unchanged) | `#141414` | 8.5:1 | AAA |
+| light | `#5a4fcf` (purple) | `#ffffff` / `#f5f5f5` | 6.1:1 / 5.6:1 | AA |
+| high-contrast-light | `#855a0d` (amber) | `#ffffff` | 6.1:1 | AA |
+| high-contrast-dark | `#e8b86d` (amber) | `#000000` | 11.5:1 | AAA |
+
+`-subtle` versions are tints of each theme's final accent at that theme's
+existing alpha: light `rgba(90, 79, 207, 0.10)`, HC-light
+`rgba(133, 90, 13, 0.10)`, HC-dark `rgba(232, 184, 109, 0.12)`.
+
+Notes for future edits:
+- **Light purple is hue-faithful to `#B9B0FF`, darkened until it reads on white.**
+  `#5a4fcf` is the same value HC-light uses for `accent2`; reused here because it
+  is already verified at 6.1:1 on white. It is distinct from light's own `accent2`
+  (`#7b6fd4`).
+- **A golden amber cannot reach AAA on white.** Pushing `#E8B86D` to AAA collapses
+  it into a dark brown indistinct from `accent3`. `#855a0d` holds the amber
+  identity at AA (6.1:1), matching the bar `accent2` already runs at in HC-light.
+  If HC-light should be AAA throughout, drop accent to `#6b4400` (8.6:1) and accept
+  the browner tone.
+- **Hue overlap is now a known property, not a bug.** In light, accent (purple)
+  shares a family with `accent2` (easing/secondary purple). In both HC themes,
+  accent (amber) shares a family with `accent3` (warning amber). Contrast is fine;
+  the consequence is that "active" and "secondary/warning" read as the same hue
+  within a theme.

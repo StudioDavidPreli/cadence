@@ -8,6 +8,7 @@ import { useNavState } from '../../context/NavigationContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { EasingVisualizer } from '../EasingVisualizer'
+import { DurationVisualizer } from '../DurationVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
 import { NavColumn } from '../NavColumn'
 import { DemoArea } from '../DemoArea'
@@ -1398,6 +1399,10 @@ export function TokenLab() {
             tokenKey={`duration.${key}`}
           />
         ))}
+        {/* Reads the live duration values straight from rawState — the controls
+            column is outside MotionTokensProvider, so the visualizer takes the
+            numbers as a prop rather than through useMotionTokens(). */}
+        <DurationVisualizer durations={rawState.duration} />
       </ControlSection>
 
       <ControlSection

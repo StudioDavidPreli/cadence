@@ -245,6 +245,13 @@ export function PrinciplesLibrary({ filter = 'all' }) {
   // DemoArea entirely), so it is null on the very first render.
   const overlay = useDemoOverlay()
 
+  // Universal icon pause. One boolean drives every collapsed-card Rive icon at
+  // once: each PrincipleIcon receives it as a prop and calls rive.pause()/play()
+  // on its own instance. Held here (not per-card) so the whole grid stops and
+  // resumes together. The expanded card's full PrincipleAnimation is unaffected
+  // — this only governs the decorative grid icons.
+  const [iconsPaused, setIconsPaused] = useState(false)
+
   // Intro modal. Auto-opens on the first visit, then the header button reopens
   // it. Dismissing (close button, backdrop, or Escape — all routed through
   // closeIntro) records the visit in localStorage; reopening does not clear it.
@@ -329,6 +336,18 @@ export function PrinciplesLibrary({ filter = 'all' }) {
       {/* Reopen affordance for the intro. Persistent so a returning visitor,
           past the one-time auto-open, can still find the explanation. */}
       <div className={styles.header}>
+        {/* Universal pause for the grid icons. Sits to the left of "How this
+            works". Label and aria-pressed reflect state: it reads "Pause" while
+            the icons run and "Play" once stopped, so the way to resume is
+            visible rather than implied. */}
+        <button
+          type="button"
+          className={styles.pauseButton}
+          onClick={() => setIconsPaused(prev => !prev)}
+          aria-pressed={iconsPaused}
+        >
+          {iconsPaused ? 'Play' : 'Pause'}
+        </button>
         <button
           type="button"
           className={styles.infoButton}
@@ -373,6 +392,7 @@ export function PrinciplesLibrary({ filter = 'all' }) {
             cellWidth={cellWidth}
             totalCards={totalCards}
             selectedId={selectedId}
+            iconsPaused={iconsPaused}
           />
         ))}
       </div>

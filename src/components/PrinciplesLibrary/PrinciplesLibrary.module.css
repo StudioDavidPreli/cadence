@@ -23,6 +23,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  gap: 8px;
   padding: 16px 24px 0;
 }
 
@@ -49,6 +50,41 @@
 }
 
 .infoButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-text-muted);
+}
+
+/* Pause/Play toggle. Same neutral pill as .infoButton — accent (green) is
+   reserved for active/connected state, and pausing the decorative icons is a
+   neutral utility action. Shares the muted-border-on-hover treatment.
+   The pressed (paused) state fills with surface-active and sets base text in
+   the same rule, per the contrast requirement that any background-color change
+   also sets color — so the control reads as held down while the grid is stopped. */
+.pauseButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.pauseButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-text-muted);
+}
+
+.pauseButton[aria-pressed='true'] {
   background-color: var(--color-surface-active);
   color: var(--color-text-base);
   border-color: var(--color-text-muted);

@@ -3,6 +3,7 @@
 // mount/unmount — do not hoist these hooks into PrincipleCard. Two clean
 // implementations are easier to read than one shared util at this scale.
 
+import { useEffect } from 'react'
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
@@ -100,7 +101,7 @@ const themeToInstanceName = {
 // these and would otherwise spam the console on every theme toggle or reflow.
 const warnedIds = new Set()
 
-export function PrincipleIcon({ principleId, className }) {
+export function PrincipleIcon({ principleId, className, paused = false }) {
   const { theme } = useTheme()
   const config = ICON_CONFIG[principleId]
 
@@ -127,6 +128,7 @@ export function PrincipleIcon({ principleId, className }) {
       stateMachine={config.stateMachine}
       theme={theme}
       className={className}
+      paused={paused}
     />
   )
 }
@@ -140,13 +142,25 @@ export function PrincipleIcon({ principleId, className }) {
 // no pointer handlers. The wrapper sets pointer-events: none in CSS so clicks
 // pass through to PrincipleCard's expand-on-click handler.
 
-function RiveIcon({ src, stateMachine, theme, className }) {
+function RiveIcon({ src, stateMachine, theme, className, paused }) {
   const { rive, RiveComponent } = useRive({
     src,
     stateMachines: stateMachine,
     autoplay: true,
     autoBind: false,
   })
+
+  // Universal pause. The library header's Pause button flips `paused` for every
+  // mounted icon at once. rive.pause() halts the running state machine in place;
+  // rive.play() (no argument) resumes whatever was last active. The effect also
+  // runs when `rive` first becomes non-null, so an icon that mounts while the
+  // library is already paused (e.g. a card collapsing back into the grid) starts
+  // paused rather than animating.
+  useEffect(() => {
+    if (!rive) return
+    if (paused) rive.pause()
+    else rive.play()
+  }, [rive, paused])
 
   const viewModel = useViewModel(rive, { name: 'ViewModel1' })
 

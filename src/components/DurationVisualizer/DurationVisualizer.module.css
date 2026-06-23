@@ -1,0 +1,228 @@
+/* DurationVisualizer — sits inside the Duration control section, below the
+   sliders. Visual register matches the Easing slot tabs and export toggle so it
+   reads as part of the same tool bar, not a new vocabulary. */
+
+.visualizer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Separates the visualizer from the sliders above it. */
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-base);
+}
+
+.tokenValue {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Token selector ─────────────────────────────────────────────────────────
+   Four-column tab strip, same treatment as .easingTab / .easingTabActive. */
+.tokenTabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.tokenTab {
+  padding: 6px 4px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.tokenTab:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+.tokenTabActive,
+.tokenTabActive:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* ── Mode toggle ────────────────────────────────────────────────────────────
+   Two segments reading as one unit, same construction as .exportFormatToggle. */
+.modeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.modeOption {
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms;
+}
+
+.modeOption:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.modeOption:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+/* Active segment uses the accent — this mode is the one currently driving the
+   dots, and accent means "currently affecting the system" in this project. */
+.modeOptionActive,
+.modeOptionActive:hover {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+}
+
+/* ── Kinetic strip ──────────────────────────────────────────────────────────
+   Three tracks. Each holds a dot that translates from the left edge to its
+   fraction of the track width. */
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.track {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trackHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.trackLabel {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.trackTime {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted2);
+}
+
+/* The rail the dot travels along. A faint center line shows the full track so
+   the distance reads even with the dot at rest. */
+.rail {
+  position: relative;
+  height: 12px;
+  background:
+    linear-gradient(var(--color-border), var(--color-border)) left center / 100% 1px no-repeat;
+}
+
+.dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* ── Chart ──────────────────────────────────────────────────────────────────
+   Duration (Y) vs distance (X). */
+.chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.axis {
+  stroke: var(--color-border2);
+  stroke-width: 0.6;
+}
+
+.gridline {
+  stroke: var(--color-border);
+  stroke-width: 0.5;
+  stroke-dasharray: 1 2;
+}
+
+.line {
+  stroke: var(--color-text-muted);
+  stroke-width: 1;
+  fill: none;
+  transition: stroke 150ms, stroke-width 150ms;
+}
+
+/* The line for the active mode — accent, thicker. */
+.lineActive {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.marker {
+  fill: var(--color-accent);
+}
+
+.crossPoint {
+  fill: var(--color-text-base);
+}
+
+.axisLabel {
+  fill: var(--color-text-muted2);
+  font-size: 5px;
+  font-family: inherit;
+}
+
+/* ── Caption + replay ───────────────────────────────────────────────────── */
+.caption {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.replayButton {
+  align-self: flex-start;
+  padding: 5px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 100ms, color 100ms, border-color 100ms;
+}
+
+.replayButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+  border-color: var(--color-border2);
+}

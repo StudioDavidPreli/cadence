@@ -114,7 +114,8 @@ body {
    text-muted (#666666) on surface-active (#ebebeb)  4.8:1  AA  ✓  ← Card hover (tag, description)
    text-primary (#ffffff) on surface (#1a1a1a)     17.4:1  AAA ✓
    text-primary (#ffffff) on surface-hover (#333333) 12.6:1 AAA ✓
-   accent (#4a9e52) on surface-raised (#ffffff)     3.3:1  UI  ✓  (outline only — not text)
+   accent (#5a4fcf) on surface-raised (#ffffff)     6.1:1  AA  ✓  (UI/stroke — not text)
+   accent (#5a4fcf) on bg (#f5f5f5)                 5.6:1  AA  ✓
    accent3 (#905e18) on surface-raised (#ffffff)    5.5:1  AA  ✓  ← noDemoNote text
    accent3 (#905e18) on bg (#f5f5f5)               5.1:1  AA  ✓ */
 :root[data-theme="light"] {
@@ -139,9 +140,10 @@ body {
   --color-text-muted:     #666666;
   --color-text-muted2:    #888888;
 
-  /* Darkened for contrast on light backgrounds */
-  --color-accent:         #4a9e52;  /* 3.3:1 on white — UI threshold only (used as outline) */
-  --color-accent-subtle:  rgba(74, 158, 82, 0.10);
+  /* Purple accent, darkened for contrast on light backgrounds. Hue-faithful to
+     the dark theme's lavender (#b9b0ff), which is too light to read on white. */
+  --color-accent:         #5a4fcf;  /* 6.1:1 on white, 5.6:1 on bg — AA (UI/stroke, not text) */
+  --color-accent-subtle:  rgba(90, 79, 207, 0.10);
   --color-accent2:        #7b6fd4;  /* purple — easing curve, secondary */
   --color-accent2-subtle: rgba(123, 111, 212, 0.10); /* extended principle badge background */
   /* #905e18 replaces #c4882a — old value was 3.1:1 on white, failing the
@@ -158,7 +160,7 @@ body {
    text-base (#000000) on bg (#ffffff)            21.0:1  AAA ✓
    text-muted (#000000) on surface-active (#f0f0f0) 18.4:1 AAA ✓
    text-primary (#ffffff) on surface (#000000)    21.0:1  AAA ✓
-   accent (#006810) on bg (#ffffff)                7.0:1  AAA ✓
+   accent (#855a0d) on bg (#ffffff)                6.1:1  AA  ✓  (amber; UI/stroke — 3:1 threshold)
    accent2 (#5a4fcf) on bg (#ffffff)               6.1:1  AA  ✓  (SVG stroke — 3:1 threshold)
    accent3 (#6b4400) on bg (#ffffff)               8.6:1  AAA ✓ */
 :root[data-theme="high-contrast-light"] {
@@ -181,12 +183,12 @@ body {
   --color-text-muted:     #000000;  /* no grays in high-contrast */
   --color-text-muted2:    #000000;
 
-  /* All accent values AAA-verified against #ffffff background except accent2.
-     accent2 (#5a4fcf) reaches 6.1:1 — AA, not AAA. It is used exclusively as
-     an SVG stroke (graphical, 3:1 threshold), so this is sufficient. Darkening
-     it further to reach AAA would make it indistinguishable from navy. */
-  --color-accent:         #006810;  /* 7.0:1 AAA — was #007a0c (only 5.5:1, not AAA) */
-  --color-accent-subtle:  rgba(0, 104, 16, 0.10);
+  /* accent and accent2 are AA (6.1:1), not AAA. Both are used as UI / SVG
+     strokes (graphical, 3:1 threshold), so AA is sufficient. A golden amber
+     cannot reach AAA on white without collapsing to a dark brown indistinct
+     from accent3; #855a0d holds the amber identity at AA. accent3 stays AAA. */
+  --color-accent:         #855a0d;  /* amber — 6.1:1 on white, AA (UI/stroke threshold 3:1) */
+  --color-accent-subtle:  rgba(133, 90, 13, 0.10);
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
@@ -206,7 +208,7 @@ body {
    text-base (#ffffff) on bg (#000000)            21.0:1  AAA ✓
    text-muted (#ffffff) on surface-active (#0f0f0f) 19.2:1 AAA ✓
    text-primary (#000000) on surface (#ffffff)    21.0:1  AAA ✓
-   accent (#3ee06a) on bg (#000000)               12.1:1  AAA ✓
+   accent (#e8b86d) on bg (#000000)               11.5:1  AAA ✓
    accent2 (#c2b6ff) on bg (#000000)              11.4:1  AAA ✓  (SVG stroke — 3:1 threshold)
    accent3 (#f5c563) on bg (#000000)              13.0:1  AAA ✓ */
 :root[data-theme="high-contrast-dark"] {
@@ -232,8 +234,8 @@ body {
   /* Bright accents, AAA-verified against #000000. accent2 clears AAA here (the
      light-theme HC variant could only reach AA on white); it is still used only
      as an SVG stroke, so the 3:1 graphical threshold is met with wide margin. */
-  --color-accent:         #3ee06a;  /* 12.1:1 AAA */
-  --color-accent-subtle:  rgba(62, 224, 106, 0.12);
+  --color-accent:         #e8b86d;  /* amber — 11.5:1 AAA on black */
+  --color-accent-subtle:  rgba(232, 184, 109, 0.12);
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */
