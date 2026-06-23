@@ -24,8 +24,8 @@
   color: var(--color-text-base);
   cursor: pointer;
   transition:
-    background-color 100ms var(--motion-ease-standard),
-    border-color 100ms var(--motion-ease-standard);
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard),
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
 .drawerTrigger:hover {

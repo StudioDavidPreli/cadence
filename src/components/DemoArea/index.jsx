@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavState } from '../../context/NavigationContext'
 import { TOKEN_LAB_GUIDE } from '../../data/navigation'
-import { navDurationSeconds } from '../../utils/feedbackDuration'
+import { navDurationSeconds, FEEDBACK_EASE } from '../../utils/feedbackDuration'
 import { DemoOverlayContext } from './overlayContext'
 import styles from './DemoArea.module.css'
 
@@ -76,7 +76,7 @@ export function DemoArea({ categoryContent, principlesContent, hero, guide }) {
             // delay = navDur keeps the outgoing layer mounted under the incoming
             // fade; duration 0 makes its actual removal instant and hidden.
             exit={{ opacity: 0, transition: { delay: navDur, duration: 0 } }}
-            transition={{ duration: navDur, ease: 'easeInOut' }}
+            transition={{ duration: navDur, ease: FEEDBACK_EASE }}
           >
             {frozen.current[activeKey]}
           </motion.div>

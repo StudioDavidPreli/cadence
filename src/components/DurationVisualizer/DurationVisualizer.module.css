@@ -48,7 +48,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .tokenTab:hover {
@@ -82,7 +82,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
 .modeOption:first-child {
@@ -176,7 +176,7 @@
   stroke: var(--color-text-muted);
   stroke-width: 1;
   fill: none;
-  transition: stroke 150ms, stroke-width 150ms;
+  transition: stroke var(--feedback-ui-duration), stroke-width var(--feedback-ui-duration);
 }
 
 /* The line for the active mode — accent, thicker. */
@@ -218,7 +218,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .replayButton:hover {

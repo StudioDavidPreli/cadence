@@ -185,8 +185,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: color 100ms var(--motion-ease-standard),
-              background-color 100ms var(--motion-ease-standard);
+  transition: color var(--feedback-ui-duration) var(--motion-ease-standard),
+              background-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
 .closeButton:hover {
@@ -310,9 +310,9 @@
   color: var(--color-text-muted);
   text-wrap: balance;
   cursor: pointer;
-  transition: border-color 100ms var(--motion-ease-standard),
-              color 100ms var(--motion-ease-standard),
-              background-color 100ms var(--motion-ease-standard);
+  transition: border-color var(--feedback-ui-duration) var(--motion-ease-standard),
+              color var(--feedback-ui-duration) var(--motion-ease-standard),
+              background-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
 .stateToggle:hover {

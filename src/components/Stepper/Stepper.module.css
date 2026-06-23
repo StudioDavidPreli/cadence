@@ -91,8 +91,8 @@
      Framer Motion owns the checkmark/number scale inside.
      No transform here — Framer Motion would conflict with CSS transforms. */
   transition:
-    border-color 150ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    background-color 150ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .circleActive {
@@ -175,8 +175,8 @@
   outline: 2px solid transparent;
   outline-offset: 2px;
   transition:
-    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    outline          100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    outline          var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .nextButton:hover {
@@ -231,8 +231,8 @@
   color: var(--color-text-muted);
   margin-left: 4px;
   transition:
-    border-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color        100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color        var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .resetButton:hover {

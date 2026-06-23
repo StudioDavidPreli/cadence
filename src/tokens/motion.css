@@ -62,4 +62,13 @@
      broken. Structural navigation should not be at the mercy of the values the
      tool exists to let people experiment with. */
   --feedback-nav-duration: 360ms;
+
+  /* UI micro-feedback timing — the third fixed chrome value, same rationale as
+     the flash and nav values above. Hover, focus, color/theme shifts, tooltips,
+     and small inline reveals read this so a near-zero --motion-duration-* in
+     Explore mode can never make the tool's own feedback vanish. (The structural
+     control-section accordions use the nav value above, not this one.) One
+     value on purpose: the old 80/120/150/160ms spread across components was
+     incidental, not designed. */
+  --feedback-ui-duration: 100ms;
 }

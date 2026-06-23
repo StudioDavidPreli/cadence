@@ -116,8 +116,8 @@
   color: var(--color-text-muted);
   font-family: inherit;
   transition:
-    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .closeButton:hover {

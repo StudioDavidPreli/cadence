@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react'
 import { motion } from 'framer-motion'
+import { EASING_CURVES } from '../../data/motionPresets'
 import styles from './DurationVisualizer.module.css'
 
 // ─── DurationVisualizer ─────────────────────────────────────────────────────
@@ -149,7 +150,7 @@ export function DurationVisualizer({ durations }) {
                   // CLAUDE.md. (Reduced motion is intentionally not honored here:
                   // perceiving the motion is the purpose, same stance as the demo
                   // column's respectReducedMotion={false}.)
-                  transition={{ duration: seconds, ease: 'linear' }}
+                  transition={{ duration: seconds, ease: EASING_CURVES.linear.fm }}
                 />
               </div>
             </div>

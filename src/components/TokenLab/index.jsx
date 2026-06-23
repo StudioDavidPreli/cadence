@@ -7,6 +7,7 @@ import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseConte
 import { useNavState } from '../../context/NavigationContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { DurationVisualizer } from '../DurationVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
@@ -320,6 +321,7 @@ function HoverTip({ text, children }) {
   const [coords, setCoords]    = useState({ top: 0, right: 0 })
   const wrapperRef = useRef(null)
   const timerRef   = useRef(null)
+  const chrome     = useChromeTransition()
 
   function handleEnter() {
     timerRef.current = setTimeout(() => {
@@ -354,7 +356,7 @@ function HoverTip({ text, children }) {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+              transition={chrome.ui}
             >
               {text}
             </motion.span>
@@ -387,6 +389,7 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   const [exportFormat, setExportFormat] = useState('dtcg')
   const [copied, setCopied] = useState(false)
   const activePresetId = getActivePresetId(rawState, allPresets)
+  const chrome = useChromeTransition()
 
   function handleSave() {
     const trimmed = saveName.trim()
@@ -476,7 +479,7 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            transition={chrome.ui}
           >
             Save preset
           </motion.button>
@@ -488,7 +491,7 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            transition={chrome.ui}
           >
             <input
               className={styles.presetSaveInput}
@@ -701,6 +704,7 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
 function DemoWrapper({ componentName, instruction, children, code }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
+  const chrome = useChromeTransition()
 
   let state = 'idle'
   if (activeToken !== null) {
@@ -749,7 +753,7 @@ function DemoWrapper({ componentName, instruction, children, code }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            transition={chrome.ui}
             style={{ overflow: 'hidden' }}
           >
             <CodeBlock code={code} />
@@ -966,6 +970,7 @@ function EasingSection({ rawState, dispatch }) {
   const setActiveToken = useSetActiveToken()
   const [activeSlot, setActiveSlot] = useState('standard')
   const [resetHovered, setResetHovered] = useState(false)
+  const chrome = useChromeTransition()
 
   const slotValue   = rawState.easing[activeSlot]
   const isCustom    = Array.isArray(slotValue)
@@ -998,7 +1003,7 @@ function EasingSection({ rawState, dispatch }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            transition={chrome.ui}
             className={styles.curveValues}
           >
             [{activeCurve.map(v => v.toFixed(2)).join(', ')}]
@@ -1031,7 +1036,7 @@ function EasingSection({ rawState, dispatch }) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+              transition={chrome.ui}
               className={`${styles.easeButton} ${styles.easeButtonCustom}`}
               // Reset returns the active slot to its own named default —
               // Standard returns to 'standard', Enter to 'enter', Exit to
@@ -1051,6 +1056,7 @@ function EasingSection({ rawState, dispatch }) {
 
 // ─── ControlSection ───────────────────────────────────────────────────────────
 function ControlSection({ label, isOpen, onToggle, children }) {
+  const chrome = useChromeTransition()
   return (
     <div className={styles.section}>
       <button className={styles.sectionHeader} onClick={onToggle}>
@@ -1064,7 +1070,7 @@ function ControlSection({ label, isOpen, onToggle, children }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+            transition={chrome.nav}
             style={{ overflow: 'hidden' }}
           >
             <div className={styles.sectionInner}>

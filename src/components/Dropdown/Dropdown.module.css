@@ -24,8 +24,8 @@
   font-family: inherit;
   white-space: nowrap;
   transition:
-    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    border-color     100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color     var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .trigger:hover {
@@ -40,7 +40,7 @@
 .chevron {
   font-size: 10px;
   color: var(--color-text-muted);
-  transition: transform 120ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: transform var(--motion-duration-fast, 100ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
   display: inline-block;
 }
 
@@ -81,8 +81,8 @@
   text-align: left;
   white-space: nowrap;
   transition:
-    background-color 80ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color 80ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .menuItem:hover {

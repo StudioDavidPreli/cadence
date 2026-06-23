@@ -212,7 +212,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .presetItem:hover {
@@ -240,7 +240,7 @@
   line-height: 1;
   cursor: pointer;
   border-radius: 2px;
-  transition: color 80ms;
+  transition: color var(--feedback-ui-duration);
 }
 
 .presetDelete:hover {
@@ -261,7 +261,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   overflow: hidden;
-  transition: border-color 100ms, color 100ms;
+  transition: border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
 .presetSaveButton:hover {
@@ -288,7 +288,7 @@
   font-size: 11px;
   font-family: inherit;
   outline: none;
-  transition: border-color 100ms;
+  transition: border-color var(--feedback-ui-duration);
 }
 
 .presetSaveInput:focus {
@@ -310,7 +310,7 @@
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 100ms;
+  transition: background-color var(--feedback-ui-duration);
 }
 
 .presetSaveConfirm:hover {
@@ -346,7 +346,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
 /* A divider after every option but the last, so the segments read as one unit. */
@@ -378,7 +378,7 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color 100ms;
+  transition: background-color var(--feedback-ui-duration);
 }
 
 .exportButton:hover {
@@ -395,7 +395,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .exportCopyButton:hover {
@@ -426,7 +426,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: border-color 100ms, color 100ms;
+  transition: border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
 .importButton:hover {
@@ -549,7 +549,7 @@
 
 .chevron {
   font-size: 10px;
-  transition: transform 150ms;
+  transition: transform var(--feedback-ui-duration);
   display: inline-block;
 }
 
@@ -619,7 +619,7 @@
      (#1e1e1e in dark) was nearly identical to the track — invisible. */
   background: var(--color-text-muted2);
   cursor: pointer;
-  transition: transform 100ms;
+  transition: transform var(--feedback-ui-duration);
 }
 
 .slider::-webkit-slider-thumb:hover {
@@ -653,7 +653,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .easingTab:hover {
@@ -690,7 +690,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .easeButton:hover {
@@ -765,7 +765,7 @@
   color: var(--color-text-primary);
   outline: 1px solid var(--color-border2);
   transition:
-    background-color 100ms var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .demoTrigger:hover {
@@ -804,7 +804,7 @@
   line-height: 1.4;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .codeToggle:hover {
@@ -872,7 +872,7 @@
   padding: 12px;
   margin: -12px;
   outline: 1px solid var(--color-accent);
-  transition: opacity 150ms;
+  transition: opacity var(--feedback-ui-duration);
 }
 
 /* forced-colors flattens the accent outline and the subtle background to system
@@ -889,7 +889,7 @@
 /* All other demo groups step back — reduce contrast without hiding. */
 .demoGroupDimmed {
   opacity: 0.35;
-  transition: opacity 150ms;
+  transition: opacity var(--feedback-ui-duration);
 }
 
 /* Shown inside a dimmed group when the active token has no demo component.

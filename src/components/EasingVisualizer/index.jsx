@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { FEEDBACK_EASE } from '../../utils/feedbackDuration'
 import styles from './EasingVisualizer.module.css'
 
 // ─── Bernstein polynomial ──────────────────────────────────────────────────────
@@ -140,7 +141,10 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd 
   // Individual control points use duration 0 only for their own point's drag.
   const curveDuration = dragging ? 0 : 0.35
   const pointDuration = (point) => dragging === point ? 0 : 0.35
-  const transition = (dur) => ({ duration: dur, ease: [0.4, 0, 0.2, 1] })
+  // Chrome easing for the curve's own redraw — the standard curve, fixed (it is
+  // the visualizer's UI, not a token demonstration). dur is the morph duration,
+  // set by the caller above (0 during drag, 0.35 on preset switch).
+  const transition = (dur) => ({ duration: dur, ease: FEEDBACK_EASE })
 
   return (
     <div className={styles.container}>

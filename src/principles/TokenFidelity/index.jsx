@@ -38,6 +38,11 @@ export function TokenFidelity() {
     duration: tokens.duration.base,
     ease: tokens.ease.standard,
   }
+  // Deliberately OFF the token system. This principle demonstrates token
+  // fidelity by contrast: offTransition is a raw, un-tokenised value (linear
+  // curve, ad-hoc duration) so the "fixed" state can switch back to
+  // systemTransition above and show the correction. The literal is the point;
+  // do not replace it with a token. See docs/principles for Token Fidelity.
   const offTransition = {
     duration: FIDELITY_OFF_DURATION,
     ease: [0, 0, 1, 1],  // linear

@@ -41,7 +41,7 @@
 .comment {
   color: var(--color-text-muted);
   font-weight: 400;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color var(--feedback-ui-duration) ease, color var(--feedback-ui-duration) ease;
 }
 
 /* While its slider is being dragged, the value lights up green. The green lives
@@ -73,7 +73,7 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
 .copy:hover {

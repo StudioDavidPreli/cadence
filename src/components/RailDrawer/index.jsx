@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { navDurationSeconds } from '../../utils/feedbackDuration'
+import { navDurationSeconds, FEEDBACK_EASE } from '../../utils/feedbackDuration'
 import styles from './RailDrawer.module.css'
 
 // ─── RailDrawer ───────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ export function RailDrawer({ label, drawerId, open, onToggle, onClose, children 
               initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: dur, ease: 'easeInOut' }}
+              transition={{ duration: dur, ease: FEEDBACK_EASE }}
             >
               {children}
             </motion.div>
