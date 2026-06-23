@@ -113,10 +113,13 @@ function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen, uiMode) {
     case 17: return <ReducedMotion />
     case 18: return <SharedVocabulary />
     default:
+      // Defensive fallback for a principleId outside 1-18. Unreachable today
+      // (all 18 have demos), kept so an out-of-range id degrades to a quiet
+      // message rather than a blank panel.
       return (
         <div className={styles.demoArea}>
           <span className={styles.demoAreaText}>
-            Component example coming in Phase 2
+            No component demo for this principle.
           </span>
         </div>
       )
