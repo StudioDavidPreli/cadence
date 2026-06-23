@@ -88,7 +88,7 @@ so a regression in one HC mode usually shows in both.
 
 ## Token integrity (the core argument, under test)
 
-- [ ] No hardcoded duration, easing, or delay in any component
+- [x] No hardcoded duration, easing, or delay in any component (enforced by `src/tokens/tokenIntegrity.test.js`; chrome timing reads fixed `--feedback-*` constants, demonstration motion reads editable `--motion-*`). 2026-06-23
 - [ ] Every animated value traces to a CSS custom property
 - [ ] Token Lab changes propagate to all consuming components live
 - [ ] Constrained vs Explore mode toggles behave correctly per section
@@ -102,7 +102,7 @@ so a regression in one HC mode usually shows in both.
 
 ## Build hygiene
 
-- [ ] Repo self-contained, no orphaned code
-- [ ] Commits clean between changes
-- [ ] SVG State 1 placeholders flagged where Rive will replace them post-launch
-- [ ] Known latent edge cases documented (single-column grid below 574px)
+- [x] Repo self-contained, no orphaned code (audit 2026-06-23: no orphaned JS/JSX or CSS modules; dependencies limited to `framer-motion` + `@rive-app/react-canvas`)
+- [x] Commits clean between changes
+- [x] SVG State 1 placeholders flagged where Rive will replace them post-launch (`hero.riv` referenced but unauthored; graceful text fallback, tracked above under Landing)
+- [x] Known latent edge cases documented (single-column grid below 574px; in CLAUDE.md and `docs/decisions/grid-architecture.md`)

@@ -32,8 +32,10 @@ not build the exhaustive matrix.
 
 ## Token integrity (the core argument, under test)
 
-- [ ] **T1** Static: grep source for hardcoded durations, easings, delays. Any literal
+- [x] **T1** Static: grep source for hardcoded durations, easings, delays. Any literal
       ms value, cubic-bezier, or numeric delay in a component is a fail.
+      **Done 2026-06-23: `src/tokens/tokenIntegrity.test.js` (Vitest, deploy gate).
+      See `docs/decisions/chrome-timing-and-token-integrity-2026-06-23.md`.**
 - [ ] **T1** Live: Playwright edits a duration token through the Token Lab UI, then
       asserts a consuming component's running animation or `getComputedStyle` changed.
       This test is the thesis executed. Highest-value test in the suite.
