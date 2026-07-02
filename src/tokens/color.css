@@ -39,6 +39,16 @@ body {
 :root {
   --font-mono:  'IBM Plex Mono', monospace;
   --font-serif: 'DM Serif Display', serif;
+
+  /* Wordmark pixel-title fills (src/components/Wordmark, from the inlined
+     public/titleSVGS/titleThemed.svg). Defined once here as references to the
+     per-theme color tokens, so they re-resolve automatically when data-theme
+     changes — no per-theme block needed. Mapping to already-verified tokens
+     means no separate contrast check: the glyph is the letterform (text-base,
+     full-contrast on background in every theme), the outline is the dilated
+     halo (accent, whose role is graphical strokes at the 3:1 bar). */
+  --hero-glyph:   var(--color-text-base);
+  --hero-outline: var(--color-accent);
 }
 
 /* ─── Dark theme (default) ───────────────────────────────────────────────────

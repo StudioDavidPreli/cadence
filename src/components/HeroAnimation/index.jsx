@@ -4,22 +4,39 @@
 // takes over the demo area. Do not lift the Rive hooks to a parent.
 //
 // Interaction model matches the principle files: the .riv carries its own
-// hitboxes and pointer listeners, so hover/click are handled inside the state
-// machine. React passes nothing in; its only job is theme synchronization.
+// hitboxes and pointer listeners. A click reseeds the animation; mouse position
+// drives its scale and speed. All of that is handled inside the state machine,
+// so React passes nothing in — its only job is theme synchronization.
 
-import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
+// hero3.riv is authored for the Rive Renderer, so it needs the WebGL2 runtime —
+// the canvas runtime the principle files use cannot load it and renders blank.
+// This is the one component in the app on @rive-app/react-webgl2; every other
+// Rive canvas stays on @rive-app/react-canvas. The two runtimes each ship their
+// own WASM and run independently; the hero and the principle grids never
+// co-mount, so the two never share a moment on screen. Keep the two package
+// versions in lockstep so the hook API stays identical across both.
+import { useEffect } from 'react'
+import {
+  useRive,
+  useViewModel,
+  useViewModelInstance,
+  useViewModelInstanceColor,
+} from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
-import { useHCContrastColors } from '../../hooks/useHCContrastColors'
 import styles from './HeroAnimation.module.css'
 
-// The landing .riv. stateMachine is the author's choice in Rive — rename here to
-// match. Same view-model convention as every principle file: ViewModel1 with
-// Light / Dark / Contrast instances and colorPropertyFill / colorPropertyStroke.
-const HERO_RIV = { src: '/rive/hero.riv', stateMachine: 'heroSM' }
+// The landing .riv. artboard and stateMachine are the author's choices in Rive —
+// name them here to match. Instance convention matches the principle files
+// (Light / Dark / Contrast) but the view model is named 'Hero3ViewModel', not
+// 'ViewModel1' (bound below). This file carries a third bindable color,
+// colorAccent, alongside colorPropertyFill / colorPropertyStroke; like the other
+// two it is authored per instance, so no React write is needed (accent is amber
+// in both HC themes, so it does not flip — see the HC effect below).
+const HERO_RIV = { src: '/rive/hero3.riv', artboard: 'Hero3', stateMachine: 'hero3SM' }
 
 // Both high-contrast themes bind the single 'Contrast' instance; high-contrast-
-// dark flips its stroke/fill at runtime (useHCContrastColors).
+// dark flips its stroke/fill at runtime (see the effect in HeroAnimation).
 const themeToInstanceName = {
   dark: 'Dark',
   light: 'Light',
@@ -36,12 +53,16 @@ export function HeroAnimation() {
 
   const { rive, RiveComponent } = useRive({
     src: HERO_RIV.src,
+    artboard: HERO_RIV.artboard,
     stateMachines: HERO_RIV.stateMachine,
     autoplay: !reduce,
     autoBind: false,
   })
 
-  const viewModel = useViewModel(rive, { name: 'ViewModel1' })
+  // This file names its view model 'Hero3ViewModel', not the 'ViewModel1' the
+  // principle files use — its instances (Dark / Light / Contrast) and color
+  // properties still follow the shared convention.
+  const viewModel = useViewModel(rive, { name: 'Hero3ViewModel' })
   // { rive } makes the hook bind the instance and rebind when the name (theme)
   // changes. No manual useEffect needed — same as RiveCanvas.
   const instance = useViewModelInstance(viewModel, {
@@ -49,8 +70,30 @@ export function HeroAnimation() {
     rive,
   })
 
-  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
-  useHCContrastColors(instance, theme)
+  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill. The
+  // rest of the app does this through the shared useHCContrastColors hook, but
+  // that hook binds colors via the react-canvas runtime. This instance comes from
+  // the react-webgl2 runtime, so its color binding must go through webgl2's own
+  // useViewModelInstanceColor — mixing an instance from one runtime with the
+  // color hook of the other is implicit coupling to avoid. Logic mirrors the
+  // shared hook: both HC themes bind 'Contrast', so the colors are asserted per
+  // theme (switching HC-light <-> HC-dark does not rebind). colorAccent is amber
+  // in both HC themes, so it is not written here — it holds its authored value.
+  const stroke = useViewModelInstanceColor('colorPropertyStroke', instance)
+  const fill = useViewModelInstanceColor('colorPropertyFill', instance)
+  useEffect(() => {
+    if (!instance) return
+    if (theme === 'high-contrast-dark') {
+      stroke.setRgb(255, 255, 255)
+      fill.setRgb(0, 0, 0)
+    } else if (theme === 'high-contrast-light') {
+      stroke.setRgb(0, 0, 0)
+      fill.setRgb(255, 255, 255)
+    }
+    // Setter objects are re-created each render; theme + instance are the
+    // meaningful triggers (writes are idempotent). Same reasoning as the hook.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [instance, theme])
 
   return (
     <div className={styles.hero}>
@@ -66,7 +109,14 @@ export function HeroAnimation() {
             Pick a tool to begin. Token Lab edits the system; Principles shows it at work.
           </p>
         )}
-        <RiveComponent className={styles.canvas} />
+        {/* Clip wrapper. It fills the padded content box and owns the overflow
+            clip, so scaling the canvas above 1 (--hero-art-scale) grows the art
+            inside the padding rather than out over it. Without this inner box the
+            clip would fall at .riveContainer's outer edge (overflow clips at the
+            padding box), and the scale would erase the padding entirely. */}
+        <div className={styles.canvasClip}>
+          <RiveComponent className={styles.canvas} />
+        </div>
       </div>
 
       {/* Short description beneath the artwork: states the tool's purpose, then

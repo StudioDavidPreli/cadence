@@ -1,0 +1,31 @@
+/* The Cadence wordmark / home button. Now a pixel-title SVG rather than serif
+   text, so the button is a bare, borderless click target sized to the mark.
+   Hover dims the whole mark to 0.7; both fills (--hero-glyph on --color-text-base,
+   --hero-outline on --color-accent) clear their contrast bars at full opacity,
+   and the outline is a graphical stroke (3:1), so the dimmed hover state stays
+   legible in every theme. Timing uses the fixed --feedback-nav-duration so
+   Explore mode's near-zero motion tokens can never flatten it. */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity var(--feedback-nav-duration) ease;
+}
+
+.wordmark:hover {
+  opacity: 0.7;
+}
+
+/* The mark. Height sets the wordmark's optical size; width follows the fixed
+   976:208 viewBox aspect ratio. display: block removes the inline baseline gap.
+   overflow: visible so the outline dilation, which extends into the negative
+   viewBox margin (-48), is never clipped. */
+.mark {
+  height: 36.3px;
+  width: auto;
+  display: block;
+  overflow: visible;
+}
