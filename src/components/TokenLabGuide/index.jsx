@@ -7,12 +7,13 @@
 // Copy is drafted against docs/voice/voice-analysis.md (register-shifting
 // section). Em-dash count: zero.
 
+import { TokenLabTitle } from './TokenLabTitle'
 import styles from './TokenLabGuide.module.css'
 
 export function TokenLabGuide() {
   return (
     <article className={styles.guide}>
-      <h2 className={styles.title}>Token Lab</h2>
+      <TokenLabTitle />
       <p className={styles.lede}>
         Token Lab is the editor. You change a value that defines motion, and every
         component on the right answers at once. Nothing here is a recording. The
