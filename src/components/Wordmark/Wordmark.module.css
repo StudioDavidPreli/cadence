@@ -2,8 +2,8 @@
    text, so the button is a bare, borderless click target sized to the mark.
    Hover dims the whole mark to 0.7; both fills (--hero-glyph on --color-text-base,
    --hero-outline on --color-accent) clear their contrast bars at full opacity,
-   and the outline is a graphical stroke (3:1), so the dimmed hover state stays
-   legible in every theme. Timing uses the fixed --feedback-nav-duration so
+   and the extruded layer is a graphical element (3:1), so the dimmed hover state
+   stays legible in every theme. Timing uses the fixed --feedback-nav-duration so
    Explore mode's near-zero motion tokens can never flatten it. */
 .wordmark {
   display: inline-flex;
@@ -21,10 +21,36 @@
 
 /* The mark. Height sets the wordmark's optical size; width follows the fixed
    976:208 viewBox aspect ratio. display: block removes the inline baseline gap.
-   overflow: visible so the outline dilation, which extends into the negative
-   viewBox margin (-48), is never clipped. */
+   The extruded artwork sits within the 0 0 976 208 viewBox, so there is nothing
+   to clip; overflow: visible is kept for parity with .themedMark.
+
+   48.2px measured from titleMock.png (public/titleSVGS/): the target glyph reads
+   ~26px CSS tall, and title2's ink fills only 112 of the 208 viewBox units in
+   height, so the element height is 26 x 208/112 ~ 48.2. (Up from 36.3px, which
+   suited the old outline art that filled its viewBox nearly edge to edge; the
+   extruded art carries more internal padding, so it needed the larger box to
+   read at the same optical size.) */
 .mark {
-  height: 36.3px;
+  height: 48.2px;
+  width: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* The alternate script wordmark shown in the Principles section. Sized by HEIGHT
+   to the pixel mark's element height (48.2px, kept in step by hand) so swapping
+   sections never changes the top bar's row height; its ~5.27:1 viewBox
+   (0 0 1249.6 236.9) then sets the width (~254px). overflow: visible kept for
+   parity with .mark.
+
+   Note: title2's glyph fills only ~54% of its viewBox height (it carries internal
+   vertical padding), so at equal element height the script word can read a little
+   larger than the pixel word. That is a property of the two artworks, not a sizing
+   error — matching element height is what holds the row height constant. Earlier
+   this matched by WIDTH (170px), which was equivalent back when the pixel art
+   filled its box edge to edge. */
+.themedMark {
+  height: 48.2px;
   width: auto;
   display: block;
   overflow: visible;

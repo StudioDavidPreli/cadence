@@ -41,14 +41,32 @@ body {
   --font-serif: 'DM Serif Display', serif;
 
   /* Wordmark pixel-title fills (src/components/Wordmark, from the inlined
-     public/titleSVGS/titleThemed.svg). Defined once here as references to the
-     per-theme color tokens, so they re-resolve automatically when data-theme
-     changes — no per-theme block needed. Mapping to already-verified tokens
-     means no separate contrast check: the glyph is the letterform (text-base,
-     full-contrast on background in every theme), the outline is the dilated
-     halo (accent, whose role is graphical strokes at the 3:1 bar). */
+     public/titleSVGS/titleThemed.svg). These are the DARK-theme defaults; the
+     glyph and outline reference the per-theme color tokens, so dark and light
+     glyphs re-resolve automatically when data-theme changes. Light and both
+     high-contrast themes override the outline (and HC the glyph) below — the
+     wordmark is a design-first graphical element, so its title colors are
+     intentionally decoupled from --color-accent rather than tracking it. */
   --hero-glyph:   var(--color-text-base);
   --hero-outline: var(--color-accent);
+}
+
+/* ─── Wordmark title per-theme overrides ─────────────────────────────────────
+   Design-first color for the top-left "Cadence" pixel-title only (no other
+   element reads --hero-glyph / --hero-outline). These diverge from the accent
+   and text tokens on purpose. Attribute selectors (0,2,0) outrank the :root
+   defaults above (0,1,0), so these win regardless of source order.
+
+   Contrast note: in HC-light the amber glyph (#e8b86d) is ~1.5:1 on white — the
+   near-black #262626 outline (~15:1 on white) carries legibility. In HC-dark the
+   amber glyph carries it (11.5:1 on black) and the outline recedes. Decorative
+   title, not body text; directed deliberately. */
+:root[data-theme="light"] {
+  --hero-outline: #b9b0ff;  /* lavender — lighter than the light-theme accent */
+}
+:root[data-theme^="high-contrast"] {
+  --hero-outline: #262626;  /* near-black halo, both HC modes */
+  --hero-glyph:   #e8b86d;  /* amber letterforms, both HC modes */
 }
 
 /* ─── Dark theme (default) ───────────────────────────────────────────────────
