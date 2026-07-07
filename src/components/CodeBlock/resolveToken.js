@@ -67,14 +67,17 @@ export function resolveTokenDisplay(path, tokens) {
   const value = tokens?.[group]?.[key]
   if (value === undefined) return null
 
+  // All three families use the same display scheme: toFixed(3) caps the tail at
+  // three places, then unary-plus trims trailing zeros. A dragged slider or curve
+  // yields raw floats like 1.0299999999999998; without this they print in full.
+  // 0.4 stays "0.4s", a dragged 0.123 stays "0.123s", scale 0.95 stays "0.95".
+
   // duration and delay are held in seconds, matching what Framer Motion gets.
-  // toFixed(3) then unary-plus trims trailing zeros: 0.4 stays "0.4s", a dragged
-  // 0.123 stays "0.123s".
   if (group === 'duration' || group === 'delay') return `${+value.toFixed(3)}s`
 
-  // ease is a four-number bezier array.
-  if (group === 'ease') return `[${value.join(', ')}]`
+  // ease is a four-number bezier array; round each coordinate the same way.
+  if (group === 'ease') return `[${value.map(n => +n.toFixed(3)).join(', ')}]`
 
   // scale is unitless.
-  return `${value}`
+  return `${+value.toFixed(3)}`
 }
