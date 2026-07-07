@@ -24,9 +24,17 @@
 }
 
 /* Each source line. white-space: pre keeps the snippet's own indentation; the
-   trailing comment sits on the same line after the source. */
+   trailing comment sits on the same line after the source.
+
+   width: max-content makes the line grow to fit its non-wrapping text instead of
+   shrinking to the <pre> width like a normal block box. Without it a long line's
+   text overflows this box but never widens the <pre>, so .pre's overflow-x: auto
+   finds nothing to scroll and the text is clipped at the right edge. With it the
+   longest line sets the scroll width and the block scrolls horizontally,
+   preserving the snippet's indentation (the reason we scroll rather than wrap). */
 .line {
   white-space: pre;
+  width: max-content;
 }
 
 .source {
