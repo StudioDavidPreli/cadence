@@ -95,40 +95,51 @@ export function CodeBlock({ code }) {
     }
   }
 
-  const lines = code.split('\n').map((line, i) => {
+  // Each source line renders as its own row. When a line reads a token, the live
+  // resolved value renders on a SEPARATE row directly beneath it, indented to sit
+  // under the code it annotates. Keeping the comment off the source line means the
+  // source keeps its real width, so a value ticking up as the user drags a slider
+  // never pushes the code line past the block's right edge. flatMap because a line
+  // with a token read emits two rows (source + comment), one without emits one.
+  const lines = code.split('\n').flatMap((line, i) => {
     // Resolve every token read on this line to its current value. filter(Boolean)
     // drops any unresolved path defensively; the guard test prevents that case.
     const paths = [...line.matchAll(TOKEN_REF)].map(m => `${m[1]}.${m[2]}`)
-    const comment = paths.length
-      ? '// ' + paths
-          .map(p => {
-            const value = resolveTokenDisplay(p, tokens)
-            if (!value) return null // filter(Boolean) below; guard test prevents this
-            // Tokens no slider can reach (ease.linear, ease.spring, delay.none)
-            // are tagged so their never-changing value reads as a fixed reference,
-            // not a dead live comment. Per-token, not per-line, because one line
-            // can mix the two (Notification Badge: ease.spring fixed, ease.standard
-            // editable). See isEditableToken.
-            return isEditableToken(p) ? value : `${value} (fixed)`
-          })
-          .filter(Boolean)
-          .join(' · ')
-      : ''
+    const sourceRow = (
+      <div className={styles.line} key={`src-${i}`}>
+        <span className={styles.source}>{line}</span>
+      </div>
+    )
+    if (paths.length === 0) return [sourceRow]
+
+    const comment = '// ' + paths
+      .map(p => {
+        const value = resolveTokenDisplay(p, tokens)
+        if (!value) return null // filter(Boolean) below; guard test prevents this
+        // Tokens no slider can reach (ease.linear, ease.spring, delay.none)
+        // are tagged so their never-changing value reads as a fixed reference,
+        // not a dead live comment. Per-token, not per-line, because one line
+        // can mix the two (Notification Badge: ease.spring fixed, ease.standard
+        // editable). See isEditableToken.
+        return isEditableToken(p) ? value : `${value} (fixed)`
+      })
+      .filter(Boolean)
+      .join(' · ')
     // Lit if its token is under an active drag (sustained) or mid-flash (transient).
     const isActive = paths.some(
       p => tokenPathMatchesActive(p, activeToken) || flashed.has(p)
     )
-    return (
-      <div className={styles.line} key={i}>
-        <span className={styles.source}>{line}</span>
-        {comment && (
-          <>
-            {' '}
-            <span className={`${styles.comment} ${isActive ? styles.commentActive : ''}`}>{comment}</span>
-          </>
-        )}
-      </div>
-    )
+    // The source line's leading whitespace, reused so the comment row lines up
+    // under the code it annotates. .line is white-space: pre, so it renders as-is.
+    const indent = line.match(/^\s*/)[0]
+
+    return [
+      sourceRow,
+      <div className={styles.line} key={`cmt-${i}`}>
+        {indent}
+        <span className={`${styles.comment} ${isActive ? styles.commentActive : ''}`}>{comment}</span>
+      </div>,
+    ]
   })
 
   return (
