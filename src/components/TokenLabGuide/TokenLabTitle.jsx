@@ -1,9 +1,9 @@
 // The animated "Token Lab" title for the guide (the Token Lab overview). It
-// replaces the plain serif <h2> with tokenlabhero.riv, the same idea as the
+// replaces the plain serif <h2> with tokenlabhero2.riv, the same idea as the
 // landing hero: the display word is the artwork, and React's only job is to
 // bind the active theme.
 //
-// Runtime: tokenlabhero.riv is the sibling of hero3.riv and is authored for the
+// Runtime: tokenlabhero2.riv is the sibling of hero3.riv and is authored for the
 // Rive Renderer, so it loads on the WebGL2 runtime like HeroAnimation. This is
 // the only other component on @rive-app/react-webgl2; every principle canvas
 // stays on @rive-app/react-canvas. If the title area renders blank, the file was
@@ -33,9 +33,9 @@ import styles from './TokenLabGuide.module.css'
 // (confirmed against the .riv). The view model is 'TokenLabVM', not the
 // 'ViewModel1' the principle files use.
 const TITLE_RIV = {
-  src: '/rive/tokenlabhero.riv',
-  artboard: 'tokenLab',
-  stateMachine: 'tokenLabSM',
+  src: '/rive/tokenlabhero2.riv',
+  artboard: 'tokenLab2',
+  stateMachine: 'tokenLab2SM',
 }
 
 // One instance per theme — a clean 1:1 map, no shared Contrast instance.
