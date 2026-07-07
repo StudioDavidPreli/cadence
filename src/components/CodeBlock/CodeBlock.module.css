@@ -23,18 +23,22 @@
   line-height: 1.6;
 }
 
-/* Each source line. white-space: pre keeps the snippet's own indentation; the
-   trailing comment sits on the same line after the source.
+/* Each source line, and each live-value comment row. white-space: pre-wrap keeps
+   the snippet's own leading indentation but lets a long line wrap instead of
+   running past the block's right edge. overflow-wrap: break-word lets an unbroken
+   token path break if it alone is wider than the column.
 
-   width: max-content makes the line grow to fit its non-wrapping text instead of
-   shrinking to the <pre> width like a normal block box. Without it a long line's
-   text overflows this box but never widens the <pre>, so .pre's overflow-x: auto
-   finds nothing to scroll and the text is clipped at the right edge. With it the
-   longest line sets the scroll width and the block scrolls horizontally,
-   preserving the snippet's indentation (the reason we scroll rather than wrap). */
+   We wrap rather than scroll deliberately. Horizontal scroll needs the line to
+   overflow the <pre>, but the code view mounts inside DemoWrapper's height:0→auto
+   reveal, and the <pre>'s scrollbar decision made during that animation goes stale
+   until a reflow (a window resize), so the scrollbar never appeared on open.
+   Wrapping is pure layout with no timing dependence. Tradeoff: the wrapped
+   remainder of a long line returns to the left edge, not the source indent;
+   acceptable because values now sit on their own rows (so lines stay short) and
+   the snippets are shallowly nested. */
 .line {
-  white-space: pre;
-  width: max-content;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .source {
