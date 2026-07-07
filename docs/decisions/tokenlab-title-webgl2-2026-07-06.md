@@ -4,6 +4,13 @@ Status: RESOLVED. The Token Lab guide's plain serif `<h2>Token Lab</h2>` is now
 the animated `tokenlabhero.riv`, wired into a new `TokenLabTitle` component. Runtime
 rendering confirmed by David.
 
+> **2026-07-07 update:** the art was re-authored with animated lab rats and the
+> component now points at `tokenlabhero2.riv` (artboard `tokenLab2`, state machine
+> `tokenLab2SM`, commit `8d1b6f5`). The view model `TokenLabVM` and the four theme
+> instances below are unchanged, so everything in this doc still holds except the
+> file, artboard, and state-machine names. The old `tokenlabhero.riv` remains in
+> `public/rive/` unreferenced.
+
 This is the sibling of the landing hero (`hero-webgl2-wiring-2026-07-02.md`): the
 display word is the artwork, React binds only the theme. The wiring is simpler than
 the hero's in one way, recorded below.
