@@ -250,7 +250,7 @@ function QuoteBlock({ principle, uiMode, tokens: motionTokens }) {
 // next paint. No reflow, no FLIP corrective, no canvas collapse.
 //
 // ── Animation timing ──────────────────────────────────────────────────────────
-// Both directions use duration.slow + ease.standard. Spring is reserved for
+// Both directions use duration.slow + ease.standard. Overshoot is reserved for
 // whileHover and whileTap.
 // See CLAUDE.md: "ease.standard (not spring) for concurrent layout animations."
 //
@@ -503,7 +503,7 @@ export function PrincipleCard({
       transition={{
         opacity: { duration: dur.base },
         duration: dur.fast,
-        ease: tokens.ease.spring,
+        ease: tokens.ease.overshoot,
       }}
     >
       {/* ── Collapsed state ───────────────────────────────────────────────── */}
@@ -564,7 +564,7 @@ export function PrincipleCard({
                 className={styles.closeButton}
                 onClick={handleClose}
                 whileTap={{ scale: tokens.scale.subtle }}
-                transition={{ duration: dur.fast, ease: tokens.ease.spring }}
+                transition={{ duration: dur.fast, ease: tokens.ease.overshoot }}
               >
                 ×
               </motion.button>

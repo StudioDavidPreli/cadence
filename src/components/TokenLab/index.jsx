@@ -57,7 +57,7 @@ import styles from './TokenLab.module.css'
 // Policy: a component is listed under a token if its source reads that token
 // (tokens.<group>.<key>, or the matching --motion-* CSS variable). Objective and
 // greppable. Fixed reference tokens have no slider, so reads of ease.linear and
-// ease.spring produce no entry here. Two reads are wired but not exercised by the
+// ease.overshoot produce no entry here. Two reads are wired but not exercised by the
 // TokenLab demo itself — Card's scale.subtle (its dimmed branch, used by the Appeal
 // principle) and Stepper's scale.base — and are listed because the component
 // consumes them even though this demo never triggers that path.
@@ -65,7 +65,7 @@ import styles from './TokenLab.module.css'
 // Rebuilt 2026-06-20 against each component's actual reads in the Token Fidelity
 // audit. The prior table had drifted: NavItem was under easing.standard (it reads
 // enter/exit), Toggle under easing.standard + scale.base (it reads only
-// duration.fast + the fixed ease.spring), Card under duration.slow (it reads base),
+// duration.fast + the fixed ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
@@ -270,23 +270,26 @@ function getActivePresetId(state, presets) {
   return null
 }
 
-// Migrate a preset's `state.easing` from the old single-value shape to the
-// three-slot object shape. Older user presets persisted to localStorage
-// hold either a string preset key or a four-number array on `state.easing`;
-// we normalize those into `{ standard: <old>, enter: 'enter', exit: 'exit' }`
-// so the reducer and visualizer can read uniformly. Already-new presets
-// pass through unchanged.
+// Migrate a preset's `state.easing` to the current shape. Two migrations run
+// here, so a preset saved under any past version loads cleanly:
+//   1. Shape: older presets hold either a string preset key or a four-number
+//      array on `state.easing`; we normalize those into the three-slot object
+//      `{ standard: <old>, enter: 'enter', exit: 'exit' }`.
+//   2. Key rename: the `'spring'` curve was renamed `'overshoot'` (a cubic-bezier
+//      is not a real spring), so any slot still set to `'spring'` is remapped.
+// Already-current presets with no `'spring'` slot pass through with the same
+// values. A preset missing `state.easing` entirely is returned untouched.
 function migratePresetEasing(preset) {
   const easing = preset?.state?.easing
+  if (easing == null) return preset
   const isOldShape = typeof easing === 'string' || Array.isArray(easing)
-  if (!isOldShape) return preset
-  return {
-    ...preset,
-    state: {
-      ...preset.state,
-      easing: { standard: easing, enter: 'enter', exit: 'exit' },
-    },
+  const slots = isOldShape
+    ? { standard: easing, enter: 'enter', exit: 'exit' }
+    : { ...easing }
+  for (const slot of Object.keys(slots)) {
+    if (slots[slot] === 'spring') slots[slot] = 'overshoot'
   }
+  return { ...preset, state: { ...preset.state, easing: slots } }
 }
 
 // Auto-generates a compact token summary for user preset tooltips.

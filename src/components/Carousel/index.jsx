@@ -107,14 +107,14 @@ function SlideImage({ src, stateMachine, theme }) {
 // only one would either miss slow drags or require excessive force for flicks.
 //
 // ── Why spring easing for snap ────────────────────────────────────────────────
-// The snap uses ease.spring (cubic-bezier(0.34, 1.56, 0.64, 1)) — an
+// The snap uses ease.overshoot (cubic-bezier(0.34, 1.56, 0.64, 1)) — an
 // overshooting curve. This is deliberate:
 //
 // The overshoot IS the Follow Through.
 //
 // When you release a physical object (a drawer, a card, a book), it doesn't
 // stop exactly where it lands. Momentum carries it past the resting point,
-// friction brings it back. Spring easing replicates this. The slide
+// friction brings it back. Overshoot easing replicates this. The slide
 // overshoots the snap target slightly and settles — the same micro-movement
 // that makes analog controls feel authoritative.
 //
@@ -198,13 +198,13 @@ export function Carousel({ compact = false, slides = SLIDES }) {
     setCurrentSlide(index)
     // Cancel any in-progress snap before starting a new one.
     animRef.current?.stop()
-    // Spring easing: the overshoot is the Follow Through principle made visible.
+    // Overshoot easing: the overshoot is the Follow Through principle made visible.
     // The slide carries past its resting point and settles — physical momentum.
     // duration.slow matches Stepper's cascade — sequential components share
     // the same token so adjusting duration.slow affects both simultaneously.
     animRef.current = animate(x, index * -slideWidth, {
       duration: tokens.duration.slow,
-      ease: tokens.ease.spring,
+      ease: tokens.ease.overshoot,
     })
   }
 
@@ -300,7 +300,7 @@ export function Carousel({ compact = false, slides = SLIDES }) {
       {/* ── Dot indicators ──────────────────────────────────────────────── */}
       {/* Each dot is always rendered — no conditional mounting or layoutId.
           The active dot expands from a circle to a pill via CSS transitions,
-          driven by --motion-duration-fast and --motion-ease-spring tokens.
+          driven by --motion-duration-fast and --motion-ease-overshoot tokens.
           This avoids Framer Motion's layout animation system entirely.
           The layoutId + LayoutGroup approach was removed because LayoutGroup
           does not isolate from the global ProjectionNode tree — it only scopes

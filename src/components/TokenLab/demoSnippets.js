@@ -62,13 +62,13 @@ const Button = `const tokens = useMotionTokens()
 const Card = `const tokens = useMotionTokens()
 
 // Selection lifts the card a couple percent; clicking again
-// returns it to rest. Spring in reads as "chosen"; standard
+// returns it to rest. Overshoot in reads as "chosen"; standard
 // out reads as "returning". Two curves, one toggle.
 <motion.div
   animate={{ scale: isSelected ? tokens.scale.lift : 1 }}
   transition={{
     duration: tokens.duration.base,
-    ease: isSelected ? tokens.ease.spring : tokens.ease.standard,
+    ease: isSelected ? tokens.ease.overshoot : tokens.ease.standard,
   }}
 />`
 
@@ -95,7 +95,7 @@ const Toggle = `const tokens = useMotionTokens()
   animate={{ x: on ? THUMB_TRAVEL : 0 }}
   transition={{
     duration: tokens.duration.fast,
-    ease: tokens.ease.spring,
+    ease: tokens.ease.overshoot,
   }}
 />`
 
@@ -129,7 +129,7 @@ const NotificationBadge = `const tokens = useMotionTokens()
   transition={{
     duration: tokens.duration.slow,
     times: [0, 0.3, 0.6, 1],
-    ease: [tokens.ease.spring, tokens.ease.linear, tokens.ease.standard],
+    ease: [tokens.ease.overshoot, tokens.ease.linear, tokens.ease.standard],
   }}
 />`
 
@@ -207,7 +207,7 @@ const Carousel = `const tokens = useMotionTokens()
 // arrives with weight.
 animate(x, index * -slideWidth, {
   duration: tokens.duration.slow,
-  ease: tokens.ease.spring,
+  ease: tokens.ease.overshoot,
 })
 
 // Each slide scales up slightly when it becomes current.

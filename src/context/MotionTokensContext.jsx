@@ -30,7 +30,7 @@ export const MotionTokensContext = createContext(null)
 // Why ease and scale are not flattened:
 // At 10 ms total duration, the curve shape and the start scale factor are
 // imperceptible. Flattening them adds code without changing the user-visible
-// behavior. Spring overshoot is a special case worth flagging — at 10 ms it
+// behavior. Overshoot is a special case worth flagging — at 10 ms it
 // resolves before the eye can register, so users who explicitly prefer no
 // bounce still get effectively no bounce.
 export function reduceMotion(tokens) {

@@ -68,10 +68,10 @@ export function Card({
       }}
       transition={{
         // Different curves for select vs deselect — spring in, standard out.
-        // Spring communicates "something was chosen" (expressive).
+        // Overshoot communicates "something was chosen" (expressive).
         // Standard communicates "returning to rest" (neutral).
         duration: tokens.duration.base,
-        ease: isSelected ? tokens.ease.spring : tokens.ease.standard,
+        ease: isSelected ? tokens.ease.overshoot : tokens.ease.standard,
       }}
       onClick={handleClick}
       aria-pressed={isSelected}

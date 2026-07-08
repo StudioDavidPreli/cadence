@@ -12,7 +12,7 @@ export const EASING_CURVES = {
   standard: { label: 'Standard', css: 'cubic-bezier(0.4, 0, 0.2, 1)',       fm: [0.4, 0, 0.2, 1] },
   enter:    { label: 'Enter',    css: 'cubic-bezier(0, 0, 0.2, 1)',         fm: [0, 0, 0.2, 1] },
   exit:     { label: 'Exit',     css: 'cubic-bezier(0.4, 0, 1, 1)',         fm: [0.4, 0, 1, 1] },
-  spring:   { label: 'Spring',   css: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fm: [0.34, 1.56, 0.64, 1] },
+  overshoot:   { label: 'Overshoot',   css: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fm: [0.34, 1.56, 0.64, 1] },
 }
 
 // ─── Initial state ────────────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ export const EASING_CURVES = {
 // `easing` holds three independent slots — standard / enter / exit — each
 // editable through the TokenLab bezier visualizer. Each value is either a
 // preset key (`'standard'`, `'enter'`, etc.) or a four-number bezier array
-// for a custom curve. Linear and Spring stay as constants in the runtime
+// for a custom curve. Linear and Overshoot stay as constants in the runtime
 // (see stateToTokens below) and as quick-load preset buttons in the UI.
 export const INITIAL_STATE = {
   duration: { fast: 100, base: 200, slow: 400, slower: 600 },
@@ -46,13 +46,13 @@ export const BUILT_IN_PRESETS = [
     id: 'snappy',
     label: 'Snappy',
     isBuiltIn: true,
-    tooltip: 'Short durations, spring easing, tight delays. High energy, confident.',
+    tooltip: 'Short durations, overshoot easing, tight delays. High energy, confident.',
     state: {
       duration: { fast: 60, base: 120, slow: 200, slower: 350 },
-      // Snappy is the personality where Standard reads as Spring — confident
-      // overshoot. Enter and Exit stay at their default decelerate / accelerate
-      // shapes; bending those would dilute the contrast Snappy is built on.
-      easing:   { standard: 'spring', enter: 'enter', exit: 'exit' },
+      // Snappy is the personality where Standard reads as the Overshoot curve,
+      // confident overshoot. Enter and Exit stay at their default decelerate /
+      // accelerate shapes; bending those would dilute the contrast Snappy is built on.
+      easing:   { standard: 'overshoot', enter: 'enter', exit: 'exit' },
       delay:    { short: 20, medium: 40, long: 80 },
       scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
     },
@@ -80,9 +80,9 @@ export const BUILT_IN_PRESETS = [
 // shape that MotionTokensProvider expects (seconds for duration/delay,
 // four-number arrays for easing).
 //
-// Each editable slot resolves independently. Linear and Spring stay constant
+// Each editable slot resolves independently. Linear and Overshoot stay constant
 // because they are not editable through the UI — Linear has no draggable
-// handles (corners only) and Spring's Y > 1 control point falls outside the
+// handles (corners only) and Overshoot's Y > 1 control point falls outside the
 // visualizer's draggable region.
 function resolveCurve(slot) {
   return Array.isArray(slot) ? slot : EASING_CURVES[slot].fm
@@ -101,7 +101,7 @@ export function stateToTokens(state) {
       standard: resolveCurve(state.easing.standard),
       enter:    resolveCurve(state.easing.enter),
       exit:     resolveCurve(state.easing.exit),
-      spring:   EASING_CURVES.spring.fm,
+      overshoot:   EASING_CURVES.overshoot.fm,
     },
     delay: {
       none:   0,
@@ -118,7 +118,7 @@ export function stateToTokens(state) {
 // TokenLab's writeAllTokensToCss. Where writeAllTokensToCss writes only the
 // editable tokens to the DOM, the export must produce the COMPLETE token
 // document a design system would consume — including the members the editor
-// never exposes: ease.linear, ease.spring, and delay.none. Those are real
+// never exposes: ease.linear, ease.overshoot, and delay.none. Those are real
 // tokens in motion.css; an export that dropped them would be a partial file,
 // not a usable one.
 //
@@ -139,7 +139,7 @@ export function stateToExport(state) {
       standard: resolveCurve(state.easing.standard),
       enter:    resolveCurve(state.easing.enter),
       exit:     resolveCurve(state.easing.exit),
-      spring:   EASING_CURVES.spring.fm,
+      overshoot:   EASING_CURVES.overshoot.fm,
     },
     delay: {
       none:   0,
@@ -272,7 +272,7 @@ export const EDITABLE_TOKEN_SCHEMA = {
 // together they classify every token the runtime carries, which the drift guard
 // in resolveToken.test.js asserts. Control-layer naming (`easing.`, matching the
 // schema), normalized to the runtime `ease.` where it meets a token path.
-export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'easing.spring', 'delay.none'])
+export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'easing.overshoot', 'delay.none'])
 
 function clampScalar(n, { min, max }) {
   return Math.max(min, Math.min(max, n))
@@ -330,8 +330,8 @@ function canonicalizeCurve(arr) {
 // A control point with y outside [0, 1] renders above/below the visualizer's
 // draggable region (x is always clamped to [0, 1] in the editor). The curve
 // still loads and animates correctly; the user just cannot drag it. Same state
-// the Spring preset is in. Only reported for unnamed (custom) curves — named
-// curves like spring are expected, not surprising.
+// the Overshoot curve is in. Only reported for unnamed (custom) curves: named
+// curves like overshoot are expected, not surprising.
 function curveOutsideDraggableRegion(arr) {
   return arr[1] < 0 || arr[1] > 1 || arr[3] < 0 || arr[3] > 1
 }

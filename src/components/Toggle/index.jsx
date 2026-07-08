@@ -77,7 +77,7 @@ export function Toggle({ label, mode = 'subtle', onChange, on: onProp }) {
           animate={{ x: on ? THUMB_TRAVEL : 0 }}
           transition={{
             duration: tokens.duration.fast,
-            ease: tokens.ease.spring,
+            ease: tokens.ease.overshoot,
           }}
         />
       </button>

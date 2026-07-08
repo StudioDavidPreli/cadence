@@ -37,7 +37,7 @@ const FALLBACKS = {
     standard: [0.4, 0, 0.2, 1],
     enter:    [0, 0, 0.2, 1],
     exit:     [0.4, 0, 1, 1],
-    spring:   [0.34, 1.56, 0.64, 1],
+    overshoot:   [0.34, 1.56, 0.64, 1],
   },
   delay:   { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
   scale:   { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
@@ -99,7 +99,7 @@ export function useMotionTokens({ respectReducedMotion = true } = {}) {
         standard: get('--motion-ease-standard') ? parseCubicBezier(get('--motion-ease-standard')) : FALLBACKS.ease.standard,
         enter:    get('--motion-ease-enter')    ? parseCubicBezier(get('--motion-ease-enter'))    : FALLBACKS.ease.enter,
         exit:     get('--motion-ease-exit')     ? parseCubicBezier(get('--motion-ease-exit'))     : FALLBACKS.ease.exit,
-        spring:   get('--motion-ease-spring')   ? parseCubicBezier(get('--motion-ease-spring'))   : FALLBACKS.ease.spring,
+        overshoot:   get('--motion-ease-overshoot')   ? parseCubicBezier(get('--motion-ease-overshoot'))   : FALLBACKS.ease.overshoot,
       },
       delay: {
         none:   get('--motion-delay-none')   ? parseMs(get('--motion-delay-none'))   : FALLBACKS.delay.none,

@@ -14,7 +14,7 @@ import {
 // stateToTokens is the CSS-side -> React-side converter. These tests pin its
 // contract: ms become seconds, delay.none is injected, named easing slots
 // resolve to bezier arrays while custom arrays pass through, and the
-// non-editable linear/spring slots stay constant regardless of input.
+// non-editable linear/overshoot slots stay constant regardless of input.
 describe('stateToTokens', () => {
   it('converts durations from ms to seconds', () => {
     const tokens = stateToTokens(INITIAL_STATE)
@@ -43,11 +43,11 @@ describe('stateToTokens', () => {
     expect(stateToTokens(state).ease.standard).toEqual(custom)
   })
 
-  it('keeps linear and spring constant regardless of state', () => {
+  it('keeps linear and overshoot constant regardless of state', () => {
     // Neither is editable through the visualizer, so they are not read from state.
     const tokens = stateToTokens(INITIAL_STATE)
     expect(tokens.ease.linear).toEqual(EASING_CURVES.linear.fm)
-    expect(tokens.ease.spring).toEqual(EASING_CURVES.spring.fm)
+    expect(tokens.ease.overshoot).toEqual(EASING_CURVES.overshoot.fm)
   })
 
   it('copies scale into a fresh object rather than aliasing state', () => {
@@ -59,7 +59,7 @@ describe('stateToTokens', () => {
 
 // stateToExport is the format-agnostic serializer feeding both JSON exporters.
 // Unlike writeAllTokensToCss it must emit the COMPLETE token set, including the
-// non-editable constants (linear, spring, delay.none), in CSS-side units.
+// non-editable constants (linear, overshoot, delay.none), in CSS-side units.
 describe('stateToExport', () => {
   const snappy = BUILT_IN_PRESETS.find(p => p.id === 'snappy').state
 
@@ -69,10 +69,10 @@ describe('stateToExport', () => {
     expect(out.delay).toEqual({ none: 0, short: 50, medium: 100, long: 200 })
   })
 
-  it('includes the non-editable constants linear, spring, and delay.none', () => {
+  it('includes the non-editable constants linear, overshoot, and delay.none', () => {
     const out = stateToExport(INITIAL_STATE)
     expect(out.easing.linear).toEqual(EASING_CURVES.linear.fm)
-    expect(out.easing.spring).toEqual(EASING_CURVES.spring.fm)
+    expect(out.easing.overshoot).toEqual(EASING_CURVES.overshoot.fm)
     expect(out.delay.none).toBe(0)
   })
 
@@ -84,9 +84,9 @@ describe('stateToExport', () => {
     expect(out.easing.enter).toEqual(EASING_CURVES.enter.fm) // named slot resolves
   })
 
-  it('reflects a built-in preset (Snappy reads standard as the spring curve)', () => {
+  it('reflects a built-in preset (Snappy reads standard as the overshoot curve)', () => {
     const out = stateToExport(snappy)
-    expect(out.easing.standard).toEqual(EASING_CURVES.spring.fm)
+    expect(out.easing.standard).toEqual(EASING_CURVES.overshoot.fm)
     expect(out.duration.fast).toBe(60)
   })
 })
@@ -103,7 +103,7 @@ describe('toDtcgJson', () => {
   it('carries the non-editable constants into the document', () => {
     const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
     expect(doc.motion.easing.linear.$value).toEqual(EASING_CURVES.linear.fm)
-    expect(doc.motion.easing.spring.$value).toEqual(EASING_CURVES.spring.fm)
+    expect(doc.motion.easing.overshoot.$value).toEqual(EASING_CURVES.overshoot.fm)
     expect(doc.motion.delay.none).toEqual({ $type: 'duration', $value: '0ms' })
   })
 })
@@ -138,10 +138,10 @@ describe('toCssVars', () => {
     expect(css).toContain('--motion-scale-lift: 1.02;')
   })
 
-  it('carries the non-editable constants linear, spring, and delay.none', () => {
+  it('carries the non-editable constants linear, overshoot, and delay.none', () => {
     const css = toCssVars(INITIAL_STATE)
     expect(css).toContain('--motion-ease-linear: cubic-bezier(0, 0, 1, 1);')
-    expect(css).toContain('--motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);')
+    expect(css).toContain('--motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);')
     expect(css).toContain('--motion-delay-none: 0ms;')
   })
 
@@ -173,11 +173,11 @@ describe('importTokens', () => {
     expect(res.state).toEqual(INITIAL_STATE)
   })
 
-  it('round-trips Snappy, mapping the spring array back to the spring key', () => {
+  it('round-trips Snappy, mapping the overshoot array back to the overshoot key', () => {
     const res = importTokens(toDtcgJson(snappy))
     expect(res.ok).toBe(true)
-    expect(res.state.easing.standard).toBe('spring')
-    // spring overshoots (y 1.56) but it is a named curve, so it is NOT flagged.
+    expect(res.state.easing.standard).toBe('overshoot')
+    // the overshoot curve has y 1.56 but it is a named curve, so it is NOT flagged.
     expect(res.report.curvesOutOfRange).toEqual([])
   })
 
@@ -210,7 +210,7 @@ describe('importTokens', () => {
     const res = importTokens(JSON.stringify(doc))
     expect(res.report.ignored).toContainEqual({ path: 'color' })
     expect(res.report.ignored).toContainEqual({ path: 'duration.fastt' })
-    // toFlatJson does not emit linear/spring/delay.none, so add them to prove
+    // toFlatJson does not emit linear/overshoot/delay.none, so add them to prove
     // they are suppressed rather than simply absent.
     const dtcg = JSON.parse(toDtcgJson(INITIAL_STATE))
     const res2 = importTokens(JSON.stringify(dtcg))

@@ -58,7 +58,7 @@ export function TokenLabGuide() {
           The four numbers under the graph are the curve. They update as you drag,
           so the value you feel is the value you would write. Three slots hold
           separate curves, Standard, Enter, and Exit, and the tab strip above the
-          graph chooses which one the graph reads and writes. Spring and Linear
+          graph chooses which one the graph reads and writes. Overshoot and Linear
           load as presets. A named curve is a shared word between a designer and an
           engineer, where four loose numbers are not.
         </p>
@@ -98,7 +98,7 @@ export function TokenLabGuide() {
           there is no gap between what you see and what the code does. The active
           value highlights as you edit it. A value tagged <code>(fixed)</code> is a
           reference token no slider can move, <code>ease.linear</code> and{' '}
-          <code>ease.spring</code> among them. They are anchors. A slider that could
+          <code>ease.overshoot</code> among them. They are anchors. A slider that could
           rename them would erase the shared word they stand for.
         </p>
       </section>
@@ -131,7 +131,7 @@ export function TokenLabGuide() {
         <p className={styles.body}>
           It is a fixed reference token, marked <code>(fixed)</code>. The editable
           tokens are the ones a slider owns. The fixed ones, <code>ease.linear</code>,{' '}
-          <code>ease.spring</code>, and <code>delay.none</code>, are named constants
+          <code>ease.overshoot</code>, and <code>delay.none</code>, are named constants
           the rest of the system measures against. Full detail lives in the token
           architecture doc.
         </p>

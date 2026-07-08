@@ -224,8 +224,8 @@
   background-color: var(--color-border);
   flex-shrink: 0;
   transition:
-    width var(--motion-duration-slow, 400ms) var(--motion-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
-    border-radius var(--motion-duration-slow, 400ms) var(--motion-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    width var(--motion-duration-slow, 400ms) var(--motion-ease-overshoot, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    border-radius var(--motion-duration-slow, 400ms) var(--motion-ease-overshoot, cubic-bezier(0.34, 1.56, 0.64, 1)),
     background-color var(--motion-duration-slow, 400ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 

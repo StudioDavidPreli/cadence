@@ -9,7 +9,7 @@ import styles from './Appeal.module.css'
 // unselected siblings (scale.subtle + opacity 0.55) — the "spotlight narrows"
 // composition. All four classic motion tokens read together: duration.slower
 // drives the drift cycle, duration.base drives the settle/dim/lift, ease.standard
-// smooths the neutral states, ease.spring marks selection. "All tokens in concert"
+// smooths the neutral states, ease.overshoot marks selection. "All tokens in concert"
 // is then literal in the demo, not just label.
 //
 // Card itself owns scale + opacity via the isSelected/dimmed props; the

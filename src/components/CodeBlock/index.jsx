@@ -116,10 +116,10 @@ export function CodeBlock({ code }) {
       .map(p => {
         const value = resolveTokenDisplay(p, tokens)
         if (!value) return null // filter(Boolean) below; guard test prevents this
-        // Tokens no slider can reach (ease.linear, ease.spring, delay.none)
+        // Tokens no slider can reach (ease.linear, ease.overshoot, delay.none)
         // are tagged so their never-changing value reads as a fixed reference,
         // not a dead live comment. Per-token, not per-line, because one line
-        // can mix the two (Notification Badge: ease.spring fixed, ease.standard
+        // can mix the two (Notification Badge: ease.overshoot fixed, ease.standard
         // editable). See isEditableToken.
         return isEditableToken(p) ? value : `${value} (fixed)`
       })

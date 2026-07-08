@@ -32,7 +32,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The press compresses. The release returns. A button with no give reads as image, not interface.',
     componentQuoteAttribution: null,
-    tokens: 'scale.base · duration.fast · ease.spring',
+    tokens: 'scale.base · duration.fast · ease.overshoot',
   },
   {
     id: 2, title: 'Anticipation', category: 'classic',
@@ -42,7 +42,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'Interfaces that skip the windup feel abrupt. A small reverse motion prepares the eye for arrival.',
     componentQuoteAttribution: null,
-    tokens: 'duration.base · ease.spring',
+    tokens: 'duration.base · ease.overshoot',
   },
   {
     id: 3, title: 'Staging', category: 'classic',
@@ -72,7 +72,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The slide arrives. The indicator follows. Secondary motion is how the interface says: that was real.',
     componentQuoteAttribution: null,
-    tokens: 'duration.base · ease.spring',
+    tokens: 'duration.base · ease.overshoot',
   },
   {
     id: 6, title: 'Slow In & Slow Out', category: 'classic',
@@ -122,7 +122,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: "The notification doesn't just appear. It overshoots, and that overshoot is the alert.",
     componentQuoteAttribution: null,
-    tokens: 'scale.expressive · ease.spring · duration.slow',
+    tokens: 'scale.expressive · ease.overshoot · duration.slow',
   },
   {
     id: 11, title: 'Solid Drawing', category: 'classic',
