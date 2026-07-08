@@ -46,8 +46,13 @@ so a Cadence token file is complete, but no slider reaches them.
 | Token | Value |
 |---|---|
 | `ease.linear` | `cubic-bezier(0, 0, 1, 1)` |
-| `ease.overshoot` | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 | `delay.none` | 0 |
+
+`ease.overshoot` was a fixed constant until 2026-07-08. It is now an editable
+slot, unlocked in Explore mode (its `y = 1.56` handle needs the visualizer's
+extended vertical range). In constrained mode it stays at the named overshoot
+curve, so it reads as an anchor there; toggling Explore off resets it. It is in
+`EDITABLE_TOKEN_SCHEMA`, not `FIXED_REFERENCE_PATHS`.
 
 ---
 

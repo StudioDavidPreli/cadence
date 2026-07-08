@@ -4,6 +4,15 @@
   aspect-ratio: 1;
 }
 
+/* Overshoot slot: the viewBox grows to "0 -70 100 180" so the y=1.56 handle is
+   reachable. Match the container aspect ratio to that viewBox (100/180) so the
+   taller coordinate space is not letterboxed and the curve keeps its true shape.
+   The box gets taller when the Overshoot tab is active — a deliberate context
+   shift, not a per-frame change. */
+.containerTall {
+  aspect-ratio: 100 / 180;
+}
+
 .svg {
   width: 100%;
   height: 100%;

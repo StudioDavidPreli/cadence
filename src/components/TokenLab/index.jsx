@@ -56,16 +56,20 @@ import styles from './TokenLab.module.css'
 //
 // Policy: a component is listed under a token if its source reads that token
 // (tokens.<group>.<key>, or the matching --motion-* CSS variable). Objective and
-// greppable. Fixed reference tokens have no slider, so reads of ease.linear and
-// ease.overshoot produce no entry here. Two reads are wired but not exercised by the
-// TokenLab demo itself — Card's scale.subtle (its dimmed branch, used by the Appeal
-// principle) and Stepper's scale.base — and are listed because the component
-// consumes them even though this demo never triggers that path.
+// greppable. ease.linear has no slider (corners only), so reads of it produce no
+// entry here. Two reads are wired but not exercised by the TokenLab demo itself —
+// Card's scale.subtle (its dimmed branch, used by the Appeal principle) and
+// Stepper's scale.base — and are listed because the component consumes them even
+// though this demo never triggers that path.
+//
+// easing.overshoot became an editable slot (unlocked in Explore mode, 2026-07-08),
+// so it now carries the components that read ease.overshoot: Card's select lift,
+// Carousel's snap, the Notification Badge launch, and the Toggle thumb.
 //
 // Rebuilt 2026-06-20 against each component's actual reads in the Token Fidelity
 // audit. The prior table had drifted: NavItem was under easing.standard (it reads
-// enter/exit), Toggle under easing.standard + scale.base (it reads only
-// duration.fast + the fixed ease.overshoot), Card under duration.slow (it reads base),
+// enter/exit), Toggle under easing.standard + scale.base (it reads
+// duration.fast + ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
@@ -75,6 +79,7 @@ const TOKEN_COMPONENT_MAP = {
   'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge'],
   'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
   'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar'],
+  'easing.overshoot': ['Card', 'Carousel', 'Notification Badge', 'Toggle'],
   'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper'],
@@ -132,6 +137,7 @@ function writeAllTokensToCss(state) {
   el.style.setProperty('--motion-ease-standard',    easingCss(state.easing.standard))
   el.style.setProperty('--motion-ease-enter',       easingCss(state.easing.enter))
   el.style.setProperty('--motion-ease-exit',        easingCss(state.easing.exit))
+  el.style.setProperty('--motion-ease-overshoot',   easingCss(state.easing.overshoot))
   el.style.setProperty('--motion-delay-short',      `${state.delay.short}ms`)
   el.style.setProperty('--motion-delay-medium',     `${state.delay.medium}ms`)
   el.style.setProperty('--motion-delay-long',       `${state.delay.long}ms`)
@@ -289,6 +295,10 @@ function migratePresetEasing(preset) {
   for (const slot of Object.keys(slots)) {
     if (slots[slot] === 'spring') slots[slot] = 'overshoot'
   }
+  // The overshoot slot landed 2026-07-08 (editable in Explore mode). Presets
+  // saved before it have no overshoot key; default it to the named curve so the
+  // reducer and writeAllTokensToCss never read undefined.
+  if (slots.overshoot === undefined) slots.overshoot = 'overshoot'
   return { ...preset, state: { ...preset.state, easing: slots } }
 }
 
@@ -968,12 +978,27 @@ const EASING_TABS = [
   { id: 'enter',    label: 'Enter'    },
   { id: 'exit',     label: 'Exit'     },
 ]
+// Overshoot is an editable slot but its tab only appears in Explore mode. Two
+// reasons: its Y > 1 control point needs the visualizer's extended vertical
+// range (allowOvershoot below), and gating it keeps overshoot a fixed anchor in
+// constrained mode — the shared-vocabulary lesson that some curves are named
+// constants you reference, not dials you turn.
+const OVERSHOOT_TAB = { id: 'overshoot', label: 'Overshoot' }
 
-function EasingSection({ rawState, dispatch }) {
+function EasingSection({ rawState, dispatch, exploreMode }) {
   const setActiveToken = useSetActiveToken()
   const [activeSlot, setActiveSlot] = useState('standard')
   const [resetHovered, setResetHovered] = useState(false)
   const chrome = useChromeTransition()
+
+  const tabs = exploreMode ? [...EASING_TABS, OVERSHOOT_TAB] : EASING_TABS
+
+  // If Explore turns off while the Overshoot tab is active, fall back to Standard
+  // so the visualizer never reads a slot whose tab is gone. RESET_TO_DEFAULTS on
+  // Explore-off already returns the overshoot value itself to its anchor.
+  useEffect(() => {
+    if (!exploreMode && activeSlot === 'overshoot') setActiveSlot('standard')
+  }, [exploreMode, activeSlot])
 
   const slotValue   = rawState.easing[activeSlot]
   const isCustom    = Array.isArray(slotValue)
@@ -986,7 +1011,7 @@ function EasingSection({ rawState, dispatch }) {
   return (
     <>
       <div className={styles.easingTabs} role="tablist">
-        {EASING_TABS.map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
             role="tab"
@@ -1016,6 +1041,7 @@ function EasingSection({ rawState, dispatch }) {
 
       <EasingVisualizer
         curve={activeCurve}
+        allowOvershoot={activeSlot === 'overshoot'}
         onCurveChange={curve => setSlot(curve)}
         onDragStart={() => setActiveToken(`easing.${activeSlot}`)}
         onDragEnd={() => setActiveToken(null)}
@@ -1435,7 +1461,7 @@ export function TokenLab() {
           for exploration, but a curve without a name can't be systematized.
           If a custom curve is worth keeping, it should become a named token.
         */}
-        <EasingSection rawState={rawState} dispatch={dispatch} />
+        <EasingSection rawState={rawState} dispatch={dispatch} exploreMode={exploreMode} />
       </ControlSection>
 
       <ControlSection

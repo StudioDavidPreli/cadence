@@ -19,14 +19,14 @@ export const EASING_CURVES = {
 // The "Default" preset's state. Defined separately so the Default entry in
 // BUILT_IN_PRESETS can reference it without duplicating values.
 //
-// `easing` holds three independent slots — standard / enter / exit — each
-// editable through the TokenLab bezier visualizer. Each value is either a
+// `easing` holds four independent slots — standard / enter / exit / overshoot —
+// each editable through the TokenLab bezier visualizer. Each value is either a
 // preset key (`'standard'`, `'enter'`, etc.) or a four-number bezier array
-// for a custom curve. Linear and Overshoot stay as constants in the runtime
-// (see stateToTokens below) and as quick-load preset buttons in the UI.
+// for a custom curve. The overshoot slot only surfaces a control in Explore mode
+// (see EasingSection); Linear stays a runtime constant with no editable slot.
 export const INITIAL_STATE = {
   duration: { fast: 100, base: 200, slow: 400, slower: 600 },
-  easing:   { standard: 'standard', enter: 'enter', exit: 'exit' },
+  easing:   { standard: 'standard', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
   delay:    { short: 50, medium: 100, long: 200 },
   scale:    { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
 }
@@ -52,7 +52,7 @@ export const BUILT_IN_PRESETS = [
       // Snappy is the personality where Standard reads as the Overshoot curve,
       // confident overshoot. Enter and Exit stay at their default decelerate /
       // accelerate shapes; bending those would dilute the contrast Snappy is built on.
-      easing:   { standard: 'overshoot', enter: 'enter', exit: 'exit' },
+      easing:   { standard: 'overshoot', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 20, medium: 40, long: 80 },
       scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
     },
@@ -67,7 +67,7 @@ export const BUILT_IN_PRESETS = [
       // Cinematic favours arrival — Standard becomes Enter so general motion
       // decelerates into rest. Enter keeps that shape. Exit stays sharp so
       // dismissals don't drag.
-      easing:   { standard: 'enter', enter: 'enter', exit: 'exit' },
+      easing:   { standard: 'enter', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 100, medium: 200, long: 400 },
       scale:    { subtle: 0.99, base: 0.97, expressive: 0.94, lift: 1.01 },
     },
@@ -80,10 +80,10 @@ export const BUILT_IN_PRESETS = [
 // shape that MotionTokensProvider expects (seconds for duration/delay,
 // four-number arrays for easing).
 //
-// Each editable slot resolves independently. Linear and Overshoot stay constant
-// because they are not editable through the UI — Linear has no draggable
-// handles (corners only) and Overshoot's Y > 1 control point falls outside the
-// visualizer's draggable region.
+// Each editable slot resolves independently, overshoot included: it is unlocked
+// in Explore mode, where the visualizer gives its Y > 1 handle extra vertical
+// headroom. Only Linear stays constant, because it has no draggable handles
+// (corners only) and so nothing to read from state.
 function resolveCurve(slot) {
   return Array.isArray(slot) ? slot : EASING_CURVES[slot].fm
 }
@@ -101,7 +101,7 @@ export function stateToTokens(state) {
       standard: resolveCurve(state.easing.standard),
       enter:    resolveCurve(state.easing.enter),
       exit:     resolveCurve(state.easing.exit),
-      overshoot:   EASING_CURVES.overshoot.fm,
+      overshoot: resolveCurve(state.easing.overshoot),
     },
     delay: {
       none:   0,
@@ -118,9 +118,9 @@ export function stateToTokens(state) {
 // TokenLab's writeAllTokensToCss. Where writeAllTokensToCss writes only the
 // editable tokens to the DOM, the export must produce the COMPLETE token
 // document a design system would consume — including the members the editor
-// never exposes: ease.linear, ease.overshoot, and delay.none. Those are real
-// tokens in motion.css; an export that dropped them would be a partial file,
-// not a usable one.
+// never exposes as a live-editable slider: ease.linear and delay.none. Those are
+// real tokens in motion.css; an export that dropped them would be a partial file,
+// not a usable one. (ease.overshoot is now an editable slot, exported from state.)
 //
 // It returns a normalized, format-agnostic shape in CSS-side units: durations
 // and delays as plain ms numbers, easing as canonical four-number bezier
@@ -139,7 +139,7 @@ export function stateToExport(state) {
       standard: resolveCurve(state.easing.standard),
       enter:    resolveCurve(state.easing.enter),
       exit:     resolveCurve(state.easing.exit),
-      overshoot:   EASING_CURVES.overshoot.fm,
+      overshoot: resolveCurve(state.easing.overshoot),
     },
     delay: {
       none:   0,
@@ -258,21 +258,29 @@ export const EXPLORE_BOUNDS = {
 // reference. easing slots are beziers (no scalar clamp); the rest are clamped
 // scalars. Uses control-layer naming (`easing`); the runtime token layer calls
 // the same family `ease` (see the easing/ease note in resolveToken.js).
+//
+// `overshoot` is an editable easing slot but only surfaces a control in Explore
+// mode (its Y > 1 handle needs the visualizer's extended vertical range). It is
+// in the schema because it is a real editable token: it resolves from state,
+// exports its edited value, and imports as a curve. Constrained mode simply
+// hides its tab, leaving it at the default overshoot curve.
 export const EDITABLE_TOKEN_SCHEMA = {
   duration: ['fast', 'base', 'slow', 'slower'],
-  easing:   ['standard', 'enter', 'exit'],
+  easing:   ['standard', 'enter', 'exit', 'overshoot'],
   delay:    ['short', 'medium', 'long'],
   scale:    ['subtle', 'base', 'expressive', 'lift'],
 }
 
 // Paths a Cadence export legitimately carries but the editor cannot hold: the
 // non-editable constants. They are dropped on import WITHOUT being reported as
-// foreign, so a clean round trip shows an empty "ignored" list instead of three
-// rows of expected noise. This is the exact complement of EDITABLE_TOKEN_SCHEMA:
+// foreign, so a clean round trip shows an empty "ignored" list instead of rows
+// of expected noise. This is the exact complement of EDITABLE_TOKEN_SCHEMA:
 // together they classify every token the runtime carries, which the drift guard
 // in resolveToken.test.js asserts. Control-layer naming (`easing.`, matching the
 // schema), normalized to the runtime `ease.` where it meets a token path.
-export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'easing.overshoot', 'delay.none'])
+// `linear` alone stays fixed among the easing curves: it has no draggable
+// handles (corners only), so there is nothing to edit.
+export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'delay.none'])
 
 function clampScalar(n, { min, max }) {
   return Math.max(min, Math.min(max, n))

@@ -46,31 +46,33 @@ function buildPath(points) {
 
 // ─── Coordinate conversion ────────────────────────────────────────────────────
 //
-// The SVG has viewBox="0 -25 100 135":
-//   vbMinX = 0,   vbWidth  = 100
-//   vbMinY = -25, vbHeight = 135
+// The vertical viewBox range depends on the slot being edited. Both share the
+// unit square [0,1]×[0,1] as the reference grid; they differ only in how much
+// headroom sits above y=1:
+//   NORMAL  — viewBox "0 -25 100 135" → draggable bezierY up to ~1.25. Fine for
+//             standard / enter / exit, whose control points live near the square.
+//   TALL    — viewBox "0 -70 100 180" → draggable bezierY up to ~1.70. Needed for
+//             the overshoot slot, whose default handle sits at y=1.56, above the
+//             normal ceiling. The container switches to a portrait aspect ratio
+//             so the taller viewBox is not letterboxed (see .containerTall).
 //
-// Given a pointer at (clientX, clientY) and the SVG's bounding rect:
+// Coordinate steps, given a pointer at (clientX, clientY) and the SVG rect:
+//   1. normalize to [0,1] in the element's pixel bounds
+//   2. scale to viewBox space:  svgX = normX*100;  svgY = normY*height + minY
+//   3. to bezier: bezierX = svgX/100;  bezierY = 1 - svgY/100 (flip y)
 //
-//   Step 1 — normalize to [0,1] within the element's pixel bounds:
-//     normX = (clientX - rect.left) / rect.width
-//     normY = (clientY - rect.top)  / rect.height
-//
-//   Step 2 — scale to viewBox space (multiply by dimensions, add origin offset):
-//     svgX = normX * 100           (vbWidth = 100, vbMinX = 0 → no offset)
-//     svgY = normY * 135 + (-25)   (vbHeight = 135, vbMinY = -25)
-//
-//   Step 3 — convert SVG coordinates to bezier values:
-//     bezierX = svgX / 100
-//     bezierY = 1 - svgY / 100     (flip y: svgY=0 → bezierY=1, svgY=100 → bezierY=0)
-//
-// x is clamped to [0,1] — control points can't be placed outside the start/end.
-// y is left unclamped — spring curves intentionally overshoot above y=1.
-function pixelToBezier(clientX, clientY, rect) {
+// x is clamped to [0,1] — control points can't sit outside the start/end.
+// y is left unclamped — overshoot curves intentionally rise above y=1.
+const VIEW = {
+  normal: { minY: -25, height: 135 },
+  tall:   { minY: -70, height: 180 },
+}
+
+function pixelToBezier(clientX, clientY, rect, view) {
   const normX  = (clientX - rect.left) / rect.width
   const normY  = (clientY - rect.top)  / rect.height
   const svgX   = normX * 100
-  const svgY   = normY * 135 - 25
+  const svgY   = normY * view.height + view.minY
   return {
     x: Math.max(0, Math.min(1, svgX / 100)),
     y: 1 - svgY / 100,
@@ -95,10 +97,13 @@ function pixelToBezier(clientX, clientY, rect) {
 // onDragStart / onDragEnd — optional callbacks fired when a control point drag
 // begins or ends. TokenLab uses these to set the active token to 'easing' so
 // DemoWrapper can highlight the components affected by easing changes.
-export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd }) {
+export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd, allowOvershoot = false }) {
   const [x1, y1, x2, y2] = curve
   const svgRef    = useRef(null)
   const [dragging, setDragging] = useState(null) // 'p1' | 'p2' | null
+
+  // Overshoot slots need extra vertical headroom to reach their y=1.56 handle.
+  const view = allowOvershoot ? VIEW.tall : VIEW.normal
 
   const points = sampleCurve(x1, y1, x2, y2)
   const pathD  = buildPath(points)
@@ -121,7 +126,7 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd 
 
   function handlePointerMove(e) {
     if (!dragging || !onCurveChange) return
-    const { x, y } = pixelToBezier(e.clientX, e.clientY, svgRef.current.getBoundingClientRect())
+    const { x, y } = pixelToBezier(e.clientX, e.clientY, svgRef.current.getBoundingClientRect(), view)
     if (dragging === 'p1') onCurveChange([x, y, x2, y2])
     else                   onCurveChange([x1, y1, x, y])
   }
@@ -147,10 +152,10 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd 
   const transition = (dur) => ({ duration: dur, ease: FEEDBACK_EASE })
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${allowOvershoot ? styles.containerTall : ''}`}>
       <svg
         ref={svgRef}
-        viewBox="0 -25 100 135"
+        viewBox={`0 ${view.minY} 100 ${view.height}`}
         className={`${styles.svg} ${dragging ? styles.dragging : ''}`}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

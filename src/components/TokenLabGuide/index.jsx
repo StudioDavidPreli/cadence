@@ -97,9 +97,9 @@ export function TokenLabGuide() {
           transition block the component runs, reading through the token layer, so
           there is no gap between what you see and what the code does. The active
           value highlights as you edit it. A value tagged <code>(fixed)</code> is a
-          reference token no slider can move, <code>ease.linear</code> and{' '}
-          <code>ease.overshoot</code> among them. They are anchors. A slider that could
-          rename them would erase the shared word they stand for.
+          reference token no slider can move, like <code>ease.linear</code>. They are
+          anchors. A slider that could rename them would erase the shared word they
+          stand for.
         </p>
       </section>
 
@@ -130,9 +130,12 @@ export function TokenLabGuide() {
         <p className={styles.question}>Why does one value in the code view never move?</p>
         <p className={styles.body}>
           It is a fixed reference token, marked <code>(fixed)</code>. The editable
-          tokens are the ones a slider owns. The fixed ones, <code>ease.linear</code>,{' '}
-          <code>ease.overshoot</code>, and <code>delay.none</code>, are named constants
-          the rest of the system measures against. Full detail lives in the token
+          tokens are the ones a slider owns. The fixed ones, <code>ease.linear</code>{' '}
+          and <code>delay.none</code>, are named constants the rest of the system
+          measures against. <code>ease.overshoot</code> sits between the two: it reads
+          as a fixed anchor in constrained mode, but Explore mode gives it a control,
+          and the visualizer the vertical room its overshoot needs, so you can watch
+          it drive the components that use it. Full detail lives in the token
           architecture doc.
         </p>
 

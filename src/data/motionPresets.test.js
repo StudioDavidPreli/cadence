@@ -13,8 +13,9 @@ import {
 
 // stateToTokens is the CSS-side -> React-side converter. These tests pin its
 // contract: ms become seconds, delay.none is injected, named easing slots
-// resolve to bezier arrays while custom arrays pass through, and the
-// non-editable linear/overshoot slots stay constant regardless of input.
+// resolve to bezier arrays while custom arrays pass through, overshoot resolves
+// from state (an editable slot since the Explore-mode unlock), and only the
+// non-editable linear slot stays constant regardless of input.
 describe('stateToTokens', () => {
   it('converts durations from ms to seconds', () => {
     const tokens = stateToTokens(INITIAL_STATE)
@@ -43,11 +44,18 @@ describe('stateToTokens', () => {
     expect(stateToTokens(state).ease.standard).toEqual(custom)
   })
 
-  it('keeps linear and overshoot constant regardless of state', () => {
-    // Neither is editable through the visualizer, so they are not read from state.
+  it('keeps linear constant and resolves overshoot from state', () => {
+    // Linear is not editable (corners only), so it is never read from state.
+    // Overshoot became an editable slot (Explore mode), so it resolves like the
+    // other slots — its default value is the named overshoot curve.
     const tokens = stateToTokens(INITIAL_STATE)
     expect(tokens.ease.linear).toEqual(EASING_CURVES.linear.fm)
     expect(tokens.ease.overshoot).toEqual(EASING_CURVES.overshoot.fm)
+
+    // A custom overshoot slot now flows through, unlike before the unlock.
+    const custom = [0.3, 1.7, 0.6, 1]
+    const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, overshoot: custom } }
+    expect(stateToTokens(state).ease.overshoot).toEqual(custom)
   })
 
   it('copies scale into a fresh object rather than aliasing state', () => {
@@ -58,8 +66,9 @@ describe('stateToTokens', () => {
 })
 
 // stateToExport is the format-agnostic serializer feeding both JSON exporters.
-// Unlike writeAllTokensToCss it must emit the COMPLETE token set, including the
-// non-editable constants (linear, overshoot, delay.none), in CSS-side units.
+// Unlike writeAllTokensToCss it must emit the COMPLETE token set, including
+// linear and delay.none (which have no slider) plus the overshoot slot, in
+// CSS-side units.
 describe('stateToExport', () => {
   const snappy = BUILT_IN_PRESETS.find(p => p.id === 'snappy').state
 
@@ -69,7 +78,7 @@ describe('stateToExport', () => {
     expect(out.delay).toEqual({ none: 0, short: 50, medium: 100, long: 200 })
   })
 
-  it('includes the non-editable constants linear, overshoot, and delay.none', () => {
+  it('includes linear, the overshoot slot, and delay.none', () => {
     const out = stateToExport(INITIAL_STATE)
     expect(out.easing.linear).toEqual(EASING_CURVES.linear.fm)
     expect(out.easing.overshoot).toEqual(EASING_CURVES.overshoot.fm)
@@ -138,7 +147,7 @@ describe('toCssVars', () => {
     expect(css).toContain('--motion-scale-lift: 1.02;')
   })
 
-  it('carries the non-editable constants linear, overshoot, and delay.none', () => {
+  it('carries linear, the overshoot slot, and delay.none', () => {
     const css = toCssVars(INITIAL_STATE)
     expect(css).toContain('--motion-ease-linear: cubic-bezier(0, 0, 1, 1);')
     expect(css).toContain('--motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);')
@@ -210,8 +219,9 @@ describe('importTokens', () => {
     const res = importTokens(JSON.stringify(doc))
     expect(res.report.ignored).toContainEqual({ path: 'color' })
     expect(res.report.ignored).toContainEqual({ path: 'duration.fastt' })
-    // toFlatJson does not emit linear/overshoot/delay.none, so add them to prove
-    // they are suppressed rather than simply absent.
+    // A clean Cadence export carries linear, overshoot, and delay.none, and all
+    // three are classified (linear + delay.none as fixed, overshoot as editable),
+    // so a round-tripped file reports nothing ignored.
     const dtcg = JSON.parse(toDtcgJson(INITIAL_STATE))
     const res2 = importTokens(JSON.stringify(dtcg))
     expect(res2.report.ignored).toEqual([])

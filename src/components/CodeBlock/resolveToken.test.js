@@ -96,11 +96,12 @@ describe('isEditableToken', () => {
     expect(isEditableToken('ease.standard')).toBe(true)
     expect(isEditableToken('ease.enter')).toBe(true)
     expect(isEditableToken('ease.exit')).toBe(true)
+    // overshoot became an editable slot (unlocked in Explore mode, 2026-07-08).
+    expect(isEditableToken('ease.overshoot')).toBe(true)
   })
 
   it('is false for fixed reference tokens no slider can reach', () => {
     expect(isEditableToken('ease.linear')).toBe(false)
-    expect(isEditableToken('ease.overshoot')).toBe(false)
     expect(isEditableToken('delay.none')).toBe(false)
   })
 
