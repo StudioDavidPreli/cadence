@@ -1,0 +1,229 @@
+/* Motion Tiles surface. The control panel mirrors Token Lab's visual language
+   (src/components/TokenLab/TokenLab.module.css): a bordered rounded shell, a
+   fixed-width left controls column that scrolls inside itself, uppercase section
+   labels, the same slider and pill treatments, and the same theme tokens so it
+   reads as one system across all four themes.
+
+   Timing note: this panel is CHROME (the tool's own UI), not demonstration
+   motion, so every transition uses the fixed --feedback-ui-duration, never the
+   editable --motion-* tokens — same rule Token Lab's controls follow. */
+
+.tileLab {
+  display: grid;
+  /* Stage on the left, controls on the RIGHT — the mirror of Token Lab, whose
+     tool bar is on the left. Keeping this panel on the right prevents it reading
+     as the Token Lab tool bar when the view sits inside the shared app shell. */
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ── Right column: controls ─────────────────────────────────────────────── */
+
+.controls {
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto;
+  min-height: 0;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* The motion-tiles Cadence title, shown in the app top bar (App.jsx) in place of
+   the Wordmark on this view. Sized by height to the Wordmark's 48.2px so swapping
+   it in never changes the top-bar row height; the SVGs are background-free, so
+   they sit directly on the bar. */
+.title {
+  height: 48.2px;
+  width: auto;
+  display: block;
+}
+
+/* ── Panel section ──────────────────────────────────────────────────────── */
+/* Matches .presetsSection: a labelled block with a bottom rule. */
+.section {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ── Pill row (presets, stagger tables) ─────────────────────────────────── */
+/* Mirrors .presetsList + .presetItem / .presetItemActive. */
+.pillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration),
+    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+}
+
+.pill:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+.pillActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.pillActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* ── Slider row ─────────────────────────────────────────────────────────── */
+/* Mirrors .sliderRow / .sliderLabel / .sliderName / .sliderValue / .slider. */
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sliderName {
+  font-size: 12px;
+  color: var(--color-text-base);
+  font-weight: 500;
+}
+
+.sliderValue {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-text-muted2);
+  cursor: pointer;
+  transition: transform var(--feedback-ui-duration);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ── Status footer (fps, unbound) ───────────────────────────────────────── */
+.status {
+  margin-top: auto; /* pin to the bottom of the scrolling column */
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fps {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-base);
+}
+
+/* Accent is the "currently affecting the system" role; a sagging frame rate is
+   exactly that. Text-only accent, but fps is large so it clears the 3:1 bar. */
+.fps[data-warn='true'] {
+  color: var(--color-accent);
+}
+
+.warn {
+  color: var(--color-accent);
+}
+
+/* ── Right column: tile stage ───────────────────────────────────────────── */
+.stage {
+  min-height: 0;
+  overflow: auto;
+  background-color: var(--color-bg);
+  display: grid;
+  place-content: center;
+  padding: 24px;
+}
+
+.stageGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 120px);
+  gap: 4px;
+}
+
+.tile {
+  width: 120px;
+  height: 120px;
+  display: block;
+}
+
+/* A tile that failed to bind its VM instance — outlined so it is visible against
+   the grid without disturbing layout. */
+.tile[data-bound='false'] {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+/* Load / error state before the file parses. */
+.loading {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.loadError {
+  color: var(--color-accent);
+  font-weight: 600;
+}
