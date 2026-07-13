@@ -102,6 +102,66 @@
   color: var(--color-text-primary);
 }
 
+/* ── Action button (reshuffle) ──────────────────────────────────────────── */
+/* Full-width button in the pill visual language, sized to sit under a slider. */
+.actionButton {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-base);
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration),
+    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+}
+
+.actionButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-primary);
+}
+
+/* ── Clawd logo button ──────────────────────────────────────────────────── */
+/* Full-bleed bay: no side padding, so the logo button spans the whole tool column
+   edge to edge. A bottom rule keeps the section rhythm below it. */
+.logoBay {
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* The button housing the waving-logo Rive animation. Edge-to-edge (no border or
+   radius of its own), full column width; its height comes from the logo's real aspect
+   ratio (--logo-aspect, set once the artboard loads; the 3/1 fallback holds the box
+   open until then). The canvas fills it, so the logo scales up to the full width.
+   Chrome, so the hover transition uses --feedback-ui-duration like the pills. */
+.logoButton {
+  width: 100%;
+  aspect-ratio: var(--logo-aspect, 3 / 1);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+  transition: background-color var(--feedback-ui-duration);
+}
+
+.logoButton:hover {
+  background-color: var(--color-surface-active);
+}
+
+/* pointer-events:none so a click always reaches the button, never Rive's own pointer
+   handling on the canvas. The logo's wave is autonomous and needs no pointer input. */
+.logoCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
 /* ── Slider row ─────────────────────────────────────────────────────────── */
 /* Mirrors .sliderRow / .sliderLabel / .sliderName / .sliderValue / .slider. */
 .sliderRow {
@@ -197,14 +257,26 @@
 
 .stageGrid {
   display: grid;
-  grid-template-columns: repeat(6, 120px);
+  /* Column count and tile size are set inline as CSS custom properties by the grid
+     (--cols, --tile) so the board can change size (3×3 … 8×8) while keeping a roughly
+     constant footprint. Children inherit --tile for their own width/height. */
+  grid-template-columns: repeat(var(--cols, 6), var(--tile, 120px));
   gap: 4px;
 }
 
 .tile {
-  width: 120px;
-  height: 120px;
+  width: var(--tile, 120px);
+  height: var(--tile, 120px);
   display: block;
+}
+
+/* A static slot shown before the shared statics file has loaded — a muted box so the
+   ratio stays legible while it arrives. Dashed to read as "placeholder", not art. */
+.tilePlaceholder {
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  opacity: 0.5;
 }
 
 /* A tile that failed to bind its VM instance — outlined so it is visible against
