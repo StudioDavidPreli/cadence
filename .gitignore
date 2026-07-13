@@ -24,3 +24,7 @@ docs/recordings/breakpointLayout.jpg
 
 # Python bytecode cache
 __pycache__/
+
+# Archived motion-tile probes and superseded assets — kept locally for reference,
+# out of the build. Restore by moving a path back to its original src/ or public/ spot.
+/archive/
