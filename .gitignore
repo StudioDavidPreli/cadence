@@ -28,3 +28,10 @@ __pycache__/
 # Archived motion-tile probes and superseded assets — kept locally for reference,
 # out of the build. Restore by moving a path back to its original src/ or public/ spot.
 /archive/
+
+# Local-only files kept on disk but out of git: project instructions, the vendored
+# emil-design-eng skill (and its lockfile). Not build inputs; Cloudflare ships dist/ only.
+/CLAUDE.md
+/skills-lock.json
+.claude/skills/
+.agents/skills/
