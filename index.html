@@ -3,7 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadence</title>
+    <title>Cadence: the motion system explorer</title>
+
+    <!-- SEO + social preview. The description reuses the README's one-line framing.
+         og:url and og:image are absolute on the production origin: a link scraper
+         renders the card off-site, where relative URLs do not resolve. og:image is
+         the 1200x630 PNG at public/favIcon/og-image.png, served at /favIcon/. -->
+    <meta name="description" content="A motion design system explorer built for designers learning how animation tokens drive UI behavior." />
+    <meta name="theme-color" content="#141414" />
+
+    <meta property="og:title" content="Cadence: the motion system explorer" />
+    <meta property="og:description" content="A motion design system explorer built for designers learning how animation tokens drive UI behavior." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cadence.davidpreli.com/" />
+    <meta property="og:image" content="https://cadence.davidpreli.com/favIcon/og-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cadence: the motion system explorer" />
+    <meta name="twitter:description" content="A motion design system explorer built for designers learning how animation tokens drive UI behavior." />
+    <meta name="twitter:image" content="https://cadence.davidpreli.com/favIcon/og-image.png" />
+
+    <!-- SVG favicon. Case-sensitive path: matches public/favIcon/favIcon.svg 1:1. -->
+    <link rel="icon" type="image/svg+xml" href="/favIcon/favIcon.svg" />
+
     <!-- Resolve the theme before first paint so the OS preference is honored and a
          stored choice never flashes the default palette. Runs synchronously in
          <head>, setting data-theme before any CSS applies. Resolution order:
