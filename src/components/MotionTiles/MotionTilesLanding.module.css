@@ -1,0 +1,39 @@
+/* The Motion Tiles landing fills the demo-area track and centers a single
+   reading column. Colors come from the theme tokens so it reads across all four
+   themes. The Enter button is chrome, so its hover uses the fixed
+   --feedback-ui-duration, never an editable --motion-* token. */
+.landing {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* safe center: center the column vertically when it fits, but fall back to
+     start-alignment when the content is taller than the track, so the top never
+     gets clipped above the scroll origin (the classic flex-centering + overflow
+     trap). */
+  justify-content: safe center;
+  padding: 48px;
+  background-color: var(--color-bg);
+}
+
+.inner {
+  max-width: 46ch;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* text-base, not text-primary: text-primary is #ffffff in the light theme (the
+   on-dark-surface color) and would vanish on the light --color-bg. text-base is
+   the full-contrast on-background color and is AA+ in every theme. */
+.body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* The Enter call to action is now the EnterGridButton (a themed looping Rive
+   label); its styling lives in EnterGridButton.module.css. */

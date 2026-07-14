@@ -15,8 +15,20 @@
      NavColumn). That frees the nav's width back to the demo area, so the full
      three-column layout only exists above 1024px. The horizontal pan (.tool
      owns overflow-x in App.module.css) remains as a deep fallback for the rare
-     case below ~844px where even the collapsed layout no longer fits. */
-  grid-template-columns: 300px 220px minmax(420px, 1fr);
+     case below ~844px where even the collapsed layout no longer fits.
+
+     The two left tracks are custom properties so a single collapse can be
+     driven independently by width (the media queries below) OR by section (the
+     .controlsRailed class, set when Motion Tiles is active). Expressing them as
+     vars lets .controlsRailed override ONLY the controls track without touching
+     the nav track, which a flat grid-template-columns rule could not do. And
+     --drawer-left (where the RailDrawer's drawer + backdrop start) is computed
+     from the same two vars, so it stays correct for every combination of full /
+     railed columns instead of being hardcoded per breakpoint. */
+  --col-controls: 300px;
+  --col-nav: 220px;
+  grid-template-columns: var(--col-controls) var(--col-nav) minmax(420px, 1fr);
+  --drawer-left: calc(var(--col-controls) + var(--col-nav));
   /* position: relative anchors the nav drawer + backdrop, which are absolutely
      positioned against this box (and clipped to its rounded corners). */
   position: relative;
@@ -54,23 +66,29 @@
    horizontal scroll appears in the normal desktop range. Breakpoints must mirror
    the useMediaQuery calls in TokenLab/index.jsx.
 
-   --drawer-left is the combined width of the persistent rail strip to the left
-   of the drawers: controls(300) + nav-rail(44) = 344 while the controls are
-   full, then tokens-rail(44) + nav-rail(44) = 88 once both collapse. The
-   drawers and backdrop start there (RailDrawer.module.css) so they cover only
-   the demo area and leave the rails clickable to switch between them. */
+   Each breakpoint sets only the track var(s) it collapses; --drawer-left
+   recomputes from them (controls + nav) so the drawers and backdrop still start
+   past the persistent rail strip and cover only the demo area, leaving the rails
+   clickable to switch between them. */
 @media (max-width: 1024px) {
   .tokenLab {
-    grid-template-columns: 300px 44px minmax(420px, 1fr);
-    --drawer-left: 344px;
+    --col-nav: 44px;
   }
 }
 
 @media (max-width: 720px) {
   .tokenLab {
-    grid-template-columns: 44px 44px minmax(420px, 1fr);
-    --drawer-left: 88px;
+    --col-controls: 44px;
   }
+}
+
+/* Section-driven collapse: when Motion Tiles is active, the Token Lab tool bar
+   collapses to the 44px "Tokens" rail regardless of viewport width, the same
+   form it takes at ≤720px. Only the controls track changes; the nav keeps
+   whatever width its own breakpoint dictates (full above 1024px, rail below).
+   Set by TokenLab/index.jsx via the controlsRailed flag. */
+.controlsRailed {
+  --col-controls: 44px;
 }
 
 /* ── Controls column ────────────────────────────────────────────────────── */

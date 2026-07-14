@@ -8,6 +8,7 @@
 export const SECTIONS = {
   TOKEN_LAB: 'token-lab',
   PRINCIPLES: 'principles',
+  MOTION_TILES: 'motion-tiles',
 }
 
 // The Token Lab guide is a destination, not a category. Opening the Token Lab
@@ -16,6 +17,15 @@ export const SECTIONS = {
 // #/token-lab/<id>). Kept distinct from CATEGORY_IDS so the router can tell a
 // category from the guide: 'overview' is not in the category list.
 export const TOKEN_LAB_GUIDE = 'overview'
+
+// Motion Tiles has two destinations, mirroring the Token Lab guide/category
+// split: the landing (an intro that gates the heavy webgl2 grid behind an
+// explicit Enter) and the live grid itself. The landing is the bare
+// #/motion-tiles route; the grid fills #/motion-tiles/grid. Kept as distinct
+// constants so the router and the section can tell them apart, the same way
+// TOKEN_LAB_GUIDE is distinct from the category ids.
+export const MOTION_TILES_LANDING = 'landing'
+export const MOTION_TILES_GRID = 'grid'
 
 // Token Lab's four behavior categories, in display order.
 export const CATEGORIES = [

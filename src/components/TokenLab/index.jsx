@@ -5,12 +5,14 @@ import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState } from '../../context/NavigationContext'
+import { SECTIONS } from '../../data/navigation'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { DurationVisualizer } from '../DurationVisualizer'
 import { PrinciplesLibrary } from '../PrinciplesLibrary'
+import { MotionTilesSection } from '../MotionTiles/MotionTilesSection'
 import { NavColumn } from '../NavColumn'
 import { DemoArea } from '../DemoArea'
 import { useDemoOverlay } from '../DemoArea/overlayContext'
@@ -1124,7 +1126,7 @@ export function TokenLab() {
   // Which Principles filter is active comes from NavigationContext (the nav
   // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
   // The destination itself is read by DemoArea, not here.
-  const { principleFilter } = useNavState()
+  const { principleFilter, section } = useNavState()
   // NavItem demo selection — local to the Press & State category.
   const [activeNav, setActiveNav] = useState('Token Lab')
 
@@ -1134,6 +1136,14 @@ export function TokenLab() {
   const navCollapsed      = useMediaQuery('(max-width: 1024px)')
   const controlsCollapsed = useMediaQuery('(max-width: 720px)')
 
+  // Motion Tiles is a third tool that renders in the right region. While it is
+  // active the Token Lab tool bar collapses to the "Tokens" rail regardless of
+  // viewport width — the same form it takes at ≤720px — so the tile field gets
+  // the room and the bar reads as set aside. The bar collapses but never
+  // unmounts, so token state persists across a Motion Tiles visit for free.
+  const isMotionTiles = section === SECTIONS.MOTION_TILES
+  const controlsRailed = controlsCollapsed || isMotionTiles
+
   // Which rail's drawer is open: 'tokens' | 'nav' | null. A single value makes
   // the two drawers mutually exclusive — opening one closes the other, which is
   // exactly the requested behavior. Clearing it when its breakpoint passes keeps
@@ -1141,8 +1151,10 @@ export function TokenLab() {
   const [openDrawer, setOpenDrawer] = useState(null)
   useEffect(() => {
     if (!navCollapsed && openDrawer === 'nav') setOpenDrawer(null)
-    if (!controlsCollapsed && openDrawer === 'tokens') setOpenDrawer(null)
-  }, [navCollapsed, controlsCollapsed, openDrawer])
+    // Close the Tokens drawer whenever the bar is no longer railed — including
+    // on leaving Motion Tiles, not only on crossing the width breakpoint.
+    if (!controlsRailed && openDrawer === 'tokens') setOpenDrawer(null)
+  }, [navCollapsed, controlsRailed, openDrawer])
 
   const toggleDrawer = id => setOpenDrawer(prev => (prev === id ? null : id))
   const closeDrawer  = () => setOpenDrawer(null)
@@ -1503,13 +1515,14 @@ export function TokenLab() {
   return (
     <ActiveTokenProvider>
     <TitlePulseProvider>
-    <div className={styles.tokenLab}>
+    <div className={`${styles.tokenLab} ${controlsRailed ? styles.controlsRailed : ''}`}>
 
       {/* ── Left column: controls (tool bar) ──────────────────────────── */}
-      {/* ≤720px the tool bar collapses into a "Tokens" rail that opens the same
-          controls as a drawer, sharing the mutually-exclusive drawer state with
-          the nav. Above 720px it is the full always-visible column. */}
-      {controlsCollapsed ? (
+      {/* Railed (a "Tokens" rail that opens the same controls as a drawer) when
+          the viewport is ≤720px OR Motion Tiles is active; a full always-visible
+          column otherwise. The drawer shares the mutually-exclusive drawer state
+          with the nav. */}
+      {controlsRailed ? (
         <RailDrawer
           label="Tokens"
           drawerId="tokens-drawer"
@@ -1544,14 +1557,23 @@ export function TokenLab() {
           the user is here specifically to perceive motion. Honoring OS-level
           prefers-reduced-motion would flatten every preview to instant and
           defeat the tool's purpose. See docs/decisions/reduced-motion-2026-05-06.md. */}
-      <MotionTokensProvider tokens={liveTokens} respectReducedMotion={false}>
-        <DemoArea
-          categoryContent={categoryContent}
-          principlesContent={<PrinciplesLibrary filter={principleFilter} />}
-          hero={<HeroAnimation />}
-          guide={<TokenLabGuide />}
-        />
-      </MotionTokensProvider>
+      {/* Right region swaps by section. Token Lab and Principles render the demo
+          area (wrapped in MotionTokensProvider so their previews read live
+          tokens). Motion Tiles renders its own section instead: the landing, then
+          the lazy grid on Enter. It sits outside MotionTokensProvider on purpose,
+          it reads no --motion-* tokens and runs its own preset system. */}
+      {isMotionTiles ? (
+        <MotionTilesSection />
+      ) : (
+        <MotionTokensProvider tokens={liveTokens} respectReducedMotion={false}>
+          <DemoArea
+            categoryContent={categoryContent}
+            principlesContent={<PrinciplesLibrary filter={principleFilter} />}
+            hero={<HeroAnimation />}
+            guide={<TokenLabGuide />}
+          />
+        </MotionTokensProvider>
+      )}
 
       {/* Import report. Opens after any import attempt; the title reflects
           success vs a fatal parse / validation failure. */}

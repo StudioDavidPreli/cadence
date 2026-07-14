@@ -1,5 +1,11 @@
 import { createContext, useContext, useMemo, useReducer } from 'react'
-import { SECTIONS, FILTERS, TOKEN_LAB_GUIDE } from '../data/navigation'
+import {
+  SECTIONS,
+  FILTERS,
+  TOKEN_LAB_GUIDE,
+  MOTION_TILES_LANDING,
+  MOTION_TILES_GRID,
+} from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
 // ─── Navigation state ─────────────────────────────────────────────────────────
@@ -11,9 +17,9 @@ import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 // Lab state persist while the user is in the Principles Library.
 //
 // State shape:
-//   section          'token-lab' | 'principles' | null   (null = landing/hero)
-//   destination       categoryId | 'principles' | null    (what the demo shows)
-//   expandedSection  'token-lab' | 'principles' | null    (single-open accordion)
+//   section          'token-lab' | 'principles' | 'motion-tiles' | null  (null = landing/hero)
+//   destination       categoryId | 'principles' | 'landing' | 'grid' | null  (what the tool region shows)
+//   expandedSection  'token-lab' | 'principles' | 'motion-tiles' | null  (single-open accordion)
 //   principleFilter  'all' | 'classic' | 'extended'
 //
 // The demo area's rule: render the destination's content, else the hero. There
@@ -57,6 +63,18 @@ function navReducer(state, action) {
           principleFilter: FILTERS.ALL,
         }
       }
+      // Motion Tiles is a leaf section (no sub-navigation). Opening it is both
+      // disclosure and destination: it sets the section and lands on the Motion
+      // Tiles landing, the intro that gates the heavy webgl2 grid. An Enter
+      // gesture in the landing routes on to the grid destination.
+      if (action.id === SECTIONS.MOTION_TILES) {
+        return {
+          section: SECTIONS.MOTION_TILES,
+          expandedSection: SECTIONS.MOTION_TILES,
+          destination: MOTION_TILES_LANDING,
+          principleFilter: FILTERS.ALL,
+        }
+      }
       // Opening Token Lab reveals the four categories AND shows the guide as
       // its destination, symmetric to Principles opening to the grid. The guide
       // is the Token Lab landing: a how-to that crossfades in from the hero. A
@@ -69,6 +87,19 @@ function navReducer(state, action) {
         principleFilter: FILTERS.ALL,
       }
     }
+
+    // A Motion Tiles view selected: the landing (Overview / the Enter gate) or
+    // the live grid. Both keep the section open. Selecting the grid mounts the
+    // lazy chunk and pushes #/motion-tiles/grid, so the browser back button and
+    // the Overview leaf both return to the landing. Fires from the landing's
+    // Enter button and from the two nav leaves.
+    case 'SET_MOTION_TILES_VIEW':
+      return {
+        section: SECTIONS.MOTION_TILES,
+        expandedSection: SECTIONS.MOTION_TILES,
+        destination: action.view,
+        principleFilter: FILTERS.ALL,
+      }
 
     // Classic / Extended clicked. Re-clicking the active filter toggles back to
     // all. Section and destination are untouched — the grid is already up.
@@ -109,6 +140,10 @@ export function NavigationProvider({ children }) {
       selectCategory: id => dispatch({ type: 'SELECT_CATEGORY', id }),
       toggleSection: id => dispatch({ type: 'TOGGLE_SECTION', id }),
       setFilter: filter => dispatch({ type: 'SET_FILTER', filter }),
+      showMotionTilesLanding: () =>
+        dispatch({ type: 'SET_MOTION_TILES_VIEW', view: MOTION_TILES_LANDING }),
+      enterMotionTilesGrid: () =>
+        dispatch({ type: 'SET_MOTION_TILES_VIEW', view: MOTION_TILES_GRID }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
     }),
     [],

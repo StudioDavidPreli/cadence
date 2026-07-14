@@ -1,4 +1,10 @@
-// IngredientV8Grid — a pooled motion-tile mosaic.
+// MotionTilesGrid — a pooled motion-tile mosaic. (Formerly IngredientV8Grid; the
+// "ingredient" name is dead legacy from the fixed 6x6 composition era.)
+//
+// This is the React.lazy chunk of the Motion Tiles section: it alone imports
+// @rive-app/react-webgl2, so that runtime is code-split into this chunk and does
+// not load until the user clicks Enter on the landing. See
+// docs/decisions/motion-tiles-integration-2026-07-13.md.
 //
 // History: this started as a fixed 6x6 composition — 36 artboards (r1c1..r6c6) from
 // ONE consolidated Rive file (ingredients_v8.riv), each cell a specific tile that
@@ -33,37 +39,9 @@ import {
   useViewModelInstance,
   useViewModelInstanceNumber,
 } from '@rive-app/react-webgl2'
-import { useTheme } from '../../context/ThemeContext'
-import styles from './IngredientV8Grid.module.css'
+import styles from './MotionTilesGrid.module.css'
 
 const RIV_SRC = '/riveTiles/ingredients_v8.riv'
-
-// The motion-tiles Cadence title set — one pre-themed SVG per theme (David's
-// artwork). Unlike the app Wordmark (CSS-var fills), these are baked per theme, so
-// we swap the file by theme rather than recolor at runtime. The SVGs are
-// background-free, so the title sits directly on the top bar like the Wordmark.
-//
-// Exported because it replaces the Wordmark in the app top bar (App.jsx) when the
-// motion-tiles view is active — it is the page's upper-left title, not a panel
-// element. Sized by height to match the Wordmark (48.2px) so the top-bar row
-// height is unchanged when the title swaps in.
-const TITLE_BY_THEME = {
-  light: 'lightMode',
-  dark: 'darkMode',
-  'high-contrast-light': 'lightCon',
-  'high-contrast-dark': 'darkCon',
-}
-export function MotionTilesTitle() {
-  const { theme } = useTheme()
-  const file = TITLE_BY_THEME[theme] ?? 'darkMode'
-  return (
-    <img
-      className={styles.title}
-      src={`/titleSVGS/motionTilesTitles/${file}.svg`}
-      alt="Cadence Motion Tiles"
-    />
-  )
-}
 
 const VIEW_MODEL = 'PathEffectVM'
 const BASE_PERIOD = 2.0 // seconds per cycle at speed 1, matches the old Lua driver
@@ -530,7 +508,7 @@ function ClawdLogoButton({ instanceName, onClick }) {
   )
 }
 
-export function IngredientV8Grid() {
+export function MotionTilesGrid() {
   const { riveFile, status } = useRiveFile({ src: RIV_SRC })
   // The statics file loads alongside the animation file. If it lags, static cells
   // show the placeholder until it arrives; the grid does not block on it.
@@ -793,6 +771,14 @@ export function IngredientV8Grid() {
       {/* ── Right column: controls, Token-Lab styled. On the RIGHT so it never
           reads as the Token Lab tool bar (which lives on the left). ──────── */}
       <aside className={styles.controls}>
+        {/* The motion-tiles logo heads the panel as its title. It is also the
+            easter-egg affordance: the waving-logo Rive animation invites the
+            click, and each click drops a self-driven clawd tile onto a random
+            cell. */}
+        <div className={styles.logoBay}>
+          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} />
+        </div>
+
         {/* Composition — the pooled-mosaic controls: size, animation density, and a
             reshuffle that re-seeds the layout and source placement. */}
         <div className={styles.section}>
@@ -831,15 +817,18 @@ export function IngredientV8Grid() {
           </div>
         </div>
 
-        {/* Stagger — the weight table that shapes how the wave travels the grid. */}
+        {/* Stagger — the weight table that shapes how the wave travels the grid.
+            A fixed 4-column grid (not a flex-wrap) so the seven options always lay
+            out as two rows (4 + 3, row-major so they still read Sync..Scatter in
+            order), independent of which one is selected. */}
         <div className={styles.section}>
           <div className={styles.sectionLabel}>Stagger</div>
-          <div className={styles.pillList}>
+          <div className={styles.staggerList}>
             {TABLE_ORDER.map(([key, label]) => (
               <button
                 key={key}
                 type="button"
-                className={table === key ? styles.pillActive : styles.pill}
+                className={`${styles.staggerPill} ${table === key ? styles.pillActive : styles.pill}`}
                 onClick={() => selectTable(key)}
               >
                 {label}
@@ -866,13 +855,6 @@ export function IngredientV8Grid() {
             onChange={setCellSize} />
           <Slider label="gapSize" value={gapSize} min={0} max={2} step={0.05} format={(v) => v.toFixed(2)}
             onChange={setGapSize} />
-        </div>
-
-        {/* Clawd — the easter-egg affordance. The waving-logo Rive animation is the
-            suggestive UI: its motion invites the click, and each click drops a
-            self-driven clawd tile onto a random cell. */}
-        <div className={styles.logoBay}>
-          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} />
         </div>
 
         <div className={styles.status}>

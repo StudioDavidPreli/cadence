@@ -17,8 +17,10 @@
   grid-template-rows: minmax(0, 1fr);
   height: 100%;
   min-height: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+  /* No border or radius: the grid renders inside the app shell's demo-area
+     track, which the shell (.tokenLab) already frames and clips to its rounded
+     corners. A self-border here would double the frame. (It carried its own
+     border when it was the whole tool under the retired ?v8grid gate.) */
   overflow: hidden;
 }
 
@@ -31,16 +33,6 @@
   background-color: var(--color-bg);
   display: flex;
   flex-direction: column;
-}
-
-/* The motion-tiles Cadence title, shown in the app top bar (App.jsx) in place of
-   the Wordmark on this view. Sized by height to the Wordmark's 48.2px so swapping
-   it in never changes the top-bar row height; the SVGs are background-free, so
-   they sit directly on the bar. */
-.title {
-  height: 48.2px;
-  width: auto;
-  display: block;
 }
 
 /* ── Panel section ──────────────────────────────────────────────────────── */
@@ -100,6 +92,29 @@
   background-color: var(--color-surface-hover);
   border-color: var(--color-surface-hover);
   color: var(--color-text-primary);
+}
+
+/* ── Stagger list ───────────────────────────────────────────────────────── */
+/* A fixed 4-column grid, not a flex-wrap, so the seven stagger options always lay
+   out as two rows (4 + 3), row-major so they still read Sync..Scatter in order.
+   Structural: the row count cannot shift when a label changes width on selection,
+   which the flex-wrap version did at the 268px panel budget. */
+.staggerList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* Stagger pills fill their grid cell (so all four columns read equal) and carry
+   tighter horizontal padding than the free-flowing pills, so the longest label
+   ("Center-in") fits a quarter-width column without truncating. Text centered,
+   never wrapped. Color and border still come from .pill / .pillActive; this rule
+   sits after them so its padding wins. */
+.staggerPill {
+  justify-content: center;
+  min-width: 0;
+  padding: 5px 4px;
+  white-space: nowrap;
 }
 
 /* ── Action button (reshuffle) ──────────────────────────────────────────── */

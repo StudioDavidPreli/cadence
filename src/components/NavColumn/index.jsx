@@ -1,6 +1,13 @@
 import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { RailDrawer } from '../RailDrawer'
-import { SECTIONS, CATEGORIES, FILTERS, TOKEN_LAB_GUIDE } from '../../data/navigation'
+import {
+  SECTIONS,
+  CATEGORIES,
+  FILTERS,
+  TOKEN_LAB_GUIDE,
+  MOTION_TILES_LANDING,
+  MOTION_TILES_GRID,
+} from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
 // ─── NavColumn ──────────────────────────────────────────────────────────────
@@ -49,13 +56,15 @@ export function NavColumn({ collapsed, open, onToggle, onClose }) {
 // to pick a category). In the inline column onNavigate is undefined (no close).
 function NavAccordion({ onNavigate }) {
   const { section, destination, expandedSection, principleFilter } = useNavState()
-  const { selectCategory, toggleSection, setFilter } = useNavActions()
+  const { selectCategory, toggleSection, setFilter, showMotionTilesLanding, enterMotionTilesGrid } = useNavActions()
 
-  const tokenLabOpen   = expandedSection === SECTIONS.TOKEN_LAB
-  const principlesOpen = expandedSection === SECTIONS.PRINCIPLES
+  const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
+  const principlesOpen   = expandedSection === SECTIONS.PRINCIPLES
+  const motionTilesOpen  = expandedSection === SECTIONS.MOTION_TILES
 
-  const tokenLabBodyId   = 'nav-section-token-lab'
-  const principlesBodyId = 'nav-section-principles'
+  const tokenLabBodyId    = 'nav-section-token-lab'
+  const principlesBodyId  = 'nav-section-principles'
+  const motionTilesBodyId = 'nav-section-motion-tiles'
 
   const pickCategory    = id => { selectCategory(id); onNavigate?.() }
   const pickFilter      = f  => { setFilter(f); onNavigate?.() }
@@ -65,6 +74,11 @@ function NavAccordion({ onNavigate }) {
   // is about to pick a category from the revealed list); the guide shows behind
   // it and the Overview leaf is the explicit way back.
   const clickTokenLab   = () => toggleSection(SECTIONS.TOKEN_LAB)
+  // Motion Tiles opens like Token Lab: the header discloses its leaves and shows
+  // the landing, and the drawer stays open on toggle so the user can pick a leaf.
+  const clickMotionTiles  = () => toggleSection(SECTIONS.MOTION_TILES)
+  const pickMotionLanding = () => { showMotionTilesLanding(); onNavigate?.() }
+  const pickMotionGrid    = () => { enterMotionTilesGrid();   onNavigate?.() }
 
   return (
     <>
@@ -116,6 +130,33 @@ function NavAccordion({ onNavigate }) {
             onClick={() => pickFilter(f.id)}
           />
         ))}
+      </AccordionBody>
+
+      {/* ── Motion Tiles ──────────────────────────────────────────────── */}
+      <SectionHeader
+        label="Motion Tiles"
+        open={motionTilesOpen}
+        bodyId={motionTilesBodyId}
+        active={section === SECTIONS.MOTION_TILES}
+        current={section === SECTIONS.MOTION_TILES}
+        onClick={clickMotionTiles}
+      />
+      <AccordionBody id={motionTilesBodyId} open={motionTilesOpen}>
+        {/* Overview is the landing (the Enter gate); Grid jumps straight to the
+            live grid, skipping the gate. Overview is also the in-app way back to
+            the landing from the grid. */}
+        <NavRow
+          label="Overview"
+          active={destination === MOTION_TILES_LANDING}
+          tabbable={motionTilesOpen}
+          onClick={pickMotionLanding}
+        />
+        <NavRow
+          label="Grid"
+          active={destination === MOTION_TILES_GRID}
+          tabbable={motionTilesOpen}
+          onClick={pickMotionGrid}
+        />
       </AccordionBody>
     </>
   )

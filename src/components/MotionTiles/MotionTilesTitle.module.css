@@ -1,0 +1,8 @@
+/* The motion-tiles title image. Sized by height to match the Wordmark (48.2px)
+   so swapping it into the top bar never changes the row height; the SVGs are
+   background-free, so they sit directly on the bar. */
+.title {
+  height: 48.2px;
+  width: auto;
+  display: block;
+}

@@ -1,0 +1,54 @@
+/* Mirrors the Token Lab title box (TokenLabGuide.module.css). The <h2> styles the
+   plain-text fallback and the screen-reader name it wraps; the visible word is the
+   canvas. */
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+/* The Rive title's box. Fixed height (matching the Token Lab title's 128px) so the
+   heading holds its space whether the canvas has painted or the fallback is
+   showing; the .riv fits (contain, left-aligned) inside it, so the word reads from
+   the landing's left margin like the copy below it. Full width, not aspect-driven:
+   Fit.Contain handles the scaling, so no bounds read is needed. */
+.logoAnim {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 128px;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Plain-text stand-in shown until the canvas paints (or if the .riv is absent).
+   Pinned to the left edge and vertically centered so it sits where the animated
+   word lands, inheriting the serif type from .title. */
+.logoFallback {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Visually-hidden accessible name: keeps "Motion Tiles" in the document outline
+   and readable by a screen reader while the visible heading is the aria-hidden
+   canvas. Standard sr-only clip pattern. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

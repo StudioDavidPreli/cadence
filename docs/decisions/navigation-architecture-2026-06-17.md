@@ -2,6 +2,7 @@
 
 **Date:** 2026-06-17
 **Status:** Accepted, in build
+**Extended 2026-07-13:** Motion Tiles added as a third tool. It keeps this shell (the tool bar and nav stay mounted; only the right region swaps) and the same hash router, and adds a section-driven collapse of the tool bar. See `docs/decisions/motion-tiles-integration-2026-07-13.md`.
 **Context:** Cadence is framed as two interactive tools, Token Lab and Principles Library, but the implementation buried the Principles Library as the fifth tab in TokenLab's horizontal demo-tab strip. A tab strip cannot grow: every new category competes for horizontal space and the labels wrap. The product framing and the layout disagreed. This change promotes the two tools to a top-level navigation surface, moves category selection into a vertical column that scales with growth, and gives the tool a landing state built on a Rive animation.
 
 The tool bar (the controls column) must remain mounted across both tools. Many Principles Library demos read live token values from it, so hiding it on the Principles view would break those demonstrations. That constraint is the spine of every decision below.

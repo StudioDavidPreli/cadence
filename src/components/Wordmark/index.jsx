@@ -25,12 +25,17 @@
 import { useNavActions, useNavState } from '../../context/NavigationContext'
 import { SECTIONS } from '../../data/navigation'
 import { ThemedMark } from './ThemedMark'
+import { MotionTilesTitle } from '../MotionTiles/MotionTilesTitle'
 import styles from './Wordmark.module.css'
 
 export function Wordmark() {
   const { returnHome } = useNavActions()
   const { section } = useNavState()
   const inPrinciples = section === SECTIONS.PRINCIPLES
+  // Motion Tiles swaps in its own per-theme title art. It stays inside this
+  // button, so the top-left title returns to the landing on click here too, with
+  // the same accessible name as the other two marks.
+  const inMotionTiles = section === SECTIONS.MOTION_TILES
   return (
     <button
       type="button"
@@ -38,7 +43,9 @@ export function Wordmark() {
       onClick={returnHome}
       aria-label="Cadence, return to start"
     >
-      {inPrinciples ? (
+      {inMotionTiles ? (
+        <MotionTilesTitle />
+      ) : inPrinciples ? (
         <ThemedMark />
       ) : (
       /* shapeRendering="crispEdges" disables edge anti-aliasing. The mark is

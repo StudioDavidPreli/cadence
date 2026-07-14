@@ -1,0 +1,47 @@
+/* The Enter call to action: a looping Rive label wrapped in a real button. The
+   button is a bare hit target sized to the artwork (fixed height, width from the
+   artboard's aspect ratio, 4/1 fallback until it loads); the .riv carries the
+   visible treatment per theme, so there is no surface, border, or radius here. */
+.button {
+  align-self: center;
+  margin-top: 8px;
+  height: 52px;
+  aspect-ratio: var(--enter-aspect, 4 / 1);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  display: block;
+}
+
+/* Keyboard focus: the Rive label carries no browser-default focus ring, so give
+   the button its own. Accent meets the 3:1 UI-component bar in every theme. */
+.button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* pointer-events:none so a click always reaches the button, never Rive's own
+   pointer handling on the canvas. */
+.canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Plain-text stand-in shown until the canvas paints (or if the .riv is absent),
+   centered where the animated label lands so the button reads immediately and a
+   missing asset degrades to a legible button. */
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-base);
+}

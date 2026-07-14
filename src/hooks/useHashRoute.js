@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { SECTIONS, CATEGORY_IDS, FILTERS, TOKEN_LAB_GUIDE } from '../data/navigation'
+import {
+  SECTIONS,
+  CATEGORY_IDS,
+  FILTERS,
+  TOKEN_LAB_GUIDE,
+  MOTION_TILES_LANDING,
+  MOTION_TILES_GRID,
+} from '../data/navigation'
 
 // ─── Hash routing ─────────────────────────────────────────────────────────────
 //
@@ -15,6 +22,8 @@ import { SECTIONS, CATEGORY_IDS, FILTERS, TOKEN_LAB_GUIDE } from '../data/naviga
 //   #/token-lab/<categoryId>        a Token Lab category demo
 //   #/principles                    grid, all eighteen
 //   #/principles/<filter>           grid filtered to classic | extended
+//   #/motion-tiles                  Motion Tiles landing (the Enter gate)
+//   #/motion-tiles/grid             the live Motion Tiles grid
 //
 // The expanded-principle segment (#/principles/<filter>/<id>) is reserved here
 // but not yet produced or consumed — PrinciplesLibrary owns expansion state
@@ -70,6 +79,19 @@ export function parseHash(hash) {
     }
   }
 
+  if (first === SECTIONS.MOTION_TILES) {
+    // #/motion-tiles (landing) or #/motion-tiles/grid (the live grid). A
+    // non-grid tail falls back to the landing, so a stale or bad tail lands on
+    // the intro rather than paying the runtime cost unasked.
+    const isGrid = second === MOTION_TILES_GRID
+    return {
+      section: SECTIONS.MOTION_TILES,
+      expandedSection: SECTIONS.MOTION_TILES,
+      destination: isGrid ? MOTION_TILES_GRID : MOTION_TILES_LANDING,
+      principleFilter: FILTERS.ALL,
+    }
+  }
+
   return { ...LANDING }
 }
 
@@ -86,6 +108,13 @@ export function stateToHash(state) {
     return state.principleFilter && state.principleFilter !== FILTERS.ALL
       ? `#/${SECTIONS.PRINCIPLES}/${state.principleFilter}`
       : `#/${SECTIONS.PRINCIPLES}`
+  }
+  if (state.section === SECTIONS.MOTION_TILES) {
+    // Only the grid destination fills the tail; the landing serializes to the
+    // bare route.
+    return state.destination === MOTION_TILES_GRID
+      ? `#/${SECTIONS.MOTION_TILES}/${MOTION_TILES_GRID}`
+      : `#/${SECTIONS.MOTION_TILES}`
   }
   return '#/'
 }
