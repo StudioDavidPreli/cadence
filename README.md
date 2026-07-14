@@ -2,11 +2,11 @@
 
 A motion design system explorer built for designers learning how animation tokens drive UI behavior.
 
-Cadence demonstrates the relationship between design tokens and motion through two interactive tools: a live token editor and an interactive library of animation principles applied to UI components, the classic 12 plus 6 extended design-engineering principles.
+Cadence demonstrates the relationship between design tokens and motion through three interactive tools: Token Lab, a live token editor; the Principles Library, animation principles applied to UI components, the classic 12 plus 6 extended design-engineering principles; and Motion Tiles, a pooled Rive mosaic that runs one motion vocabulary at scale.
 
 **Built with:** React, Framer Motion, CSS Custom Properties, Vite
 
-**Live:** [url when deployed]
+**Live:** https://cadence.davidpreli.com (pending first deploy)
 
 ---
 
@@ -41,6 +41,11 @@ Six extended design-engineering principles that bridge animation and systems thi
 16. Token Fidelity
 17. Reduced Motion
 18. Shared Vocabulary
+
+### Motion Tiles
+A pooled mosaic of Rive tiles that runs one motion vocabulary at scale. The presets, timing, easing, and stagger that tune a single component in Token Lab drive the whole field at once. Change a preset and every tile retimes together. Drag the stagger and the change crosses the grid in a wave.
+
+The grid is landing-gated, so its WebGL2 runtime and the tiles load only when you enter it. The per-tile Rive bindings were built with Claude Code driving the Rive editor over MCP, and the landing walks through that build.
 
 ---
 
@@ -99,6 +104,7 @@ cadence/
     │   └── motion.css
     ├── components/
     │   ├── TokenLab/
+    │   ├── MotionTiles/
     │   └── shared/
     └── principles/
         ├── SquashAndStretch/
