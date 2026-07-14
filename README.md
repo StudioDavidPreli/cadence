@@ -130,6 +130,6 @@ Full documentation lives in `/docs`. Architecture decisions are recorded in `/do
 
 ## About
 
-Built by David Preli — motion designer and creative technologist. This project is part of a deliberate effort to work at the intersection of motion design and design engineering.
+Built by David Preli, motion designer and creative technologist working at the intersection of motion design and design engineering.
 
 [davidpreli.com](https://davidpreli.com) | [LinkedIn](https://linkedin.com/in/davidpreli)
