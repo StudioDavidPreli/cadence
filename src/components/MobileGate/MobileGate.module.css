@@ -15,7 +15,10 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  overflow: hidden;
+  /* Never clip the copy. If a short/landscape screen can't fit the art + copy,
+     it scrolls; it does not cut the text. On normal phone heights the group
+     fits and centers with no scroll. */
+  overflow-y: auto;
 }
 
 /* Artwork box. Width-driven: it spans the column (capped so it is not absurdly
@@ -29,8 +32,11 @@
   width: 100%;
   max-width: 460px;
   aspect-ratio: var(--gate-art-aspect, 2 / 1);
-  max-height: 55vh;
-  max-height: 55dvh;
+  /* Leave room for the copy: cap the art at half the viewport and never let it
+     shrink the copy below it. */
+  flex-shrink: 0;
+  max-height: 50vh;
+  max-height: 50dvh;
 }
 
 .canvas {
@@ -53,6 +59,7 @@
    Color is a theme custom property; nothing hardcoded. */
 .copy {
   flex: none;
+  flex-shrink: 0;
   max-width: 40ch;
   margin: 0 auto;
   padding: 0 8px 8px;
