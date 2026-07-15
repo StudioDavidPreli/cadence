@@ -102,9 +102,13 @@ export function MobileGate() {
 
   return (
     <div className={styles.gate}>
-      {/* Rive artwork on top. Its box follows the artboard's real aspect ratio
+      {/* The one exit, at the top: a Studio David Preli title that links to
+          davidpreli.com, so a phone visitor is not stranded. */}
+      <StudioLogoLink />
+
+      {/* Rive artwork. Its box follows the artboard's real aspect ratio
           (--gate-art-aspect) so the art fills the width instead of stranding a
-          contain-fit strip in a tall column. The art + copy center as a group. */}
+          contain-fit strip in a tall column. The group centers as a whole. */}
       <div
         className={styles.riveContainer}
         style={aspect ? { '--gate-art-aspect': aspect } : undefined}
@@ -116,16 +120,12 @@ export function MobileGate() {
       </div>
 
       {/* Approved gate copy, verbatim. No "continue anyway" into the app — the
-          gate is hard; the only way onward is out to the studio, below. */}
+          gate is hard; the only way onward is out to the studio, above. */}
       <p className={styles.copy}>
         Cadence is a motion design system explorer. The tooling wants a desktop
         screen. Open this on your computer and everything will be where it should
         be.
       </p>
-
-      {/* The one exit: a Studio David Preli title that links to davidpreli.com,
-          so a phone visitor is not stranded. */}
-      <StudioLogoLink />
     </div>
   )
 }
