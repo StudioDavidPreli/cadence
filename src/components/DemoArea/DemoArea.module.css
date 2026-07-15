@@ -30,6 +30,18 @@
   background-color: var(--color-surface-raised);
 }
 
+/* Hero-only modifier. The hero doesn't scroll, so its single right-edge gutter
+   (from .layer's scrollbar-gutter: stable) is pure dead inset that pushes the
+   full-bleed art off-center. `both-edges` reserves a matching gutter on the left
+   — self-matching to the platform scrollbar width, no magic number — so the art
+   sits symmetric between the two lanes. The quieter --color-hero-bg (near
+   --color-bg per theme) replaces the raised column color so the landing panel
+   does not read as a distinct block against the shell and cause perceived drift. */
+.heroLayer {
+  scrollbar-gutter: stable both-edges;
+  background-color: var(--color-hero-bg);
+}
+
 /* Mount node for scoped overlay demos (Drawer, Modal) that portal up out of the
    scrolling .layer. Fills the column and clips to it via .demoArea's
    overflow: hidden, so the overlay reads as "inside the demo area" rather than

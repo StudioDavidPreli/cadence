@@ -254,3 +254,79 @@ The top-bar "Cadence" serif text was replaced by the themed pixel-title SVG
 
 `titleThemed.svg` remains the source of truth for the artwork; `subTitleThemed.svg`
 in the same folder is not yet used anywhere.
+
+---
+
+## Widescreen re-author, homogenized instances, and landing presentation (2026-07-15)
+
+David replaced `public/rive/hero3.riv` with a re-authored widescreen version
+(1920×1080, now 99,841 bytes, was 90,103). Artboard `Hero3`, state machine
+`hero3SM`, and view model `Hero3ViewModel` are unchanged. What changed is the
+instance convention and, on the React side, the landing panel's presentation.
+
+### Instances homogenized — the HC runtime flip is gone
+
+The old file carried three instances (`Dark` / `Light` / `Contrast`) and both
+high-contrast themes shared the single `Contrast` instance, so HeroAnimation had
+to flip its stroke/fill inline at runtime (the react-webgl2 `useViewModelInstanceColor`
+block described under "What was implemented", point 4, and "Resolution and final
+shape"). The new file replaces that with **four homogenized instances, one per
+theme, each with its own authored colors**:
+
+- `darkMode`, `lightMode`, `contrastDark`, `contrastLight`
+
+This matches the convention `TokenLabTitle` already uses (`docs/decisions/tokenlab-title-webgl2-2026-07-06.md`)
+and the naming the MotionTiles title/logo/button components use. The consequence
+for `src/components/HeroAnimation/index.jsx`:
+
+- `themeToInstanceName` now maps to the four `…Mode` / `contrast…` names, a clean
+  1:1 map with no shared `Contrast` instance.
+- The runtime stroke/fill flip is **deleted** — the `useViewModelInstanceColor`
+  hooks, the `useEffect`, and the now-unused `useEffect` import all came out. Each
+  instance authors its own colors, so React binds the theme's instance and writes
+  no colors at all. `useHCContrastColors` was never involved here and still isn't.
+
+Sections above that describe the `Dark`/`Light`/`Contrast` + inline-flip wiring are
+retained as history but are superseded by this section.
+
+Note: `heromobile.riv` (the MobileGate asset) still carries its own instances and
+`MobileGate/index.jsx` still uses the `Dark`/`Light`/`Contrast` + inline-flip
+contract. It was NOT homogenized in this pass and is tracked separately — if that
+asset is ever re-authored to the four-instance convention, MobileGate must be
+updated the same way or it will fail to bind.
+
+### Landing presentation — full-bleed, lifted text, and the drift fix
+
+Three presentation changes, all scoped to the landing (the hero destination), none
+touching Token Lab or Principles:
+
+1. **Full-bleed art.** `HeroAnimation.module.css` sets `--hero-art-pad: 0` and
+   `--hero-art-scale: 1` (were `24px 32px` and `1.1`). The scale only ever existed
+   to claw back size lost to the padding, so both go to their identity values
+   together. Fit stays `contain`, so nothing baked into the artboard is cropped;
+   the art just runs to the container edges.
+
+2. **Text lift.** New `--hero-text-lift` variable (default `64px`, was a flat
+   `40px` bottom padding on `.description`). The description is the last item in the
+   `.hero` flex column, so growing its bottom spacing lifts the whole text block up
+   off the panel's bottom edge. It's the knob to dial the text height by eye.
+
+3. **Landing background drift fix.** The demo column paints `--color-surface-raised`,
+   which sits one step off the shell's `--color-bg`; on the empty hero landing that
+   seam reads as perceived misalignment ("drift"). Added a per-theme
+   `--color-hero-bg` token in `src/tokens/color.css` (light `#f5f5f5` = exact
+   `--color-bg`; dark `#161616` ≈ `--color-bg` `#141414`; both HC themes stay pure
+   at `#ffffff` / `#000000`). It is applied **only to the hero layer** via a new
+   `.heroLayer` modifier in `DemoArea` — `DemoArea/index.jsx` adds the class when
+   `activeKey === 'hero'`. Description copy still clears AA on the new backgrounds
+   (light 15.9:1 base / 5.3:1 muted; dark comfortably higher).
+
+The `.heroLayer` modifier also carries `scrollbar-gutter: stable both-edges`. The
+base `.layer` reserves a single right-edge scrollbar lane (`stable`) to keep the
+Principles grid from recounting columns when a scrollbar appears mid-animation. The
+hero doesn't scroll, so on the hero that lane is pure dead inset that pushes the
+full-bleed art off-center. `both-edges` reserves a matching lane on the left,
+self-matching to the platform scrollbar width with no magic number, so the art
+sits symmetric. Every other destination keeps the plain right-only gutter. Caveat:
+on platforms/settings with overlay scrollbars the reserved width can be 0, in which
+case both insets collapse to flush — still symmetric, just zero.

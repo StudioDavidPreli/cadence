@@ -15,33 +15,30 @@
 // own WASM and run independently; the hero and the principle grids never
 // co-mount, so the two never share a moment on screen. Keep the two package
 // versions in lockstep so the hook API stays identical across both.
-import { useEffect } from 'react'
 import {
   useRive,
   useViewModel,
   useViewModelInstance,
-  useViewModelInstanceColor,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
 import styles from './HeroAnimation.module.css'
 
-// The landing .riv. artboard and stateMachine are the author's choices in Rive —
-// name them here to match. Instance convention matches the principle files
-// (Light / Dark / Contrast) but the view model is named 'Hero3ViewModel', not
-// 'ViewModel1' (bound below). This file carries a third bindable color,
-// colorAccent, alongside colorPropertyFill / colorPropertyStroke; like the other
-// two it is authored per instance, so no React write is needed (accent is amber
-// in both HC themes, so it does not flip — see the HC effect below).
+// The landing .riv (1920x1080 widescreen). artboard and stateMachine are the
+// author's choices in Rive — name them here to match. The view model is named
+// 'Hero3ViewModel', not the 'ViewModel1' the principle files use. This file now
+// carries four homogenized instances (darkMode / lightMode / contrastDark /
+// contrastLight), one per theme, each with its own authored colors — so, like
+// TokenLabTitle, there is no shared 'Contrast' instance and no runtime stroke/
+// fill flip. We bind the theme's own instance and write no colors at all.
 const HERO_RIV = { src: '/rive/hero3.riv', artboard: 'Hero3', stateMachine: 'hero3SM' }
 
-// Both high-contrast themes bind the single 'Contrast' instance; high-contrast-
-// dark flips its stroke/fill at runtime (see the effect in HeroAnimation).
+// One instance per theme — a clean 1:1 map, no shared Contrast instance.
 const themeToInstanceName = {
-  dark: 'Dark',
-  light: 'Light',
-  'high-contrast-light': 'Contrast',
-  'high-contrast-dark': 'Contrast',
+  dark: 'darkMode',
+  light: 'lightMode',
+  'high-contrast-light': 'contrastLight',
+  'high-contrast-dark': 'contrastDark',
 }
 
 export function HeroAnimation() {
@@ -60,40 +57,15 @@ export function HeroAnimation() {
   })
 
   // This file names its view model 'Hero3ViewModel', not the 'ViewModel1' the
-  // principle files use — its instances (Dark / Light / Contrast) and color
-  // properties still follow the shared convention.
+  // principle files use. Each theme binds its own authored instance.
   const viewModel = useViewModel(rive, { name: 'Hero3ViewModel' })
   // { rive } makes the hook bind the instance and rebind when the name (theme)
-  // changes. No manual useEffect needed — same as RiveCanvas.
-  const instance = useViewModelInstance(viewModel, {
+  // changes. No manual useEffect needed — same as RiveCanvas. With per-theme
+  // instances there are no colors to write: each instance carries its own.
+  useViewModelInstance(viewModel, {
     name: themeToInstanceName[theme],
     rive,
   })
-
-  // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill. The
-  // rest of the app does this through the shared useHCContrastColors hook, but
-  // that hook binds colors via the react-canvas runtime. This instance comes from
-  // the react-webgl2 runtime, so its color binding must go through webgl2's own
-  // useViewModelInstanceColor — mixing an instance from one runtime with the
-  // color hook of the other is implicit coupling to avoid. Logic mirrors the
-  // shared hook: both HC themes bind 'Contrast', so the colors are asserted per
-  // theme (switching HC-light <-> HC-dark does not rebind). colorAccent is amber
-  // in both HC themes, so it is not written here — it holds its authored value.
-  const stroke = useViewModelInstanceColor('colorPropertyStroke', instance)
-  const fill = useViewModelInstanceColor('colorPropertyFill', instance)
-  useEffect(() => {
-    if (!instance) return
-    if (theme === 'high-contrast-dark') {
-      stroke.setRgb(255, 255, 255)
-      fill.setRgb(0, 0, 0)
-    } else if (theme === 'high-contrast-light') {
-      stroke.setRgb(0, 0, 0)
-      fill.setRgb(255, 255, 255)
-    }
-    // Setter objects are re-created each render; theme + instance are the
-    // meaningful triggers (writes are idempotent). Same reasoning as the hook.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [instance, theme])
 
   return (
     <div className={styles.hero}>

@@ -13,9 +13,13 @@
    --hero-text-span  max width of the description block. Widen it to rebalance
                      the composition when the artwork is scaled up. */
 .hero {
-  --hero-art-pad: 24px 32px;
-  --hero-art-scale: 1.1;
+  --hero-art-pad: 0;
+  --hero-art-scale: 1;
   --hero-text-span: 640px;
+  /* Space reserved below the description. The description is the last item in
+     the flex column, so growing its bottom spacing lifts the whole text block
+     up off the panel's bottom edge. Raise to push the text higher. */
+  --hero-text-lift: 64px;
 
   height: 100%;
   width: 100%;
@@ -79,7 +83,7 @@
   flex: none;
   max-width: var(--hero-text-span);
   margin: 0 auto;
-  padding: 0 48px 40px;
+  padding: 0 48px var(--hero-text-lift);
   text-align: center;
   font-size: 14px;
   line-height: 1.6;

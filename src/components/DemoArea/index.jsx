@@ -68,7 +68,13 @@ export function DemoArea({ categoryContent, principlesContent, hero, guide }) {
         <AnimatePresence initial={false}>
           <motion.div
             key={activeKey}
-            className={styles.layer}
+            // The hero is the only non-scrolling destination, so it takes a
+            // modifier: a symmetric scrollbar gutter (both-edges) that matches
+            // its reserved right lane on the left so the full-bleed art is not
+            // lopsided, plus the quieter --color-hero-bg to kill the panel/shell
+            // drift on the landing. Every other destination keeps the plain
+            // right-only gutter and the surface-raised column color.
+            className={activeKey === 'hero' ? `${styles.layer} ${styles.heroLayer}` : styles.layer}
             style={{ zIndex: zMap.current[activeKey] }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
