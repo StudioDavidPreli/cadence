@@ -3,6 +3,10 @@
    box takes the artboard's real aspect ratio so the hero fills its width rather
    than contain-fitting to a small band in a tall column (the earlier bug). */
 .gate {
+  /* Shared width cap for the hero art and the studio logo, so the two stay the
+     same width by construction — tune here to move both. */
+  --gate-content-width: 460px;
+
   /* dvh tracks the phone's dynamic viewport (URL bar shown/hidden); the vh line
      is the fallback for browsers without dvh. Keeps the copy on screen. */
   min-height: 100vh;
@@ -33,7 +37,7 @@
 .riveContainer {
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: var(--gate-content-width);
   aspect-ratio: var(--gate-art-aspect, 2 / 1);
   flex-shrink: 0;
   overflow: hidden;
@@ -73,13 +77,14 @@
 /* The studio logo link at the foot of the gate — the one way onward, out to
    davidpreli.com. Width-driven with height from the artboard aspect
    (--studio-aspect, 4 / 1 fallback), the same single-definite-dimension +
-   overflow: hidden setup the hero box uses. Kept modest so it reads as a signature
-   beneath the copy, not a second hero. max-width is the size lever. */
+   overflow: hidden setup the hero box uses, and the same --gate-content-width so
+   it matches the hero's width. Its own aspect keeps it a slim line beneath the
+   copy, not a second hero. */
 .studioLink {
   position: relative;
   display: block;
   width: 100%;
-  max-width: 220px;
+  max-width: var(--gate-content-width);
   aspect-ratio: var(--studio-aspect, 4 / 1);
   flex-shrink: 0;
   overflow: hidden;
