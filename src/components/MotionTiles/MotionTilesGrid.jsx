@@ -483,7 +483,7 @@ const PROBLEM_ARTBOARD = 'problemButton'
 const PROBLEM_STATE_MACHINE = 'problemSM'
 const PROBLEM_VIEW_MODEL = 'ProblemVM'
 
-function ClawdLogoButton({ instanceName, onClick, paused }) {
+function ClawdLogoButton({ instanceName, onClick }) {
   // The button fills the column width and its height follows the logo's real aspect
   // ratio, so the logo scales up without letterboxing. We read the artboard bounds
   // once loaded and expose the ratio as a CSS custom property; the module CSS applies
@@ -505,13 +505,8 @@ function ClawdLogoButton({ instanceName, onClick, paused }) {
     if (rive && instance) rive.play(LOGO_STATE_MACHINE)
   }, [rive, instance])
 
-  // The waving logo is self-driven, so Pause must freeze it explicitly — same treatment
-  // as the interactive clawd tiles.
-  useEffect(() => {
-    if (!rive || !instance) return
-    if (paused) rive.pause(LOGO_STATE_MACHINE)
-    else rive.play(LOGO_STATE_MACHINE)
-  }, [paused, rive, instance])
+  // Deliberately NOT wired to Pause: the logo is chrome, not part of the board's
+  // motion, so its wave and hover/press keep running while the grid is paused.
 
   // Derive the aspect ratio from the loaded artboard bounds (maxX-minX / maxY-minY).
   // Until this resolves, the CSS fallback ratio holds the box open.
@@ -963,7 +958,7 @@ export function MotionTilesGrid() {
             click, and each click drops a self-driven clawd tile onto a random
             cell. */}
         <div className={styles.logoBay}>
-          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} paused={paused} />
+          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} />
         </div>
 
         {/* Composition — the pooled-mosaic controls: size, animation density, and a

@@ -243,8 +243,8 @@
 /* The button housing the waving-logo Rive animation. Edge-to-edge (no border or
    radius of its own), full column width; its height comes from the logo's real aspect
    ratio (--logo-aspect, set once the artboard loads; the 3/1 fallback holds the box
-   open until then). The canvas fills it, so the logo scales up to the full width.
-   Chrome, so the hover transition uses --feedback-ui-duration like the pills. */
+   open until then). The canvas fills it, so the logo scales up to the full width. No
+   CSS hover fill — the artboard runs its own hover-scale. */
 .logoButton {
   width: 100%;
   aspect-ratio: var(--logo-aspect, 3 / 1);
@@ -255,11 +255,6 @@
   cursor: pointer;
   overflow: hidden;
   display: block;
-  transition: background-color var(--feedback-ui-duration);
-}
-
-.logoButton:hover {
-  background-color: var(--color-surface-active);
 }
 
 /* No pointer-events:none: the logo artboard now runs its own hover-scale and
