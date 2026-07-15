@@ -206,27 +206,20 @@
 }
 
 /* ── Problem (bug report) Rive button ───────────────────────────────────────
-   The Rive "Problems?" button. Boxed like .actionButton (1px border, 5px radius,
-   hover fill) so it reads as a panel action, but houses the problemButton artboard
-   instead of text. Full width; height follows the artboard's real aspect ratio
+   The Rive "Problems?" button. The button base (fill + rounded corners) is baked
+   into the problembutton.riv artboard, so the wrapper carries no frame of its own —
+   just a full-width click target sized to the artboard's real aspect ratio
    (--problem-aspect, set once bounds load; the fallback holds the box open until
-   then). Chrome, so the hover transition uses --feedback-ui-duration. */
+   then). The canvas has pointer-events:none so clicks land on the button. */
 .problemButton {
   width: 100%;
   aspect-ratio: var(--problem-aspect, 4 / 1);
   padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 5px;
+  border: none;
   background: none;
   cursor: pointer;
   overflow: hidden;
   display: block;
-  transition: background-color var(--feedback-ui-duration),
-    border-color var(--feedback-ui-duration);
-}
-
-.problemButton:hover {
-  background-color: var(--color-surface-active);
 }
 
 .problemCanvas {
