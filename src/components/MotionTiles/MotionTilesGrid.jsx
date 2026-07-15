@@ -39,6 +39,7 @@ import {
   useViewModelInstance,
   useViewModelInstanceNumber,
 } from '@rive-app/react-webgl2'
+import { Modal } from '../Modal'
 import styles from './MotionTilesGrid.module.css'
 
 const RIV_SRC = '/riveTiles/ingredients_v8.riv'
@@ -308,7 +309,7 @@ function Slider({ label, value, min, max, step, format, onChange }) {
 // identical: bind the preset instance, expose progress/cellSize/gapSize, register the
 // progress setter with the grid clock by absolute cell index. Nothing here re-renders
 // per frame — the clock calls the setter directly.
-function Tile({ source, riveFile, index, register, instanceName, cellSize, gapSize, onBind }) {
+function Tile({ source, riveFile, index, register, instanceName, cellSize, gapSize, onBind, paused }) {
   const isShared = source.kind === 'artboard'
   // Interactive tiles (clawd) drive themselves through their own state machine on
   // click. The grid clock must not write their progress/phase, and the pixelation
@@ -336,6 +337,16 @@ function Tile({ source, riveFile, index, register, instanceName, cellSize, gapSi
   useEffect(() => {
     if (rive && instance) rive.play(source.stateMachine)
   }, [rive, instance, source.stateMachine])
+
+  // Pause reaches self-driven (clawd) tiles too. Clock-driven tiles freeze because the
+  // clock stops writing them, but an interactive tile runs its own state machine, so we
+  // pause/resume that SM directly. Non-interactive tiles must keep their SM advancing
+  // (each progress write needs a redraw), so this only touches interactive ones.
+  useEffect(() => {
+    if (!interactive || !rive || !instance) return
+    if (paused) rive.pause(source.stateMachine)
+    else rive.play(source.stateMachine)
+  }, [interactive, paused, rive, instance, source.stateMachine])
 
   // Both hooks run every render (hooks can't be conditional); the tile drives the
   // one property it exposes — 'progress' for path-effect tiles, 'phase' for geometry
@@ -462,7 +473,7 @@ const LOGO_SRC = '/riveTiles/motiontileslogo.riv'
 const LOGO_ARTBOARD = 'motionTilesLogo'
 const LOGO_STATE_MACHINE = 'motionTilesLogoSM'
 
-function ClawdLogoButton({ instanceName, onClick }) {
+function ClawdLogoButton({ instanceName, onClick, paused }) {
   // The button fills the column width and its height follows the logo's real aspect
   // ratio, so the logo scales up without letterboxing. We read the artboard bounds
   // once loaded and expose the ratio as a CSS custom property; the module CSS applies
@@ -483,6 +494,14 @@ function ClawdLogoButton({ instanceName, onClick }) {
   useEffect(() => {
     if (rive && instance) rive.play(LOGO_STATE_MACHINE)
   }, [rive, instance])
+
+  // The waving logo is self-driven, so Pause must freeze it explicitly — same treatment
+  // as the interactive clawd tiles.
+  useEffect(() => {
+    if (!rive || !instance) return
+    if (paused) rive.pause(LOGO_STATE_MACHINE)
+    else rive.play(LOGO_STATE_MACHINE)
+  }, [paused, rive, instance])
 
   // Derive the aspect ratio from the loaded artboard bounds (maxX-minX / maxY-minY).
   // Until this resolves, the CSS fallback ratio holds the box open.
@@ -508,6 +527,104 @@ function ClawdLogoButton({ instanceName, onClick }) {
   )
 }
 
+// The "Problems?" affordance: a panel section whose button opens a minimal report
+// dialog. The message posts to the /api/bug-report Pages Function, which opens a
+// GitHub issue server-side — no email address ever ships to the client. `tile` is a
+// short context string (preset + grid size) the caller derives, so the issue title
+// carries the composition the report was filed from. Reuses the shared Modal (the
+// only overlay pattern); it renders viewport-fixed here because Motion Tiles sits
+// outside DemoArea, so useDemoOverlay would return null.
+function BugReport({ tile }) {
+  const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  // Honeypot: kept empty by real users, so any value means a bot and the server
+  // silently drops the report. A piece of state, not a ref, so React owns the input.
+  const [website, setWebsite] = useState('')
+  const [status, setStatus] = useState('idle') // idle | sending | sent | error
+
+  // Require a non-empty TRIMMED message, mirroring the server guard so a
+  // spaces-only report can never be submitted in the first place.
+  const canSubmit = message.trim().length > 0 && status !== 'sending'
+
+  const submit = async (e) => {
+    e.preventDefault()
+    if (!canSubmit) return
+    setStatus('sending')
+    try {
+      // Relative path so it resolves on both the .pages.dev URL and the custom
+      // subdomain without knowing the origin.
+      const res = await fetch('/api/bug-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, tile, website }),
+      })
+      if (res.ok) {
+        setStatus('sent')
+        setMessage('')
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  const close = () => {
+    setOpen(false)
+    setStatus('idle')
+    setWebsite('')
+  }
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.sectionLabel}>Feedback</div>
+      <button type="button" className={styles.actionButton} onClick={() => setOpen(true)}>
+        Problems?
+      </button>
+
+      <Modal isOpen={open} onClose={close} title="Report a problem">
+        <form className={styles.reportForm} onSubmit={submit}>
+          <textarea
+            className={styles.reportField}
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value)
+              // Clear a stale result once the user starts a fresh message.
+              if (status === 'sent' || status === 'error') setStatus('idle')
+            }}
+            maxLength={2000}
+            rows={5}
+            placeholder="What went wrong?"
+            aria-label="Describe the problem"
+          />
+
+          {/* Off-screen honeypot: invisible to people, tempting to bots. */}
+          <input
+            type="text"
+            name="website"
+            className={styles.honeypot}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+
+          {(status === 'sent' || status === 'error') && (
+            <p className={styles.reportStatus} data-state={status} role="status">
+              {status === 'sent' ? 'Sent, thank you.' : 'Could not send, try again.'}
+            </p>
+          )}
+
+          <button type="submit" className={styles.actionButton} disabled={!canSubmit}>
+            {status === 'sending' ? 'Sending…' : 'Send report'}
+          </button>
+        </form>
+      </Modal>
+    </div>
+  )
+}
+
 export function MotionTilesGrid() {
   const { riveFile, status } = useRiveFile({ src: RIV_SRC })
   // The statics file loads alongside the animation file. If it lags, static cells
@@ -530,6 +647,12 @@ export function MotionTilesGrid() {
   const [gridN, setGridN] = useState(4)
   const [animRatio, setAnimRatio] = useState(1) // 1 = all animated, 0 = all static
   const [seed, setSeed] = useState(1)
+
+  // Pause freezes the one clock. A ref so the rAF loop reads it without re-subscribing;
+  // the state drives the button label. Freezing accumulated time (not just skipping
+  // writes) means resume picks up exactly where it left off — no phase jump.
+  const [paused, setPaused] = useState(false)
+  const pausedRef = useRef(paused)
 
   // Forced clawd cells — the test scaffold for the future click-to-add easter egg.
   // A Set of absolute cell indices that render a self-driven clawd Tile, overriding
@@ -636,25 +759,32 @@ export function MotionTilesGrid() {
   // eased `progress` every frame. This is the whole source of motion.
   useEffect(() => {
     let raf
-    const start = performance.now()
+    let last = performance.now()
+    // Accumulate only un-paused time, so a pause freezes phase and resume continues
+    // seamlessly. Equivalent to (now - start) when the clock is never paused.
+    let elapsed = 0
     let frames = 0
-    let windowStart = start
+    let windowStart = last
     let worst = 60
     const loop = (now) => {
-      const elapsed = (now - start) / 1000
-      const period = BASE_PERIOD / Math.max(speedRef.current, 0.01)
-      const ph = (elapsed % period) / period
-      const spreadV = spreadRef.current
-      const k = easingRef.current
-      const w = weightsRef.current
-      const s = setters.current
-      const count = gridNRef.current * gridNRef.current
-      for (let i = 0; i < count; i += 1) {
-        const fn = s[i]
-        if (!fn) continue
-        // JS % keeps the dividend's sign; add 1 and wrap again into [0,1).
-        const phk = (((ph - spreadV * w[i]) % 1) + 1) % 1
-        fn(cycleProgress(phk, k))
+      const dt = (now - last) / 1000
+      last = now
+      if (!pausedRef.current) {
+        elapsed += dt
+        const period = BASE_PERIOD / Math.max(speedRef.current, 0.01)
+        const ph = (elapsed % period) / period
+        const spreadV = spreadRef.current
+        const k = easingRef.current
+        const w = weightsRef.current
+        const s = setters.current
+        const count = gridNRef.current * gridNRef.current
+        for (let i = 0; i < count; i += 1) {
+          const fn = s[i]
+          if (!fn) continue
+          // JS % keeps the dividend's sign; add 1 and wrap again into [0,1).
+          const phk = (((ph - spreadV * w[i]) % 1) + 1) % 1
+          fn(cycleProgress(phk, k))
+        }
       }
       frames += 1
       const span = now - windowStart
@@ -738,6 +868,7 @@ export function MotionTilesGrid() {
                 cellSize={cellSize}
                 gapSize={gapSize}
                 onBind={onBind}
+                paused={paused}
               />
             ) : cell.type === 'anim' ? (
               <Tile
@@ -776,7 +907,7 @@ export function MotionTilesGrid() {
             click, and each click drops a self-driven clawd tile onto a random
             cell. */}
         <div className={styles.logoBay}>
-          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} />
+          <ClawdLogoButton instanceName={instanceName} onClick={addClawd} paused={paused} />
         </div>
 
         {/* Composition — the pooled-mosaic controls: size, animation density, and a
@@ -797,6 +928,20 @@ export function MotionTilesGrid() {
             }}
           >
             Reshuffle
+          </button>
+          <button
+            type="button"
+            className={styles.actionButton}
+            aria-pressed={paused}
+            onClick={() => {
+              setPaused((p) => {
+                const next = !p
+                pausedRef.current = next
+                return next
+              })
+            }}
+          >
+            {paused ? 'Play' : 'Pause'}
           </button>
         </div>
 
@@ -856,6 +1001,10 @@ export function MotionTilesGrid() {
           <Slider label="gapSize" value={gapSize} min={0} max={2} step={0.05} format={(v) => v.toFixed(2)}
             onChange={setGapSize} />
         </div>
+
+        {/* Feedback — the "Problems?" report affordance. tile carries the current
+            composition (preset + grid size) into the GitHub issue title. */}
+        <BugReport tile={`Motion Tiles · ${PRESETS[preset].label} · ${gridN}×${gridN}`} />
 
         <div className={styles.status}>
           <span className={styles.fps} data-warn={fps < 55}>{fps} fps</span>

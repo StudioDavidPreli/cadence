@@ -134,9 +134,75 @@
     color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Hover darkens/lightens the surface only; text stays --color-text-base, which is
+   the token verified to read on --color-surface-active in every theme (see the Card
+   hover contrast notes in tokens/color.css). --color-text-primary is white/black for
+   DARK interactive surfaces, so it vanished on the light surface-active in light and
+   both high-contrast modes — mirror .pill:hover, which uses text-base for this reason. */
 .actionButton:hover {
   background-color: var(--color-surface-active);
-  color: var(--color-text-primary);
+  color: var(--color-text-base);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Bug report form (inside the shared Modal) ──────────────────────────────
+   Chrome inside a decisions dialog, so transitions use --feedback-ui-duration,
+   the same fixed constant the panel buttons use — never the editable --motion-*
+   tokens (see the token-integrity gate). */
+.reportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reportField {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 96px;
+  transition: border-color var(--feedback-ui-duration);
+}
+
+.reportField:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Off-screen but present in the DOM: hidden from sighted users and the tab order,
+   still fillable by a naive bot (which trips the server honeypot). */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reportStatus {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  transition: color var(--feedback-ui-duration);
+}
+
+.reportStatus[data-state='sent'] {
+  color: var(--color-accent);
+}
+
+.reportStatus[data-state='error'] {
+  color: var(--color-accent3);
 }
 
 /* ── Clawd logo button ──────────────────────────────────────────────────── */
