@@ -210,7 +210,9 @@
    into the problembutton.riv artboard, so the wrapper carries no frame of its own —
    just a full-width click target sized to the artboard's real aspect ratio
    (--problem-aspect, set once bounds load; the fallback holds the box open until
-   then). The canvas has pointer-events:none so clicks land on the button. */
+   then). The canvas TAKES pointer events (below) so problemSM can run its own
+   hover-scale and pointer-down animation; the click still bubbles from the canvas
+   up to this <button>, which opens the dialog. */
 .problemButton {
   width: 100%;
   aspect-ratio: var(--problem-aspect, 4 / 1);
@@ -222,11 +224,13 @@
   display: block;
 }
 
+/* No pointer-events:none here (unlike the logo button): problemSM needs the hover
+   and pointer-down events to drive its scale / press states. The DOM click still
+   bubbles to the wrapping <button>, so the report dialog opens as before. */
 .problemCanvas {
   width: 100%;
   height: 100%;
   display: block;
-  pointer-events: none;
 }
 
 /* ── Clawd logo button ──────────────────────────────────────────────────── */

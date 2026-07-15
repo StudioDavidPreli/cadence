@@ -538,11 +538,12 @@ function ClawdLogoButton({ instanceName, onClick, paused }) {
 
 // The Rive "Problems?" button. Chrome, like ClawdLogoButton: plays its own problemSM
 // and binds the active preset instance (standard/snappy/cinematic) so its palette
-// switches with the board theme. Clicking opens the report dialog. The button base
-// (fill + rounded corners) is baked into the artboard, so the wrapping <button> is a
-// bare click target with no frame of its own; its height follows the artboard's real
-// aspect ratio at full width (canvas has pointer-events:none so the click always
-// lands on the button, not Rive).
+// switches with the board theme. The button base (fill + rounded corners) is baked
+// into the artboard, so the wrapping <button> is a bare click target with no frame of
+// its own; its height follows the artboard's real aspect ratio at full width. The
+// canvas keeps pointer events (no pointer-events:none) so problemSM runs its own
+// hover-scale and pointer-down animation; the click bubbles up to the <button>, which
+// opens the report dialog.
 function ProblemButton({ instanceName, onClick }) {
   const [aspect, setAspect] = useState(null)
   const { rive, RiveComponent } = useRive({
