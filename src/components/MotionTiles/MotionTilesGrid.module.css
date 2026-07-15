@@ -205,6 +205,37 @@
   color: var(--color-accent3);
 }
 
+/* ── Problem (bug report) Rive button ───────────────────────────────────────
+   The Rive "Problems?" button. Boxed like .actionButton (1px border, 5px radius,
+   hover fill) so it reads as a panel action, but houses the problemButton artboard
+   instead of text. Full width; height follows the artboard's real aspect ratio
+   (--problem-aspect, set once bounds load; the fallback holds the box open until
+   then). Chrome, so the hover transition uses --feedback-ui-duration. */
+.problemButton {
+  width: 100%;
+  aspect-ratio: var(--problem-aspect, 4 / 1);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+  transition: background-color var(--feedback-ui-duration),
+    border-color var(--feedback-ui-duration);
+}
+
+.problemButton:hover {
+  background-color: var(--color-surface-active);
+}
+
+.problemCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
 /* ── Clawd logo button ──────────────────────────────────────────────────── */
 /* Full-bleed bay: no side padding, so the logo button spans the whole tool column
    edge to edge. A bottom rule keeps the section rhythm below it. */

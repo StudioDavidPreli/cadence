@@ -473,6 +473,15 @@ const LOGO_SRC = '/riveTiles/motiontileslogo.riv'
 const LOGO_ARTBOARD = 'motionTilesLogo'
 const LOGO_STATE_MACHINE = 'motionTilesLogoSM'
 
+// The bug-report affordance's Rive button (replaces the plain "Problems?" text
+// button). Same chrome-button pattern as ClawdLogoButton: self-driven state
+// machine, binds the active preset instance so its palette tracks the board's
+// theme. Its own ViewModel (ProblemVM), not the tiles' PathEffectVM.
+const PROBLEM_SRC = '/titleSVGS/problembutton.riv'
+const PROBLEM_ARTBOARD = 'problemButton'
+const PROBLEM_STATE_MACHINE = 'problemSM'
+const PROBLEM_VIEW_MODEL = 'ProblemVM'
+
 function ClawdLogoButton({ instanceName, onClick, paused }) {
   // The button fills the column width and its height follows the logo's real aspect
   // ratio, so the logo scales up without letterboxing. We read the artboard bounds
@@ -527,6 +536,53 @@ function ClawdLogoButton({ instanceName, onClick, paused }) {
   )
 }
 
+// The Rive "Problems?" button. Chrome, like ClawdLogoButton: plays its own problemSM
+// and binds the active preset instance (standard/snappy/cinematic) so its palette
+// switches with the board theme. Clicking opens the report dialog. The wrapping
+// <button> carries a rounded, bordered box so it reads as the panel's action button;
+// its height follows the artboard's real aspect ratio at full width (canvas has
+// pointer-events:none so the click always lands on the button, not Rive).
+function ProblemButton({ instanceName, onClick }) {
+  const [aspect, setAspect] = useState(null)
+  const { rive, RiveComponent } = useRive({
+    src: PROBLEM_SRC,
+    artboard: PROBLEM_ARTBOARD,
+    stateMachines: PROBLEM_STATE_MACHINE,
+    autoplay: false, // play once the preset instance is bound, same order as the tiles
+    autoBind: false, // we bind the chosen preset instance ourselves for its palette
+  })
+
+  const viewModel = useViewModel(rive, { name: PROBLEM_VIEW_MODEL })
+  const instance = useViewModelInstance(viewModel, { rive, name: instanceName })
+
+  useEffect(() => {
+    if (rive && instance) rive.play(PROBLEM_STATE_MACHINE)
+  }, [rive, instance])
+
+  // Derive the aspect ratio from the loaded artboard bounds; the CSS fallback holds
+  // the box open until this resolves.
+  useEffect(() => {
+    if (!rive) return
+    const b = rive.bounds
+    if (!b) return
+    const w = b.maxX - b.minX
+    const h = b.maxY - b.minY
+    if (w > 0 && h > 0) setAspect(w / h)
+  }, [rive])
+
+  return (
+    <button
+      type="button"
+      className={styles.problemButton}
+      style={aspect ? { '--problem-aspect': aspect } : undefined}
+      onClick={onClick}
+      aria-label="Report a problem"
+    >
+      <RiveComponent className={styles.problemCanvas} />
+    </button>
+  )
+}
+
 // The "Problems?" affordance: a panel section whose button opens a minimal report
 // dialog. The message posts to the /api/bug-report Pages Function, which opens a
 // GitHub issue server-side — no email address ever ships to the client. `tile` is a
@@ -534,7 +590,7 @@ function ClawdLogoButton({ instanceName, onClick, paused }) {
 // carries the composition the report was filed from. Reuses the shared Modal (the
 // only overlay pattern); it renders viewport-fixed here because Motion Tiles sits
 // outside DemoArea, so useDemoOverlay would return null.
-function BugReport({ tile }) {
+function BugReport({ tile, instanceName }) {
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
   // Honeypot: kept empty by real users, so any value means a bot and the server
@@ -577,10 +633,7 @@ function BugReport({ tile }) {
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionLabel}>Feedback</div>
-      <button type="button" className={styles.actionButton} onClick={() => setOpen(true)}>
-        Problems?
-      </button>
+      <ProblemButton instanceName={instanceName} onClick={() => setOpen(true)} />
 
       <Modal isOpen={open} onClose={close} title="Report a problem">
         <form className={styles.reportForm} onSubmit={submit}>
@@ -1004,7 +1057,10 @@ export function MotionTilesGrid() {
 
         {/* Feedback — the "Problems?" report affordance. tile carries the current
             composition (preset + grid size) into the GitHub issue title. */}
-        <BugReport tile={`Motion Tiles · ${PRESETS[preset].label} · ${gridN}×${gridN}`} />
+        <BugReport
+          tile={`Motion Tiles · ${PRESETS[preset].label} · ${gridN}×${gridN}`}
+          instanceName={instanceName}
+        />
 
         <div className={styles.status}>
           <span className={styles.fps} data-warn={fps < 55}>{fps} fps</span>
