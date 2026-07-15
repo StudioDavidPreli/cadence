@@ -14,6 +14,8 @@ import { NavigationProvider } from './context/NavigationContext'
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { Wordmark } from './components/Wordmark'
 import { TokenLab } from './components/TokenLab'
+import { MobileGate } from './components/MobileGate'
+import { useMediaQuery } from './hooks/useMediaQuery'
 import styles from './App.module.css'
 
 // NavigationProvider wraps the whole shell so the Wordmark and the nav column both
@@ -26,6 +28,17 @@ import styles from './App.module.css'
 // returns to the landing on click in every case, so the top bar needs no
 // section logic of its own.
 export default function App() {
+  // Hard viewport gate. Below 720px the shell does not render — MobileGate takes
+  // over. 719px is the 720px shell boundary expressed as "below 720": at exactly
+  // 720px the app renders as usual (TokenLab's controls rail also engages at
+  // ≤720px). This early return sits ABOVE NavigationProvider on purpose, so the
+  // hash-routing machinery (useHashSync, inside that provider) never mounts under
+  // the gate — a phone deep link stays untouched and resolves when the same URL
+  // opens at desktop width. The hook re-renders on resize/rotation, so the gate
+  // flips live. Theme still comes from ThemeProvider in main.jsx, above App.
+  const gated = useMediaQuery('(max-width: 719px)')
+  if (gated) return <MobileGate />
+
   return (
     <NavigationProvider>
       <div className={styles.appShell}>
