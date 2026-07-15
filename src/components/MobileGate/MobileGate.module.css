@@ -69,3 +69,45 @@
   font-size: 15px;
   line-height: 1.6;
 }
+
+/* The studio logo link at the foot of the gate — the one way onward, out to
+   davidpreli.com. Width-driven with height from the artboard aspect
+   (--studio-aspect, 4 / 1 fallback), the same single-definite-dimension +
+   overflow: hidden setup the hero box uses. Kept modest so it reads as a signature
+   beneath the copy, not a second hero. max-width is the size lever. */
+.studioLink {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: var(--studio-aspect, 4 / 1);
+  flex-shrink: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* The Rive title carries no browser-default focus ring; give the link its own.
+   Accent meets the 3:1 UI-component bar in every theme, same as EnterGridButton. */
+.studioLink:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.studioCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Behind the canvas, visible only while it is empty (loading or missing asset). */
+.studioFallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

@@ -25,6 +25,7 @@ import {
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { StudioLogoLink } from './StudioLogoLink'
 import styles from './MobileGate.module.css'
 
 // Same asset, artboard, state machine, and view model as HeroAnimation.
@@ -114,12 +115,17 @@ export function MobileGate() {
         <RiveComponent className={styles.canvas} />
       </div>
 
-      {/* Approved gate copy, verbatim. No "continue anyway" — the gate is hard. */}
+      {/* Approved gate copy, verbatim. No "continue anyway" into the app — the
+          gate is hard; the only way onward is out to the studio, below. */}
       <p className={styles.copy}>
         Cadence is a motion design system explorer. The tooling wants a desktop
         screen. Open this on your computer and everything will be where it should
         be.
       </p>
+
+      {/* The one exit: a Studio David Preli title that links to davidpreli.com,
+          so a phone visitor is not stranded. */}
+      <StudioLogoLink />
     </div>
   )
 }
