@@ -118,3 +118,38 @@ wording was corrected in the same commit as the `.dev.vars` entry.
 David-owned dashboard follow-up (also tracked in the session's closing report):
 set `GH_TOKEN` (fine-grained PAT, this repo only, Issues read + write) and
 `GH_REPO` (`StudioDavidPreli/cadence`) as Pages environment variables.
+
+## Addendum (2026-07-15, second) — host is Workers, not Pages; `functions/` retired
+
+The prior addendum assumed a Pages project. It isn't one. When the repo was
+connected in the Cloudflare dashboard it created a **Worker with static assets**,
+not a Pages project. That distinction is not cosmetic: the Pages-only root
+`functions/` convention is ignored on Workers, and the dashboard blocks
+environment variables until a worker script is deployed. Decision: stay on
+Workers and adapt rather than recreate a Pages project.
+
+What changed in the repo:
+
+- `functions/api/bug-report.js` was **deleted** and replaced by
+  **`worker/index.js`** — a single `fetch` handler that owns every request. It
+  matches `POST /api/bug-report` explicitly (the path and method checks Pages did
+  implicitly, plus a new 405 branch for non-POST), runs the identical guard /
+  honeypot / GitHub-issue logic, and falls through to `env.ASSETS.fetch(request)`
+  for everything else (the static `dist/` build). The worker lives at the repo
+  root, outside `src/` (so Vite and the token-integrity gate never touch it) and
+  outside `dist/` (so it never ships as an asset).
+- A root **`wrangler.jsonc`** now declares the project (`name: "cadence"`), the
+  worker entry (`main: "worker/index.js"`), the assets binding
+  (`directory: "./dist"`, `binding: "ASSETS"`, `run_worker_first: ["/api/*"]`),
+  and `GH_REPO` as a plaintext `var`. Only `GH_TOKEN` stays a dashboard secret.
+- **Build inputs now include `wrangler.jsonc`.** The git-connected build is still
+  `npm run build` → `dist`; the deploy step is `npx wrangler deploy`, which reads
+  `wrangler.jsonc` to publish the worker alongside the assets.
+- The `.gitignore` comments that named "Pages," the `functions/` directory, and
+  `wrangler pages dev` were corrected to Workers / `wrangler dev` in the same
+  commit as the conversion.
+
+Dashboard follow-up is unchanged in intent, corrected in venue: set `GH_TOKEN`
+as a **Workers** project secret (the block lifts once the worker script is
+deployed), then retry the deployment so it takes. `GH_REPO` no longer needs a
+dashboard entry — it ships in `wrangler.jsonc`.
