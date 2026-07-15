@@ -2,7 +2,7 @@
 
 A hard viewport gate for Cadence. Below 720px the app shell does not render; in
 its place the gate stacks a Studio David Preli logo that links out to
-davidpreli.com, the hero3.riv animation, and a short copy block explaining the
+davidpreli.com, the mobile hero animation, and a short copy block explaining the
 tool is built for a desktop screen. There is no way *into* the app below 720px;
 the studio link is the one way *onward*. At or above 720px the app renders
 exactly as before. This records the decisions behind `src/components/MobileGate/`
@@ -59,16 +59,23 @@ the gate must activate strictly below it. `useMediaQuery` re-renders on the
 
 ## Rive: own thin instance, not a shared component
 
-The gate carries its own copy of the hero3.riv wiring rather than reusing
-`HeroAnimation` or extracting a shared hook. The tradeoff was surfaced and David
-chose this: the landing hero stays single-purpose (its two-block layout and
-canonical description copy are wrong for the gate), at the cost of duplicating
-~50 lines of Rive wiring. The duplicated part must stay in step with
-`HeroAnimation` if hero3's view model or binding changes:
+The gate carries its own copy of the desktop hero's Rive wiring rather than
+reusing `HeroAnimation` or extracting a shared hook. The tradeoff was surfaced
+and David chose this: the landing hero stays single-purpose (its two-block layout
+and canonical description copy are wrong for the gate), at the cost of
+duplicating ~50 lines of Rive wiring.
 
-- WebGL2 runtime (`@rive-app/react-webgl2`) — hero3 is authored for the Rive
-  Renderer. The gate and the hero never co-mount (one is <720px, the other
-  ≥720px), so the two webgl2 canvases never share a moment on screen.
+The gate renders a **mobile-specific asset** — `heromobile.riv` (artboard
+`heroMobile`, state machine `heroMobileSM`), a shorter composition sized for a
+phone. The desktop hero3.riv turned out wrong for the gate on deploy (its
+proportions did not sit well in the narrow stack), so it was replaced
+2026-07-15. The asset differs, but it keeps the same `Hero3ViewModel` /
+theme-instance / reduced-motion contract as `HeroAnimation`, so the wiring below
+must still stay in step with that view model if it changes:
+
+- WebGL2 runtime (`@rive-app/react-webgl2`) — the asset is authored for the Rive
+  Renderer. The gate and the desktop hero never co-mount (one is <720px, the
+  other ≥720px), so their webgl2 canvases never share a moment on screen.
 - `Hero3ViewModel` with Light / Dark / Contrast instances; the high-contrast-
   dark stroke/fill flip through webgl2's own `useViewModelInstanceColor`.
 - Reduced motion via framer-motion's `useReducedMotion()` → `autoplay={!reduce}`,
@@ -142,8 +149,8 @@ left in place, no follow-up.
 
 ## Files
 
-- `src/components/MobileGate/index.jsx` — component + own hero3 wiring; stacks
-  studio logo, hero, copy
+- `src/components/MobileGate/index.jsx` — component + own mobile-hero wiring
+  (heromobile.riv); stacks studio logo, hero, copy
 - `src/components/MobileGate/StudioLogoLink.jsx` — the davidpreli.com exit logo
 - `src/components/MobileGate/MobileGate.module.css` — styles, theme custom
   properties only
