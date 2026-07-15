@@ -1,15 +1,17 @@
 # Mobile viewport gate (2026-07-14)
 
 A hard viewport gate for Cadence. Below 720px the app shell does not render; in
-its place the gate shows the hero3.riv animation over a short copy block
-explaining the tool is built for a desktop screen, with a Studio David Preli
-logo beneath it that links out to davidpreli.com. There is no way *into* the app
-below 720px; the studio link is the one way *onward*. At or above 720px the app
-renders exactly as before. This records the decisions behind
-`src/components/MobileGate/` and its mount in `App.jsx`.
+its place the gate stacks a Studio David Preli logo that links out to
+davidpreli.com, the hero3.riv animation, and a short copy block explaining the
+tool is built for a desktop screen. There is no way *into* the app below 720px;
+the studio link is the one way *onward*. At or above 720px the app renders
+exactly as before. This records the decisions behind `src/components/MobileGate/`
+and its mount in `App.jsx`.
 
-**Amended 2026-07-15:** added the studio logo exit (see "The exit" below). The
-original gate was a pure dead end; a phone visitor now has one way out.
+**Amended 2026-07-15:** added the studio logo exit (see "The exit" below), so the
+gate is no longer a pure dead end. The three elements share one width
+(`--gate-content-width`, 460px) and the logo sits at the top of the stack, above
+the hero and copy. Outer padding is 16px, matching the 16px inter-element gap.
 
 ## Why a hard gate
 
@@ -97,15 +99,16 @@ exactly the grid logo box's approach (`MotionTilesGrid.module.css`).
 Consequence to know: with `max-height` gone, the art is bounded by width, not
 viewport height. For hero3's landscape wordmark this stays compact; if the
 artboard were portrait it could get tall on a short window. The single tuning
-lever is the `460px` `max-width` on `.riveContainer`.
+lever is `--gate-content-width` on `.gate` (460px), which the hero box, the
+studio logo, and the copy all read — so it moves the whole stack's width at once.
 
 ## The exit (added 2026-07-15)
 
-`StudioLogoLink` sits at the foot of the gate: the `singlelinelogo.riv` Studio
-David Preli title, wrapped in an `<a href="https://davidpreli.com">`. A phone
-visitor is otherwise stranded, and the studio home is the natural place to send
-them — it is not an escape *into* the desktop-only app, so it does not soften the
-hard gate.
+`StudioLogoLink` sits at the top of the gate, above the hero and copy: the
+`singlelinelogo.riv` Studio David Preli title, wrapped in an
+`<a href="https://davidpreli.com">`. A phone visitor is otherwise stranded, and
+the studio home is the natural place to send them — it is not an escape *into*
+the desktop-only app, so it does not soften the hard gate.
 
 - **Its own component**, not a second `useRive` inside `MobileGate`, to keep the
   Rive-hook isolation the rest of the app uses. Two webgl2 canvases co-mount in
@@ -120,8 +123,10 @@ hard gate.
   since the Rive title carries no default focus outline. Reduced motion follows
   the hero (`autoplay={!reduce}`).
 - Sized by the same `rive.bounds` → `aspect-ratio` + `overflow: hidden` setup as
-  the hero box, kept modest (`max-width: 220px`) so it reads as a signature, not
-  a second hero. `max-width` is the size lever.
+  the hero box. It shares the hero's width cap (`--gate-content-width`), so the
+  logo, hero, and copy are the same width by construction — tune that one value
+  to move all three. Its own artboard aspect keeps it a slim line, not a second
+  hero.
 
 ## Copy (approved, verbatim)
 
@@ -137,7 +142,9 @@ left in place, no follow-up.
 
 ## Files
 
-- `src/components/MobileGate/index.jsx` — component + own hero3 wiring
+- `src/components/MobileGate/index.jsx` — component + own hero3 wiring; stacks
+  studio logo, hero, copy
+- `src/components/MobileGate/StudioLogoLink.jsx` — the davidpreli.com exit logo
 - `src/components/MobileGate/MobileGate.module.css` — styles, theme custom
   properties only
 - `src/App.jsx` — gate query + early return mount
