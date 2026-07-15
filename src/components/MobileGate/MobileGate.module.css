@@ -12,7 +12,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   box-sizing: border-box;
-  padding: 24px;
+  padding: 16px;
   background-color: var(--color-bg);
   display: flex;
   flex-direction: column;
@@ -65,7 +65,8 @@
 .copy {
   flex: none;
   flex-shrink: 0;
-  max-width: 40ch;
+  /* Wrap to the hero's width so the copy block lines up with the art above it. */
+  max-width: var(--gate-content-width);
   margin: 0 auto;
   padding: 0 8px 8px;
   text-align: center;
