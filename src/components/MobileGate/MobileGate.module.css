@@ -1,0 +1,79 @@
+/* The hard viewport gate, shown below 720px in place of the app shell. Fills
+   the viewport as a vertical stack: hero3 artwork on top, the copy beneath.
+
+   Padding is deliberately tighter than the desktop hero (--hero-art-pad is
+   24px 32px there): hero3.riv is tall, and on a phone the copy has to clear the
+   fold. Two levers, grouped so they read as one system:
+   --gate-art-pad   breathing room around the artwork.
+   --gate-art-scale how much the artwork fills its padded box (fit is "contain",
+                    so padding shrinks it; scaling above 1 grows it back). */
+.gate {
+  --gate-art-pad: 16px 20px;
+  --gate-art-scale: 1.1;
+
+  /* dvh tracks the phone's dynamic viewport (URL bar shown/hidden); the vh line
+     is the fallback for browsers without dvh. Keeps the copy on screen. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 24px;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* Artwork box. Takes the vertical give above the copy and centers the canvas.
+   min-height: 0 lets it shrink inside the flex column instead of pushing the
+   copy out of view. position: relative stacks the fallback under the canvas. */
+.riveContainer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gate-art-pad);
+  overflow: hidden;
+}
+
+/* Clip box for the artwork: fills the padded content box and owns the overflow
+   clip, so a scaled canvas is cut at this inner edge and the padding survives.
+   Same technique as the hero's .canvasClip. */
+.canvasClip {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+  transform: scale(var(--gate-art-scale));
+  transform-origin: center;
+}
+
+/* Behind the canvas, visible only while it is empty (loading or missing asset);
+   a loaded hero paints over it. */
+.fallbackText {
+  position: absolute;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* The gate copy. flex: none holds it at its natural height so the artwork box
+   absorbs all the give above. Muted register — this is an aside, not a headline.
+   Color is a theme custom property; nothing hardcoded. */
+.copy {
+  flex: none;
+  max-width: 40ch;
+  margin: 0 auto;
+  padding: 0 8px 8px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
