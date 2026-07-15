@@ -3,16 +3,18 @@
 // built for a desktop screen, and this states that plainly over the hero
 // artwork. At or above 720px this never mounts and the shell renders as usual.
 //
-// This carries its OWN thin instance of the hero3.riv wiring rather than reusing
-// HeroAnimation, so the landing hero stays single-purpose (its layout and
-// canonical description copy are wrong for the gate). The Rive/theme/reduced-
-// motion handling below is a deliberate mirror of HeroAnimation — keep the two
-// in step if hero3's view model or binding ever changes.
+// This carries its OWN thin instance of the desktop hero's Rive wiring rather
+// than reusing HeroAnimation, so the landing hero stays single-purpose (its
+// layout and canonical description copy are wrong for the gate). It renders a
+// mobile-specific asset — heromobile.riv, a shorter composition sized for a
+// phone rather than the desktop hero3.riv — but the same Hero3ViewModel /
+// theme-instance / reduced-motion contract as HeroAnimation, so keep the two in
+// step if that view model or binding ever changes.
 //
-// hero3.riv is authored for the Rive Renderer, so it needs the WebGL2 runtime,
-// same as HeroAnimation. This is the only other component on
-// @rive-app/react-webgl2; the gate and the hero never co-mount (one is <720px,
-// the other ≥720px), so the two webgl2 canvases never share a moment on screen.
+// heromobile.riv is authored for the Rive Renderer, so it needs the WebGL2
+// runtime, same as HeroAnimation. The gate and the desktop hero never co-mount
+// (one is <720px, the other ≥720px), so their webgl2 canvases never share a
+// moment on screen.
 import { useEffect, useState } from 'react'
 import {
   useRive,
@@ -28,8 +30,10 @@ import { useTheme } from '../../context/ThemeContext'
 import { StudioLogoLink } from './StudioLogoLink'
 import styles from './MobileGate.module.css'
 
-// Same asset, artboard, state machine, and view model as HeroAnimation.
-const HERO_RIV = { src: '/rive/hero3.riv', artboard: 'Hero3', stateMachine: 'hero3SM' }
+// The mobile hero. Its own asset/artboard/state machine, but the same
+// 'Hero3ViewModel' with Dark / Light / Contrast instances as the desktop hero
+// (bound below), so the theme wiring is unchanged.
+const HERO_RIV = { src: '/titleSVGS/heromobile.riv', artboard: 'heroMobile', stateMachine: 'heroMobileSM' }
 
 // Both high-contrast themes bind the single 'Contrast' instance; high-contrast-
 // dark flips its stroke/fill at runtime (see the effect below). Mirrors the map
