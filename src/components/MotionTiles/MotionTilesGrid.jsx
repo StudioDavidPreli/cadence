@@ -582,7 +582,7 @@ function ProblemButton({ instanceName, onClick }) {
 }
 
 // The "Problems?" affordance: a panel section whose button opens a minimal report
-// dialog. The message posts to the /api/bug-report Pages Function, which opens a
+// dialog. The message posts to the /api/bug-report Worker route, which opens a
 // GitHub issue server-side — no email address ever ships to the client. `tile` is a
 // short context string (preset + grid size) the caller derives, so the issue title
 // carries the composition the report was filed from. Reuses the shared Modal (the

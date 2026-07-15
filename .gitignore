@@ -4,11 +4,12 @@ node_modules/
 # Build output
 dist/
 
-# Cloudflare Pages Functions local secrets (GH_TOKEN, GH_REPO) — never committed.
-# The real values live in the Pages dashboard.
+# Cloudflare Worker local secrets (GH_TOKEN, GH_REPO) — never committed.
+# GH_TOKEN's real value lives in the Workers dashboard as a secret; GH_REPO is a
+# plaintext var in wrangler.jsonc.
 .dev.vars
 
-# Local state from `wrangler pages dev` — regenerated per run, not a build input.
+# Local state from `wrangler dev` — regenerated per run, not a build input.
 .wrangler/
 
 # Local references (not for repo)
@@ -37,8 +38,8 @@ __pycache__/
 /archive/
 
 # Local-only files kept on disk but out of git: project instructions, the vendored
-# emil-design-eng skill (and its lockfile). Not build inputs: Cloudflare Pages ships
-# the static build (dist/) plus the functions/ directory (the /api Pages Functions),
+# emil-design-eng skill (and its lockfile). Not build inputs: Cloudflare deploys
+# the static build (dist/) plus the Worker (worker/index.js, per wrangler.jsonc),
 # and none of these files are part of either.
 /CLAUDE.md
 /skills-lock.json
