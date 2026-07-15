@@ -99,3 +99,22 @@ in the gitignored `archive/`.
 - `docs/decisions/motion-tiles-integration-2026-07-13.md` — the third tool the
   README and title work document.
 - Memory `repo-deploy-hygiene.md`, `motion-tiles-final-composition.md`.
+
+## Addendum (2026-07-15) — Pages Functions correct the "only dist/" framing
+
+The framing above ("Cloudflare deploys only `dist/`") is incomplete. Cloudflare
+Pages also picks up a root **`functions/`** directory and deploys each file in it
+as a serverless Function, routed by path — `functions/api/bug-report.js` serves
+`POST /api/bug-report`. So the live site is the static `dist/` build **plus** the
+Functions, not `dist/` alone. This does not change the git-connected build (still
+`npm run build` → `dist`); Pages layers the Functions on automatically, no config
+file and no separate build step.
+
+Prompted by the Motion Tiles bug-report button, which posts to that Function; the
+Function opens a GitHub issue using `GH_TOKEN` / `GH_REPO`, so no email address is
+ever exposed client-side. The `.gitignore` note that carried the same "dist/ only"
+wording was corrected in the same commit as the `.dev.vars` entry.
+
+David-owned dashboard follow-up (also tracked in the session's closing report):
+set `GH_TOKEN` (fine-grained PAT, this repo only, Issues read + write) and
+`GH_REPO` (`StudioDavidPreli/cadence`) as Pages environment variables.
