@@ -35,3 +35,10 @@ __pycache__/
 /skills-lock.json
 .claude/skills/
 .agents/skills/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
