@@ -464,8 +464,9 @@ function StaticTile({ staticFile, source, instanceName, cellSize, gapSize }) {
 // clicking it adds a clawd tile to the grid (onClick → addClawd). It plays its own
 // motionTilesLogoSM — its wave is self-contained, like the interactive clawd tile — and
 // binds the active preset instance so its palette tracks the board. It is chrome, not a
-// driven tile: no clock, no pixelation writes. The canvas has pointer-events:none (CSS)
-// so every click lands on the wrapping <button>, never getting swallowed by Rive.
+// driven tile: no clock, no pixelation writes. The canvas keeps pointer events so the
+// artboard's own hover-scale and pointer-down animation run; the click still bubbles to
+// the wrapping <button> (addClawd), so the click behavior is unchanged.
 const LOGO_SRC = '/riveTiles/motiontileslogo.riv'
 // Artboard read from the .riv strings, NOT confirmed in the editor: the file carries
 // both `motionTilesLogo` and `motionTilesLogoSM`, the same artboard/SM split as clawd,

@@ -262,13 +262,14 @@
   background-color: var(--color-surface-active);
 }
 
-/* pointer-events:none so a click always reaches the button, never Rive's own pointer
-   handling on the canvas. The logo's wave is autonomous and needs no pointer input. */
+/* No pointer-events:none: the logo artboard now runs its own hover-scale and
+   pointer-down animation, so its state machine needs the pointer events. The DOM
+   click still bubbles to the wrapping <button> (addClawd), so the click behavior is
+   unchanged. */
 .logoCanvas {
   width: 100%;
   height: 100%;
   display: block;
-  pointer-events: none;
 }
 
 /* ── Slider row ─────────────────────────────────────────────────────────── */
