@@ -13,12 +13,15 @@
 // same as HeroAnimation. This is the only other component on
 // @rive-app/react-webgl2; the gate and the hero never co-mount (one is <720px,
 // the other ≥720px), so the two webgl2 canvases never share a moment on screen.
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useRive,
   useViewModel,
   useViewModelInstance,
   useViewModelInstanceColor,
+  Layout,
+  Fit,
+  Alignment,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
@@ -45,13 +48,31 @@ export function MobileGate() {
   // not this Rive autoplay). Load the file but hold a static first frame.
   const reduce = useReducedMotion()
 
+  // Size the artwork box to the artboard's real aspect ratio, read once the file
+  // loads (the fallback ratio holds the box open until then). This is the same
+  // rive.bounds → aspect-ratio pattern EnterGridButton and the grid logo use: it
+  // lets the art fill its box at full width instead of contain-fitting to a small
+  // strip stranded in a tall column. The 2/1 fallback is landscape-ish so the
+  // pre-load box is roughly the right shape.
+  const [aspect, setAspect] = useState(null)
+
   const { rive, RiveComponent } = useRive({
     src: HERO_RIV.src,
     artboard: HERO_RIV.artboard,
     stateMachines: HERO_RIV.stateMachine,
     autoplay: !reduce,
     autoBind: false,
+    layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
   })
+
+  useEffect(() => {
+    if (!rive) return
+    const b = rive.bounds
+    if (!b) return
+    const w = b.maxX - b.minX
+    const h = b.maxY - b.minY
+    if (w > 0 && h > 0) setAspect(w / h)
+  }, [rive])
 
   const viewModel = useViewModel(rive, { name: 'Hero3ViewModel' })
   const instance = useViewModelInstance(viewModel, {
@@ -80,16 +101,17 @@ export function MobileGate() {
 
   return (
     <div className={styles.gate}>
-      {/* Rive artwork on top. Flexes to absorb the vertical give so the copy
-          below stays on screen; hero3.riv is tall, so it must not push the copy
-          past the fold on common phone heights. */}
-      <div className={styles.riveContainer}>
+      {/* Rive artwork on top. Its box follows the artboard's real aspect ratio
+          (--gate-art-aspect) so the art fills the width instead of stranding a
+          contain-fit strip in a tall column. The art + copy center as a group. */}
+      <div
+        className={styles.riveContainer}
+        style={aspect ? { '--gate-art-aspect': aspect } : undefined}
+      >
         {/* Graceful fallback while the asset loads (or if it is absent): a quiet
             themed line the canvas paints over once it loads. Mirrors the hero. */}
         {!rive && <p className={styles.fallbackText}>Cadence</p>}
-        <div className={styles.canvasClip}>
-          <RiveComponent className={styles.canvas} />
-        </div>
+        <RiveComponent className={styles.canvas} />
       </div>
 
       {/* Approved gate copy, verbatim. No "continue anyway" — the gate is hard. */}

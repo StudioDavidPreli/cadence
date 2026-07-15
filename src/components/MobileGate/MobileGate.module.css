@@ -1,16 +1,8 @@
-/* The hard viewport gate, shown below 720px in place of the app shell. Fills
-   the viewport as a vertical stack: hero3 artwork on top, the copy beneath.
-
-   Padding is deliberately tighter than the desktop hero (--hero-art-pad is
-   24px 32px there): hero3.riv is tall, and on a phone the copy has to clear the
-   fold. Two levers, grouped so they read as one system:
-   --gate-art-pad   breathing room around the artwork.
-   --gate-art-scale how much the artwork fills its padded box (fit is "contain",
-                    so padding shrinks it; scaling above 1 grows it back). */
+/* The hard viewport gate, shown below 720px in place of the app shell. The
+   artwork and copy sit as one centered group, not stretched to fill: the art
+   box takes the artboard's real aspect ratio so the hero fills its width rather
+   than contain-fitting to a small band in a tall column (the earlier bug). */
 .gate {
-  --gate-art-pad: 16px 20px;
-  --gate-art-scale: 1.1;
-
   /* dvh tracks the phone's dynamic viewport (URL bar shown/hidden); the vh line
      is the fallback for browsers without dvh. Keeps the copy on screen. */
   min-height: 100vh;
@@ -20,38 +12,30 @@
   background-color: var(--color-bg);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
   overflow: hidden;
 }
 
-/* Artwork box. Takes the vertical give above the copy and centers the canvas.
-   min-height: 0 lets it shrink inside the flex column instead of pushing the
-   copy out of view. position: relative stacks the fallback under the canvas. */
+/* Artwork box. Width-driven: it spans the column (capped so it is not absurdly
+   wide on a landscape phone or a narrowed desktop window) and its height follows
+   the artboard aspect via aspect-ratio, so the art fills the box with no
+   letterbox. max-height keeps it from crowding the copy on short/landscape
+   screens; the aspect ratio then trades width to stay in bounds. The 2 / 1
+   fallback holds a landscape-ish box open until rive.bounds resolves. */
 .riveContainer {
   position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--gate-art-pad);
-  overflow: hidden;
-}
-
-/* Clip box for the artwork: fills the padded content box and owns the overflow
-   clip, so a scaled canvas is cut at this inner edge and the padding survives.
-   Same technique as the hero's .canvasClip. */
-.canvasClip {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  max-width: 460px;
+  aspect-ratio: var(--gate-art-aspect, 2 / 1);
+  max-height: 55vh;
+  max-height: 55dvh;
 }
 
 .canvas {
   width: 100%;
   height: 100%;
-  transform: scale(var(--gate-art-scale));
-  transform-origin: center;
 }
 
 /* Behind the canvas, visible only while it is empty (loading or missing asset);
