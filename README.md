@@ -6,7 +6,7 @@ Cadence demonstrates the relationship between design tokens and motion through t
 
 **Built with:** React, Framer Motion, CSS Custom Properties, Vite
 
-**Live:** https://cadence.davidpreli.com (pending first deploy)
+**Live:** https://cadence.davidpreli.com
 
 ---
 
