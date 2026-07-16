@@ -52,7 +52,7 @@ Five items rise above the rest. Each is expanded in its section below.
 | Demo video (optional) | Week 9 | Open, explicitly optional. |
 | "Complete token architecture documentation" | Week 9, unchecked box | Ambiguous scope. `docs/token-architecture.md` is substantial; nothing defines what "complete" adds. Worth deciding whether to check it or name the gap. |
 | Physics-spring token family | Future work, architecture | Deliberately deferred, scoped as its own pass. The harmonized presets doc calls it the highest-value case-study addition, which raises its priority relative to the other two. |
-| Scale press/lift legibility split | Future work, architecture | Deferred, internal legibility only. Note: `motion-presets-harmonized.md` already uses the new names while `motion-presets.md` uses the flat ones, so the two reference docs currently disagree. |
+| Scale press/lift legibility split | Future work, architecture | Deferred, internal legibility only. The reference-doc disagreement is resolved as of 2026-07-16: a note in `motion-presets-harmonized.md` records that its nested spellings are the proposal's record, the settled rename format is flat (`scale.pressSubtle`), and `motion-presets.md` mirrors the code and wins until the rename ships. |
 | Duration scalar for the distance-and-speed visualizer | Future work, architecture | Deferred. The visualizer it serves is itself unplanned work. |
 | Per-section lazy loading, seeded on the new page | Future work, Rive scaling | Effectively done: Motion Tiles shipped as a landing-gated `React.lazy` chunk. The checkbox was never ticked. |
 | Prefetch the active section's `.riv` set on nav open or hover | Future work, Rive scaling | **Done in full 2026-07-16.** JS-chunk half in the afternoon; the `.riv` asset half the same evening (manifest exported from the grid, fetched by the landing, verified on built output: 20 files prefetch during the landing, Enter serves entirely from cache). |
@@ -69,7 +69,7 @@ Five items rise above the rest. Each is expanded in its section below.
 - **Optional follow-ups from the naming-docs session** (2026-06-20): ~~the in-tool editable-vs-fixed explainer~~ (closed 2026-07-16: it was already absorbed 2026-06-22 by the Token Lab guide, in the code-view section and FAQ question one, and both read correct against current source; see the dated paragraph above for what the verification turned up), the grep-based `TOKEN_COMPONENT_MAP` lock test (deliberately declined as brittle), and ~~the CLAUDE.md References one-liner for token-architecture.md~~ (done 2026-07-16).
 - **Rive canvases ignore forced-colors.** Accepted limitation from 2026-06-22, recorded pre-Motion-Tiles. The Rive surface area has since grown by roughly 50 canvases, so the acceptance is worth a conscious re-affirmation rather than an inheritance.
 - ~~**r3c1 state-machine gap.**~~ **Closed 2026-07-16 (retroactive).** Fixed by the 2026-07-12 re-export; the tracker note and closeout now record it.
-- **Tracker hygiene.** The trailing "## Pending Items" heading is empty, and the Decisions Log table has three undated rows. Cosmetic.
+- ~~**Tracker hygiene.**~~ **Closed 2026-07-16 in two passes:** the Pending Items heading and the undated Decisions Log rows went in the tracker-tidy commit (492f415); the last leftover, the Blockers table's empty placeholder row, replaced with an empty-by-design note in the micro-tidy pass. Original: the trailing "## Pending Items" heading is empty, and the Decisions Log table has three undated rows. Cosmetic.
 
 ---
 
