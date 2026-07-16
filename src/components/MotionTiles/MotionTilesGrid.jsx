@@ -483,6 +483,20 @@ const PROBLEM_ARTBOARD = 'problemButton'
 const PROBLEM_STATE_MACHINE = 'problemSM'
 const PROBLEM_VIEW_MODEL = 'ProblemVM'
 
+// Every .riv the grid fetches at mount, for the landing's asset prefetch. Built
+// from the same constants the mount path reads, so the list cannot drift from
+// what the grid actually loads — if a tile source is added above, it is
+// prefetched with no second edit. clawd.riv is deliberately absent: it is
+// click-gated behind the logo button and its 748 kB would nearly triple the
+// prefetch payload for an easter egg most visitors never trigger.
+export const RIV_PREFETCH_MANIFEST = [
+  RIV_SRC,
+  ...GROUP2_FILES.map((f) => f.src),
+  STATIC_FILE,
+  LOGO_SRC,
+  PROBLEM_SRC,
+]
+
 function ClawdLogoButton({ instanceName, onClick }) {
   // The button fills the column width and its height follows the logo's real aspect
   // ratio, so the logo scales up without letterboxing. We read the artboard bounds

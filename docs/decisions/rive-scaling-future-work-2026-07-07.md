@@ -146,3 +146,26 @@ quietly. The boundary sits inside the layer's content, never around the
 `AnimatePresence`, so the motion.div that the crossfade manages never
 suspends. That constraint is commented at the `principlesContent` site in
 `TokenLab/index.jsx` and is the rule for any future lazy destination.
+
+## Addendum 2026-07-16 (later the same day): the `.riv` prefetch half
+
+The prefetch item's second half shipped. `MotionTilesGrid.jsx` now exports
+`RIV_PREFETCH_MANIFEST`, the exact URLs its mount path fetches, built from the
+same constants (`RIV_SRC`, `GROUP2_FILES`, `STATIC_FILE`, `LOGO_SRC`,
+`PROBLEM_SRC`) so the list cannot drift from what the grid loads. The landing's
+existing chunk-prefetch effect chains onto it: when the dynamic import
+resolves, it fetches all 20 files (~400 kB) fire-and-forget at low priority,
+reading each body to completion so the response commits to the HTTP cache. It
+skips under `navigator.connection.saveData`, and clawd.riv is deliberately
+absent (748 kB, click-gated easter egg; prefetching it would nearly triple the
+payload for a tile most visitors never summon).
+
+The pairing rule this completes: lazy answers "has the user shown interest in
+this section," prefetch answers "given they are at the door, fetch what is
+behind it during the idle read." Nothing loads earlier than the landing; users
+who never visit the section still pay zero bytes.
+
+Measured on built output (`wrangler dev` on `dist/`, Playwright): all 20 files
+fetch as full 200s while the landing is on screen; after Enter, every runtime
+request for the same URLs is a ~3ms 304 revalidation served from the primed
+cache, zero full downloads, zero console errors.
