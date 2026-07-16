@@ -126,3 +126,20 @@ Each rail is a grid item; its drawer and backdrop are absolutely positioned agai
 Because the controls live inside the Tokens drawer when collapsed, they unmount while it is closed; the token reducer lives in TokenLab and never unmounts, so token VALUES persist (only transient slider UI state, like the active easing slot, resets on reopen).
 
 Known gap: the `max-height: 600px` unlock makes `.tokenLab` auto-height, which collapses the demo area's absolutely-positioned crossfade layers. Short viewports are unaddressed and pair with the future true-phone layout work (vertical stacking of all three regions).
+
+
+## Addendum 2026-07-16: the short-viewport known gap is closed
+
+The gap above (the `max-height: 600px` unlock collapsing the demo area's
+absolutely-positioned crossfade layers) is fixed with a floor: under the same
+media query, `.demoArea` takes `min-height: 600px`, so the layers always have a
+box and the body scrolls the difference. The bug had narrowed since this doc was
+written: the 2026-07-14 mobile gate removed every viewport under 720px wide, and
+at 730px and wider the full tool bar's natural height (~1750px) holds the grid
+row open on its own. The one reachable manifestation was the boundary: at
+exactly 720px wide (gate fires below 720, rail collapse fires at 720 and below)
+with a sub-600px height, the demo column collapsed to 105px. Verified on built
+output: with the floor it holds 600px there, all three tools render at
+1200x550, and the normal viewport-locked layout is unchanged. The true-phone
+layout work this gap was paired with remains out of scope by the mobile-gate
+decision.

@@ -228,20 +228,6 @@
    --color-surface-active distinguishes this from the card's surface-raised
    background — reads as a designated stage area, not empty space.
    Replaced by Rive illustration in Phase 6. */
-.animationPlaceholder {
-  flex: 1;
-  background-color: var(--color-surface-active);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.animationPlaceholderText {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
 
 /* Right half: vertically centered as a block by the parent's align-items:
    center. The 40px padding on expandedContent clears the close button. */

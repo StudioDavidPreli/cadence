@@ -41,7 +41,7 @@ body {
   --font-serif: 'DM Serif Display', serif;
 
   /* Wordmark pixel-title fills (src/components/Wordmark, from the inlined
-     public/titleSVGS/titleThemed.svg). These are the DARK-theme defaults; the
+     public/titleSVGS/title2.svg). These are the DARK-theme defaults; the
      glyph and outline reference the per-theme color tokens, so dark and light
      glyphs re-resolve automatically when data-theme changes. Light and both
      high-contrast themes override the outline (and HC the glyph) below — the

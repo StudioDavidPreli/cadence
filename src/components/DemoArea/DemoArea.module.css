@@ -8,6 +8,19 @@
   height: 100%;
 }
 
+/* Short-viewport floor. Below 600px height the app shell unlocks to natural
+   body scroll (color.css / App.module.css) and every ancestor goes auto-height.
+   The crossfade layers are absolutely positioned, so they contribute no height,
+   and without a floor the demo column collapses to zero: the known gap from
+   navigation-architecture-2026-06-17.md. 600px matches the unlock threshold, so
+   the demo column is never smaller than the smallest viewport that avoids the
+   unlock; the body scrolls the difference. */
+@media (max-height: 600px) {
+  .demoArea {
+    min-height: 600px;
+  }
+}
+
 /* Each destination is a full-bleed absolute layer with its own vertical scroll.
    scrollbar-gutter: stable reserves the scrollbar lane so an expansion inside
    the principles grid that gains a row can't make the scrollbar appear
