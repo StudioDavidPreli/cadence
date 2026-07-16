@@ -66,7 +66,9 @@ whose title colors are decoupled from the system accent.
   `--hero-outline: var(--color-accent)`.
 - `light`: `--hero-outline: #b9b0ff` (lavender, lighter than the light accent).
 - `high-contrast-*`: `--hero-outline: #262626` (near-black halo),
-  `--hero-glyph: #e8b86d` (amber letterforms), both HC modes.
+  `--hero-glyph: #e8b86d` (amber letterforms), both HC modes. *(2026-07-16: now
+  HC-light only; HC-dark overrides the glyph to `#aaccf6`, matching the HC-dark
+  accent re-hue. See the contrast audit's 2026-07-16 addendum.)*
 
 Selector specificity: the `[data-theme=...]` overrides are (0,2,0), outranking the
 `:root` defaults (0,1,0), so they win regardless of source order.

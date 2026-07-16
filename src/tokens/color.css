@@ -59,14 +59,19 @@ body {
 
    Contrast note: in HC-light the amber glyph (#e8b86d) is ~1.5:1 on white — the
    near-black #262626 outline (~15:1 on white) carries legibility. In HC-dark the
-   amber glyph carries it (11.5:1 on black) and the outline recedes. Decorative
-   title, not body text; directed deliberately. */
+   light-blue glyph carries it (12.7:1 on black) and the outline recedes.
+   Decorative title, not body text; directed deliberately. */
 :root[data-theme="light"] {
   --hero-outline: #b9b0ff;  /* lavender — lighter than the light-theme accent */
 }
 :root[data-theme^="high-contrast"] {
   --hero-outline: #262626;  /* near-black halo, both HC modes */
-  --hero-glyph:   #e8b86d;  /* amber letterforms, both HC modes */
+  --hero-glyph:   #e8b86d;  /* amber letterforms, HC-light (HC-dark overrides below) */
+}
+/* Same specificity (0,2,0) as the starts-with block above; source order makes
+   this exact-match override win, so it must stay after that block. */
+:root[data-theme="high-contrast-dark"] {
+  --hero-glyph:   #aaccf6;  /* light blue, matching the HC-dark accent re-hue (2026-07-16) */
 }
 
 /* ─── Dark theme (default) ───────────────────────────────────────────────────

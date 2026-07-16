@@ -220,6 +220,10 @@ Two knock-on notes:
   now, not "active" and "warning."
 - The themed Rive chrome that carries accent color in its own instances was
   re-authored by David the same day: `tokenlabhero2.riv` and `enterthegrid.riv`
-  (their `contrastDark` instances). Other Rive assets holding authored amber in
-  HC-dark (the hero's `colorAccent`, the wordmark's `--hero-glyph` letterforms)
-  were not part of this change and keep their values.
+  (their `contrastDark` instances).
+- **Follow-up, same day:** the wordmark titles' `--hero-glyph` followed. HC-dark
+  now sets it to `#aaccf6` (12.7:1 on black, carries the titles' legibility with
+  the outline receding as before) via an exact-match override after the
+  starts-with HC block; HC-light keeps the amber glyph with the near-black
+  outline carrying legibility. The hero's authored `colorAccent` remains the one
+  amber carrier in HC-dark, David's to re-author or keep.

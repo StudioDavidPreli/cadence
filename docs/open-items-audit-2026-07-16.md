@@ -184,5 +184,5 @@ Site-wide visual rows (record in `docs/deploy-checklist.md`):
 - [x] HC-light ↔ HC-dark switch repaints the Rive artwork in both directions
 - [x] Token Lab guide voice pass (register, em-dash count zero)
 - [x] Reduced-transparency scrim on Modal and Drawer backdrops (OS setting; un-automatable in Playwright)
-- [ ] Enter button hover: confirm the Rive carries a hover response, or ask for the CSS fallback
+- [x] Enter button hover: confirm the Rive carries a hover response, or ask for the CSS fallback
 - [x] MotionTilesTitle optical size now that the artwork has settled
