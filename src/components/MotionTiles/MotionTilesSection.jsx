@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { MOTION_TILES_GRID } from '../../data/navigation'
+import { ErrorBoundary } from '../ErrorBoundary'
 import { MotionTilesLanding } from './MotionTilesLanding'
 import styles from './MotionTilesSection.module.css'
 
@@ -28,9 +29,18 @@ export function MotionTilesSection() {
     return <MotionTilesLanding onEnter={enterMotionTilesGrid} />
   }
 
+  // ErrorBoundary outside Suspense so it catches both a chunk-load failure and a
+  // render-time throw inside the grid (e.g. the motion-token NaN crash), degrading
+  // to a message in place while the rest of the app keeps running. The app root
+  // has its own boundary as a backstop; this one keeps a grid crash local.
   return (
-    <Suspense fallback={<div className={styles.fallback}>Loading the grid…</div>}>
-      <MotionTilesGrid />
-    </Suspense>
+    <ErrorBoundary
+      title="The grid hit a snag"
+      message="The Motion Tiles grid ran into an unexpected error. Reloading usually clears it."
+    >
+      <Suspense fallback={<div className={styles.fallback}>Loading the grid…</div>}>
+        <MotionTilesGrid />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

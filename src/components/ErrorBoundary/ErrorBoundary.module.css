@@ -1,0 +1,50 @@
+/* Fills whatever container it lands in — the whole viewport at the app root, or
+   just the Motion Tiles section when scoped around the lazy grid. A min-height
+   floor keeps the message comfortably centered without forcing full viewport
+   height inside a mid-page section. */
+.boundary {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 60vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: var(--color-bg);
+}
+
+.card {
+  max-width: 32rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+}
+
+.message {
+  margin: 0 0 1.25rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.reload {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-hover);
+  color: var(--color-text-base);
+  padding: 0.5rem 1.25rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reload:hover {
+  background: var(--color-surface-active);
+}

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './tokens/motion.css'
 import './tokens/color.css'
 import { ThemeProvider } from './context/ThemeContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App'
 
 // React Strict Mode enabled.
@@ -14,7 +15,9 @@ import App from './App'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </ThemeProvider>
   </StrictMode>,
 )
