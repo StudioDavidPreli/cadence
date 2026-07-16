@@ -1,13 +1,23 @@
+import { useEffect } from 'react'
 import { MotionTilesLogo } from './MotionTilesLogo'
 import { EnterGridButton } from './EnterGridButton'
 import styles from './MotionTilesLanding.module.css'
 
 // The Motion Tiles landing: the intro that gates the heavy webgl2 grid behind an
-// explicit Enter. It imports nothing from @rive-app/react-webgl2, so it stays in
-// the main bundle and the runtime does not load until onEnter routes to the grid.
-// Copy written against docs/voice/voice-analysis.md (register-shifted for
+// explicit Enter. It imports nothing from @rive-app/react-webgl2 statically, so
+// it stays in the main bundle and the runtime does not parse until the grid
+// mounts. Copy written against docs/voice/voice-analysis.md (register-shifted for
 // portfolio prose: present tense, physical first, the last line does the work).
 export function MotionTilesLanding({ onEnter }) {
+  // Prefetch the lazy grid chunk while the user reads the landing. The same
+  // specifier MotionTilesSection's React.lazy uses resolves to the same chunk,
+  // so by Enter the fetch is done (or in flight) and the Suspense fallback
+  // rarely paints. A dynamic import only downloads and parses; nothing mounts
+  // and no GL context is created until the user actually enters. Fire-and-
+  // forget: a failed prefetch just means Enter falls back to fetching then.
+  useEffect(() => {
+    import('./MotionTilesGrid').catch(() => {})
+  }, [])
   return (
     <div className={styles.landing}>
       <div className={styles.inner}>

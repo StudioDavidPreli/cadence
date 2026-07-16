@@ -41,7 +41,7 @@ Five items rise above the rest. Each is expanded in its section below.
 | Scale press/lift legibility split | Future work, architecture | Deferred, internal legibility only. Note: `motion-presets-harmonized.md` already uses the new names while `motion-presets.md` uses the flat ones, so the two reference docs currently disagree. |
 | Duration scalar for the distance-and-speed visualizer | Future work, architecture | Deferred. The visualizer it serves is itself unplanned work. |
 | Per-section lazy loading, seeded on the new page | Future work, Rive scaling | Effectively done: Motion Tiles shipped as a landing-gated `React.lazy` chunk. The checkbox was never ticked. |
-| Prefetch the active section's `.riv` set on nav open or hover | Future work, Rive scaling | Open. Overlaps the motion-tiles integration doc's "prefetch the grid chunk" item; one covers assets, the other the code chunk. |
+| Prefetch the active section's `.riv` set on nav open or hover | Future work, Rive scaling | Half done 2026-07-16: the grid's JS chunk prefetches on landing mount (verified: both chunk files fetch before Enter), so the Suspense fallback rarely paints. The `.riv` asset half stays open. |
 | Retrofit Principles to lazy | Future work, Rive scaling | Open, and its stated precondition ("after the pattern is proven on Tiles") is now met. This is the move that takes `react-canvas` off first paint. The bundle-revisit trigger ("when the second Rive-heavy section lands") has also fired. |
 
 ### Buried in tracker weekly notes (on the file, not in any open-items section)
@@ -67,7 +67,7 @@ Five items rise above the rest. Each is expanded in its section below.
 - **`docs/deploy-verification-matrix.md`:** the thesis test now has a passing manual run (2026-07-16) but the automated test the matrix specifies is still unwritten, as is the rest of the Tier 1 suite and the four-phase plan. ~~One explicit open question: whether Playwright `emulateMedia` supports `prefers-reduced-transparency`.~~ Answered 2026-07-16: it does not; that row is manual Tier 3 permanently.
 - **Coverage gap in both docs:** neither mentions Motion Tiles, the fourth theme, or the Worker deployment. The checklists describe an app two tools and one theme smaller than the one that shipped.
 - **Found and fixed in the item 4 session (2026-07-16):** the eight token sliders had no accessible name and no keyboard-focus indicator, and the DurationVisualizer time readouts failed AA in light theme. All three fixed and re-verified on built output (commit 43ec278).
-- **Keyboard slider adjustment fires no active-token highlight** (`docs/decisions/code-view-active-highlight-2026-06-19.md`, "left as is"). Keyboard users get less feedback than pointer users in the code view. The one open item in this audit that is itself an accessibility behavior rather than an unverified check.
+- ~~**Keyboard slider adjustment fires no active-token highlight**~~ Resolved 2026-07-16: `onFocus`/`onBlur` on the slider sustain and clear the highlight; verified on built output (three connected demo groups light on keyboard focus, clear on blur). Pointer behavior unchanged.
 
 ### Production and correctness risks
 

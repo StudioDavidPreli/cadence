@@ -690,6 +690,15 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
         onChange={e => onChange(Number(e.target.value))}
         onPointerDown={() => setActiveToken(tokenKey)}
         onPointerUp={() => setActiveToken(null)}
+        // Keyboard parity for the active-token highlight: arrow keys fire no
+        // pointer events, so before these two handlers a keyboard user never
+        // saw the code view light up (the gap documented in
+        // code-view-active-highlight-2026-06-19.md). Focus sustains the
+        // highlight, blur clears it. After a mouse drag, pointer-up still
+        // clears while the slider keeps focus, preserving pointer behavior;
+        // a later arrow press still flashes via CodeBlock's value watcher.
+        onFocus={() => setActiveToken(tokenKey)}
+        onBlur={() => setActiveToken(null)}
       />
     </div>
   )
