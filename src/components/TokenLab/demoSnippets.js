@@ -28,14 +28,14 @@ const Drawer = `const tokens = useMotionTokens()
 // drops out on exit. Same duration, opposite shape.
 <motion.div
   initial={{ y: '100%', opacity: 0 }}
-  animate={{ y: ['100%', '-4%', '0%'], opacity: [0, 1, 1] }}
+  animate={{ y: ['100%', '-10%', '0%'], opacity: [0, 1, 1] }}
   transition={{
     duration: tokens.duration.slow,
     times: [0, 0.7, 1],
     ease: tokens.ease.enter,
   }}
   exit={{
-    y: ['0%', '-4%', '100%'],
+    y: ['0%', '-10%', '100%'],
     opacity: [1, 1, 0],
     transition: {
       duration: tokens.duration.slow,
@@ -47,8 +47,7 @@ const Drawer = `const tokens = useMotionTokens()
 
 const Button = `const tokens = useMotionTokens()
 
-// Press dips the button to a smaller scale, then releases
-// back to rest. Short and neutral: feedback, not flourish.
+// Press dips the button to a smaller scale: the squash.
 <motion.button
   whileTap={{
     scale: tokens.scale.base,
@@ -56,6 +55,11 @@ const Button = `const tokens = useMotionTokens()
       duration: tokens.duration.fast,
       ease: tokens.ease.standard,
     },
+  }}
+  // Release rides the overshoot back past rest: the stretch.
+  transition={{
+    duration: tokens.duration.fast,
+    ease: tokens.ease.overshoot,
   }}
 />`
 

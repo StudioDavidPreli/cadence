@@ -16,4 +16,4 @@ The expanded card renders the Carousel from Token Lab's Gesture demo in `compact
 
 ## Tokens used
 
-`duration.base`, `ease.spring` (the slide snap). The dot indicator trails on its own CSS transition so the lag survives alongside the spring.
+`duration.slow`, `ease.overshoot` (the slide snap). The dot indicator trails on its own CSS transition so the lag survives alongside the snap.

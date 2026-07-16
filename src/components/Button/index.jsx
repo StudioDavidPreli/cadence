@@ -15,6 +15,15 @@ export function Button({ children, className = '', ...props }) {
           ease: tokens.ease.standard,
         },
       }}
+      // The release: when the tap ends, scale animates back to rest using this
+      // transition. Without it, Framer Motion falls back to its default spring
+      // for transforms, an easing no token owns. One scale value does both
+      // jobs: the press compresses on standard (the squash), the release rides
+      // the overshoot curve back past rest (the stretch).
+      transition={{
+        duration: tokens.duration.fast,
+        ease: tokens.ease.overshoot,
+      }}
       {...props}
     >
       {children}

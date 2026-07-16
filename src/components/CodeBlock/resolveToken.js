@@ -45,10 +45,11 @@ export function tokenPathMatchesActive(path, activeToken) {
 //
 // EDITABLE_TOKEN_SCHEMA (data/motionPresets.js) is the single source of truth for
 // what the editor exposes a control for. A token whose key is not in the schema
-// for its family is a fixed reference: ease.linear and ease.overshoot (constant
-// curves the bezier visualizer can't reach) and delay.none. The code view marks
-// those so a comment that never moves while sliders are dragged (Spinner's
-// ease.linear is the clearest case) reads as intentional, not broken.
+// for its family is a fixed reference: ease.linear (corners only, nothing to
+// drag) and delay.none. Overshoot is in the schema, an editable slot whose
+// control surfaces only in Explore mode, so it is never marked. The code view
+// marks the fixed pair so a comment that never moves while sliders are dragged
+// (Spinner's ease.linear is the clearest case) reads as intentional, not broken.
 //
 // Same naming boundary as tokenPathMatchesActive: a snippet path names the easing
 // family "ease"; the schema (control layer) names it "easing". Normalize before

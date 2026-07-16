@@ -23,7 +23,7 @@ Defined in `src/tokens/motion.css`.
   --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
   --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Delay */
   --motion-delay-none: 0ms;
@@ -45,11 +45,13 @@ Defined in `src/tokens/motion.css`.
 
 Not every token is a dial. The token set splits in two, and the split governs how Token Lab and the live code view behave.
 
-**Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the three easing slots (standard, enter, exit), the three delays (short, medium, long), and the four scales (subtle, base, expressive, lift). `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
+**Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the four easing slots (standard, enter, exit, overshoot), the three delays (short, medium, long), and the four scales (subtle, base, expressive, lift). Overshoot is the one editable slot whose control only surfaces in Explore mode: its Y > 1 handle needs the visualizer's extended vertical range, so Constrained mode hides its tab and leaves it at the default curve. `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
 
-**Fixed reference tokens** are real tokens components use, but no control reaches them: `ease.linear`, `ease.spring`, and `delay.none`. `stateToTokens` wires these to constants instead of editor state, and `FIXED_REFERENCE_PATHS` lists them as the exact complement of the editable schema.
+**Fixed reference tokens** are real tokens components use, but no control reaches them: `ease.linear` and `delay.none`. `stateToTokens` wires these to constants instead of editor state, and `FIXED_REFERENCE_PATHS` lists them as the exact complement of the editable schema.
 
-They are anchors, not dials. `ease.linear` is "no easing" itself, the constant-velocity baseline a curve is measured against, so a slider that bent it would unname it. `ease.spring` is a fixed expressive signature, the same overshoot every spring read shares. `delay.none` is the system's named zero, so a component that starts immediately can say so in token terms: the Stepper's first beat reads `tokens.delay.none`, not a literal `0`. Make any of the three editable and it stops anchoring the thing it names.
+They are anchors, not dials. `ease.linear` is "no easing" itself, the constant-velocity baseline a curve is measured against, so a slider that bent it would unname it. `delay.none` is the system's named zero, so a component that starts immediately can say so in token terms: the Stepper's first beat reads `tokens.delay.none`, not a literal `0`. Make either editable and it stops anchoring the thing it names.
+
+The fixed set used to be three. `ease.spring` was renamed to `ease.overshoot` on 2026-07-08 (a cubic-bezier approximates spring overshoot but is not a spring; `docs/references/motion-presets-harmonized.md` carries the reasoning) and moved into the editable schema as the Explore-only fourth slot described above.
 
 This is why a value in the live code view can sit still while the sliders move. The code view tags every fixed read `(fixed)`. Spinner's rotation reads `tokens.ease.linear`, so its easing comment holds at `[0, 0, 1, 1]` no matter what the easing tabs do, while its duration comment still ticks. `isEditableToken` in `src/components/CodeBlock/resolveToken.js` makes the call, and a guard test in `resolveToken.test.js` asserts the editable schema and the fixed set together classify every token the runtime carries, with no overlap and none left over.
 
@@ -75,7 +77,7 @@ Token Lab exports the live token state as a downloadable file. Export is the inv
 
 The export pipeline is four pure functions in `src/data/motionPresets.js`:
 
-1. `stateToExport(state)` normalizes the editor's `rawState` into a format-agnostic object in CSS-side units (ms numbers, four-number bezier arrays, unitless scale). It emits the complete token set, including the members the editor never exposes as sliders: `ease.linear`, `ease.spring`, and `delay.none`. An export that dropped those would be a partial file, not a usable one.
+1. `stateToExport(state)` normalizes the editor's `rawState` into a format-agnostic object in CSS-side units (ms numbers, four-number bezier arrays, unitless scale). It emits the complete token set, including the members the editor never exposes as sliders: `ease.linear` and `delay.none`. An export that dropped those would be a partial file, not a usable one.
 2. `toDtcgJson(state)` serializes that object to the W3C Design Tokens Community Group format, wrapping each leaf in `$type` / `$value` under a top-level `motion` namespace. This is the shape Style Dictionary, Tokens Studio, and Figma Variables consume. The draft spec has no motion-specific delay type, so delays serialize as `duration`.
 3. `toFlatJson(state)` serializes the same object to a flat JSON mirroring the CSS variable names: ms strings, `cubic-bezier()` strings, bare scale numbers.
 4. `toCssVars(state)` serializes the same object to a `:root` block of the editable `--motion-*` custom properties, in the exact variable names and units used by `src/tokens/motion.css`. It is a drop-in replacement for that block. Only the editable token scale is emitted; the `--feedback-*` chrome timings in `motion.css` are not design tokens and are left out.
@@ -94,6 +96,6 @@ The rules:
 - **Clamps scalars, never curves.** Duration, delay, and scale values outside `EXPLORE_BOUNDS` are pulled to the nearest edge and reported. Easing curves are not clamped: a control point with `y` outside `[0,1]` renders outside the visualizer's draggable region (the same state the Spring preset is in), so it loads and is reported as not-editable rather than bent. A curve with `x` outside `[0,1]` is a structural error (CSS rejects it) and fails the import.
 - **Fills missing tokens from Default** and reports each, so a partial file imports rather than failing.
 - **Re-canonicalizes easing.** Export flattens named curves to arrays; import maps a matching array back to its named key, so a round-tripped preset keeps its identity and lights up as active.
-- **Reports foreign keys** but suppresses the three expected constants (`ease.linear`, `ease.spring`, `delay.none`) so a clean round trip shows nothing.
+- **Reports foreign keys** but suppresses the two expected constants (`ease.linear`, `delay.none`) so a clean round trip shows nothing.
 
 On success, TokenLab writes the result into a single reserved "Imported" preset (replacing any previous one), loads it via `LOAD_PRESET`, and opens a report modal (`ImportReport`) listing every clamp, fill, ignored key, and non-editable curve. Fatal failures open the same modal with the error message. The shared `Modal` component gained a focus trap in this pass, since the report made it a real dialog rather than a visual demo.

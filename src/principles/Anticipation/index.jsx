@@ -1,8 +1,11 @@
 import { Drawer } from '../../components/Drawer'
 import styles from './Anticipation.module.css'
 
-// P02 Anticipation. A scoped Drawer dips slightly downward before sliding up —
-// that small reverse motion is the anticipation, preparing the eye for arrival.
+// P02 Anticipation. A scoped Drawer whose countermotion lives on the exit: it
+// lifts in the first fifth of the clock before dropping away, and that small
+// reverse motion is the anticipation. The enter rises past its mark and
+// settles. The copy inside describes the exit, since that is where the
+// principle shows.
 //
 // ── Why drawerOpen / setDrawerOpen are props, not local state ─────────────────
 // This is the one demo whose open state is owned by PrincipleCard rather than
@@ -26,8 +29,8 @@ export function Anticipation({ drawerOpen, setDrawerOpen }) {
         onClose={() => setDrawerOpen(false)}
         title="Anticipation"
       >
-        The drawer dips slightly downward before sliding up. That small
-        reverse motion is anticipation — preparing the eye for arrival.
+        Close this drawer and it lifts before it drops away. That small
+        reverse motion is anticipation: intent shown before the move.
       </Drawer>
     </div>
   )

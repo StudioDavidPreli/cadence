@@ -91,8 +91,10 @@ const Carousel = lazy(() =>
 // though this demo never triggers that path.
 //
 // easing.overshoot became an editable slot (unlocked in Explore mode, 2026-07-08),
-// so it now carries the components that read ease.overshoot: Card's select lift,
-// Carousel's snap, the Notification Badge launch, and the Toggle thumb.
+// so it now carries the components that read ease.overshoot: the Button release
+// (explicit since 2026-07-16; it previously fell to Framer's default spring),
+// Card's select lift, Carousel's snap, the Notification Badge launch, and the
+// Toggle thumb.
 //
 // Rebuilt 2026-06-20 against each component's actual reads in the Token Fidelity
 // audit. The prior table had drifted: NavItem was under easing.standard (it reads
@@ -107,7 +109,7 @@ const TOKEN_COMPONENT_MAP = {
   'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge'],
   'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
   'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar'],
-  'easing.overshoot': ['Card', 'Carousel', 'Notification Badge', 'Toggle'],
+  'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
   'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper'],

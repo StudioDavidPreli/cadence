@@ -4,7 +4,7 @@ Before a pitcher throws, the arm goes back. Before a jump, the knees bend. The m
 
 ## UI demonstration
 
-The expanded card renders the scoped Drawer from Token Lab's Enter & Exit demo. An "Open drawer" trigger sends it up from the bottom edge, but the panel first dips a few pixels downward before it climbs. That dip is the countermotion. It runs on `ease.spring` at `duration.base`, so the reverse travel and the overshoot at the top come from the same curve. The drawer announces itself before it arrives.
+The expanded card renders the scoped Drawer from Token Lab's Enter & Exit demo. An "Open drawer" trigger sends it up from the bottom edge; it rises past its mark by a few percent and settles on `ease.enter`. The countermotion lives on the exit: close the drawer and the panel lifts in the first fifth of the clock, then accelerates down and away on `ease.exit`. Both directions share `duration.slow`. The keyframes carry the reverse travel, the curves carry the character, and the drawer states its intent before it leaves.
 
 ## Animation
 
@@ -16,4 +16,4 @@ The expanded card renders the scoped Drawer from Token Lab's Enter & Exit demo. 
 
 ## Tokens used
 
-`duration.base`, `ease.spring` (the dip and the overshoot share one curve).
+`duration.slow` (both directions), `ease.enter` (the arrival and settle), `ease.exit` (the lift, then the leave).

@@ -40,7 +40,7 @@ Cadence is that thing. Drag `duration.fast` from 100ms to 350ms and watch a butt
 
 Tokens are CSS custom properties in one file, `src/tokens/motion.css`. Four families: duration (fast 100ms, base 200ms, slow 400ms, slower 600ms), easing (five named cubic-bezier curves), delay (a named zero plus short, medium, long), and scale (three press compressions below 1 and a lift above it). Components never hardcode an animation value; they read tokens at runtime through `getComputedStyle`. This is the pattern Material and Primer use, which makes the tool's demonstration authentic rather than simulated: Token Lab edits the same layer a production system would ship.
 
-The set splits into editable tokens and fixed references, and the split is doing real work. The durations, the three easing slots, the delays, and the scales all have sliders. Three tokens deliberately do not: `ease.linear` is the constant-velocity baseline every curve is measured against, `ease.spring` is a fixed expressive signature, and `delay.none` is the system's named zero. A slider that could bend `ease.linear` would unname it. The live code view tags these reads `(fixed)`, and a guard test asserts the two classes partition the full token set with nothing shared and nothing left over.
+The set splits into editable tokens and fixed references, and the split is doing real work. The durations, the four easing slots, the delays, and the scales all have controls; the fourth easing slot, `ease.overshoot`, surfaces its control only in Explore mode, where the curve graph has the vertical room its above-one handle needs. Two tokens deliberately have no control at all: `ease.linear` is the constant-velocity baseline every curve is measured against, and `delay.none` is the system's named zero. A slider that could bend `ease.linear` would unname it. The live code view tags these reads `(fixed)`, and a guard test asserts the two classes partition the full token set with nothing shared and nothing left over.
 
 Token sets export in three formats: W3C DTCG (`$type`/`$value`, the shape Style Dictionary and Figma Variables consume), flat JSON mirroring the CSS variable names, and a drop-in CSS `:root` block. All three serialize from one normalized object so they cannot drift. Import runs the pipeline in reverse with validation: scalars clamp to the Explore bounds and report, missing tokens fill from Default and report, round-tripped curves re-canonicalize to their named keys, and the report modal lists every correction. A tuned token set leaves the tool as the artifact an engineer's pipeline consumes.
 
@@ -54,7 +54,7 @@ The system also draws a line the demonstration depends on. Demonstration motion,
 
 ### The Principles as UI Curriculum
 
-Every principle is demonstrated twice: a Rive illustration on the animation side, and a real UI component on the other, driven by the live token system. The pairing is the pedagogy. A motion designer already knows what anticipation looks like; what Cadence shows is where anticipation lives in an interface (a drawer that dips before it climbs) and which tokens produce it (`ease.spring` at `duration.base`, one curve carrying both the dip and the overshoot).
+Every principle is demonstrated twice: a Rive illustration on the animation side, and a real UI component on the other, driven by the live token system. The pairing is the pedagogy. A motion designer already knows what anticipation looks like; what Cadence shows is where anticipation lives in an interface (a drawer that lifts before it leaves) and which tokens produce it (`ease.exit` at `duration.slow`, with keyframes carrying the countermotion).
 
 Real components were chosen over abstract shapes because abstraction is the problem being solved. A bouncing ball demonstrates easing; it does not demonstrate why a dropdown's chevron should share its menu's timing. The demos use the same Button, Drawer, Modal, and Carousel the Token Lab exercises, so a principle learned in one tool is recognizable in the other, and every demo responds when a token changes.
 
@@ -74,15 +74,15 @@ The architecture is the argument made physical. The tiles carry no clocks of the
 
 ### 01. Squash and Stretch
 **UI Component:** Button (the same one from Token Lab's Press & State demo)
-**Token values driving it:** `scale.base`, `duration.fast`, `ease.spring`
-**Key decision:** Reuse the component the user has already met rather than build a demo prop, so the principle attaches to something they have pressed before.
+**Token values driving it:** `scale.base`, `duration.fast`, `ease.standard`, `ease.overshoot`
+**Key decision:** One scale value carries both halves of the principle; the split lives in the easing, `ease.standard` down and `ease.overshoot` back. And reuse the component the user has already met rather than build a demo prop, so the principle attaches to something they have pressed before.
 **What it demonstrates:** Weight. The press compresses, the release overshoots past rest before settling, and the travel is a few percent of scale doing the whole job.
 
 ### 02. Anticipation
 **UI Component:** Drawer (scoped, from Enter & Exit)
-**Token values driving it:** `duration.base`, `ease.spring`
-**Key decision:** The dip and the overshoot come from one curve rather than two chained animations; the countermotion is the bezier's own undershoot.
-**What it demonstrates:** An action that is caused rather than one that merely happens. The drawer announces itself before it arrives.
+**Token values driving it:** `duration.slow`, `ease.enter`, `ease.exit`
+**Key decision:** Enter and exit share one duration; the character splits in the easing and the keyframe spacing, and the countermotion lives on the exit, a lift in the first fifth of the clock before the drop.
+**What it demonstrates:** An action that is caused rather than one that merely happens. The drawer states its intent before it leaves.
 
 ### 03. Staging
 **UI Component:** Modal with backdrop
@@ -98,7 +98,7 @@ The architecture is the argument made physical. The tiles carry no clocks of the
 
 ### 05. Follow Through and Overlapping Action
 **UI Component:** Carousel (compact, text-only) with its dot indicator
-**Token values driving it:** `duration.base`, `ease.spring` for the slide; the dot deliberately trails on a CSS transition
+**Token values driving it:** `duration.slow`, `ease.overshoot` for the slide; the dot deliberately trails on a CSS transition
 **Key decision:** The dot runs outside Framer Motion entirely, on its own CSS clock, so the lag is structural rather than choreographed. (The same choice fixed a real bug; see Key Decisions.)
 **What it demonstrates:** Parts arriving at different times. The slide arrives, then the dot admits it arrived.
 
@@ -128,8 +128,8 @@ The architecture is the argument made physical. The tiles carry no clocks of the
 
 ### 10. Exaggeration
 **UI Component:** NotificationBadge with New / Clear triggers
-**Token values driving it:** `scale.expressive`, `ease.spring`, `duration.fast`
-**Key decision:** Re-key the badge on every increment so the enter animation fires each time; the compress comes from the initial scale and the overshoot from the spring bezier, two motion sources composing one alert.
+**Token values driving it:** `scale.expressive`, `ease.overshoot`, `duration.slow`
+**Key decision:** Re-key the badge on every increment so the enter animation fires each time; the compress comes from the initial scale and the overshoot from the bezier, two motion sources composing one alert.
 **What it demonstrates:** A badge that scales to exactly 1.0 registers as a state change. One that overshoots registers as an alert. The overshoot is the meaning.
 
 ### 11. Solid Drawing
@@ -140,7 +140,7 @@ The architecture is the argument made physical. The tiles carry no clocks of the
 
 ### 12. Appeal
 **UI Component:** A 2x2 grid of compact Cards with ASCII faces
-**Token values driving it:** All of them: `duration.slower` drives an ambient drift, `duration.base` the settle, `ease.standard` the neutral states, `ease.spring` the selection
+**Token values driving it:** All of them: `duration.slower` drives an ambient drift, `duration.base` the settle, `ease.standard` the neutral states, `ease.overshoot` the selection
 **Key decision:** Per-card phase offsets on the idle drift so the four never sync. Selection freezes the drift, dims the siblings, lifts the chosen card.
 **What it demonstrates:** Appeal is the other principles working in concert. Nothing here is remarkable alone; nothing is wrong, and that is the effect.
 

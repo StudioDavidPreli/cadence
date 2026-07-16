@@ -4,7 +4,7 @@ Amplifying an action beyond reality to clarify or heighten its emotional truth. 
 
 ## UI demonstration
 
-The expanded card renders a NotificationBadge with two triggers: New (increment) and Clear (reset to zero). Each increment re-keys the badge so Framer Motion's enter animation fires: `initial: { scale: tokens.scale.expressive }` (0.9) to `animate: { scale: 1 }` with `tokens.ease.spring`. The compress comes from the initial value. The overshoot above 1 comes from the spring bezier (0.34, 1.56, 0.64, 1). Two motion sources combine into one alert.
+The expanded card renders a NotificationBadge with two triggers: New (increment) and Clear (reset to zero). Each increment re-keys the badge so Framer Motion's enter animation fires: the pill starts at `tokens.scale.expressive` (0.9), launches through a peak of 1.2 on `tokens.ease.overshoot`, holds there, then settles to 1 on `tokens.ease.standard`, all inside one `tokens.duration.slow` window. The compress is system-correct. The peak is a hand-tuned keyframe above any scale token, and that violation is the point: exaggeration is the system going past its own rules to signal intensity.
 
 ## Animation
 
@@ -16,4 +16,4 @@ The expanded card renders a NotificationBadge with two triggers: New (increment)
 
 ## Tokens used
 
-`scale.expressive`, `ease.spring`, `duration.fast`.
+`scale.expressive`, `ease.overshoot`, `duration.slow`.
