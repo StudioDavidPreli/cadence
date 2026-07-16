@@ -80,6 +80,6 @@ The pixel pipeline was strong on *how much and when* and repeatedly wrong on *wh
 
 ---
 
-Handoff state: `TOKEN_LAB_WORKFLOW.md` carries the operating knowledge; per-row specs are build-current with all in-editor corrections folded back; the React contract is `TOKEN_LAB_INGREDIENTS.md` §6; snappy/cinematic remain [proposed] pending a tuning pass against the live grid — the one number-turning session left in the project, and a pleasant one.
+Handoff state: `TOKEN_LAB_WORKFLOW.md` carries the operating knowledge; per-row specs are build-current with all in-editor corrections folded back; the React contract is `TOKEN_LAB_INGREDIENTS.md` §6; snappy/cinematic remain [proposed] pending a tuning pass against the live grid — the one number-turning session left in the project, and a pleasant one. **Resolved 2026-07-16: David reviewed the shipped values against the live grid in the Tier 3 sign-off sweep and blessed them as final. No tuning session; [proposed] is retired. This note supersedes the same [proposed] marker in WORKFLOW, INGREDIENTS §3, and PHASE2 §6.**
 
 React connection proven end to end 2026-07-08: the Cadence panel drives `IngredientVM` (`speed`, `easing`, preset instance) against the live `Parametric` grid on localhost, still gated behind a `?ingredients` test route. This closes the phase-1 preset-switch question; details in `TOKEN_LAB_INGREDIENTS.md` §6.

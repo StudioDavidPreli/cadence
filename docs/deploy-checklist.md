@@ -41,9 +41,9 @@ Surfaces added after the first draft. The guide is the project's largest block o
 body text, the landing is the first thing a hiring manager sees, and the nav was
 rebuilt to open Token Lab to the guide.
 
-- [ ] Landing renders the final `hero.riv`, not the fallback prompt
+- [x] Landing renders the final `hero.riv`, not the fallback prompt: verified by David on the live site, Tier 3 sweep 2026-07-16
 - [x] Token Lab guide: heading and body text meet 4.5:1 in all four modes (light, dark, high-contrast-light, high-contrast-dark): verified 2026-07-16, built output via Playwright: computed-style sweep, zero failures
-- [ ] Token Lab guide: copy reads in David's voice, em-dash count zero
+- [x] Token Lab guide: copy reads in David's voice, em-dash count zero: David's read, Tier 3 sweep 2026-07-16
 - [x] Token Lab guide: inline `code` chips legible in every theme (the accent-subtle background sets its own text color): verified 2026-07-16, built output via Playwright (in the same sweep)
 - [x] Navigation keyboard operable: Tab into the accordion, Overview and category leaves reachable, Enter/Space activate: verified 2026-07-16, built output via Playwright: real Tab walk, Enter toggles aria-expanded, aria-current set
 - [ ] Opening Token Lab shows the guide; the Overview leaf returns to it after a category
@@ -81,9 +81,9 @@ so a regression in one HC mode usually shows in both.
 - [x] Reduced-motion mode verified against `prefers-reduced-motion`: verified 2026-07-16, built output via Playwright via emulateMedia: Modal fully appears and fully leaves under reduce
 - [x] Theme switch re-reads tokens: verified 2026-07-16, built output via Playwright: custom properties re-resolve on data-theme flip; chrome color transitions run (sample after the transition, not at t=0)
 - [x] high-contrast-dark Rive artwork: icons, hero, and carousel paint white stroke on black (the shared `Contrast` instance flipped at runtime via `useHCContrastColors`). Verified 2026-06-22.
-- [ ] Switching high-contrast-light <-> high-contrast-dark repaints the Rive artwork in both directions (the shared `Contrast` instance is re-asserted per theme)
+- [x] Switching high-contrast-light <-> high-contrast-dark repaints the Rive artwork in both directions: verified by David, Tier 3 sweep 2026-07-16 (with the HC-dark accent re-hue in place)
 - [x] forced-colors (Windows HCM): accent/box-shadow state cues survive: verified 2026-07-16, built output via Playwright via emulateMedia: active leaf outline solid 2px, connection ring outline solid 2px. Title pulse not exercised
-- [ ] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim: NOT automatable, Playwright emulateMedia has no reduced-transparency flag (answers the matrix's T1? question; manual Tier 3, last verified by forced match 2026-06-22)
+- [x] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim: NOT automatable (no emulateMedia flag); verified by David under the OS setting, Tier 3 sweep 2026-07-16
 - [ ] First load with no stored choice follows the OS: `prefers-contrast: more` resolves to high-contrast-light or high-contrast-dark by `prefers-color-scheme`, otherwise light/dark by `prefers-color-scheme`; a stored choice is restored without a flash
 
 ## Token integrity (the core argument, under test)

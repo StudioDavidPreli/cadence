@@ -22,7 +22,7 @@ Five items rise above the rest. Each is expanded in its section below.
 
 4. **[CRITICAL] Short desktop windows break the demo-area crossfade.** At 720px or wider and 600px or shorter, the `max-height` unlock makes `.tokenLab` auto-height and collapses the absolutely-positioned crossfade layers. The 2026-07-14 mobile gate covers width only, so this remains reachable on the deployed site by resizing, and pairs with 200% browser zoom. Recorded as a known gap in `docs/decisions/navigation-architecture-2026-06-17.md`, never scheduled. *(On the tracker only as a buried weekly note.)*
 
-5. **[CRITICAL, in progress] Motion Tiles shipped with its design sign-offs unrecorded.** *(Update 2026-07-16: David is running the Tier 3 visual sweep now; record each verdict in `GROUP2_PATHEFFECT_ROLLOUT_CLOSEOUT.md` or the tracker as it lands.)* The snappy and cinematic preset values are marked `[proposed]` in four briefing docs, "pending a tuning pass against the live grid" that no doc records happening; the values shipped verbatim. Three per-tile visual confirmations flagged for David were never recorded as done: the stroked-shape pixelation read (r1c4, r4c2, r6c6), the r1c6 `circleScale` percent-rule scrub (a potential collapsed-at-rest state), and the flip (r1c2) amplitude read against the reference sheet. All of these tiles are live in the shipped pool. These may all be fine on screen; the record does not say. *(Not on tracker.)*
+5. ~~**[CRITICAL] Motion Tiles shipped with its design sign-offs unrecorded.**~~ **Closed 2026-07-16: David ran the full Tier 3 sweep** (thirteen rows, all ticked below); verdicts recorded in the tracker's Motion Tiles section and `TOKEN_LAB_CLOSEOUT.md`. The preset values are blessed as final; [proposed] is retired. *(Update 2026-07-16: David is running the Tier 3 visual sweep now; record each verdict in `GROUP2_PATHEFFECT_ROLLOUT_CLOSEOUT.md` or the tracker as it lands.)* The snappy and cinematic preset values are marked `[proposed]` in four briefing docs, "pending a tuning pass against the live grid" that no doc records happening; the values shipped verbatim. Three per-tile visual confirmations flagged for David were never recorded as done: the stroked-shape pixelation read (r1c4, r4c2, r6c6), the r1c6 `circleScale` percent-rule scrub (a potential collapsed-at-rest state), and the flip (r1c2) amplitude read against the reference sheet. All of these tiles are live in the shipped pool. These may all be fine on screen; the record does not say. *(Not on tracker.)*
 
 ---
 
@@ -77,7 +77,7 @@ Five items rise above the rest. Each is expanded in its section below.
 - **`getExpandedFootprint` at `columnCount === 1`** still computes an invalid grid line. Structurally unreachable since the 420px demo-column floor; the code was never patched and carries no test. Fine as long as the floor holds; the second Vitest slice (footprint extraction) from the 2026-06-18 handoff never happened.
 - **Re-export bind regression rule.** Any future group-2 tile re-export needs the HUD unbound check; the r4c1 blank-tile export is the precedent. Standing rule, no owner.
 
-### Motion Tiles sign-offs *(Critical flag 5)*
+### Motion Tiles sign-offs *(Critical flag 5)*: all closed by David's Tier 3 sweep, 2026-07-16; verdicts in the tracker
 
 - snappy / cinematic preset values shipped as `[proposed]`; the tuning pass ("the one number-turning session left in the project") is unrecorded.
 - Stroked-shape pixelation read on r1c4, r4c2, r6c6: flagged for visual confirmation in three docs, never closed.
@@ -157,14 +157,14 @@ Work that happened; the record still said otherwise. **All items below were clos
 2. ~~Verify the WASM fetch on the live site; apply the `setWasmUrl` pin.~~ Done 2026-07-16; ships with the next deploy.
 3. The source-doc reconciliation pass. ~~The mechanical half: Part 3's one-liners, the stale banners, the small hygiene closes.~~ Done 2026-07-16. The case-study half (framing decisions, full source refresh) folds into Week 10.
 4. ~~A single verification session against the deploy checklist on built output.~~ Done 2026-07-16: fifteen rows dated, three failures fixed (commit 43ec278). The automated suite and the remaining rows are listed under Critical flag 2.
-5. The Motion Tiles sign-off sweep: one session in front of the live grid with the five flagged tiles and the two preset values. **In progress (David, started 2026-07-16).** The full Tier 3 shortlist also includes: hero final art on the live site, four-theme visual parity on the Rive surfaces, the guide voice pass, and the reduced-transparency scrim (un-automatable).
+5. ~~The Motion Tiles sign-off sweep.~~ Done 2026-07-16: David closed all thirteen Tier 3 rows; three assets re-authored along the way for the HC-dark accent re-hue.
 6. Week 10.
 
 The rest is future work in the honest sense, and the tracker's Future work section is the right home for the items in Part 2 worth keeping alive: the Principles lazy retrofit, the prefetch pass, the preset vocabulary unification, and the physics-spring family.
 
 ---
 
-## Tier 3 shortlist (David, in progress 2026-07-16)
+## Tier 3 shortlist: CLOSED (David, 2026-07-16)
 
 The rows only eyes can close. Tick each here as the verdict lands, and note it in the source doc named in parentheses so the drift this audit chased does not restart.
 
@@ -180,7 +180,7 @@ Motion Tiles sign-offs (record in `GROUP2_PATHEFFECT_ROLLOUT_CLOSEOUT.md` or the
 Site-wide visual rows (record in `docs/deploy-checklist.md`):
 
 - [x] Landing renders the final hero art on the live site, not the fallback prompt
-- [ ] Four-theme visual parity on the Rive surfaces (the text-contrast sweep is done; art is the open half)
+- [x] Four-theme visual parity on the Rive surfaces (the text-contrast sweep is done; art is the open half)
 - [x] HC-light ↔ HC-dark switch repaints the Rive artwork in both directions
 - [x] Token Lab guide voice pass (register, em-dash count zero)
 - [x] Reduced-transparency scrim on Modal and Drawer backdrops (OS setting; un-automatable in Playwright)
