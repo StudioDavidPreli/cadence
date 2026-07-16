@@ -227,3 +227,22 @@ Two knock-on notes:
   starts-with HC block; HC-light keeps the amber glyph with the near-black
   outline carrying legibility. The hero's authored `colorAccent` remains the one
   amber carrier in HC-dark, David's to re-author or keep.
+
+## Correction 2026-07-16: accent is no longer strokes-only
+
+The "stays UI-strokes-only so the governing bar remains 3:1" line above (and the
+same claim in CLAUDE.md) had drifted by the time it was written. A census during
+the deploy-checklist accent row found seven `color: var(--color-accent)` text
+uses: the bug-report sent status (app footer and Motion Tiles panel), the fps
+warn readout and `.warn`, the grid load error, the custom-curve reset button in
+the ease grid, and the PrincipleCard classic category chip. Six are state
+signals consistent with the accent role. Computed ratios (scripted, not by
+eye): accent as text clears 4.5:1 in all four themes on every surface it sits
+on; worst case is the category chip on its `--color-accent-subtle` tint,
+5.25:1 in light and HC-light. So the text bar governs those uses and passes.
+
+Open question, David's call: the category chips (`.categoryClassic` accent,
+`.categoryExtended` accent2) use the accent family as taxonomy color, which
+reads decorative against the stated "active/connected only" role. Either bless
+the chips as a documented exception or move them to a neutral pair. Recorded in
+the deploy checklist's accent row, left unticked until the verdict.
