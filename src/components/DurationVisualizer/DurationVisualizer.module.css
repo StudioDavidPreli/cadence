@@ -131,7 +131,10 @@
 .trackTime {
   font-size: 10px;
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted2);
+  /* muted, not muted2: muted2 is #888 in light, 3.25:1 on the light bg —
+     below the 4.5:1 text floor. Same trap TokenLabGuide documents. muted2
+     stays correct for graphical uses (the slider thumb). */
+  color: var(--color-text-muted);
 }
 
 /* The rail the dot travels along. A faint center line shows the full track so

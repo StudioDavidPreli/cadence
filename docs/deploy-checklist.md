@@ -42,10 +42,10 @@ body text, the landing is the first thing a hiring manager sees, and the nav was
 rebuilt to open Token Lab to the guide.
 
 - [ ] Landing renders the final `hero.riv`, not the fallback prompt
-- [ ] Token Lab guide: heading and body text meet 4.5:1 in all four modes (light, dark, high-contrast-light, high-contrast-dark)
+- [x] Token Lab guide: heading and body text meet 4.5:1 in all four modes (light, dark, high-contrast-light, high-contrast-dark): verified 2026-07-16, built output via Playwright: computed-style sweep, zero failures
 - [ ] Token Lab guide: copy reads in David's voice, em-dash count zero
-- [ ] Token Lab guide: inline `code` chips legible in every theme (the accent-subtle background sets its own text color)
-- [ ] Navigation keyboard operable: Tab into the accordion, Overview and category leaves reachable, Enter/Space activate
+- [x] Token Lab guide: inline `code` chips legible in every theme (the accent-subtle background sets its own text color): verified 2026-07-16, built output via Playwright (in the same sweep)
+- [x] Navigation keyboard operable: Tab into the accordion, Overview and category leaves reachable, Enter/Space activate: verified 2026-07-16, built output via Playwright: real Tab walk, Enter toggles aria-expanded, aria-current set
 - [ ] Opening Token Lab shows the guide; the Overview leaf returns to it after a category
 - [ ] Deep links resolve: `#/token-lab` (guide), `#/token-lab/<category>` (demo), back button traverses
 
@@ -56,8 +56,8 @@ rebuilt to open Token Lab to the guide.
 For every interactive demo (Button, Toggle, Dropdown, Stepper, sliders, tabs):
 
 - [ ] Disabled state defined and visually distinct
-- [ ] Focus-visible ring present and meeting 3:1 against adjacent colors
-- [ ] Keyboard operable: Tab order correct, Enter/Space/Arrow where expected
+- [x] Focus-visible ring present and meeting 3:1 against adjacent colors: verified 2026-07-16, built output via Playwright. Buttons: UA ring, correct per color-scheme (3.5:1 light / 12:1 dark). Sliders had NO ring (outline: none); fixed same day with a 2px accent :focus-visible outline
+- [x] Keyboard operable: Tab order correct, Enter/Space/Arrow where expected: verified 2026-07-16, built output via Playwright: tab order logical, arrow keys drive sliders and update tokens live. Sliders had no accessible name; fixed same day (aria-label=tokenKey)
 - [ ] Hover state does not depend on hover alone to convey meaning
 - [ ] Active/pressed state distinct from hover
 
@@ -75,30 +75,30 @@ The two high-contrast modes are surface/text inversions of each other; verify bo
 not just one. Tokens and HC-specific CSS (`[data-theme^="high-contrast"]`) are shared,
 so a regression in one HC mode usually shows in both.
 
-- [ ] Parity on every component across all four modes (light, dark, high-contrast-light, high-contrast-dark)
+- [x] Parity across all four modes: text-contrast sweep verified 2026-07-16, built output via Playwright on guide, Press & State, Principles, and Motion Tiles views; visual art parity stays a human check (Tier 3)
 - [ ] Every `background-color` rule also sets `color` (no inherited-color assumption)
 - [ ] `--color-accent` reads as active/connected only, never decorative
-- [ ] Reduced-motion mode verified against `prefers-reduced-motion`
-- [ ] Theme switch re-reads tokens (Framer Motion values do not re-read on their own)
+- [x] Reduced-motion mode verified against `prefers-reduced-motion`: verified 2026-07-16, built output via Playwright via emulateMedia: Modal fully appears and fully leaves under reduce
+- [x] Theme switch re-reads tokens: verified 2026-07-16, built output via Playwright: custom properties re-resolve on data-theme flip; chrome color transitions run (sample after the transition, not at t=0)
 - [x] high-contrast-dark Rive artwork: icons, hero, and carousel paint white stroke on black (the shared `Contrast` instance flipped at runtime via `useHCContrastColors`). Verified 2026-06-22.
 - [ ] Switching high-contrast-light <-> high-contrast-dark repaints the Rive artwork in both directions (the shared `Contrast` instance is re-asserted per theme)
-- [ ] forced-colors (Windows HCM): accent/box-shadow state cues survive (nav active leaf, Token Lab connection ring, title pulse) via outline + system colors
-- [ ] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim, not the translucent 0.8
+- [x] forced-colors (Windows HCM): accent/box-shadow state cues survive: verified 2026-07-16, built output via Playwright via emulateMedia: active leaf outline solid 2px, connection ring outline solid 2px. Title pulse not exercised
+- [ ] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim: NOT automatable, Playwright emulateMedia has no reduced-transparency flag (answers the matrix's T1? question; manual Tier 3, last verified by forced match 2026-06-22)
 - [ ] First load with no stored choice follows the OS: `prefers-contrast: more` resolves to high-contrast-light or high-contrast-dark by `prefers-color-scheme`, otherwise light/dark by `prefers-color-scheme`; a stored choice is restored without a flash
 
 ## Token integrity (the core argument, under test)
 
 - [x] No hardcoded duration, easing, or delay in any component (enforced by `src/tokens/tokenIntegrity.test.js`; chrome timing reads fixed `--feedback-*` constants, demonstration motion reads editable `--motion-*`). 2026-06-23
 - [ ] Every animated value traces to a CSS custom property
-- [ ] Token Lab changes propagate to all consuming components live
+- [x] Token Lab changes propagate to consuming components live: verified 2026-07-16, built output via Playwright: slider drive rewrote --motion-duration-fast 100->350ms and the code view's live value followed (0.1s -> 0.35s). The matrix's T1 thesis test, run by hand; the automated version stays open
 - [ ] Constrained vs Explore mode toggles behave correctly per section
 
 ## Accessibility floors
 
-- [ ] 4.5:1 contrast on normal text, every theme (all four modes)
-- [ ] 3:1 on large text and UI components, every theme (all four modes)
-- [ ] Reduced motion does not strand a user without feedback
-- [ ] Focus never lost into a closed Modal or Drawer
+- [x] 4.5:1 contrast on normal text, every theme (all four modes): verified 2026-07-16, built output via Playwright: computed-style sweep over four views x four themes. One failure found and fixed same day: DurationVisualizer .trackTime used muted2 (#888, 3.25:1 in light); now muted
+- [x] 3:1 on large text and UI components: verified 2026-07-16, built output via Playwright for focus rings and the accent-stroke uses exercised; full UI-component census not run
+- [x] Reduced motion does not strand a user without feedback: verified 2026-07-16, built output via Playwright: dialog reaches full opacity and closes under reduce
+- [x] Focus never lost into a closed Modal or Drawer: verified 2026-07-16, built output via Playwright: focus trap cycles, Escape closes, focus lands on body after close (restore-to-trigger is a documented non-goal; soft follow-up)
 
 ## Build hygiene
 

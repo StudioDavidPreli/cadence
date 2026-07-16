@@ -678,6 +678,11 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
       <input
         type="range"
         className={styles.slider}
+        // The visible label lives in a sibling span, which no accessible-name
+        // algorithm reaches — without this a screen reader announces only
+        // "slider". tokenKey ("duration.fast") over the bare name ("fast")
+        // because the section prefix is what disambiguates it aloud.
+        aria-label={tokenKey}
         min={config.min}
         max={config.max}
         step={config.step}
@@ -953,6 +958,7 @@ function ProgressBarDemo() {
         <input
           type="range"
           className={styles.slider}
+          aria-label="Progress value"
           min={0}
           max={100}
           step={1}
