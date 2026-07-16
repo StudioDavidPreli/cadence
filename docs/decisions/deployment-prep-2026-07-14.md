@@ -153,3 +153,44 @@ Dashboard follow-up is unchanged in intent, corrected in venue: set `GH_TOKEN`
 as a **Workers** project secret (the block lifts once the worker script is
 deployed), then retry the deployment so it takes. `GH_REPO` no longer needs a
 dashboard entry — it ships in `wrangler.jsonc`.
+
+## Addendum (2026-07-15, third) — grafted onto Cloudflare's Vite-plugin autoconfig
+
+Between the second addendum and pushing, the Cloudflare dashboard's bot had
+already committed its own **"Add Cloudflare Workers configuration"** (PR #7,
+merged to `origin/main`) — discovered only when the push was rejected for
+diverged history. That autoconfig chose the **`@cloudflare/vite-plugin`**
+pattern, not the hand-rolled assets binding the second addendum describes. We
+grafted our worker onto Cloudflare's scaffolding (a merge commit) rather than
+override it, because it matches whatever build the connected dashboard expects
+and is Cloudflare's current recommended pattern. This supersedes the second
+addendum's config specifics:
+
+- **`vite.config.js`** now includes `cloudflare()` (from Cloudflare's commit).
+  `npm run build` (`vite build`) emits **`dist/client/`** (assets) and
+  **`dist/cadence/index.js`** (the bundled worker) plus a generated
+  `dist/cadence/wrangler.json` and a `.wrangler/deploy/config.json` redirect.
+  So there is **no `assets.directory: "./dist"`** — the plugin derives the
+  assets dir (`dist/client`); the second addendum's `./dist` line is obsolete.
+- **`wrangler.jsonc`** is Cloudflare's base (`$schema`, `nodejs_compat`,
+  `observability`, `assets.not_found_handling: "single-page-application"`) plus
+  our graft: `main: "worker/index.js"`, `assets.binding: "ASSETS"`,
+  `run_worker_first: ["/api/*"]`, `vars.GH_REPO`. `run_worker_first` is
+  **load-bearing** under SPA `not_found_handling`: without it an unmatched
+  `/api/bug-report` gets the index.html fallback instead of the worker.
+- **`wrangler` and `@cloudflare/vite-plugin` are now devDependencies** (from
+  Cloudflare's commit), so wrangler is no longer an `npx` fetch.
+- **`vitest.config.js`** is new. The `cloudflare()` plugin defines a Worker
+  build environment whose `resolve.external` collides with Vitest's node-builtin
+  externalization and aborts Vitest at startup. Vitest loads this React-only
+  config in preference to `vite.config.js`, so the suite (token gate included)
+  runs again. It sits at the repo root, outside the token gate's
+  `src/{components,principles}` scan scope.
+
+Build/deploy commands (Cloudflare's generated `package.json` scripts, unchanged):
+`npm run dev` = `vite` (worker runs in-process via the plugin);
+`npm run build` = `vite build`; `npm run deploy` = `npm run build && wrangler deploy`.
+Bare `wrangler deploy` from the root follows the `.wrangler/deploy/config.json`
+redirect to the built `dist/cadence/` — confirmed with `wrangler deploy --dry-run`.
+The `worker/index.js` handler, the guard/honeypot/GitHub logic, and the
+`GH_TOKEN`-secret / `GH_REPO`-var split are all unchanged from the second addendum.
