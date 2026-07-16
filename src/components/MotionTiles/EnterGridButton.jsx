@@ -15,8 +15,8 @@ import styles from './EnterGridButton.module.css'
 // animation (enterthegrid.riv) instead of text and themed per display mode. Same
 // theme-binding pattern as MotionTilesLogo / TokenLabTitle, wrapped in a real
 // <button>:
-//   - the canvas is the visible label; pointer-events:none (CSS) sends every click
-//     to the <button>, never Rive's own hit-testing
+//   - the canvas is the visible label and receives pointer events, so the SM's
+//     hover scale (added 2026-07-16) runs; clicks still bubble to the <button>
 //   - the button keeps a text accessible name (aria-label) and a plain-text
 //     fallback until the canvas paints, so it degrades to a readable button if the
 //     .riv is slow or absent

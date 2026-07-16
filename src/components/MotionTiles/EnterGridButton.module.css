@@ -23,13 +23,14 @@
   border-radius: 6px;
 }
 
-/* pointer-events:none so a click always reaches the button, never Rive's own
-   pointer handling on the canvas. */
+/* No pointer-events:none here (same as the Problems? button): the 2026-07-16
+   enterthegrid.riv carries a hover scale animation in enterTheGridSM, and the
+   state machine only sees the pointer if the canvas receives events. The DOM
+   click still bubbles to the wrapping <button>, so Enter behaves as before. */
 .canvas {
   width: 100%;
   height: 100%;
   display: block;
-  pointer-events: none;
 }
 
 /* Plain-text stand-in shown until the canvas paints (or if the .riv is absent),

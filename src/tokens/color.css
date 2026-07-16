@@ -239,7 +239,7 @@ body {
    text-base (#ffffff) on bg (#000000)            21.0:1  AAA ✓
    text-muted (#ffffff) on surface-active (#0f0f0f) 19.2:1 AAA ✓
    text-primary (#000000) on surface (#ffffff)    21.0:1  AAA ✓
-   accent (#e8b86d) on bg (#000000)               11.5:1  AAA ✓
+   accent (#aaccf6) on bg (#000000)               12.7:1  AAA ✓  (light blue since 2026-07-16; was amber #e8b86d at 11.5:1)
    accent2 (#c2b6ff) on bg (#000000)              11.4:1  AAA ✓  (SVG stroke — 3:1 threshold)
    accent3 (#f5c563) on bg (#000000)              13.0:1  AAA ✓ */
 :root[data-theme="high-contrast-dark"] {
@@ -266,8 +266,8 @@ body {
   /* Bright accents, AAA-verified against #000000. accent2 clears AAA here (the
      light-theme HC variant could only reach AA on white); it is still used only
      as an SVG stroke, so the 3:1 graphical threshold is met with wide margin. */
-  --color-accent:         #e8b86d;  /* amber — 11.5:1 AAA on black */
-  --color-accent-subtle:  rgba(232, 184, 109, 0.12);
+  --color-accent:         #aaccf6;  /* light blue — 12.7:1 AAA on black (was amber, 2026-07-16) */
+  --color-accent-subtle:  rgba(170, 204, 246, 0.12);
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */

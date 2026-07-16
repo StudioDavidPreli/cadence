@@ -207,7 +207,7 @@ body {
   --color-text-muted:     #ffffff;  /* no grays in high-contrast */
   --color-text-muted2:    #ffffff;
 
-  --color-accent:         #e8b86d;  /* amber — 11.5:1 AAA on black */
+  --color-accent:         #aaccf6;  /* light blue — 12.7:1 AAA on black (was amber, 2026-07-16) */
   --color-accent-subtle:  rgba(232, 184, 109, 0.12);
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);

@@ -202,3 +202,24 @@ Notes for future edits:
   accent (amber) shares a family with `accent3` (warning amber). Contrast is fine;
   the consequence is that "active" and "secondary/warning" read as the same hue
   within a theme.
+
+
+## Addendum 2026-07-16: HC-dark accent re-hued amber to light blue
+
+`--color-accent` in `high-contrast-dark` changed `#e8b86d` (amber, 11.5:1 on
+black) to `#aaccf6` (light blue, 12.7:1 on black; 11.6:1 on `#0f0f0f`
+surface-active). AAA with margin against every HC-dark surface; the accent
+stays UI-strokes-only so the governing bar remains 3:1. `--color-accent-subtle`
+followed to `rgba(170, 204, 246, 0.12)`. HC-light keeps its amber `#855a0d`.
+
+Two knock-on notes:
+
+- The hue-overlap map changes for HC-dark only: accent no longer shares the
+  amber family with `accent3` there; it now sits near `accent2`'s blue-violet
+  family (`#c2b6ff`). "Active" and "secondary" are the adjacent hues in HC-dark
+  now, not "active" and "warning."
+- The themed Rive chrome that carries accent color in its own instances was
+  re-authored by David the same day: `tokenlabhero2.riv` and `enterthegrid.riv`
+  (their `contrastDark` instances). Other Rive assets holding authored amber in
+  HC-dark (the hero's `colorAccent`, the wordmark's `--hero-glyph` letterforms)
+  were not part of this change and keep their values.

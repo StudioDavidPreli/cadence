@@ -121,3 +121,13 @@ instance correctly in both directions.
 
 If dedicated `ContrastDark` instances are authored later, point the
 `themeToInstanceName` maps at them and delete the `useHCContrastColors` call.
+
+
+## Addendum 2026-07-16: accent is now light blue
+
+The accent this doc tabled as green (`#3ee06a`) shipped as amber (`#e8b86d`,
+per the contrast audit's 2026-06-22 addendum) and changed again 2026-07-16 to
+light blue `#aaccf6` (12.7:1 AAA on black). The contrast audit doc carries the
+full reasoning and ratios. `tokenlabhero2.riv` and `enterthegrid.riv` had their
+`contrastDark` instances re-authored to match; the runtime stroke/fill flip
+this doc defines is untouched (it never carried the accent).

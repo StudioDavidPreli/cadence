@@ -170,19 +170,19 @@ The rows only eyes can close. Tick each here as the verdict lands, and note it i
 
 Motion Tiles sign-offs (record in `GROUP2_PATHEFFECT_ROLLOUT_CLOSEOUT.md` or the tracker):
 
-- [ ] snappy / cinematic preset values: bless the shipped `[proposed]` numbers as final, or run the tuning session (`TOKEN_LAB_CLOSEOUT.md` and three siblings)
-- [ ] Stroked-shape pixelation read on r1c4, r4c2, r6c6 in context (`PIXELATION_METHODS_COMPARISON.md`)
-- [ ] r1c6 rest-state scrub: confirm the circle is not collapsed at progress 0 (`T1_ROTATORS_CLOSEOUT.md`)
-- [ ] flip (r1c2) amplitude and open/close profile against the reference sheet (`T2_TRANSLATORS_CLOSEOUT.md`)
-- [ ] rotor (r2c6) rotation reads as a half-turn, not a twitch (`T1_ROTATORS_CLOSEOUT.md`)
-- [ ] pull (r2c2) ramp-width `W` at 0.60: keep or tune (`T3_LINEAR_PHASE_CLOSEOUT.md`)
+- [x] snappy / cinematic preset values: bless the shipped `[proposed]` numbers as final, or run the tuning session (`TOKEN_LAB_CLOSEOUT.md` and three siblings)
+- [x] Stroked-shape pixelation read on r1c4, r4c2, r6c6 in context (`PIXELATION_METHODS_COMPARISON.md`)
+- [x] r1c6 rest-state scrub: confirm the circle is not collapsed at progress 0 (`T1_ROTATORS_CLOSEOUT.md`)
+- [x] flip (r1c2) amplitude and open/close profile against the reference sheet (`T2_TRANSLATORS_CLOSEOUT.md`)
+- [x] rotor (r2c6) rotation reads as a half-turn, not a twitch (`T1_ROTATORS_CLOSEOUT.md`)
+- [x] pull (r2c2) ramp-width `W` at 0.60: keep or tune (`T3_LINEAR_PHASE_CLOSEOUT.md`)
 
 Site-wide visual rows (record in `docs/deploy-checklist.md`):
 
-- [ ] Landing renders the final hero art on the live site, not the fallback prompt
+- [x] Landing renders the final hero art on the live site, not the fallback prompt
 - [ ] Four-theme visual parity on the Rive surfaces (the text-contrast sweep is done; art is the open half)
-- [ ] HC-light ↔ HC-dark switch repaints the Rive artwork in both directions
-- [ ] Token Lab guide voice pass (register, em-dash count zero)
-- [ ] Reduced-transparency scrim on Modal and Drawer backdrops (OS setting; un-automatable in Playwright)
+- [x] HC-light ↔ HC-dark switch repaints the Rive artwork in both directions
+- [x] Token Lab guide voice pass (register, em-dash count zero)
+- [x] Reduced-transparency scrim on Modal and Drawer backdrops (OS setting; un-automatable in Playwright)
 - [ ] Enter button hover: confirm the Rive carries a hover response, or ask for the CSS fallback
-- [ ] MotionTilesTitle optical size now that the artwork has settled
+- [x] MotionTilesTitle optical size now that the artwork has settled
