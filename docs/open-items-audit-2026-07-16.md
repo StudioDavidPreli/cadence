@@ -4,6 +4,14 @@ A full sweep of the project record: TRACKER.md, all 22 decision docs, all 26 bri
 
 The structure: Part 1 is what the tracker already carries. Part 2 is what it does not. Part 3 is the record-keeping drift, where the work happened but no doc says so. Critical flags are marked **[CRITICAL]** inline and collected at the top.
 
+---
+
+**END OF DAY, 2026-07-16. This audit is complete.** All five critical flags are resolved. Every quick win and every cheap win is banked: the README and release tag, the WASM pin, the reconciliation pass, fifteen verified checklist rows with three accessibility fixes, David's full Tier 3 sweep, the HC-dark accent re-hue across tokens and five assets, the short-viewport floor, the case-study draft, keyboard highlight parity, the grid-chunk prefetch, the orphaned assets and dead CSS, and the tracker tidy. Fourteen commits, `v1.0.0` tagged, everything live at cadence.davidpreli.com.
+
+What remains is elective, session-sized work, none of it production risk: the **Principles lazy retrofit** (the next session's topic; entry points are `docs/decisions/rive-scaling-future-work-2026-07-07.md` and the motion-tiles integration doc's Future work note, and the Suspense-inside-crossfade problem that was sidestepped in July comes due there), the physics-spring token family, the `.riv` asset-prefetch half, the preset vocabulary unification, the automated Tier 1 suite, the CSS import asymmetry, the reserved deep-link route, an ESLint baseline (David to approve the churn first), the `claude-workflow.md` stub, and the conditional git-history purge if the repo ever goes public. On the case study: David's What I Learned rewrite, the hiring-manager edit, portfolio integration, and the sharing pass. This document is now a record, not a to-do list; the tracker's Future work section carries what stays alive.
+
+---
+
 **Progress, same day (2026-07-16):** suggested-order items 1 and 2 are done (README URL, `v1.0.0` tag, the WASM pin applied and verified on built output). The mechanical half of item 3 is done: every Part 3 one-liner is closed (r3c1 and the Modal focus trap corrected in the tracker and closeout, the scroll-architecture and chronology headers closed, the WEBGL handoff superseded note, the r2c6 verdict recorded as reconstructed), stale banners are on `principle-component-status.md`, `cover-letter-reference.md`, `principles-reference.md`, and `component-accounting.md`, the CLAUDE.md token-architecture one-liner is extended, the voice doc's own em-dashes are fixed (eight, not the two first counted), and both duplicate `.txt` files are deleted. What remains of item 3 is the case-study half: the framing decisions (12-vs-18, timeline) and the full source-doc refresh, which belong to the Week 10 session.
 
 **Item 4 run (2026-07-16, same day):** the verification session against the deploy checklist, on built output via Playwright. Fifteen checklist rows now carry dated verifications. Three real failures found, fixed, and re-verified on built output: the eight token sliders had no accessible name (now `aria-label={tokenKey}`), no visible keyboard-focus indicator (now a 2px accent `:focus-visible` outline), and the DurationVisualizer time readouts used muted2 (#888, 3.25:1 in light; now muted). The thesis test passed by hand: a slider drive rewrote `--motion-duration-fast` and the code view's live value followed. Reduced-motion and forced-colors pass under emulation; the matrix's open question resolves as "Playwright cannot emulate prefers-reduced-transparency" (manual Tier 3). Still open from the two documents: the automated Tier 1 suite itself, easing-slot/Explore-mode/out-of-range propagation checks, the in-flight/absent-state rows, OS-preference first-load, the HC Rive repaint check, and the per-principle Tier 2/3 matrix. One session note with teeth: the Claude Browser pane runs pages as a hidden tab (rAF frozen), which manufactured a convincing false "stuck modal" bug on dev AND prod before Playwright disproved it; recorded in memory so no future session chases it.
@@ -32,7 +40,7 @@ Five items rise above the rest. Each is expanded in its section below.
 
 | Item | Where | Status |
 |---|---|---|
-| Case Study, Week 10: narrative, decisions, learning arc, hiring-manager edit, portfolio integration | Week 10, five unchecked boxes | Untouched. The kickoff gap analysis (`docs/case-study-kickoff-gap-analysis.md`, currently untracked in git) is the working plan. |
+| Case Study, Week 10 | Week 10 | **Draft written 2026-07-16** (`docs/case-study.md`); first three tracker boxes ticked. Remaining: David's What I Learned rewrite, the hiring-manager edit, portfolio integration, then the sharing pass. |
 | README Live-URL fill | Status header + Week 9 | **Done 2026-07-16** (commit 635c51b): "(pending first deploy)" dropped. |
 | Release tag | Status header + Week 9 | **Done 2026-07-16**: annotated `v1.0.0` pushed; package.json bumped to match. |
 | Demo video (optional) | Week 9 | Open, explicitly optional. |
@@ -42,7 +50,7 @@ Five items rise above the rest. Each is expanded in its section below.
 | Duration scalar for the distance-and-speed visualizer | Future work, architecture | Deferred. The visualizer it serves is itself unplanned work. |
 | Per-section lazy loading, seeded on the new page | Future work, Rive scaling | Effectively done: Motion Tiles shipped as a landing-gated `React.lazy` chunk. The checkbox was never ticked. |
 | Prefetch the active section's `.riv` set on nav open or hover | Future work, Rive scaling | Half done 2026-07-16: the grid's JS chunk prefetches on landing mount (verified: both chunk files fetch before Enter), so the Suspense fallback rarely paints. The `.riv` asset half stays open. |
-| Retrofit Principles to lazy | Future work, Rive scaling | Open, and its stated precondition ("after the pattern is proven on Tiles") is now met. This is the move that takes `react-canvas` off first paint. The bundle-revisit trigger ("when the second Rive-heavy section lands") has also fired. |
+| Retrofit Principles to lazy | Future work, Rive scaling | Open; precondition met; **queued as the next session's topic.** The move that takes `react-canvas` off first paint. Read the rive-scaling doc first; the Suspense-inside-crossfade problem comes due here. |
 
 ### Buried in tracker weekly notes (on the file, not in any open-items section)
 
@@ -155,7 +163,7 @@ Work that happened; the record still said otherwise. **All items below were clos
 
 1. ~~The two quick wins: README Live URL, release tag.~~ Done 2026-07-16.
 2. ~~Verify the WASM fetch on the live site; apply the `setWasmUrl` pin.~~ Done 2026-07-16; ships with the next deploy.
-3. The source-doc reconciliation pass. ~~The mechanical half: Part 3's one-liners, the stale banners, the small hygiene closes.~~ Done 2026-07-16. The case-study half (framing decisions, full source refresh) folds into Week 10.
+3. ~~The source-doc reconciliation pass.~~ Done in full 2026-07-16: the mechanical half in the afternoon, the case-study half (source refresh, framings) in the Week 10 session.
 4. ~~A single verification session against the deploy checklist on built output.~~ Done 2026-07-16: fifteen rows dated, three failures fixed (commit 43ec278). The automated suite and the remaining rows are listed under Critical flag 2.
 5. ~~The Motion Tiles sign-off sweep.~~ Done 2026-07-16: David closed all thirteen Tier 3 rows; three assets re-authored along the way for the HC-dark accent re-hue.
 6. Week 10. **Started 2026-07-16, same day: the full case-study draft is written** (`docs/case-study.md`) with the agreed framings (classic 12 extended by 6; calendar span; Motion Tiles featured as the third Approach thread). Remaining: David's rewrite of What I Learned, the hiring-manager edit pass, portfolio integration, then the sharing-material pass.
