@@ -4,21 +4,33 @@ import { MotionTokensContext, reduceMotion } from '../context/MotionTokensContex
 
 // --- Parsers ---
 // Each token type comes out of getPropertyValue as a string and needs
-// a different conversion before Framer Motion can use it.
+// a different conversion before Framer Motion can use it. The parsers must
+// survive the production CSS minifier, which rewrites values without changing
+// their meaning: "400ms" becomes ".4s", "0.4" becomes ".4", and the spaces
+// after commas may be dropped. A parser that assumed the authored form (e.g.
+// "always ms", "always comma-space separated") yields NaN in the minified
+// build — and a NaN duration reaching Framer Motion throws
+// "Element.animate: Duration (nan)", which with no error boundary blanks the app.
 
-// "100ms" → 0.1  (Framer Motion uses seconds, CSS uses milliseconds)
+// CSS time → seconds (Framer Motion uses seconds). Handles both the authored
+// "400ms" and the minified ".4s" / "0s": parseFloat reads the leading number,
+// and the unit suffix decides the scale (ms → divide by 1000; s stays as-is).
 function parseMs(raw) {
-  return parseFloat(raw.slice(0, -2)) / 1000
+  const n = parseFloat(raw)
+  if (Number.isNaN(n)) return NaN
+  return /ms\s*$/i.test(raw) ? n / 1000 : n
 }
 
 // "cubic-bezier(0.4, 0, 0.2, 1)" → [0.4, 0, 0.2, 1]
-// Framer Motion accepts easing as a four-number array [x1, y1, x2, y2].
+// Framer Motion accepts easing as a four-number array [x1, y1, x2, y2]. Split
+// on the comma alone (not ", ") and parseFloat each part, so it survives the
+// minifier dropping the spaces after commas.
 function parseCubicBezier(raw) {
   return raw
     .replace('cubic-bezier(', '')
     .replace(')', '')
-    .split(', ')
-    .map(Number)
+    .split(',')
+    .map((part) => parseFloat(part))
 }
 
 // "0.95" → 0.95  (already unitless, just needs parseFloat)
@@ -84,34 +96,43 @@ export function useMotionTokens({ respectReducedMotion = true } = {}) {
     // data-theme="dark" is set, we get the dark theme's values, not the defaults.
     const s = getComputedStyle(document.documentElement)
 
-    // Helper: read a property, trim whitespace, return null if missing.
-    const get = (name) => s.getPropertyValue(name).trim() || null
+    // Read a property, parse it, and fall back when it is missing OR the parse
+    // yields NaN (scalar) or an array containing NaN (easing). This is the last
+    // line of defense: a NaN token must never reach Framer Motion, because a NaN
+    // duration throws in Element.animate and the app has no error boundary.
+    const read = (name, parse, fallback) => {
+      const raw = s.getPropertyValue(name).trim()
+      if (!raw) return fallback
+      const value = parse(raw)
+      const bad = Array.isArray(value) ? value.some(Number.isNaN) : Number.isNaN(value)
+      return bad ? fallback : value
+    }
 
     setTokens({
       duration: {
-        fast:   get('--motion-duration-fast')   ? parseMs(get('--motion-duration-fast'))   : FALLBACKS.duration.fast,
-        base:   get('--motion-duration-base')   ? parseMs(get('--motion-duration-base'))   : FALLBACKS.duration.base,
-        slow:   get('--motion-duration-slow')   ? parseMs(get('--motion-duration-slow'))   : FALLBACKS.duration.slow,
-        slower: get('--motion-duration-slower') ? parseMs(get('--motion-duration-slower')) : FALLBACKS.duration.slower,
+        fast:   read('--motion-duration-fast',   parseMs, FALLBACKS.duration.fast),
+        base:   read('--motion-duration-base',   parseMs, FALLBACKS.duration.base),
+        slow:   read('--motion-duration-slow',   parseMs, FALLBACKS.duration.slow),
+        slower: read('--motion-duration-slower', parseMs, FALLBACKS.duration.slower),
       },
       ease: {
-        linear:   get('--motion-ease-linear')   ? parseCubicBezier(get('--motion-ease-linear'))   : FALLBACKS.ease.linear,
-        standard: get('--motion-ease-standard') ? parseCubicBezier(get('--motion-ease-standard')) : FALLBACKS.ease.standard,
-        enter:    get('--motion-ease-enter')    ? parseCubicBezier(get('--motion-ease-enter'))    : FALLBACKS.ease.enter,
-        exit:     get('--motion-ease-exit')     ? parseCubicBezier(get('--motion-ease-exit'))     : FALLBACKS.ease.exit,
-        overshoot:   get('--motion-ease-overshoot')   ? parseCubicBezier(get('--motion-ease-overshoot'))   : FALLBACKS.ease.overshoot,
+        linear:    read('--motion-ease-linear',    parseCubicBezier, FALLBACKS.ease.linear),
+        standard:  read('--motion-ease-standard',  parseCubicBezier, FALLBACKS.ease.standard),
+        enter:     read('--motion-ease-enter',     parseCubicBezier, FALLBACKS.ease.enter),
+        exit:      read('--motion-ease-exit',      parseCubicBezier, FALLBACKS.ease.exit),
+        overshoot: read('--motion-ease-overshoot', parseCubicBezier, FALLBACKS.ease.overshoot),
       },
       delay: {
-        none:   get('--motion-delay-none')   ? parseMs(get('--motion-delay-none'))   : FALLBACKS.delay.none,
-        short:  get('--motion-delay-short')  ? parseMs(get('--motion-delay-short'))  : FALLBACKS.delay.short,
-        medium: get('--motion-delay-medium') ? parseMs(get('--motion-delay-medium')) : FALLBACKS.delay.medium,
-        long:   get('--motion-delay-long')   ? parseMs(get('--motion-delay-long'))   : FALLBACKS.delay.long,
+        none:   read('--motion-delay-none',   parseMs, FALLBACKS.delay.none),
+        short:  read('--motion-delay-short',  parseMs, FALLBACKS.delay.short),
+        medium: read('--motion-delay-medium', parseMs, FALLBACKS.delay.medium),
+        long:   read('--motion-delay-long',   parseMs, FALLBACKS.delay.long),
       },
       scale: {
-        subtle:     get('--motion-scale-subtle')     ? parseUnitless(get('--motion-scale-subtle'))     : FALLBACKS.scale.subtle,
-        base:       get('--motion-scale-base')       ? parseUnitless(get('--motion-scale-base'))       : FALLBACKS.scale.base,
-        expressive: get('--motion-scale-expressive') ? parseUnitless(get('--motion-scale-expressive')) : FALLBACKS.scale.expressive,
-        lift:       get('--motion-scale-lift')       ? parseUnitless(get('--motion-scale-lift'))       : FALLBACKS.scale.lift,
+        subtle:     read('--motion-scale-subtle',     parseUnitless, FALLBACKS.scale.subtle),
+        base:       read('--motion-scale-base',       parseUnitless, FALLBACKS.scale.base),
+        expressive: read('--motion-scale-expressive', parseUnitless, FALLBACKS.scale.expressive),
+        lift:       read('--motion-scale-lift',       parseUnitless, FALLBACKS.scale.lift),
       },
     })
   }, [override])
