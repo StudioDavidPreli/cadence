@@ -196,7 +196,10 @@ Notes for future edits:
   it into a dark brown indistinct from `accent3`. `#855a0d` holds the amber
   identity at AA (6.1:1), matching the bar `accent2` already runs at in HC-light.
   If HC-light should be AAA throughout, drop accent to `#6b4400` (8.6:1) and accept
-  the browner tone.
+  the browner tone. *(Closed: keep `#855a0d`, David, 2026-07-16. 6.1:1 clears every
+  governing bar with margin, and the AAA option has since become impossible on its
+  own terms: `#6b4400` is now HC-light's `accent3` hex, so taking it would make
+  active and warning the same color.)*
 - **Hue overlap is now a known property, not a bug.** In light, accent (purple)
   shares a family with `accent2` (easing/secondary purple). In both HC themes,
   accent (amber) shares a family with `accent3` (warning amber). Contrast is fine;

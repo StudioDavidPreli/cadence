@@ -140,3 +140,11 @@ The current Cadence token set covers the Principles Library build adequately. Tw
 2. A `--motion-delay-xshort` at 30ms for fine-grained content stagger inside modals. The current delay.short at 50ms may be too coarse for staggering individual form fields. Decide during the Modal build.
 
 Neither addition changes the token system's semantic structure. They are calibration additions within existing categories.
+
+> **Both declined, David, 2026-07-16.** The Modal shipped 2026-05-05 and neither
+> gap materialized: the entrance reads correctly on `ease.enter`, and the Modal
+> carries no form-field stagger for a 30ms delay to serve. The condition each
+> candidate set for itself ("only add if the Modal reveals a difference,"
+> "decide during the Modal build") resolved against adding. The expressive-settle
+> need, if it ever returns, belongs to the planned physics-spring family, which
+> settles by physics rather than by another bezier.

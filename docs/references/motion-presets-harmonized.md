@@ -226,6 +226,11 @@ web. The M3 standard values are in the curve table if you want to move current. 
 trap to avoid is not the choice, it is not knowing there was one. Confirm M2, or
 switch to M3.
 
+> **Confirmed M2, David, 2026-07-16.** The reasoning above stands as written:
+> the M2 triad is the clearer teaching curve and the production-web norm, and
+> the tool's first job is teaching. The M3 values stay in the curve table as
+> the documented alternative. Nothing retimes.
+
 **2. Spring honesty: renamed the bezier to Overshoot, proposed a real spring
 family.** The rename is safe and I would ship it regardless. The physics-spring
 family is optional because it needs JS-side work (Framer Motion spring config, a new

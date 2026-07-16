@@ -104,12 +104,12 @@ Five items rise above the rest. Each is expanded in its section below.
 
 ### Design decisions parked in docs only
 
-- **M2 vs M3 easing lineage.** `motion-presets-harmonized.md`: "Confirm M2, or switch to M3." The doc's point is knowing the fork exists; the confirmation was never recorded.
+- ~~**M2 vs M3 easing lineage.**~~ **Closed 2026-07-16, decision round: M2 confirmed** (the teaching-clarity reasoning stands; recorded in the harmonized doc). Original: `motion-presets-harmonized.md`: "Confirm M2, or switch to M3." The doc's point is knowing the fork exists; the confirmation was never recorded.
 - **Reduced-motion pedagogy for P14, P15, P16.** The demos respect OS reduce-motion and snap instead of animating; the wrap-in-`respectReducedMotion={false}` alternative is documented as a possible future change. Genuine open design question, four themes deep.
-- **HC-light AAA option.** Accent could drop to `#6b4400` (8.6:1) at the cost of a browner tone. Answer pre-computed, question never asked.
-- **Nav column placement** (middle vs far left). Explicitly David's call, explicitly non-blocking, never made.
+- ~~**HC-light AAA option.**~~ **Closed 2026-07-16, decision round: keep `#855a0d` AA.** The AAA hex `#6b4400` has since become HC-light's `accent3`, so taking it would collapse active and warning into one color. Recorded in the contrast audit.
+- ~~**Nav column placement**~~ **Closed 2026-07-16, decision round: nav stays in the middle.** Recorded in the Motion Tiles integration doc. Original: (middle vs far left). Explicitly David's call, explicitly non-blocking, never made.
 - **Preset vocabulary unification** (Token Lab's tokens vs Motion Tiles' presets). The integration doc calls it a case-study thread: one motion vocabulary driving a component set and a tile field. CLAUDE.md's Motion Tiles pitch already describes the unified state. Strategic, and directly feeds Week 10.
-- **Two token candidates from the Modal era**, `--motion-ease-decelerate-expressive` and `--motion-delay-xshort`, deferred to "decide during the Modal build." The Modal shipped long ago; the decision was never made either way.
+- ~~**Two token candidates from the Modal era**~~ **Closed 2026-07-16, decision round: both declined.** The Modal shipped and neither gap materialized; expressive settling belongs to the planned physics-spring family. Recorded in `animation-principles-notes.md`. Original: `--motion-ease-decelerate-expressive` and `--motion-delay-xshort`, deferred to "decide during the Modal build." The Modal shipped long ago; the decision was never made either way.
 - **Grid Phase 2: proportional deformation of neighbor cards.** The documented seam is still clean and still unused.
 - **Hero interactivity: feeding React-side data (token values) into the hover.** Tabled 2026-06-17, partially overtaken by the state-machine-driven hero, never revisited.
 - **Preset enter/exit pinning vs Carbon's per-preset curves.** Documented deliberate divergence, offered for reconsideration; no action unless the lesson changes.

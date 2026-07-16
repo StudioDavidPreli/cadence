@@ -97,9 +97,11 @@ Note: the earlier plan lifted the token reducer into a `TokenStateProvider` to s
 
 **Step 3. Retire the gate and update docs.** Delete the `?v8grid` branch in `App.jsx`. Update CLAUDE.md's two-tools framing, the docs index, and the tracker. Any new UI copy passes the voice rules in `docs/voice/voice-analysis.md`.
 
-## Open decision: nav column placement
+## Nav column placement: closed
 
-The nav is currently the middle column: tool bar, then `NavColumn`, then right region. With the tool bar collapsing to a 44px rail in Motion Tiles, the middle position still works (rail, nav, stage-plus-controls). Whether to also move the nav to the far left for a cleaner shell reading is a separate design call, David's to make, and it does not block Steps 1 and 2.
+The nav is currently the middle column: tool bar, then `NavColumn`, then right region. With the tool bar collapsing to a 44px rail in Motion Tiles, the middle position still works (rail, nav, stage-plus-controls). Whether to also move the nav to the far left for a cleaner shell reading was a separate design call, David's to make, and it did not block Steps 1 and 2.
+
+**Decided: the nav stays in the middle (David, 2026-07-16).** The current reading holds in all three tools including the rail state, and the shell is settling into the case-study record as it stands. If the far-left arrangement is ever revisited, it is a `grid-template-columns` reorder plus a re-check of the ≤1024px rail behavior across the three tools and four themes.
 
 ## Risks
 
