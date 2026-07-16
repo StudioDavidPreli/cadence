@@ -1,4 +1,10 @@
 import { useEffect } from 'react'
+// Side effect: pins the canvas runtime's WASM to our origin. It lives here,
+// not in main.jsx, because this hook is the one module every canvas-runtime
+// component imports (the CLAUDE.md theme-binding convention), and it must stay
+// inside the lazy Principles/Carousel graph so @rive-app/canvas is not dragged
+// back into the eager entry chunk. See src/utils/riveWasmCanvas.js.
+import '../utils/riveWasmCanvas'
 import { useViewModelInstanceColor } from '@rive-app/react-canvas'
 
 // ─── useHCContrastColors ────────────────────────────────────────────────────

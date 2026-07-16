@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useReducer, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
@@ -11,8 +11,8 @@ import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { DurationVisualizer } from '../DurationVisualizer'
-import { PrinciplesLibrary } from '../PrinciplesLibrary'
 import { MotionTilesSection } from '../MotionTiles/MotionTilesSection'
+import { ErrorBoundary } from '../ErrorBoundary'
 import { NavColumn } from '../NavColumn'
 import { DemoArea } from '../DemoArea'
 import { useDemoOverlay } from '../DemoArea/overlayContext'
@@ -32,7 +32,6 @@ import { Drawer } from '../Drawer'
 import { Modal } from '../Modal'
 import { Tooltip } from '../Tooltip'
 import { Dropdown } from '../Dropdown'
-import { Carousel } from '../Carousel'
 import { NotificationBadge } from '../NotificationBadge'
 import {
   EASING_CURVES,
@@ -45,6 +44,33 @@ import {
   importTokens,
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
+
+// ─── Lazy boundaries: the @rive-app/react-canvas consumers ───────────────────
+//
+// PrinciplesLibrary (via PrincipleCard → PrincipleIcon/PrincipleAnimation) and
+// Carousel are the app's only react-canvas importers. Loading them lazily takes
+// that runtime off first paint: the landing mounts only the hero, which runs on
+// the separate webgl2 runtime, so react-canvas was dead weight in the eager
+// chunk. Same pattern as MotionTilesSection's lazy grid; see
+// docs/decisions/rive-scaling-future-work-2026-07-07.md (addendum).
+//
+// Because both lazy chunks import Carousel (FollowThrough renders one inside
+// the principles chunk), Rollup hoists Carousel + react-canvas + the HC color
+// hook into a shared chunk loaded when either side first needs it. Neither
+// lands in the eager index chunk.
+//
+// The importer functions are shared between React.lazy and the idle prefetch
+// in TokenLab, so both resolve to the same chunk. React.lazy expects a default
+// export, so the .then shim adapts our named exports (same as MotionTilesSection).
+const importPrinciplesLibrary = () => import('../PrinciplesLibrary')
+const importCarousel = () => import('../Carousel')
+
+const PrinciplesLibrary = lazy(() =>
+  importPrinciplesLibrary().then((m) => ({ default: m.PrinciplesLibrary })),
+)
+const Carousel = lazy(() =>
+  importCarousel().then((m) => ({ default: m.Carousel })),
+)
 
 // ─── Token → Component map ────────────────────────────────────────────────────
 // Maps each slider's token key to the component names it affects across all tabs.
@@ -1195,6 +1221,27 @@ export function TokenLab() {
     } catch (_) { /* ignore corrupt storage */ }
   }, [])
 
+  // Prefetch the two lazy react-canvas chunks once the browser goes idle, so
+  // navigating to Principles or the Gesture category never waits on a fetch and
+  // the Suspense fallbacks near-never paint. Idle (not mount): firing the fetch
+  // immediately would compete with the hero .riv and webgl2 WASM requests that
+  // first paint actually needs. requestIdleCallback is absent in Safari, so a
+  // timer stands in there. Fire-and-forget: a failed prefetch just means the
+  // boundary falls back to fetching on demand, exactly as if we had not
+  // prefetched. Same idea as MotionTilesLanding's grid-chunk prefetch.
+  useEffect(() => {
+    const prefetch = () => {
+      importPrinciplesLibrary().catch(() => {})
+      importCarousel().catch(() => {})
+    }
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(prefetch, { timeout: 3000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const t = setTimeout(prefetch, 2000)
+    return () => clearTimeout(t)
+  }, [])
+
   const allPresets = [...BUILT_IN_PRESETS, ...userPresets]
 
   // Active config depends on explore mode.
@@ -1411,7 +1458,20 @@ export function TokenLab() {
           instruction="Drag to advance — flick fast or drag far enough to commit"
           code={DEMO_SNIPPETS.Carousel}
         >
-          <Carousel />
+          {/* Carousel is a lazy chunk (see the lazy-boundaries block up top).
+              The idle prefetch usually resolves it long before this category is
+              opened, so the fallback near-never paints; its min-height keeps the
+              layer from collapsing for the rare frame it does. ErrorBoundary
+              outside Suspense catches both a chunk-load failure and a render
+              throw, degrading in place instead of blanking the app. */}
+          <ErrorBoundary
+            title="The carousel demo hit a snag"
+            message="The Carousel demo ran into an unexpected error. Reloading usually clears it."
+          >
+            <Suspense fallback={<div className={styles.carouselFallback}>Loading the carousel…</div>}>
+              <Carousel />
+            </Suspense>
+          </ErrorBoundary>
         </DemoWrapper>
       </div>
     ),
@@ -1583,7 +1643,23 @@ export function TokenLab() {
         <MotionTokensProvider tokens={liveTokens} respectReducedMotion={false}>
           <DemoArea
             categoryContent={categoryContent}
-            principlesContent={<PrinciplesLibrary filter={principleFilter} />}
+            // The Suspense boundary lives INSIDE the crossfade layer's content,
+            // never around DemoArea's AnimatePresence: the motion.div layer that
+            // AnimatePresence manages must not suspend, or the crossfade state
+            // machine would be interrupted. The layers are absolutely positioned,
+            // so the column's geometry cannot jump when the chunk resolves; the
+            // fallback only needs to fill the layer quietly. With the idle
+            // prefetch it paints only on a cold deep link to #/principles.
+            principlesContent={
+              <ErrorBoundary
+                title="The library hit a snag"
+                message="The Principles Library ran into an unexpected error. Reloading usually clears it."
+              >
+                <Suspense fallback={<div className={styles.lazyFallback}>Loading the library…</div>}>
+                  <PrinciplesLibrary filter={principleFilter} />
+                </Suspense>
+              </ErrorBoundary>
+            }
             hero={<HeroAnimation />}
             guide={<TokenLabGuide />}
           />

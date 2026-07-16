@@ -26,8 +26,8 @@ import styles from './BugReportButton.module.css'
 // webgl2 runtime is already justified on first paint by the landing hero, so an
 // always-mounted button rides on a runtime that is loading anyway. Using
 // react-canvas here would instead pin THAT runtime onto the always-mounted path
-// and block the planned deferral of react-canvas (see
-// docs/decisions/rive-scaling-future-work-2026-07-07.md).
+// and undo its deferral: since 2026-07-16 react-canvas loads lazily with the
+// Principles and Carousel chunks (see docs/decisions/rive-scaling-future-work-2026-07-07.md).
 const PROBLEM_SRC = '/titleSVGS/problembutton2.riv'
 // Artboard name is camelCase with a capital B — verified against the .riv, not the
 // lowercase spelling it is often referred to by. useRive silently renders nothing

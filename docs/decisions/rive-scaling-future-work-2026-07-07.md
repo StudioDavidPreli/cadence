@@ -91,3 +91,58 @@ time nobody is waiting on.
 Revisit this doc when the second Rive-heavy section lands. That is the point
 where a visitor might open only one of three sections, and per-section lazy
 loading stops being premature and becomes correct.
+
+---
+
+## Addendum (2026-07-16): the Principles retrofit shipped
+
+Step 4 is done. The record below corrects this doc where the app had moved
+under it, and states what actually shipped.
+
+**The premise correction.** "react-canvas lives entirely in the Principles
+subtree" stopped being true after this doc was written. Two more eager
+importers had appeared: the Carousel demo in Token Lab's Gesture category
+(`src/components/Carousel`), and the 2026-07-16 WASM CDN pin
+(`src/utils/riveWasm.js`), which imported `@rive-app/canvas` eagerly from
+`main.jsx` to call `setWasmUrl`. Lazy-loading Principles alone would have
+moved only its component JS and left the 67 kB (gzipped) runtime glue in the
+entry chunk. All three moved together.
+
+**What shipped.**
+
+- `PrinciplesLibrary` and `Carousel` are `React.lazy` chunks, declared in
+  `TokenLab/index.jsx` with the named-export shim `MotionTilesSection` uses.
+  Each usage site is wrapped in `ErrorBoundary` (outside) and `Suspense`
+  (inside), the Motion Tiles pattern.
+- Both chunks prefetch on browser idle from a `TokenLab` mount effect
+  (`requestIdleCallback`, `setTimeout` fallback for Safari), so the fetch
+  happens after the hero's `.riv` and WASM requests and the Suspense fallback
+  paints only on a cold deep link to `#/principles`.
+- The WASM pin split: `riveWasm.js` now pins only webgl2 (eager, the hero
+  needs it at first paint); the canvas pin lives in
+  `src/utils/riveWasmCanvas.js`, imported for side effect by
+  `useHCContrastColors`, the one module every canvas-runtime component
+  imports. ESM evaluates imports before the importing module, so the pin
+  always runs before any `useRive` call can start the WASM fetch.
+- Rollup placed the canvas runtime in the Carousel chunk, which the
+  PrinciplesLibrary chunk imports (FollowThrough renders a Carousel), so the
+  runtime loads once, with whichever side is needed first.
+
+**Measured on built output (gzipped).** Eager JS went from 225 kB (one chunk)
+to 170 kB (130 kB index plus a 40 kB shared chunk). The lazy side is 10.7 kB
+of PrinciplesLibrary, 50 kB of Carousel plus runtime, and the 686 kB canvas
+WASM binary, none of it reachable from first paint. Verified with Playwright
+against `wrangler dev` on `dist/`: first load fetches only the eager chunks,
+the webgl2 WASM, and the hero `.riv`; the two lazy chunks arrive on idle a
+beat later; the canvas WASM fetches only when Principles or the Carousel demo
+mounts. All 18 cards render, a card expands, the Gesture Carousel renders,
+zero console errors.
+
+**The Suspense-inside-crossfade worry, resolved.** Step 2's concern was
+sized for a fallback that could move the layout. It cannot: DemoArea's
+crossfade layers are absolutely positioned, so the demo column's geometry
+never depends on layer content, and the fallback only has to fill its slot
+quietly. The boundary sits inside the layer's content, never around the
+`AnimatePresence`, so the motion.div that the crossfade manages never
+suspends. That constraint is commented at the `principlesContent` site in
+`TokenLab/index.jsx` and is the rule for any future lazy destination.

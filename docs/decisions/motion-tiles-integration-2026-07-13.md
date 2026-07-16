@@ -111,7 +111,7 @@ The nav is currently the middle column: tool bar, then `NavColumn`, then right r
 
 - **Prefetch the grid chunk on nav hover or landing mount**, so Enter resolves without a visible Suspense fallback.
 - **Unify the preset vocabularies.** Motion Tiles carries its own Snappy, Standard, Cinematic presets with their own speed, easing, and spread. Token Lab has its own presets. Bridging them is a case-study thread (one motion vocabulary driving both a component set and a tile field at scale), but it is out of scope for integration.
-- **Retrofit Principles to lazy** only after the pattern is proven on Motion Tiles, per the rive-scaling note. Principles is the higher-value split and the riskier one, since it touches the crossfade tree.
+- ~~**Retrofit Principles to lazy** only after the pattern is proven on Motion Tiles, per the rive-scaling note. Principles is the higher-value split and the riskier one, since it touches the crossfade tree.~~ Done 2026-07-16, together with the Carousel demo and the canvas WASM pin (two eager `react-canvas` importers this plan predated). Record: the rive-scaling doc's addendum.
 
 ## Docs to update at Step 3
 
@@ -145,4 +145,4 @@ The plan above shipped in full. It grew four refinements during the build, all a
 
 **Runtime honesty note.** The WebGL2 runtime is in the main chunk, not the lazy grid chunk, because the landing hero imports it and paints first. No lazy boundary on the grid can remove the runtime from first paint short of redesigning the hero (deferred in the rive-scaling note). What the landing gate defers is the grid code chunk plus the expensive mount: the 40-plus `.riv` fetches, the shared offscreen GL context, the 40-plus instances, and the rAF clock. That deferral is the real win; the runtime binary is shared and already warm.
 
-**Not done, still open.** The `Future work` items above stand: prefetch the grid chunk on hover, unify the two preset vocabularies, retrofit Principles to lazy. One small UX option noted in build: the Enter button has no hover cue beyond the cursor and the loop, on the assumption the Rive may carry hover; a CSS hover can be added if wanted.
+**Not done, still open.** *(Update 2026-07-16: the grid-chunk prefetch and the Principles retrofit are both done; of the Future work items only the preset-vocabulary unification stays open.)* The `Future work` items above stand: prefetch the grid chunk on hover, unify the two preset vocabularies, retrofit Principles to lazy. One small UX option noted in build: the Enter button has no hover cue beyond the cursor and the loop, on the assumption the Rive may carry hover; a CSS hover can be added if wanted.

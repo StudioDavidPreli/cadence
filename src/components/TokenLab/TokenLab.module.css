@@ -929,3 +929,31 @@
   font-style: italic;
   margin-top: 4px;
 }
+
+/* Suspense fallbacks for the two lazy react-canvas chunks (PrinciplesLibrary
+   and the Carousel demo). The crossfade layers are absolutely positioned, so
+   the demo column's geometry never depends on layer content; these only need
+   to fill their slot quietly for the rare frame the idle prefetch has not
+   already resolved the chunk. Mirrors MotionTilesSection's grid fallback. */
+.lazyFallback {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* The carousel fallback sits inside a DemoWrapper in normal flow, so it holds
+   a min-height near the carousel's natural footprint (4/5 slides, 140px floor)
+   to keep the category layer from collapsing and re-expanding on resolve. */
+.carouselFallback {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
