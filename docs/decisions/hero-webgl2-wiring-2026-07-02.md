@@ -215,6 +215,16 @@ fix if the hero ever goes blank in an offline or CSP-restricted deploy. Left
 un-applied so as not to add machinery the working app does not need; noted here so
 it is one edit away.
 
+**Applied 2026-07-16** (`src/utils/riveWasm.js`, imported first in `main.jsx`).
+The open-items audit reclassified the un-applied pin as a production risk once
+the site went live: the deployed bundle fetched both runtimes' WASM from unpkg
+with a jsdelivr fallback, so a blocked CDN blanked the hero, the mobile gate,
+the Token Lab title, and all of Motion Tiles silently. Both runtimes are pinned
+(separate RuntimeLoader classes, different binaries; the react-canvas twin per
+the note above). Verified on built output via wrangler dev: both `.wasm` files
+fetch from our origin as hashed assets, zero unpkg/jsdelivr requests, no console
+errors, 104/104 tests green. The fetch stays lazy, so first paint is unchanged.
+
 ### Presentation pass (same session)
 
 Padding and sizing, in `HeroAnimation.module.css`, tuned via three variables at

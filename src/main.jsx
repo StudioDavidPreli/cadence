@@ -1,5 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// Must run before any component module evaluates useRive: pins both Rive
+// runtimes' WASM to our own origin instead of the unpkg/jsdelivr CDNs.
+import './utils/riveWasm'
 import './tokens/motion.css'
 import './tokens/color.css'
 import { ThemeProvider } from './context/ThemeContext'

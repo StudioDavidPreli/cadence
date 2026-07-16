@@ -10,7 +10,7 @@ The structure: Part 1 is what the tracker already carries. Part 2 is what it doe
 
 Five items rise above the rest. Each is expanded in its section below.
 
-1. **[CRITICAL] The WebGL2 WASM loads from the jsDelivr CDN at runtime on the live site.** The hero, the mobile gate, the Token Lab title, and all of Motion Tiles sit on that runtime. A blocked CDN fetch (ad blocker, corporate firewall, CSP) blanks them silently. The `setWasmUrl` local pin is documented as "one edit away" in `docs/decisions/hero-webgl2-wiring-2026-07-02.md` and was never applied or verified post-deploy. The audience is hiring managers on unknown networks. *(Not on tracker.)*
+1. ~~**[CRITICAL] The WebGL2 WASM loads from the jsDelivr CDN at runtime on the live site.**~~ **Resolved 2026-07-16.** Confirmed real: both runtimes fetched WASM from unpkg with a jsdelivr fallback, no pin anywhere in `src/`. Applied the documented `setWasmUrl` pin for both runtimes (`src/utils/riveWasm.js`, imported first in `main.jsx`); verified on built output that both binaries fetch from our origin with zero CDN requests. Addendum added to the hero wiring doc. *(Ships with the next deploy.)*
 
 2. **[CRITICAL] The accessibility verification debt is real and its deferral condition has lapsed.** `docs/deploy-checklist.md` and `docs/deploy-verification-matrix.md` are almost entirely unchecked: keyboard operability, focus management, contrast floors, forced-colors, reduced-transparency, and the live token-propagation test (the matrix's own "highest-value test in the suite"). The chrome-timing decision doc deferred the Tier 1 suite "to post-integration"; integration closed 2026-07-13 and the site is deployed. Neither document covers Motion Tiles or the fourth theme at all. *(Not on tracker.)*
 
@@ -29,8 +29,8 @@ Five items rise above the rest. Each is expanded in its section below.
 | Item | Where | Status |
 |---|---|---|
 | Case Study, Week 10: narrative, decisions, learning arc, hiring-manager edit, portfolio integration | Week 10, five unchecked boxes | Untouched. The kickoff gap analysis (`docs/case-study-kickoff-gap-analysis.md`, currently untracked in git) is the working plan. |
-| README Live-URL fill | Status header + Week 9 | Confirmed still open: README line 9 reads "(pending first deploy)". Site went live 2026-07-15. Quick win. |
-| Release tag | Status header + Week 9 | Confirmed still open: `git tag` returns nothing. Quick win. |
+| README Live-URL fill | Status header + Week 9 | **Done 2026-07-16** (commit 635c51b): "(pending first deploy)" dropped. |
+| Release tag | Status header + Week 9 | **Done 2026-07-16**: annotated `v1.0.0` pushed; package.json bumped to match. |
 | Demo video (optional) | Week 9 | Open, explicitly optional. |
 | "Complete token architecture documentation" | Week 9, unchecked box | Ambiguous scope. `docs/token-architecture.md` is substantial; nothing defines what "complete" adds. Worth deciding whether to check it or name the gap. |
 | Physics-spring token family | Future work, architecture | Deliberately deferred, scoped as its own pass. The harmonized presets doc calls it the highest-value case-study addition, which raises its priority relative to the other two. |
@@ -66,7 +66,7 @@ Five items rise above the rest. Each is expanded in its section below.
 
 ### Production and correctness risks
 
-- **[CRITICAL] WASM CDN dependency** (flag 1 above). One edit to apply the documented `setWasmUrl` pin, plus the react-canvas twin. At minimum, verify the fetch on `cadence.davidpreli.com` under an ad blocker before deciding it can wait.
+- ~~**[CRITICAL] WASM CDN dependency**~~ Resolved 2026-07-16 (flag 1 above): both runtimes pinned in `src/utils/riveWasm.js`, verified on built output.
 - **[CRITICAL] Short-desktop crossfade collapse** (flag 4 above).
 - **Two view-model contracts under one name.** Desktop `hero3.riv` moved to four homogenized theme instances 2026-07-15; `heromobile.riv` and `MobileGate` deliberately stayed on the three-instance-plus-runtime-flip contract. Both docs (`hero-webgl2-wiring`, `mobile-gate`) warn that a future "make them match" edit fails silently if only one side moves. A landmine, not a task.
 - **`getExpandedFootprint` at `columnCount === 1`** still computes an invalid grid line. Structurally unreachable since the 420px demo-column floor; the code was never patched and carries no test. Fine as long as the floor holds; the second Vitest slice (footprint extraction) from the 2026-06-18 handoff never happened.
@@ -148,8 +148,8 @@ Work that happened; the record still says otherwise. Each is a one-line doc edit
 
 ## Suggested order
 
-1. The two quick wins: README Live URL, release tag. Ten minutes.
-2. Verify the WASM fetch on the live site; apply the `setWasmUrl` pin if it fails anywhere plausible.
+1. ~~The two quick wins: README Live URL, release tag.~~ Done 2026-07-16.
+2. ~~Verify the WASM fetch on the live site; apply the `setWasmUrl` pin.~~ Done 2026-07-16; ships with the next deploy.
 3. The source-doc reconciliation pass (Part 2, case-study inputs, plus Part 3's one-liners). It unblocks Week 10 and shrinks this audit by a third.
 4. A single verification session against the deploy checklist on built output: keyboard, focus, contrast floors, the four themes, Motion Tiles included. Check what passes, fix or file what fails.
 5. The Motion Tiles sign-off sweep: one session in front of the live grid with the five flagged tiles and the two preset values.
