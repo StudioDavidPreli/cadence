@@ -4,13 +4,9 @@ node_modules/
 # Build output
 dist/
 
-# Cloudflare Worker local secrets (GH_TOKEN, GH_REPO) — never committed.
-# GH_TOKEN's real value lives in the Workers dashboard as a secret; GH_REPO is a
-# plaintext var in wrangler.jsonc.
-.dev.vars
-
-# Local state from `wrangler dev` — regenerated per run, not a build input.
-.wrangler/
+# Cloudflare Worker: local secrets + wrangler state are gitignored in the
+# "wrangler files" block below. GH_TOKEN lives in the Workers dashboard as a
+# secret; GH_REPO is a plaintext var in wrangler.jsonc.
 
 # Local references (not for repo)
 docs/references/animation-principles/
@@ -45,3 +41,10 @@ __pycache__/
 /skills-lock.json
 .claude/skills/
 .agents/skills/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
