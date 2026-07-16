@@ -14,6 +14,7 @@ import { NavigationProvider } from './context/NavigationContext'
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { Wordmark } from './components/Wordmark'
 import { TokenLab } from './components/TokenLab'
+import { BugReportButton } from './components/BugReportButton'
 import { MobileGate } from './components/MobileGate'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import styles from './App.module.css'
@@ -49,6 +50,10 @@ export default function App() {
         <div className={styles.tool}>
           <TokenLab />
         </div>
+        {/* App-level bug-report affordance. Fixed to the shell's bottom-right (its
+            own CSS), so it floats over whichever tool is active. Sits inside the
+            providers so it can read the active theme for its Rive palette. */}
+        <BugReportButton />
       </div>
     </NavigationProvider>
   )

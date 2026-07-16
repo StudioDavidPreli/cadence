@@ -17,9 +17,20 @@
   /* No CSS transition — Framer Motion owns this element's transitions */
 }
 
+/* Hover inverts the button to the selected appearance. The previous hover used
+   --color-surface-active, which is a near-invisible step from the page background
+   in the high-contrast themes (#f0f0f0 on #ffffff, #0f0f0f on #000000 — both
+   under the 3:1 UI floor). Inverting to a solid surface with light-on-dark text
+   gives a legible transformation in every theme. --color-surface-hover (not
+   --color-surface) keeps a hovered button one step apart from the persistent
+   active button in the light and dark themes, so hover never looks identical to
+   the current selection. The color pairing (text-primary on surface-hover) is the
+   one already verified for .active:hover in the contrast audit. This rule also
+   covers the active button's own hover, so no separate .active:hover is needed. */
 .themeButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Active theme button inverts to match the primary surface color —
@@ -29,14 +40,4 @@
   border-color: var(--color-surface);
   color: var(--color-text-primary);
   font-weight: 500;
-}
-
-.active:hover {
-  background-color: var(--color-surface-hover);
-  border-color: var(--color-surface-hover);
-  /* .themeButton:hover sets color: --color-text-base (dark in light/HC themes).
-     Without this override, the cascade applies dark text to the dark hover
-     background — invisible in both light (#1a1a1a on #333333) and high-contrast
-     (#000000 on #000000). --color-text-primary is always light-on-dark. */
-  color: var(--color-text-primary);
 }

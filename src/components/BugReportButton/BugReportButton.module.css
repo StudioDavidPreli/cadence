@@ -1,0 +1,133 @@
+/* App-level affordance, in the shell's flow as its last row (below the tool),
+   NOT floating. Being an in-flow flex child of .appShell means the shell's own
+   gap (32px) sets the space between this button and the tool — the same gap the
+   theme-switcher row has above the tool — and the shell's 40px padding aligns it
+   to the same right edge every other element uses. justify-content: flex-end
+   pins the button to that edge; flex-shrink: 0 keeps it a fixed-height row like
+   the top bar. This is why it no longer overlaps (clips) the tool. The copyright
+   line sits in the same row, left of the button, both pushed to the right edge. */
+.root {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center; /* vertically center the © line against the taller button */
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+/* Copyright signature, mono per request. Muted text (meets AA on the page bg in
+   every theme: text-muted is >=5:1 on bg, pure black/white in the HC themes). Not
+   selectable, so it reads as chrome rather than content. */
+.copyright {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* The button base (fill + rounded corners) is baked into the problembutton2
+   artboard, so this wrapper carries no frame of its own — just a click target
+   sized to the artboard's real aspect ratio. Width is fixed; height follows
+   --problem-aspect (set once bounds load; the 43/9 fallback matches the artboard's
+   real 430x90 dimensions so there is no reflow). Tune the width here if the pill
+   wants to be larger or smaller. */
+.problemButton {
+  width: 132px;
+  aspect-ratio: var(--problem-aspect, 43 / 9);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+}
+
+/* No pointer-events:none: problemSM needs the hover and pointer-down events to
+   drive its scale / press states. The DOM click still bubbles from the canvas up
+   to the <button>, so onClick fires regardless. */
+.problemCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Report dialog form ─────────────────────────────────────────────────────
+   Mirrors the Motion Tiles report form (MotionTilesGrid.module.css). Timing uses
+   the fixed --feedback-* chrome constants, never the editable --motion-* tokens. */
+.reportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reportField {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 96px;
+  transition: border-color var(--feedback-ui-duration);
+}
+
+.reportField:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Off-screen but present in the DOM: hidden from sighted users and the tab order,
+   still fillable by a naive bot (which trips the server honeypot). */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reportStatus {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  transition: color var(--feedback-ui-duration);
+}
+
+.reportStatus[data-state='sent'] {
+  color: var(--color-accent);
+}
+
+.reportStatus[data-state='error'] {
+  color: var(--color-accent3);
+}
+
+.actionButton {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-base);
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration),
+    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+}
+
+.actionButton:hover {
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
