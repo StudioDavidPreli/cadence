@@ -241,8 +241,21 @@ eye): accent as text clears 4.5:1 in all four themes on every surface it sits
 on; worst case is the category chip on its `--color-accent-subtle` tint,
 5.25:1 in light and HC-light. So the text bar governs those uses and passes.
 
-Open question, David's call: the category chips (`.categoryClassic` accent,
-`.categoryExtended` accent2) use the accent family as taxonomy color, which
-reads decorative against the stated "active/connected only" role. Either bless
-the chips as a documented exception or move them to a neutral pair. Recorded in
-the deploy checklist's accent row, left unticked until the verdict.
+Verdict, same day: David re-specified the chips per theme and they are now
+decoupled from the accent role entirely. The chips read their own
+`--color-chip-*` tokens (six per theme, defined in `color.css`); accent's
+"active/connected only" role holds again with no exception needed. The spec:
+
+- **Dark** keeps the original tinted-text style, now on chip tokens: `#76c17d`
+  on its 12% tint (6.5:1), `#b9b0ff` on its 12% tint (7.0:1).
+- **Light** shares the same brand hues as solid fills with near-black text,
+  because the hues themselves read at ~2:1 as text on white: `#141414` on
+  `#76c17d` (8.5:1) and on `#b9b0ff` (9.4:1).
+- **HC-light**: classic is a black outline chip (no fill), extended is white
+  text on a black fill. Both 21:1.
+- **HC-dark**: the surface/text inversion — classic white outline chip,
+  extended black on white. Both 21:1.
+
+Every chip carries a constant 1px border (transparent where unused) so the
+outline and filled variants share exact geometry. Verified on built output
+2026-07-16: computed styles per theme match the spec in all four themes.

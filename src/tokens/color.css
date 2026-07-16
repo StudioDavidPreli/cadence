@@ -133,6 +133,16 @@ body {
   --color-accent2:        #b9b0ff;  /* purple — easing curve, secondary */
   --color-accent2-subtle: rgba(185, 176, 255, 0.12); /* extended principle badge background */
   --color-accent3:        #e8b86d;  /* amber — warnings, no-demo indicator */
+
+  /* Principle-card category chips (David, 2026-07-16): taxonomy color, deliberately
+     decoupled from the accent role so accent stays "active/connected" only.
+     Dark keeps the tinted-text style: green 6.5:1, purple 7.0:1 on the tint. */
+  --color-chip-classic-text:    #76c17d;
+  --color-chip-classic-bg:      rgba(118, 193, 125, 0.12);
+  --color-chip-classic-border:  transparent;
+  --color-chip-extended-text:   #b9b0ff;
+  --color-chip-extended-bg:     rgba(185, 176, 255, 0.12);
+  --color-chip-extended-border: transparent;
 }
 
 /* ─── Light theme ────────────────────────────────────────────────────────────
@@ -184,6 +194,16 @@ body {
   /* #905e18 replaces #c4882a — old value was 3.1:1 on white, failing the
      4.5:1 AA requirement for 11px noDemoNote text. New value: 5.5:1. */
   --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
+
+  /* Category chips: light shares the dark theme's brand hues (David, 2026-07-16),
+     but as solid fills with near-black text — the hues themselves are too light
+     to read as text on white. #141414 on #76c17d 8.5:1, on #b9b0ff 9.4:1. */
+  --color-chip-classic-text:    #141414;
+  --color-chip-classic-bg:      #76c17d;
+  --color-chip-classic-border:  transparent;
+  --color-chip-extended-text:   #141414;
+  --color-chip-extended-bg:     #b9b0ff;
+  --color-chip-extended-border: transparent;
 }
 
 /* ─── High-contrast light theme ──────────────────────────────────────────────
@@ -228,6 +248,15 @@ body {
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
+
+  /* Category chips go monochrome in high contrast (David, 2026-07-16):
+     classic is an outline chip, extended a solid inversion. Both 21:1. */
+  --color-chip-classic-text:    #000000;
+  --color-chip-classic-bg:      transparent;
+  --color-chip-classic-border:  #000000;
+  --color-chip-extended-text:   #ffffff;
+  --color-chip-extended-bg:     #000000;
+  --color-chip-extended-border: #000000;
 }
 
 /* ─── High-contrast dark theme ───────────────────────────────────────────────
@@ -276,4 +305,13 @@ body {
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */
+
+  /* Category chips: the surface/text inversion of HC-light's pair (David,
+     2026-07-16): classic outline chip, extended solid inversion. Both 21:1. */
+  --color-chip-classic-text:    #ffffff;
+  --color-chip-classic-bg:      transparent;
+  --color-chip-classic-border:  #ffffff;
+  --color-chip-extended-text:   #000000;
+  --color-chip-extended-bg:     #ffffff;
+  --color-chip-extended-border: #ffffff;
 }

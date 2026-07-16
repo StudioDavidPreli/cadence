@@ -78,9 +78,12 @@
 }
 
 /* ── Category badge ──────────────────────────────────────────────────────────
-   Classic: --color-accent-subtle / --color-accent (green).
-   Extended: --color-accent2-subtle / --color-accent2 (purple).
-   Mirrors the highlight pattern used by the EasingVisualizer active handle. */
+   Taxonomy color, deliberately decoupled from the accent role (David,
+   2026-07-16): the chips read their own --color-chip-* tokens, defined per
+   theme in color.css. Dark keeps the original tinted-text style, light shares
+   the same brand hues as solid fills, both HC themes go monochrome (classic
+   outline / extended solid inversion). The 1px border is constant — transparent
+   where unused — so outline and filled chips share exact geometry. */
 
 .categoryBadge {
   font-family: var(--font-mono);
@@ -89,16 +92,19 @@
   padding: 2px 6px;
   border-radius: 4px;
   line-height: 1.4;
+  border: 1px solid transparent;
 }
 
 .categoryClassic {
-  background-color: var(--color-accent-subtle);
-  color: var(--color-accent);
+  background-color: var(--color-chip-classic-bg);
+  color: var(--color-chip-classic-text);
+  border-color: var(--color-chip-classic-border);
 }
 
 .categoryExtended {
-  background-color: var(--color-accent2-subtle);
-  color: var(--color-accent2);
+  background-color: var(--color-chip-extended-bg);
+  color: var(--color-chip-extended-text);
+  border-color: var(--color-chip-extended-border);
 }
 
 /* DM Serif Display italic — editorial weight for principle names.
