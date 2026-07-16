@@ -1,12 +1,14 @@
 # Principles &harr; UI Component Status
 
-> **STALE. Last refreshed 2026-05-05, before the extended six shipped.** The
-> tables below list P13/P17/P18 as built-not-wired and P14/P15/P16 as not
-> built; all 18 principles are complete, wired, and live (deploy checklist,
-> 18/18 legibility rows). The P03 notes on the focus trap and the easing-slot
-> tabs are also stale: both shipped. Do not source case-study facts from this
-> file without checking the tracker. Flagged by the 2026-07-16 open-items
-> audit; refresh or retire during the case-study reconciliation pass.
+> **SUPERSEDED 2026-07-16.** This snapshot froze at 2026-05-05, mid-build. All
+> 18 principles are complete, wired, and live; every "Built, not wired" and
+> "Not built" row below is finished work, and the P03 notes on the focus trap
+> and easing-slot tabs are both shipped. Rather than maintain a second copy of
+> the mapping, this file is retired as a historical record. Current sources of
+> truth: `src/components/PrinciplesLibrary/index.jsx` (summaries, tokens,
+> wiring), `docs/principles/*.md` (per-principle record), and the case study's
+> build notes (`docs/case-study.md`). Kept for the case-study history: it shows
+> what mid-build looked like.
 
 Snapshot of each principle's UI demo wiring: the component summary as it
 renders in the expanded card, the tokens it consumes, the React module

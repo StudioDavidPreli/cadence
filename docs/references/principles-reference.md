@@ -1,13 +1,9 @@
 # Principles Library — Reference Document
 
-> **PARTIALLY STALE (flagged 2026-07-16).** The placeholder strategy and
-> "Phase 6" (Rive illustrations, post-launch) sections describe the pre-Rive
-> era; all 18 principles ship with authored `.riv` animations and icons. At
-> least two specs drifted from what shipped: P12 Appeal shipped as the 2x2
-> ASCII-face Card grid (not the lava lamp grid) and P15 Economy as three
-> panning bars (not layered parallax scroll). The per-principle docs in
-> `docs/principles/` are the accurate record of what shipped; this file
-> remains authoritative for principle-to-component mapping only.
+> **Historical note (2026-07-16):** the placeholder strategy and Phase 6 are
+> completed history, and the two drifted State 2 specs (P12, P15) carry
+> as-built corrections inline. The principle-to-component mapping remains
+> authoritative; `docs/principles/*.md` is the as-built record per principle.
 
 For Claude Code: read this before building any Principles 
 Library component. This document defines the scope, 
@@ -175,6 +171,9 @@ animation — simple, readable, magnetic.
 State 2 component: Lava lamp grid — abstract 
 shapes or miniature components in continuous 
 organic motion with tuned easing.
+[Shipped 2026-05+ as a 2x2 ASCII-face Card grid
+instead; the per-principle doc (appeal.md) is the
+as-built record.]
 Tokens: All tokens working together.
 
 ---
@@ -211,6 +210,8 @@ creating depth with minimal elements. (Rive post-launch)
 State 1 placeholder: Layered elements moving at 
 different speeds implying depth.
 State 2 component: Layered scroll with parallax.
+[Shipped as three panning bars at different speeds
+instead; see economy.md for the as-built record.]
 
 16 Token Fidelity
 Definition: Animation values defined in a system 
@@ -251,6 +252,11 @@ communicates what the numbers alone cannot.
 ---
 
 ## Placeholder Strategy
+
+[Completed history: every placeholder was replaced.
+All 18 principles ship with authored .riv animations
+and icons; Phase 6 closed with the Rive authoring
+pass. Kept as the record of the build strategy.]
 
 All State 1 animations use simple SVG shapes with 
 Framer Motion for the build phase. Requirements:
@@ -294,7 +300,7 @@ Phase 3 — New components (Modal, Tooltip,
            Notification Badge, Lava lamp grid)
 Phase 4 — Placeholder State 1 animations
 Phase 5 — Extended principle cards (13-18)
-Phase 6 — Rive illustrations (post-launch)
+Phase 6 — Rive illustrations (post-launch) [done]
 
 ---
 

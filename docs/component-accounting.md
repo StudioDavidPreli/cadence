@@ -10,8 +10,10 @@ rows below are open territory for further React practice, not gaps to apologize
 for.
 
 Built: 13 components across every canonical category. (Count as of the
-accounting date; predates the Motion Tiles era and the counts cited in
-later docs. Date-stamped 2026-07-16 by the open-items audit.)
+accounting date, against the canonical-set lens this doc uses. Census
+2026-07-16: 32 component folders in `src/components/`, all custom, zero
+from a UI library; the delta is infra and Rive-era chrome outside the
+canonical set. This doc stays a record of the canonical-set positioning.)
 
 ---
 
