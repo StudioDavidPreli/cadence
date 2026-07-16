@@ -33,11 +33,11 @@ __pycache__/
 # out of the build. Restore by moving a path back to its original src/ or public/ spot.
 /archive/
 
-# Local-only files kept on disk but out of git: project instructions, the vendored
-# emil-design-eng skill (and its lockfile). Not build inputs: Cloudflare deploys
-# the static build (dist/) plus the Worker (worker/index.js, per wrangler.jsonc),
-# and none of these files are part of either.
-/CLAUDE.md
+# Local-only files kept on disk but out of git: the vendored emil-design-eng skill
+# (and its lockfile). Not build inputs: Cloudflare deploys the static build (dist/)
+# plus the Worker (worker/index.js, per wrangler.jsonc), and none of these files are
+# part of either. CLAUDE.md is deliberately NOT here — it is tracked now, after being
+# lost once while gitignored (recovered from git history 2026-07-15).
 /skills-lock.json
 .claude/skills/
 .agents/skills/
