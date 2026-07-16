@@ -5,6 +5,8 @@
 **Question answered:** Can WebGL pixelation run on top of a Rive animation to pixelate the Rive animation?
 **Answer:** Yes — but only as a *post-process stage outside Rive's pipeline*, not inside it.
 
+> **Superseded 2026-07-16 note:** the in-Rive per-shape PathEffect route won and shipped inside Motion Tiles (ingredients_v8 + the 16 group-2 tiles). The "remaining build steps" at the end of this doc describe the WebGL route's promotion pass and are not live work; the `?pixel*` test gates and the `IngredientGrid` harnesses were removed from the codebase during Motion Tiles integration. Kept as the record of the route that lost and why it was viable.
+
 ---
 
 ## Context: why this matters

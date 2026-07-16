@@ -88,6 +88,8 @@ See `TOKEN_LAB_INGREDIENTS.md` §6 — preset table as single source of truth; `
 
 **Analysis phase: COMPLETE** — 16 originals, three rows of description-first pipeline, every mechanism converter-native except r2c6's pending vertex-bindability check.
 
+(r2c6 verdict, recorded after the fact 2026-07-16: no session log captured the vertex-bindability result, but `TOKEN_LAB_CLOSEOUT.md` counts 0 timelines in the final toolkit, which is only possible if the vertex check passed and the timeline fallback was never used. The tile shipped and cascades in the Motion Tiles pool. Recorded as reconstructed, not observed.)
+
 Artifacts: `poses_A/B.png` (canonical numbering), `ingredient_poses.zip` (72 exact stills), `motion_strips_1/2.png`, `easing_fit.png`, per-cell SVGs + specs, `row1_svg_signoff.png`, `ingredient_pilot.lua`.
 
 ## 10. Session kickoff prompts

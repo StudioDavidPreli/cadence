@@ -9,7 +9,9 @@ a principle, not because a complete system is supposed to have it. The unbuilt
 rows below are open territory for further React practice, not gaps to apologize
 for.
 
-Built: 13 components across every canonical category.
+Built: 13 components across every canonical category. (Count as of the
+accounting date; predates the Motion Tiles era and the counts cited in
+later docs. Date-stamped 2026-07-16 by the open-items audit.)
 
 ---
 

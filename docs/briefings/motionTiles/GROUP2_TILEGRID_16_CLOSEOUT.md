@@ -17,6 +17,12 @@ is `r3c1`, which is David's to re-export.
 > them (r2c1, r2c2, r2c3, r3c4) turned out to be correct by design, not broken.
 > The harness was driving the wrong property. Corrected below under "The four
 > `progress` gaps were not gaps." Only r3c1 remains.
+>
+> **Update 2026-07-16 (retroactive close):** r3c1 was fixed by the 2026-07-12
+> re-export. `public/riveTiles/group2/r3c1.riv` carries `r3c1SM`, confirmed
+> against the binary; the tile shipped working in the Motion Tiles pool. The
+> fix landed the day after the note above and was never recorded here. Zero
+> resume points remain.
 
 ---
 

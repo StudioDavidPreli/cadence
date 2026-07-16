@@ -1,7 +1,7 @@
 # TokenLab scroll architecture: comparison of three approaches
 
 **Date:** 2026-05-05
-**Status:** Decision pending
+**Status:** Resolved. Option B (app-shell) shipped 2026-05-05; the viewport-locked shell, per-column scroll, and the short-viewport unlock are the live architecture (see navigation-architecture-2026-06-17.md). This header was never closed at the time; corrected 2026-07-16.
 **Context:** TokenLab today scrolls at the page level. When the viewport is shorter than the content, scrolling to see a component pulls the controls column out of view as well. The functional complaint is that some tokens cannot be manipulated while looking directly at the components they affect.
 
 ---

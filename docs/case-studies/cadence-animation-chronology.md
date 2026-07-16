@@ -1,7 +1,7 @@
 ---
 Subject: PrincipleCard expand/collapse animation
 Period: 2026-04-20 to 2026-05-01
-Status: Cheap fix applied 2026-05-01. Observation pending.
+Status: Resolved. The fix landed (commit 6b59838, see Resolution section); observation period passed without recurrence. Header corrected 2026-07-16.
 Author: Studio David Preli + Claude Code, debugging session chronology
 ---
 

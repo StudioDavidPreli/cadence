@@ -4,6 +4,8 @@ A full sweep of the project record: TRACKER.md, all 22 decision docs, all 26 bri
 
 The structure: Part 1 is what the tracker already carries. Part 2 is what it does not. Part 3 is the record-keeping drift, where the work happened but no doc says so. Critical flags are marked **[CRITICAL]** inline and collected at the top.
 
+**Progress, same day (2026-07-16):** suggested-order items 1 and 2 are done (README URL, `v1.0.0` tag, the WASM pin applied and verified on built output). The mechanical half of item 3 is done: every Part 3 one-liner is closed (r3c1 and the Modal focus trap corrected in the tracker and closeout, the scroll-architecture and chronology headers closed, the WEBGL handoff superseded note, the r2c6 verdict recorded as reconstructed), stale banners are on `principle-component-status.md`, `cover-letter-reference.md`, `principles-reference.md`, and `component-accounting.md`, the CLAUDE.md token-architecture one-liner is extended, the voice doc's own em-dashes are fixed (eight, not the two first counted), and both duplicate `.txt` files are deleted. What remains of item 3 is the case-study half: the framing decisions (12-vs-18, timeline) and the full source-doc refresh, which belong to the Week 10 session.
+
 ---
 
 ## Critical flags

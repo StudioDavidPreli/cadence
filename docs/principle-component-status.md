@@ -1,5 +1,13 @@
 # Principles &harr; UI Component Status
 
+> **STALE. Last refreshed 2026-05-05, before the extended six shipped.** The
+> tables below list P13/P17/P18 as built-not-wired and P14/P15/P16 as not
+> built; all 18 principles are complete, wired, and live (deploy checklist,
+> 18/18 legibility rows). The P03 notes on the focus trap and the easing-slot
+> tabs are also stale: both shipped. Do not source case-study facts from this
+> file without checking the tracker. Flagged by the 2026-07-16 open-items
+> audit; refresh or retire during the case-study reconciliation pass.
+
 Snapshot of each principle's UI demo wiring: the component summary as it
 renders in the expanded card, the tokens it consumes, the React module
 that demonstrates the principle, and whether that module exists in

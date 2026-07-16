@@ -1,5 +1,14 @@
 # Principles Library — Reference Document
 
+> **PARTIALLY STALE (flagged 2026-07-16).** The placeholder strategy and
+> "Phase 6" (Rive illustrations, post-launch) sections describe the pre-Rive
+> era; all 18 principles ship with authored `.riv` animations and icons. At
+> least two specs drifted from what shipped: P12 Appeal shipped as the 2x2
+> ASCII-face Card grid (not the lava lamp grid) and P15 Economy as three
+> panning bars (not layered parallax scroll). The per-principle docs in
+> `docs/principles/` are the accurate record of what shipped; this file
+> remains authoritative for principle-to-component mapping only.
+
 For Claude Code: read this before building any Principles 
 Library component. This document defines the scope, 
 structure, and content of the Principles Library section 
