@@ -21,7 +21,7 @@ button's Squash and Stretch legibility is Tier 3. Same component, different tier
 - **Playwright MCP**: CC drives a live browser now. Use for the exploratory Tier 2
   pass while tuning motion.
 - **Persisted suite**: re-run on every change. Use for Tier 1 as a deploy gate.
-  **Exists as of 2026-07-16: `e2e/` (`npm run test:e2e`), 40 tests over built
+  **Exists as of 2026-07-16: `e2e/` (`npm run test:e2e`), 41 tests over built
   output served by the real Worker (`playwright.config.js` builds first). Rows
   it covers are ticked below with a spec reference.**
 
@@ -124,6 +124,10 @@ not build the exhaustive matrix.
       values after the switch.**
 
 ## zeroheight scenario coverage (per component that renders variable content)
+
+*(These rows are unautomated but not unverified: the checklist's Interaction
+states and In-flight/absent sections carry dated manual closes for the
+disabled, loading, error, and empty rows, 2026-07-16.)*
 
 - [ ] **T1** Long text wraps or truncates as designed; truncation side is intentional.
 - [ ] **T1** Many-items case (Carousel, any list) does not distort layout.

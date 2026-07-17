@@ -8,7 +8,7 @@ Tick each item per component where it applies. Not every row applies to every
 component; mark N/A and move on.
 
 As of 2026-07-16 the machine-checkable rows are also guarded continuously by
-the persisted Tier 1 suite: `npm run test:e2e` (40 tests, `e2e/`, built output
+the persisted Tier 1 suite: `npm run test:e2e` (41 tests, `e2e/`, built output
 served by the real Worker). A dated tick below records the one-time
 verification; the suite is what keeps it true.
 
