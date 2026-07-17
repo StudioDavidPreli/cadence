@@ -74,7 +74,20 @@ export function Card({
         ease: isSelected ? tokens.ease.overshoot : tokens.ease.standard,
       }}
       onClick={handleClick}
+      // The card is a toggle, so it carries a button's full contract:
+      // aria-pressed is only valid ARIA on role="button", and the role alone
+      // does not make a div focusable or key-operable, so tabIndex and the
+      // Enter/Space handler complete it (preventDefault stops Space from
+      // scrolling the demo column instead of selecting).
+      role="button"
+      tabIndex={0}
       aria-pressed={isSelected}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
       {...props}
     >
       {tag && <span className={styles.tag}>{tag}</span>}

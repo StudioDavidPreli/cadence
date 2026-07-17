@@ -48,3 +48,7 @@ __pycache__/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Playwright test-run artifacts (traces, error contexts); the suite itself is e2e/
+test-results/
+playwright-report/

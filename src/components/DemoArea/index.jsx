@@ -76,6 +76,15 @@ export function DemoArea({ categoryContent, principlesContent, hero, guide }) {
             // right-only gutter and the surface-raised column color.
             className={activeKey === 'hero' ? `${styles.layer} ${styles.heroLayer}` : styles.layer}
             style={{ zIndex: zMap.current[activeKey] }}
+            // The layer is the demo column's scroll container, and some
+            // destinations (the Token Lab guide) contain no focusable
+            // elements. A scrollable region must itself be focusable or a
+            // keyboard user cannot scroll it at all (axe:
+            // scrollable-region-focusable). role + aria-label because a
+            // focusable region needs a name to be announced as one.
+            tabIndex={0}
+            role="region"
+            aria-label="Demo area"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             // Hold fully visible, then remove once the incoming layer is opaque.

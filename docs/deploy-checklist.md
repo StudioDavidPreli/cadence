@@ -7,6 +7,11 @@ arbitrary. This checklist targets those.
 Tick each item per component where it applies. Not every row applies to every
 component; mark N/A and move on.
 
+As of 2026-07-16 the machine-checkable rows are also guarded continuously by
+the persisted Tier 1 suite: `npm run test:e2e` (40 tests, `e2e/`, built output
+served by the real Worker). A dated tick below records the one-time
+verification; the suite is what keeps it true.
+
 ---
 
 ## Principle legibility (the real audit)
@@ -86,11 +91,25 @@ so a regression in one HC mode usually shows in both.
 - [x] prefers-reduced-transparency: Modal and Drawer backdrops go to an opaque scrim: NOT automatable (no emulateMedia flag); verified by David under the OS setting, Tier 3 sweep 2026-07-16
 - [x] First load with no stored choice follows the OS: verified 2026-07-16, built output via Playwright emulateMedia with cleared storage: dark -> `dark`, light -> `light`, contrast-more + dark -> `high-contrast-dark`, contrast-more + light -> `high-contrast-light`. Stored choice wins over conflicting OS preferences (stored `light` under emulated dark + contrast-more restored `light`), set synchronously by the inline head script before the stylesheets, with zero re-sets after mount
 
+## Motion Tiles and the Worker (added 2026-07-16)
+
+The third tool and the deployment host, absent from this checklist's original
+row set (the coverage gap named in the 2026-07-16 open-items audit). Per-tile
+art judgments were closed by David's Tier 3 sweep, recorded in the tracker;
+these are the machine rows.
+
+- [x] Landing gates the grid: no tile field before Enter: automated 2026-07-16, `e2e/motion-tiles.spec.js`
+- [x] `#/motion-tiles/grid` mounts the default tile field, zero console/page errors: automated 2026-07-16, `e2e/motion-tiles.spec.js`
+- [x] Rive WASM (both runtimes) fetches from our origin, zero CDN requests: automated 2026-07-16, `e2e/motion-tiles.spec.js`, guarding the 2026-07-16 pin
+- [x] `/api/bug-report` guards: empty message 400, honeypot 204, non-POST 405: automated 2026-07-16, `e2e/motion-tiles.spec.js`, request-level with no GitHub side effects; the live end-to-end path (real issue opened) was verified 2026-07-15
+- [x] Preset values (snappy, cinematic) blessed as final: David's Tier 3 sweep 2026-07-16; the retiming-signature test stays open as Tier 2 in the matrix
+- [x] Grid-panel behavior between the mobile-gate width and 1024px: the v8 closeout's rail-collapse question, settled 2026-07-16 by automation: `e2e/motion-tiles.spec.js` renders the grid at 760px and 1024px and asserts zero horizontal overflow. No rail-collapse port needed
+
 ## Token integrity (the core argument, under test)
 
 - [x] No hardcoded duration, easing, or delay in any component (enforced by `src/tokens/tokenIntegrity.test.js`; chrome timing reads fixed `--feedback-*` constants, demonstration motion reads editable `--motion-*`). 2026-06-23
 - [x] Every animated value traces to a CSS custom property: verified 2026-07-16, scoped. The token-integrity gate enforces it over `components/` and `principles/`; a sweep of the unscanned surfaces (App shell, hooks, utils, main) found zero inline animation literals. Two documented exceptions: TokenFidelity's deliberate off-system literal (the lesson), and Motion Tiles' Rive preset scalars (`MotionTilesGrid.jsx` PRESETS), a separate vocabulary already tracked as the preset-unification item. Rive timelines are authored artwork, out of token scope
-- [x] Token Lab changes propagate to consuming components live: verified 2026-07-16, built output via Playwright: slider drive rewrote --motion-duration-fast 100->350ms and the code view's live value followed (0.1s -> 0.35s). The matrix's T1 thesis test, run by hand; the automated version stays open
+- [x] Token Lab changes propagate to consuming components live: verified 2026-07-16, built output via Playwright: slider drive rewrote --motion-duration-fast 100->350ms and the code view's live value followed (0.1s -> 0.35s). The matrix's T1 thesis test, run by hand; the automated version landed 2026-07-16 (`e2e/tokens.spec.js`) and runs on every `npm run test:e2e`
 - [x] Constrained vs Explore mode toggles behave correctly per section: verified 2026-07-16, built output via Playwright: Explore expands the rail's bounds (durations 0-2000, scale 0.5-1.2) without resetting values; an Explore-only value (duration.fast 1800ms) drives the live token; Explore-off resets to Default exactly as the documented "toggle off = clean state" model prescribes; other categories stay constrained
 
 ## Accessibility floors

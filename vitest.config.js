@@ -8,4 +8,10 @@ import react from '@vitejs/plugin-react'
 // in Node — so this mirrors the pre-Cloudflare vite config: just React.
 export default defineConfig({
   plugins: [react()],
+  test: {
+    // e2e/ is the Playwright suite (its own runner, `npm run test:e2e`);
+    // Vitest must not pick its .spec.js files up alongside the co-located
+    // unit tests in src/.
+    exclude: ['node_modules/**', 'e2e/**'],
+  },
 })

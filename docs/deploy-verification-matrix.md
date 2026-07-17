@@ -21,6 +21,9 @@ button's Squash and Stretch legibility is Tier 3. Same component, different tier
 - **Playwright MCP**: CC drives a live browser now. Use for the exploratory Tier 2
   pass while tuning motion.
 - **Persisted suite**: re-run on every change. Use for Tier 1 as a deploy gate.
+  **Exists as of 2026-07-16: `e2e/` (`npm run test:e2e`), 40 tests over built
+  output served by the real Worker (`playwright.config.js` builds first). Rows
+  it covers are ticked below with a spec reference.**
 
 Build the cheap Tier 1 tests that prove the thesis. Add Tier 2 signatures only where
 overshoot or wind-up is the whole point. Leave the long tail to one human pass. Do
@@ -36,43 +39,89 @@ not build the exhaustive matrix.
       ms value, cubic-bezier, or numeric delay in a component is a fail.
       **Done 2026-06-23: `src/tokens/tokenIntegrity.test.js` (Vitest, deploy gate).
       See `docs/decisions/chrome-timing-and-token-integrity-2026-06-23.md`.**
-- [ ] **T1** Live: Playwright edits a duration token through the Token Lab UI, then
+- [x] **T1** Live: Playwright edits a duration token through the Token Lab UI, then
       asserts a consuming component's running animation or `getComputedStyle` changed.
       This test is the thesis executed. Highest-value test in the suite.
-- [ ] **T1** Live: same for an easing slot edit (standard, enter, exit).
-- [ ] **T1** Constrained vs Explore toggle changes the available range per section.
-- [ ] **T1** Out-of-range token input is handled, not silently dropped.
+      **Done 2026-07-16: `e2e/tokens.spec.js` (slider drive → custom property →
+      the code view's resolved value follows).**
+- [x] **T1** Live: same for an easing slot edit (standard, enter, exit).
+      **Done 2026-07-16: `e2e/tokens.spec.js`, all three slots.**
+- [x] **T1** Constrained vs Explore toggle changes the available range per section.
+      **Done 2026-07-16: `e2e/tokens.spec.js`, including the toggle-off
+      reset-to-Default model and the Explore-only Overshoot tab.**
+- [x] **T1** Out-of-range token input is handled, not silently dropped.
+      **Done 2026-07-16: `e2e/tokens.spec.js`, import path: clamps itemized in
+      the report modal, clamped values live on the root.**
 
 ## Accessibility floors (inject axe-core)
 
-- [ ] **T1** 4.5:1 on normal text, every theme.
-- [ ] **T1** 3:1 on large text and UI components, every theme.
-- [ ] **T1** ARIA roles, name/role/value present on every interactive demo.
+- [x] **T1** 4.5:1 on normal text, every theme.
+      **Done 2026-07-16: `e2e/a11y.spec.js`, axe wcag2a+wcag2aa over four
+      themes x five views (home, guide, press-state, principles grid,
+      motion-tiles landing).**
+- [x] **T1** 3:1 on large text and UI components, every theme.
+      **Done 2026-07-16: same axe pass (color-contrast covers both floors).**
+- [x] **T1** ARIA roles, name/role/value present on every interactive demo.
+      **Done 2026-07-16: same axe pass. Two real findings fixed the day the
+      suite landed: the DemoArea scroll layer was not keyboard-scrollable on
+      focusable-element-free destinations (the guide), and the Card demo
+      carried `aria-pressed` on a role-less, pointer-only div. Both fixed and
+      re-verified; the Card has a keyboard regression test.**
 - [ ] **T1** No information carried by color alone (accent = active is reinforced
-      by shape, position, or text, not hue only).
+      by shape, position, or text, not hue only). *(Not automatable by axe;
+      closed manually 2026-07-16 by the checklist's hover-independence and
+      accent-census rows. Stays a code-review rule, not a test.)*
 
 ## Keyboard operability (Playwright drives, reads activeElement)
 
-- [ ] **T1** Tab order correct on every interactive demo.
-- [ ] **T1** Enter / Space / Arrow behave where expected (Toggle, Stepper, Dropdown,
+- [ ] **T1** Tab order correct on every interactive demo. *(Partially automated
+      2026-07-16: `e2e/keyboard.spec.js` walks the nav accordion and the Modal
+      trap; the manual full-order walk is the 2026-07-16 checklist row. A
+      per-demo walk is not built — the exhaustive matrix is explicitly out of
+      scope above.)*
+- [x] **T1** Enter / Space / Arrow behave where expected (Toggle, Stepper, Dropdown,
       Carousel, tabs, sliders).
-- [ ] **T1** Focus-visible ring present, meets 3:1 against adjacent colors.
-- [ ] **T1** Focus never lost into a closed Modal or Drawer.
+      **Automated for the highest-traffic paths 2026-07-16:
+      `e2e/keyboard.spec.js` (arrows drive sliders and the live token; Enter
+      toggles the nav; Enter/Space toggle the Card). The remaining demos were
+      verified manually in the 2026-07-16 checklist sessions.**
+- [x] **T1** Focus-visible ring present, meets 3:1 against adjacent colors.
+      **Presence automated 2026-07-16 (`e2e/keyboard.spec.js`, slider ring
+      under keyboard focus); the 3:1 measurement is the checklist's dated
+      manual row.**
+- [x] **T1** Focus never lost into a closed Modal or Drawer.
+      **Done 2026-07-16: `e2e/keyboard.spec.js`, 12-step trap walk, Escape
+      close, focus lands somewhere real.**
 
 ## Theme and media emulation (emulateMedia, context flags)
 
 - [ ] **T1** Light / dark / high-contrast parity. Screenshot each, diff, assert no
-      component breaks.
-- [ ] **T1** First load with no stored preference reads `prefers-color-scheme` and
+      component breaks. *(Not built as screenshot diffs; the axe pass covers all
+      four themes structurally, and art parity stayed Tier 3 — David's
+      2026-07-16 sweep. Screenshot baselines remain future work if drift ever
+      bites.)*
+- [x] **T1** First load with no stored preference reads `prefers-color-scheme` and
       follows OS. Launch with `colorScheme: 'dark'`, assert dark palette renders.
-- [ ] **T1** `prefers-reduced-motion: reduce` triggers reduced-motion mode.
+      **Done 2026-07-16: `e2e/themes.spec.js`, the full four-combination matrix
+      (colorScheme x prefers-contrast) plus stored-choice-wins under
+      conflicting OS preferences.**
+- [x] **T1** `prefers-reduced-motion: reduce` triggers reduced-motion mode.
+      **Done 2026-07-16: `e2e/themes.spec.js`, Modal fully appears and fully
+      leaves under reduce.**
 - [ ] **T1** `forced-colors: active` (Windows HCM) does not break layout or strand
-      state that relied on background-color alone.
-- [ ] **T1?** `prefers-reduced-transparency: reduce` makes the Modal backdrop opaque.
-      **Verify Playwright `emulateMedia` supports this feature before writing the
-      test. If unsupported, this row drops to Tier 3 (manual).**
-- [ ] **T1** Every `background-color` rule also sets `color`.
-- [ ] **T1** Theme switch re-reads tokens (Framer Motion does not re-read on its own).
+      state that relied on background-color alone. *(Verified manually via
+      emulateMedia in the 2026-07-16 checklist session; not yet in the
+      persisted suite.)*
+- [ ] ~~**T1?**~~ `prefers-reduced-transparency: reduce` makes the Modal backdrop
+      opaque. **Answered 2026-07-16: Playwright cannot emulate it; permanently
+      Tier 3 (manual). David verified under the OS setting, Tier 3 sweep
+      2026-07-16.**
+- [x] **T1** Every `background-color` rule also sets `color`.
+      **Done 2026-07-16 as a scripted CSS audit (172 rules), recorded in the
+      checklist; static analysis, not a browser test.**
+- [x] **T1** Theme switch re-reads tokens (Framer Motion does not re-read on its own).
+      **Done 2026-07-16: `e2e/themes.spec.js`, custom properties resolve to new
+      values after the switch.**
 
 ## zeroheight scenario coverage (per component that renders variable content)
 
@@ -81,6 +130,31 @@ not build the exhaustive matrix.
 - [ ] **T1** Disabled state defined and visually distinct on every interactive component.
 - [ ] **T1** Loading / error / empty states render where a component can be in flight
       or dataless.
+
+## Motion Tiles and the Worker (added 2026-07-16)
+
+The original matrix predates the third tool and the Worker host; this section
+closes that gap (`docs/open-items-audit-2026-07-16.md`, Critical flag 2's last
+remnant). Motion Tiles' per-tile art judgments stay Tier 3 and were closed by
+David's 2026-07-16 sweep; these are the machine facts.
+
+- [x] **T1** The landing gates the grid: no tile field mounts before Enter.
+      **Done 2026-07-16: `e2e/motion-tiles.spec.js`.**
+- [x] **T1** The grid deep link mounts the default tile field and stays
+      console-clean (no page errors, no console errors).
+      **Done 2026-07-16: `e2e/motion-tiles.spec.js`.**
+- [x] **T1** Rive WASM loads from our origin, never a CDN (the 2026-07-16 pin,
+      guarded against regression). **Done 2026-07-16: `e2e/motion-tiles.spec.js`
+      asserts at least one .wasm fetch, all from baseURL, zero unpkg/jsdelivr.**
+- [x] **T1** Worker guards hold without side effects: empty message 400,
+      honeypot 204 (no GitHub call), non-POST 405.
+      **Done 2026-07-16: `e2e/motion-tiles.spec.js`, request-level.**
+- [ ] **T2** A preset switch retimes the visible tiles together (one vocabulary
+      at scale — the section's argument). Machine signature: sample a tile's
+      progress rate before/after. Not built; the preset values themselves are
+      blessed (David's Tier 3 sweep).
+- [ ] **T2** Stagger drag crosses the grid as a wave (per-tile phase offsets
+      ordered by distance). Not built.
 
 ## Build hygiene
 
@@ -134,6 +208,10 @@ to the system-wide set.
    Playwright `emulateMedia` support for reduced-transparency. Predict before observe.
 2. **Phase two, Tier 1 suite.** Token propagation first (it is the thesis), then
    axe-core, then keyboard, then theme emulation. These are the deploy gate.
+   **Done 2026-07-16: `e2e/` as specified, in that order, plus the Motion
+   Tiles/Worker section above. Two real accessibility bugs surfaced on the
+   suite's first run (the axe rows have the detail) — the gate earned its keep
+   on day one.**
 3. **Phase three, Tier 2 via MCP.** Exploratory pass on the principles flagged Strong
    or where overshoot/wind-up is the point. Expect flake; tune sampling.
 4. **Phase four, hand the Tier 3 shortlist to David.** One human pass on legibility,
