@@ -385,6 +385,10 @@ export function PrincipleCard({
     })
 
     return () => { ax.stop(); ay.stop() }
+    // Deps are the transition flag only, by design: cellWidth, dur.slow, and
+    // ease.standard are read at transition time. Including them would restart
+    // the open animation on a token edit or grid recolumn while expanded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpanded])
 
   // ── Close animation ────────────────────────────────────────────────────────
@@ -432,6 +436,9 @@ export function PrincipleCard({
     })
 
     return () => { ax.stop(); ay.stop() }
+    // Same shape as the open path: the close animation fires on the isClosing
+    // transition alone, with the scale targets read at transition time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isClosing])
 
   // Two exit contexts for the drawer:

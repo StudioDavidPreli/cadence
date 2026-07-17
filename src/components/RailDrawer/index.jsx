@@ -52,6 +52,10 @@ export function RailDrawer({ label, drawerId, open, onToggle, onClose, children 
     drawer?.focus()
     return () => {
       document.removeEventListener('keydown', onKeyDown)
+      // Reading the ref at cleanup time is the point: focus returns to
+      // whatever rail button exists when the drawer closes, not a node
+      // captured at effect setup. Optional chaining covers unmount.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       railRef.current?.focus()
     }
   }, [open, onClose])

@@ -6,7 +6,6 @@ import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../co
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState } from '../../context/NavigationContext'
 import { SECTIONS } from '../../data/navigation'
-import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { EasingVisualizer } from '../EasingVisualizer'
@@ -1220,7 +1219,7 @@ export function TokenLab() {
       if (Array.isArray(stored)) {
         setUserPresets(stored.map(migratePresetEasing))
       }
-    } catch (_) { /* ignore corrupt storage */ }
+    } catch { /* ignore corrupt storage */ }
   }, [])
 
   // Prefetch the two lazy react-canvas chunks once the browser goes idle, so

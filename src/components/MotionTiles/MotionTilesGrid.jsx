@@ -489,6 +489,7 @@ const PROBLEM_VIEW_MODEL = 'ProblemVM'
 // prefetched with no second edit. clawd.riv is deliberately absent: it is
 // click-gated behind the logo button and its 748 kB would nearly triple the
 // prefetch payload for an easter egg most visitors never trigger.
+// eslint-disable-next-line react-refresh/only-export-components -- deliberate non-component export; the landing imports it for the .riv prefetch
 export const RIV_PREFETCH_MANIFEST = [
   RIV_SRC,
   ...GROUP2_FILES.map((f) => f.src),
