@@ -4,9 +4,9 @@ import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import styles from './Timing.module.css'
 
-// P09 Timing. Two Toggles, one per preset (Default, Cinematic). Identical
+// P09 Timing. Two Toggles, one per preset (Standard, Cinematic). Identical
 // component, different duration personalities — the only variable is timing.
-// Flipping each toggle shows how the same interaction reads as brisk (Default)
+// Flipping each toggle shows how the same interaction reads as brisk (Standard)
 // or deliberate (Cinematic) purely from its duration tokens.
 
 // Pre-resolved token shapes for the two presets. We resolve once at module load
@@ -14,12 +14,12 @@ import styles from './Timing.module.css'
 // pure transform. find() returns the matching preset object; we feed its
 // `state` to stateToTokens to get the React-shape tokens that
 // MotionTokensProvider expects.
-const DEFAULT_TOKENS = stateToTokens(
-  BUILT_IN_PRESETS.find(p => p.id === 'default').state
+const STANDARD_TOKENS = stateToTokens(
+  BUILT_IN_PRESETS.find(p => p.id === 'standard').state
 )
 
 // Demo-scoped exaggeration. The real presets differ by only 100 ms on the
-// `fast` token the Toggle animates (Default 100 ms, Cinematic 200 ms) — too
+// `fast` token the Toggle animates (Standard 100 ms, Cinematic 200 ms) — too
 // small to read as a personality shift in a single thumb flip. This demo slows
 // the Cinematic slot by a fixed factor so the contrast is unmistakable: brisk
 // vs deliberate. The factor lives here, never in the Cinematic preset itself —
@@ -59,7 +59,7 @@ function TogglePresetSlot({ presetLabel, presetTokens }) {
   return (
     // respectReducedMotion={false}: this slot exists to demonstrate a preset's
     // motion personality. Flattening it under OS reduce-motion would erase the
-    // distinction between Default and Cinematic and defeat the demo.
+    // distinction between Standard and Cinematic and defeat the demo.
     <MotionTokensProvider tokens={presetTokens} respectReducedMotion={false}>
       <div className={styles.timingRow}>
         <span className={styles.timingPresetLabel}>{presetLabel}</span>
@@ -72,7 +72,7 @@ function TogglePresetSlot({ presetLabel, presetTokens }) {
 export function Timing() {
   return (
     <div className={styles.timingDemo}>
-      <TogglePresetSlot presetLabel="Default"   presetTokens={DEFAULT_TOKENS} />
+      <TogglePresetSlot presetLabel="Standard"  presetTokens={STANDARD_TOKENS} />
       <TogglePresetSlot presetLabel="Cinematic" presetTokens={CINEMATIC_TOKENS} />
     </div>
   )

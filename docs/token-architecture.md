@@ -93,8 +93,8 @@ Import is the inverse of export, plus validation. `importTokens(text)` in `src/d
 The rules:
 
 - **Always flips to Explore.** The widened slider ranges (`EXPLORE_BOUNDS`) double as the clamp bounds, so the flip is also what lets an imported value be displayed and edited. A 1500ms duration is unreachable on a constrained slider; in Explore it sits on the track.
-- **Clamps scalars, never curves.** Duration, delay, and scale values outside `EXPLORE_BOUNDS` are pulled to the nearest edge and reported. Easing curves are not clamped: a control point with `y` outside `[0,1]` renders outside the visualizer's draggable region (the same state the Spring preset is in), so it loads and is reported as not-editable rather than bent. A curve with `x` outside `[0,1]` is a structural error (CSS rejects it) and fails the import.
-- **Fills missing tokens from Default** and reports each, so a partial file imports rather than failing.
+- **Clamps scalars, never curves.** Duration, delay, and scale values outside `EXPLORE_BOUNDS` are pulled to the nearest edge and reported. Easing curves are not clamped: a control point with `y` outside `[0,1]` renders outside the visualizer's draggable region (the same state the Overshoot curve is in), so it loads and is reported as not-editable rather than bent. A curve with `x` outside `[0,1]` is a structural error (CSS rejects it) and fails the import.
+- **Fills missing tokens from Standard** (the baseline preset, labeled Default until 2026-07-16) and reports each, so a partial file imports rather than failing.
 - **Re-canonicalizes easing.** Export flattens named curves to arrays; import maps a matching array back to its named key, so a round-tripped preset keeps its identity and lights up as active.
 - **Reports foreign keys** but suppresses the two expected constants (`ease.linear`, `delay.none`) so a clean round trip shows nothing.
 

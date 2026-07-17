@@ -48,7 +48,7 @@ not build the exhaustive matrix.
       **Done 2026-07-16: `e2e/tokens.spec.js`, all three slots.**
 - [x] **T1** Constrained vs Explore toggle changes the available range per section.
       **Done 2026-07-16: `e2e/tokens.spec.js`, including the toggle-off
-      reset-to-Default model and the Explore-only Overshoot tab.**
+      reset-to-Standard model and the Explore-only Overshoot tab.**
 - [x] **T1** Out-of-range token input is handled, not silently dropped.
       **Done 2026-07-16: `e2e/tokens.spec.js`, import path: clamps itemized in
       the report modal, clamped values live on the root.**

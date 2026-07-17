@@ -16,8 +16,10 @@ export const EASING_CURVES = {
 }
 
 // ─── Initial state ────────────────────────────────────────────────────────────
-// The "Default" preset's state. Defined separately so the Default entry in
-// BUILT_IN_PRESETS can reference it without duplicating values.
+// The "Standard" preset's state (labeled "Default" until 2026-07-16; renamed to
+// align the preset family with Motion Tiles' Snappy / Standard / Cinematic, the
+// same three personalities in both tools). Defined separately so the Standard
+// entry in BUILT_IN_PRESETS can reference it without duplicating values.
 //
 // `easing` holds four independent slots — standard / enter / exit / overshoot —
 // each editable through the TokenLab bezier visualizer. Each value is either a
@@ -36,8 +38,8 @@ export const INITIAL_STATE = {
 // isBuiltIn: true prevents these from being deleted by the user.
 export const BUILT_IN_PRESETS = [
   {
-    id: 'default',
-    label: 'Default',
+    id: 'standard',
+    label: 'Standard',
     isBuiltIn: true,
     tooltip: 'These values ship in most design systems without modification. Start here.',
     state: INITIAL_STATE,
@@ -327,7 +329,7 @@ function readCurve(leaf, format, path) {
 
 // If a bezier array exactly matches a named curve, return that key so the slot
 // stores the name (not the array). This restores the named-preset identity the
-// export flattened away, so a round-tripped Default lights up as Default again.
+// export flattened away, so a round-tripped Standard lights up as Standard again.
 function canonicalizeCurve(arr) {
   for (const [key, curve] of Object.entries(EASING_CURVES)) {
     if (curve.fm.every((v, i) => v === arr[i])) return key
@@ -356,7 +358,7 @@ function detectFormat(parsed) {
 }
 
 // Walk the editable schema, building a rawState-shaped object. Missing tokens
-// are filled from Default; present scalars are clamped to the explore bounds;
+// are filled from Standard; present scalars are clamped to the explore bounds;
 // present curves are canonicalized. Each adjustment is recorded for the report.
 function buildState(parsed, format) {
   const state = { duration: {}, easing: {}, delay: {}, scale: {} }

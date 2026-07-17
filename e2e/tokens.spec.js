@@ -42,7 +42,7 @@ test.describe('token propagation (the thesis)', () => {
     }
   })
 
-  test('Explore mode widens slider ranges; toggling off resets to Default', async ({ page }) => {
+  test('Explore mode widens slider ranges; toggling off resets to Standard', async ({ page }) => {
     await page.goto('/#/token-lab')
     const slider = page.getByRole('slider', { name: 'duration.fast' })
 
@@ -59,7 +59,8 @@ test.describe('token propagation (the thesis)', () => {
 
     // Push the value somewhere only Explore allows, then leave Explore.
     // The documented model is "toggle off = clean state": everything resets
-    // to Default rather than clamping the out-of-range value in place.
+    // to the Standard preset rather than clamping the out-of-range value in
+    // place.
     await slider.fill('1800')
     await expect.poll(() => readToken(page, '--motion-duration-fast')).toBe('1800ms')
     await page.getByRole('switch', { name: 'Explore' }).click()

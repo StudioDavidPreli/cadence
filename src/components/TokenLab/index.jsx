@@ -1266,7 +1266,7 @@ export function TokenLab() {
   // Explore toggle behavior:
   // ON  — expand range limits without resetting values. The Cinematic or Snappy
   //       preset remains loaded; the wider ranges just become reachable.
-  // OFF — always reset to Default. This keeps the "toggle off = clean state"
+  // OFF — always reset to Standard. This keeps the "toggle off = clean state"
   //       mental model consistent regardless of what was loaded in explore mode.
   // Explore mode removes semantic constraints. A user can set duration.slower
   // to 50ms to preview what a component would look like if piped to

@@ -1,10 +1,16 @@
 # Motion Presets — Token Values
 
-The three built-in presets and their token values. Default is the baseline (its
+The three built-in presets and their token values. Standard is the baseline (its
 state is `INITIAL_STATE`); Snappy and Cinematic are the two personality
 contrasts. This document is a readable mirror of `src/data/motionPresets.js`,
 which is the source of truth. When a preset value changes there, update the
 matching cell here.
+
+Standard was labeled Default until 2026-07-16. The rename aligns the preset
+family with Motion Tiles' Snappy / Standard / Cinematic: the same three
+personalities in both tools, each tool interpreting them in its own terms. The
+scoping decision (shared names, deliberately separate control vocabularies) is
+recorded in `docs/decisions/motion-tiles-integration-2026-07-13.md`.
 
 Related: `docs/token-architecture.md` (what the tokens are, how to add one),
 CLAUDE.md "Core Architecture Principle" (the read-at-runtime rule).
@@ -16,7 +22,7 @@ CLAUDE.md "Core Architecture Principle" (the read-at-runtime rule).
 These are the tokens the tool bar exposes a control for. A preset stores a value
 for each.
 
-| Token | Default | Snappy | Cinematic |
+| Token | Standard | Snappy | Cinematic |
 |---|---|---|---|
 | **Duration** (ms) | | | |
 | `duration.fast` | 100 | 60 | 200 |
@@ -82,7 +88,7 @@ four-number form.
 - **The personalities read mainly through duration and delay**, with scale as a
   secondary amplifier. Snappy compresses harder and lifts higher; Cinematic
   barely moves.
-- **Default is the "ships unmodified in most design systems" baseline** (its
+- **Standard is the "ships unmodified in most design systems" baseline** (its
   tooltip): the 100 / 200 / 400 / 600 duration ladder and the standard / enter /
   exit easing triad. It is what loads on open, so it is the tool's first
   impression.

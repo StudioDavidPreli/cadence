@@ -4,7 +4,7 @@ The number of frames determines weight and personality. More frames means heavie
 
 ## UI demonstration
 
-The expanded card renders two Toggles, each scoped to a different motion preset via `MotionTokensProvider`. One runs at the Default preset's duration values, the other at Cinematic. The user flips both and perceives the character shift directly. No easing difference, no path difference. Duration alone changes the personality.
+The expanded card renders two Toggles, each scoped to a different motion preset via `MotionTokensProvider`. One runs at the Standard preset's duration values, the other at Cinematic. The user flips both and perceives the character shift directly. No easing difference, no path difference. Duration alone changes the personality.
 
 The real presets differ by only 100 ms on the `fast` token the Toggle animates, which is too small to read in a single flip. The demo slows the Cinematic slot by a fixed factor (`CINEMATIC_DEMO_SLOWDOWN`) so the contrast is legible. The amplification is demo-scoped only; the Cinematic preset keeps its true values in TokenLab. This mirrors the demo-scoped `scale.lift` exaggeration used by Systematization and Reduced Motion.
 

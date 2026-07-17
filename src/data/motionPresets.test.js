@@ -204,7 +204,7 @@ describe('importTokens', () => {
     ])
   })
 
-  it('fills missing tokens from Default and reports each one', () => {
+  it('fills missing tokens from Standard and reports each one', () => {
     const res = importTokens(JSON.stringify({ duration: { fast: '100ms' } }))
     expect(res.ok).toBe(true)
     expect(res.state.scale).toEqual(INITIAL_STATE.scale)
