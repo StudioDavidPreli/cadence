@@ -3,12 +3,9 @@
 // landing hero: the display word is the artwork, and React's only job is to
 // bind the active theme.
 //
-// Runtime: tokenlabhero2.riv is the sibling of hero3.riv and is authored for the
-// Rive Renderer, so it loads on the WebGL2 runtime like HeroAnimation. This is
-// the only other component on @rive-app/react-webgl2; every principle canvas
-// stays on @rive-app/react-canvas. If the title area renders blank, the file was
-// exported for the vector renderer instead: change the import below to
-// '@rive-app/react-canvas' (no other change is needed).
+// Runtime: tokenlabhero2.riv is the sibling of hero3.riv, authored for the
+// Rive Renderer, and loads on the app's single WebGL2 runtime like every other
+// Rive canvas (single-runtime consolidation, 2026-07-17).
 //
 // Theme binding differs from the principle files and the hero in one way that
 // simplifies it: this file carries four view model instances (dark, light,

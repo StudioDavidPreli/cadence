@@ -4,9 +4,10 @@
 // implementations are easier to read than one shared util at this scale.
 
 import { useEffect } from 'react'
-import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
+import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-webgl2'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
+import { useRiveSupersampling } from '../../hooks/useRiveSupersampling'
 import styles from './PrincipleIcon.module.css'
 
 // Catalog of collapsed-state icons. Add entries as principles_iconNN.riv files
@@ -149,6 +150,10 @@ function RiveIcon({ src, stateMachine, theme, className, paused }) {
     autoplay: true,
     autoBind: false,
   })
+
+  // 2x supersampling: the webgl2 renderer's MSAA is coarser than the old
+  // canvas runtime's rasterizer on this thin-stroke art. See the hook.
+  useRiveSupersampling(rive)
 
   // Universal pause. The library header's Pause button flips `paused` for every
   // mounted icon at once. rive.pause() halts the running state machine in place;

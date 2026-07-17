@@ -1,11 +1,4 @@
 import { useEffect } from 'react'
-// Side effect: pins the canvas runtime's WASM to our origin. It lives here,
-// not in main.jsx, because this hook is the one module every canvas-runtime
-// component imports (the CLAUDE.md theme-binding convention), and it must stay
-// inside the lazy Principles/Carousel graph so @rive-app/canvas is not dragged
-// back into the eager entry chunk. See src/utils/riveWasmCanvas.js.
-import '../utils/riveWasmCanvas'
-import { useViewModelInstanceColor } from '@rive-app/react-canvas'
 
 // ─── useHCContrastColors ────────────────────────────────────────────────────
 //
@@ -24,24 +17,31 @@ import { useViewModelInstanceColor } from '@rive-app/react-canvas'
 // The 'Dark' and 'Light' instances are never touched — the effect only writes
 // for the two high-contrast themes, so non-HC themes keep their authored colors.
 //
+// The writes go through instance.color(name) directly, NOT through the
+// useViewModelInstanceColor hook. The hook's setters carry an internal property
+// handle that lags one render behind an instance rebind, so on a non-HC → HC
+// theme switch (Light instance → Contrast instance) they write to the handle of
+// the instance that was just discarded. The old canvas runtime happened to
+// reject that stale write and fall through to a fresh lookup; the webgl2
+// runtime accepts it silently and the flip is lost (found during the
+// 2026-07-17 single-runtime consolidation). Reading the property off the
+// current instance inside the effect cannot go stale: by the time this effect
+// runs, useViewModelInstance has already bound this exact instance.
+//
 // Call this once per Rive canvas, passing the instance returned by
 // useViewModelInstance and the current theme.
 export function useHCContrastColors(instance, theme) {
-  const stroke = useViewModelInstanceColor('colorPropertyStroke', instance)
-  const fill = useViewModelInstanceColor('colorPropertyFill', instance)
-
   useEffect(() => {
     if (!instance) return
+    const stroke = instance.color('colorPropertyStroke')
+    const fill = instance.color('colorPropertyFill')
+    if (!stroke || !fill) return
     if (theme === 'high-contrast-dark') {
-      stroke.setRgb(255, 255, 255)
-      fill.setRgb(0, 0, 0)
+      stroke.rgb(255, 255, 255)
+      fill.rgb(0, 0, 0)
     } else if (theme === 'high-contrast-light') {
-      stroke.setRgb(0, 0, 0)
-      fill.setRgb(255, 255, 255)
+      stroke.rgb(0, 0, 0)
+      fill.rgb(255, 255, 255)
     }
-    // Re-run on theme/instance change only. The stroke/fill setter objects are
-    // re-created each render; depending on them would write on every render. The
-    // writes are idempotent, so theme and instance are the meaningful triggers.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instance, theme])
 }

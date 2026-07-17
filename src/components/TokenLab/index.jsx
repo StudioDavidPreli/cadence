@@ -44,19 +44,21 @@ import {
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
 
-// ─── Lazy boundaries: the @rive-app/react-canvas consumers ───────────────────
+// ─── Lazy boundaries: PrinciplesLibrary and Carousel ─────────────────────────
 //
 // PrinciplesLibrary (via PrincipleCard → PrincipleIcon/PrincipleAnimation) and
-// Carousel are the app's only react-canvas importers. Loading them lazily takes
-// that runtime off first paint: the landing mounts only the hero, which runs on
-// the separate webgl2 runtime, so react-canvas was dead weight in the eager
-// chunk. Same pattern as MotionTilesSection's lazy grid; see
-// docs/decisions/rive-scaling-future-work-2026-07-07.md (addendum).
+// Carousel load lazily so their component JS stays off first paint. Same
+// pattern as MotionTilesSection's lazy grid; see
+// docs/decisions/rive-scaling-future-work-2026-07-07.md (addendum). Until the
+// 2026-07-17 single-runtime consolidation these chunks also carried the
+// separate @rive-app/react-canvas runtime and its WASM; everything now runs on
+// the webgl2 runtime the hero already loads eagerly, so the chunks are
+// component JS only.
 //
 // Because both lazy chunks import Carousel (FollowThrough renders one inside
-// the principles chunk), Rollup hoists Carousel + react-canvas + the HC color
-// hook into a shared chunk loaded when either side first needs it. Neither
-// lands in the eager index chunk.
+// the principles chunk), Rollup hoists Carousel + the HC color hook into a
+// shared chunk loaded when either side first needs it. Neither lands in the
+// eager index chunk.
 //
 // The importer functions are shared between React.lazy and the idle prefetch
 // in TokenLab, so both resolve to the same chunk. React.lazy expects a default
@@ -1222,7 +1224,7 @@ export function TokenLab() {
     } catch { /* ignore corrupt storage */ }
   }, [])
 
-  // Prefetch the two lazy react-canvas chunks once the browser goes idle, so
+  // Prefetch the two lazy chunks (PrinciplesLibrary, Carousel) on browser idle, so
   // navigating to Principles or the Gesture category never waits on a fetch and
   // the Suspense fallbacks near-never paint. Idle (not mount): firing the fetch
   // immediately would compete with the hero .riv and webgl2 WASM requests that

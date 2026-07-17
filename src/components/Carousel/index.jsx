@@ -1,9 +1,10 @@
 import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react'
 import { motion, animate, useMotionValue } from 'framer-motion'
-import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
+import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-webgl2'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
+import { useRiveSupersampling } from '../../hooks/useRiveSupersampling'
 import styles from './Carousel.module.css'
 
 // ─── Slide content ────────────────────────────────────────────────────────────
@@ -64,6 +65,10 @@ function SlideImage({ src, stateMachine, theme }) {
     autoplay: true,
     autoBind: false,
   })
+
+  // 2x supersampling: the webgl2 renderer's MSAA is coarser than the old
+  // canvas runtime's rasterizer on this thin-stroke art. See the hook.
+  useRiveSupersampling(rive)
 
   const viewModel = useViewModel(rive, { name: 'ViewModel1' })
 

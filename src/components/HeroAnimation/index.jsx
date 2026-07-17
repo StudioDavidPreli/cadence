@@ -8,13 +8,11 @@
 // drives its scale and speed. All of that is handled inside the state machine,
 // so React passes nothing in — its only job is theme synchronization.
 
-// hero3.riv is authored for the Rive Renderer, so it needs the WebGL2 runtime —
-// the canvas runtime the principle files use cannot load it and renders blank.
-// This is the one component in the app on @rive-app/react-webgl2; every other
-// Rive canvas stays on @rive-app/react-canvas. The two runtimes each ship their
-// own WASM and run independently; the hero and the principle grids never
-// co-mount, so the two never share a moment on screen. Keep the two package
-// versions in lockstep so the hook API stays identical across both.
+// hero3.riv is authored for the Rive Renderer, so it needs the WebGL2 runtime;
+// the older canvas runtime could not load it and rendered blank. That asymmetry
+// forced webgl2 into the app, and since the 2026-07-17 consolidation it is the
+// app's only runtime: the principle files predate the Rive Renderer but the
+// format is backwards compatible, so they run on it unchanged.
 import {
   useRive,
   useViewModel,

@@ -13,7 +13,6 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@rive-app/react-canvas": "^4.28.1",
     "@rive-app/react-webgl2": "^4.29.4",
     "framer-motion": "^11.0.0",
     "react": "^18.3.1",

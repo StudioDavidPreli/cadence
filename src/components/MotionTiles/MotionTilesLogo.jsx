@@ -5,9 +5,8 @@
 // the proven pattern for a themed title on the WebGL2 runtime.
 //
 // Runtime: authored for the Rive Renderer, so it loads on @rive-app/react-webgl2
-// like the hero and the Token Lab title. If the title area renders blank, the file
-// was exported for the vector renderer instead: change the import below to
-// '@rive-app/react-canvas' (no other change needed).
+// like the hero and the Token Lab title (and, since the 2026-07-17 single-runtime
+// consolidation, every other Rive canvas in the app).
 //
 // Theme binding is the clean four-instance kind: the file carries one view model
 // instance per theme (lightMode, darkMode, contrastLight, contrastDark), each with

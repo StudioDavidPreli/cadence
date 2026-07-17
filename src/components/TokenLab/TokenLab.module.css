@@ -930,7 +930,7 @@
   margin-top: 4px;
 }
 
-/* Suspense fallbacks for the two lazy react-canvas chunks (PrinciplesLibrary
+/* Suspense fallbacks for the two lazy chunks (PrinciplesLibrary
    and the Carousel demo). The crossfade layers are absolutely positioned, so
    the demo column's geometry never depends on layer content; these only need
    to fill their slot quietly for the rare frame the idle prefetch has not

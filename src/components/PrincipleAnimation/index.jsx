@@ -4,9 +4,10 @@
 // component view) and re-initialized when it mounts again. Do not move useRive
 // usage to parent components — that breaks the canvas lifecycle.
 
-import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-canvas'
+import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-webgl2'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
+import { useRiveSupersampling } from '../../hooks/useRiveSupersampling'
 import styles from './PrincipleAnimation.module.css'
 
 // Add entries here as .riv files are produced. `src` is relative to /public.
@@ -97,7 +98,7 @@ export function PrincipleAnimation({ principleId, className }) {
 //
 // Theme binding: useViewModelInstance accepts a { rive } option that causes it
 // to call rive.bindViewModelInstance(instance) automatically whenever name
-// changes. This is confirmed in the @rive-app/react-canvas source. No separate
+// changes. This is confirmed in the @rive-app/react-webgl2 source. No separate
 // useEffect is needed for binding — the hook handles it.
 
 function RiveCanvas({ src, stateMachine, theme, className }) {
@@ -107,6 +108,10 @@ function RiveCanvas({ src, stateMachine, theme, className }) {
     autoplay: true,
     autoBind: false,
   })
+
+  // 2x supersampling: the webgl2 renderer's MSAA is coarser than the old
+  // canvas runtime's rasterizer on this thin-stroke art. See the hook.
+  useRiveSupersampling(rive)
 
   const viewModel = useViewModel(rive, { name: 'ViewModel1' })
 
