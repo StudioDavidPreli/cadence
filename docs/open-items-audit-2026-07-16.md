@@ -137,7 +137,7 @@ Source-doc reconciliation the gap analysis does not list but the writing depends
 
 ### Repo and asset hygiene
 
-- **No ESLint or Prettier config.** Flagged 2026-06-18 as the expected baseline for a React portfolio repo; confirmed still absent.
+- **No ESLint or Prettier config.** Flagged 2026-06-18 as the expected baseline for a React portfolio repo; confirmed still absent. **Churn quantified 2026-07-16** (read-only preview, ESLint 10.7 + react-hooks 7.1 stock Vite template config, 80 files): 47 findings in 20 files, but 31 are the two new React-Compiler-era rules (`set-state-in-effect`, `refs`) that collide with documented Cadence patterns (the DemoArea `prevKeyRef`, effect-driven token sync); 11 are the conventional context-file `react-refresh` warnings; the substantive residue is 2 dead-code errors (`TokenLab/index.jsx`: unused `useMotionTokens` import at line 9, unused `_` at line 1223) and 3 `exhaustive-deps` warnings worth individual eyeballs (two PrincipleCard `useLayoutEffect`s, one RailDrawer ref-in-cleanup). David's call 2026-07-16: hold the report, decide later. If adopted, the sane shape is the template config with the two v7 rules at warn and context files exempted.
 - ~~**Orphaned public assets ship to the deploy.**~~ Removed 2026-07-16: `tokenlabhero.riv`, `subTitleThemed.svg`, `titleThemed.svg` (all verified unreferenced; a stale color.css comment pointing at titleThemed corrected to title2). The remaining title SVGs are source art David may still want; left in place.
 - ~~**Dead CSS.**~~ Removed 2026-07-16: the pre-Rive `.animationPlaceholder` rules are gone from PrincipleCard.module.css.
 - ~~**Duplicate files.**~~ Both `.txt` copies deleted 2026-07-16.
