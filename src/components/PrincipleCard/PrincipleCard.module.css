@@ -124,6 +124,13 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* flex-shrink: 0 — the title is a flex child of .collapsedContent inside
+     the fixed-height card. Without it, the column's flex layout squeezed the
+     title to 14px against a 16.9px line box, and the overflow: hidden the
+     line clamp requires sheared the serif italic descenders (the g loops in
+     "Exaggeration", "Staging"). Exempting the title from shrinking hands the
+     ~3px back to the icon area, which flexes. */
+  flex-shrink: 0;
 }
 
 /* ── Expanded structure ──────────────────────────────────────────────────────
