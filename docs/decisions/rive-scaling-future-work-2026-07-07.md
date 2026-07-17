@@ -169,3 +169,25 @@ Measured on built output (`wrangler dev` on `dist/`, Playwright): all 20 files
 fetch as full 200s while the landing is on screen; after Enter, every runtime
 request for the same URLs is a ~3ms 304 revalidation served from the primed
 cache, zero full downloads, zero console errors.
+
+## Addendum (2026-07-17): the two-runtime constraint is retired
+
+The fixed constraint above did not survive testing. "Authored against
+different Rive versions and do not run on a single shared runtime" had no
+recorded test behind it, and the file format works the other way: newer
+runtimes play older files in full. The direction that breaks is old runtime,
+new file, which is the one failure that had actually been observed (hero3.riv
+blank on the canvas runtime) and then generalized.
+
+The app now ships `@rive-app/react-webgl2` only. The canvas runtime, its
+WASM, its pin module (`riveWasmCanvas.js`), and the pin-placement rules in
+the 2026-07-16 addendum above are gone; the lazy chunks remain and carry
+component JS only. The swap surfaced two real problems, both fixed the same
+day: a stale-handle race in the HC-dark color flip that the old runtime had
+been absorbing, and an antialiasing gap on thin-stroke art that 2x
+supersampling closes. Full record, measurements, and the rules for new
+Rive-bound components: `webgl2-consolidation-2026-07-17.md`.
+
+The scaling model above is otherwise intact. `.riv` binaries are still free
+to the bundle, lazy destinations still gate component JS, and prefetch still
+answers the door. There is simply one runtime standing behind all of it.
