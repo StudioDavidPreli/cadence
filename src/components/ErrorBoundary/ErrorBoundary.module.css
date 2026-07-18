@@ -10,14 +10,20 @@
   padding: 2rem;
   box-sizing: border-box;
   background: var(--color-bg);
+  color: var(--color-text-base);
 }
 
+/* Card tokens follow the Modal panel: surface-raised is the card/panel surface,
+   and text-base/text-muted are its certified text pairings in all four themes.
+   --color-surface is the INTERACTIVE element surface (dark in light theme, inverted
+   in HC) — using it here was the bug that made this card illegible outside dark. */
 .card {
   max-width: 32rem;
   padding: 1.5rem 1.75rem;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
+  color: var(--color-text-base);
   text-align: center;
 }
 
@@ -25,7 +31,7 @@
   margin: 0 0 0.5rem;
   font-family: var(--font-serif);
   font-size: 1.25rem;
-  color: var(--color-text-primary);
+  color: var(--color-text-base);
 }
 
 .message {
@@ -34,17 +40,22 @@
   line-height: 1.5;
 }
 
+/* Ghost-button pattern, mirroring .actionButton in the bug-report forms. The
+   hover rule sets color alongside background-color (contrast rule in CLAUDE.md). */
 .reload {
   appearance: none;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-surface-hover);
+  background: none;
   color: var(--color-text-base);
   padding: 0.5rem 1.25rem;
   font: inherit;
   cursor: pointer;
+  transition: background-color var(--feedback-ui-duration),
+    color var(--feedback-ui-duration);
 }
 
 .reload:hover {
-  background: var(--color-surface-active);
+  background-color: var(--color-surface-active);
+  color: var(--color-text-base);
 }

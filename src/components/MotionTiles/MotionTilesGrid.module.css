@@ -201,8 +201,9 @@
   color: var(--color-accent);
 }
 
+/* Plain text-base for the error state: errors carry no accent (2026-07-18). */
 .reportStatus[data-state='error'] {
-  color: var(--color-accent3);
+  color: var(--color-text-base);
 }
 
 /* ── Problem (bug report) Rive button ───────────────────────────────────────
@@ -400,7 +401,10 @@
   font-size: 13px;
 }
 
+/* Error text is plain text-base, no accent: accent means "active, connected,
+   currently affecting the system" and a failure is none of those (David's call,
+   2026-07-18 error-surfaces pass). */
 .loadError {
-  color: var(--color-accent);
+  color: var(--color-text-base);
   font-weight: 600;
 }

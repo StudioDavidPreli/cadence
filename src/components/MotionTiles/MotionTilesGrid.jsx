@@ -711,6 +711,14 @@ export function MotionTilesGrid() {
   // show the placeholder until it arrives; the grid does not block on it.
   const { riveFile: staticFile } = useRiveFile({ src: STATIC_FILE })
 
+  // The on-screen load error speaks to the visitor; the asset path only helps the
+  // developer, so it goes to the console instead of the UI.
+  useEffect(() => {
+    if (status === 'failed') {
+      console.error(`[MotionTilesGrid] failed to load ${RIV_SRC}`)
+    }
+  }, [status])
+
   // preset drives which instance the tiles bind; the sliders below start from the
   // preset's baked values and can override them live.
   const [preset, setPreset] = useState('standard')
@@ -928,11 +936,12 @@ export function MotionTilesGrid() {
         <aside className={styles.controls}>
           <div className={styles.section}>
             {status === 'failed' ? (
-              <span className={styles.loadError}>
-                Failed to load {RIV_SRC}. Check the path and the export.
+              <span className={styles.loadError} role="alert">
+                The tile grid could not load. Check your connection and reload
+                the page.
               </span>
             ) : (
-              <span className={styles.sectionLabel}>Loading… ({status})</span>
+              <span className={styles.sectionLabel}>Loading…</span>
             )}
           </div>
         </aside>

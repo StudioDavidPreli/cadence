@@ -82,7 +82,7 @@ so a regression in one HC mode usually shows in both.
 
 - [x] Parity across all four modes: text-contrast sweep verified 2026-07-16, built output via Playwright on guide, Press & State, Principles, and Motion Tiles views; visual art parity stays a human check (Tier 3)
 - [x] Every `background-color` rule also sets `color` (no inherited-color assumption): verified 2026-07-16, scripted CSS audit over `src/**/*.css`: 172 rules set a background; every text-bearing one pins color in the same state scope, the base rule of the same element, or explicit child rules (the Card `.selected` pattern). The remainder are non-text surfaces (tracks, pips, backdrops, gradients)
-- [x] `--color-accent` reads as active/connected only, never decorative: closed 2026-07-16 in two halves. Contrast: scripted ratios, accent as text clears 4.5:1 in all four themes (the six remaining uses are state signals: sent status x2, fps warn, .warn, load error, custom-curve action). Semantics: David re-specified the category chips per theme and they moved off the accent family onto their own `--color-chip-*` tokens (dark tinted-text, light solid fills with near-black text, HC monochrome outline/inversion pair; all AA or better, verified on built output). The stale "UI strokes only, never text" claim in CLAUDE.md and the contrast audit was corrected the same day; full chip spec and ratios in the contrast audit's 2026-07-16 correction section
+- [x] `--color-accent` reads as active/connected only, never decorative: closed 2026-07-16 in two halves. Contrast: scripted ratios, accent as text clears 4.5:1 in all four themes (the six remaining uses are state signals: sent status x2, fps warn, .warn, load error, custom-curve action). Census reduced 2026-07-18: error text carries no accent (David's spec, the error-surfaces pass), so the load error and both bug-report error states moved to plain `--color-text-base` and the accent-as-text set is four (sent status x2, fps warn, .warn, custom-curve action). Semantics: David re-specified the category chips per theme and they moved off the accent family onto their own `--color-chip-*` tokens (dark tinted-text, light solid fills with near-black text, HC monochrome outline/inversion pair; all AA or better, verified on built output). The stale "UI strokes only, never text" claim in CLAUDE.md and the contrast audit was corrected the same day; full chip spec and ratios in the contrast audit's 2026-07-16 correction section
 - [x] Reduced-motion mode verified against `prefers-reduced-motion`: verified 2026-07-16, built output via Playwright via emulateMedia: Modal fully appears and fully leaves under reduce
 - [x] Theme switch re-reads tokens: verified 2026-07-16, built output via Playwright: custom properties re-resolve on data-theme flip; chrome color transitions run (sample after the transition, not at t=0)
 - [x] high-contrast-dark Rive artwork: icons, hero, and carousel paint white stroke on black (the shared `Contrast` instance flipped at runtime via `useHCContrastColors`). Verified 2026-06-22.
@@ -104,6 +104,18 @@ these are the machine rows.
 - [x] `/api/bug-report` guards: empty message 400, honeypot 204, non-POST 405: automated 2026-07-16, `e2e/motion-tiles.spec.js`, request-level with no GitHub side effects; the live end-to-end path (real issue opened) was verified 2026-07-15
 - [x] Preset values (snappy, cinematic) blessed as final: David's Tier 3 sweep 2026-07-16; the retiming-signature test stays open as Tier 2 in the matrix
 - [x] Grid-panel behavior between the mobile-gate width and 1024px: the v8 closeout's rail-collapse question, settled 2026-07-16 by automation: `e2e/motion-tiles.spec.js` renders the grid at 760px and 1024px and asserts zero horizontal overflow. No rail-collapse port needed
+
+## Error surfaces (added 2026-07-18)
+
+The crash card and the error copy postdate the April audit, and a crash screen
+only renders when something else is already wrong, so no theme pass had reason
+to see it. This section records the close. Session record:
+`docs/decisions/error-surfaces-2026-07-18.md`.
+
+- [x] ErrorBoundary card legible in all four themes: card on `--color-surface-raised` with a text-base title and muted message (5.5:1 dark, 5.7:1 light, 21:1 both HC); Reload wears the ghost-button pattern from the bug-report forms. Verified by David 2026-07-18 on built output through a temporary `?crash` render throw, all four themes, hook removed after the pass
+- [x] Error text carries no accent: `.loadError`, both `.reportStatus[data-state='error']` rules, and the import-failure line all read plain `--color-text-base` (David's spec 2026-07-18: accent means active, and a failure is not). Sent status keeps accent
+- [x] Grid load failure speaks to the visitor ("The tile grid could not load. Check your connection and reload the page."), carries `role="alert"`, asset path relocated to `console.error`; the loading label dropped its raw status interpolation. 2026-07-18
+- [x] Every `background-color` rule in `ErrorBoundary.module.css` sets `color` in the same scope. 2026-07-18
 
 ## Token integrity (the core argument, under test)
 

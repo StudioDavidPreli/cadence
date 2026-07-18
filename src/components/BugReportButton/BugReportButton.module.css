@@ -103,8 +103,9 @@
   color: var(--color-accent);
 }
 
+/* Plain text-base for the error state: errors carry no accent (2026-07-18). */
 .reportStatus[data-state='error'] {
-  color: var(--color-accent3);
+  color: var(--color-text-base);
 }
 
 .actionButton {

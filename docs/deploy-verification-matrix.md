@@ -135,6 +135,23 @@ disabled, loading, error, and empty rows, 2026-07-16.)*
 - [ ] **T1** Loading / error / empty states render where a component can be in flight
       or dataless.
 
+## Error surfaces (added 2026-07-18)
+
+The ErrorBoundary card (built 2026-07-15) postdates the audit and every sweep
+above; a crash screen renders only when something else already failed, so no
+theme pass exercised it. Closed manually; the checklist's Error surfaces
+section carries the ratios.
+
+- [x] **T1** ErrorBoundary card token pairings legible in all four themes
+      (surface-raised card, text-base title, ghost Reload).
+      **Done 2026-07-18: manual close on built output through a temporary
+      `?crash` render throw, David's eye across all four themes. No persisted
+      test: forcing a render throw needs a hook in App, and the hook came out
+      after the pass.**
+- [x] **T1** Error-text census: no accent on error states (grid load error,
+      both bug-report error lines, import failure; all plain text-base).
+      **Done 2026-07-18, code audit. Guarded by review, not by test.**
+
 ## Motion Tiles and the Worker (added 2026-07-16)
 
 The original matrix predates the third tool and the Worker host; this section
