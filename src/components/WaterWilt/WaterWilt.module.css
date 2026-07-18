@@ -1,0 +1,29 @@
+/* WaterWilt — demo layout only. No timings here: the demonstration motion is
+   the driver's, and the canvas paints it. */
+
+.demo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The canvas box. Aspect follows the loaded artboard bounds via --ww-aspect
+   (set inline by the component, the ClawdLogoButton convention); the fallback
+   holds the box open until the file resolves. pointer-events: none is a
+   contract term: the DOM button owns all interaction, the file's listeners
+   were removed, and the canvas must never swallow a click. */
+.stage {
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: var(--ww-aspect, 4 / 3);
+  pointer-events: none;
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.row {
+  display: flex;
+}

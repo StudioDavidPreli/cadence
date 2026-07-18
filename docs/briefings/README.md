@@ -17,6 +17,14 @@ session must respect.
 - [PrincipleCard expand/collapse animation](./principle-card-briefing.md)
   Current symptoms and constraints for the PrincipleCard close animation. Read before
   proposing any changes to the expand/collapse machinery.
+- [waterWilt React wiring](./waterwilt-react-wiring.md)
+  Full inspection of `public/rive/waterwiltreact.riv` (2026-07-18): view model surface,
+  state machine logic, listener behavior, and the gaps the wiring session plans around.
+  Read before writing the component.
+- [waterWilt token to VM map](./waterwilt-token-vm-map.md)
+  The interface contract for the Water & Wilt Token Lab demo (2026-07-18): token
+  consumption table, progress channels, instance gating, driver obligations, and
+  invariants. Both the .riv authoring and the React driver build against it.
 
 ## How to use
 

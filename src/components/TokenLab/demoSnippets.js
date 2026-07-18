@@ -248,6 +248,36 @@ const Modal = `const tokens = useMotionTokens()
   }}
 />`
 
+const WaterWilt = `const tokens = useMotionTokens()
+
+// No Framer Motion here: a rAF driver scrubs the .riv's
+// timelines. Easing runs in JS, the file holds poses, and
+// p += dt / duration is the whole timing model, so a slider
+// drag retimes a beat mid-flight from its current progress.
+const WATER_SEQUENCE = [
+  { scrub: 'rainFallProgress',
+    duration: tokens.duration.base,
+    ease: tokens.ease.enter },
+  { wait: tokens.delay.short },  // the water soaks in
+  { scrub: 'growProgress',
+    duration: tokens.duration.slower,
+    ease: tokens.ease.enter },
+  { wait: tokens.delay.long },
+  { scrub: 'flowersGrowProgress',
+    duration: tokens.duration.slow,
+    ease: tokens.ease.standard },
+]
+
+// Wilt: the three authored die timelines run together,
+// one beat, exit-fast.
+const WILT = {
+  duration: tokens.duration.base,
+  ease: tokens.ease.exit,
+}
+
+// The one direct bind, written outside the frame loop.
+plantScale.set(tokens.scale.expressive)`
+
 export const DEMO_SNIPPETS = {
   Drawer,
   Button,
@@ -262,4 +292,5 @@ export const DEMO_SNIPPETS = {
   Dropdown,
   Carousel,
   Modal,
+  WaterWilt,
 }

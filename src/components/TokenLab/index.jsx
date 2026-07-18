@@ -32,6 +32,7 @@ import { Modal } from '../Modal'
 import { Tooltip } from '../Tooltip'
 import { Dropdown } from '../Dropdown'
 import { NotificationBadge } from '../NotificationBadge'
+import { WaterWilt } from '../WaterWilt'
 import {
   EASING_CURVES,
   INITIAL_STATE,
@@ -102,21 +103,27 @@ const Carousel = lazy(() =>
 // enter/exit), Toggle under easing.standard + scale.base (it reads
 // duration.fast + ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
+// Water & Wilt (2026-07-18) is the first canvas demo in the map. Its rows are
+// exactly what the rAF driver reads (docs/briefings/waterwilt-token-vm-map.md):
+// rain in on base+enter, growth on slower+enter, flowers on slow+standard, the
+// wilt out on base+exit, the two delays between beats, and scale.expressive as
+// the plantScale direct bind. duration.fast is NOT listed for it: the demo's
+// toggle is the existing Button under Button's own contract.
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
-  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer'],
-  'duration.slower':  ['Spinner', 'Stepper'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge'],
-  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Water & Wilt'],
+  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'Water & Wilt'],
+  'duration.slower':  ['Spinner', 'Stepper', 'Water & Wilt'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Water & Wilt'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'Water & Wilt'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'Water & Wilt'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
-  'delay.short':      ['Stepper'],
+  'delay.short':      ['Stepper', 'Water & Wilt'],
   'delay.medium':     ['Stepper'],
-  'delay.long':       ['Stepper'],
+  'delay.long':       ['Stepper', 'Water & Wilt'],
   'scale.subtle':     ['Card'],
   'scale.base':       ['Button', 'Stepper'],
-  'scale.expressive': ['Notification Badge'],
+  'scale.expressive': ['Notification Badge', 'Water & Wilt'],
   'scale.lift':       ['Card', 'Carousel'],
 }
 
@@ -1450,6 +1457,19 @@ export function TokenLab() {
           code={DEMO_SNIPPETS.Stepper}
         >
           <Stepper />
+        </DemoWrapper>
+
+        {/* The first canvas demo: a Rive plant scrubbed by a rAF driver that
+            reads the same live tokens as every DOM demo. It sits in Sequence &
+            Progress because its cycle is the delay tokens' clearest showcase:
+            rain, soak, growth, settle, bloom, five beats with the gaps
+            editable. Contract: docs/briefings/waterwilt-token-vm-map.md. */}
+        <DemoWrapper
+          componentName="Water & Wilt"
+          instruction="Press Water me. Rain lands on duration.base, growth takes duration.slower, flowers wait out delay.long. Press again and everything exits together on ease.exit"
+          code={DEMO_SNIPPETS.WaterWilt}
+        >
+          <WaterWilt />
         </DemoWrapper>
       </div>
     ),
