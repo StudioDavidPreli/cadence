@@ -24,6 +24,7 @@ import {
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './TokenLabGuide.module.css'
 
 // artboard / stateMachine / view model are the author's names in the file
@@ -45,15 +46,41 @@ const themeToInstanceName = {
 
 export function TokenLabTitle() {
   const { theme } = useTheme()
-  // prefers-reduced-motion: load the file but hold a static first frame instead
-  // of playing, matching HeroAnimation and the principle demos' P17 behavior.
+  // prefers-reduced-motion (2026-07-18): render the per-theme static SVG poster
+  // instead of mounting the Rive canvas, so the .riv is never fetched for users
+  // who will never see it play. Same pattern as HeroAnimation.
   const reduce = useReducedMotion()
 
+  return (
+    // The <h2> stays the document heading for the outline and AA: the visible
+    // word is the canvas (aria-hidden), and the visually-hidden text carries the
+    // accessible name, the same split the Wordmark uses for its inlined mark.
+    <h2 className={styles.title}>
+      <span className={styles.srOnly}>Token Lab</span>
+      <span className={styles.titleAnim} aria-hidden="true">
+        {reduce ? (
+          <img
+            className={`${styles.titleCanvas} ${styles.fallbackImg}`}
+            src={riveFallbackSrc('tokenLab', theme)}
+            alt=""
+          />
+        ) : (
+          <TitleRive theme={theme} />
+        )}
+      </span>
+    </h2>
+  )
+}
+
+// The Rive half, isolated so its hooks only run when motion is allowed (the
+// poster branch above never fetches the .riv). Same isolation rule as
+// HeroAnimation/HeroRive.
+function TitleRive({ theme }) {
   const { rive, RiveComponent } = useRive({
     src: TITLE_RIV.src,
     artboard: TITLE_RIV.artboard,
     stateMachines: TITLE_RIV.stateMachine,
-    autoplay: !reduce,
+    autoplay: true,
     autoBind: false,
     // The guide is a left-aligned reading document, so the title reads from the
     // left edge rather than centering in its box (Rive's default alignment).
@@ -69,18 +96,12 @@ export function TokenLabTitle() {
   })
 
   return (
-    // The <h2> stays the document heading for the outline and AA: the visible
-    // word is the canvas (aria-hidden), and the visually-hidden text carries the
-    // accessible name, the same split the Wordmark uses for its inlined mark.
-    <h2 className={styles.title}>
-      <span className={styles.srOnly}>Token Lab</span>
-      <span className={styles.titleAnim} aria-hidden="true">
-        {/* Fallback: until rive loads (or if the file is absent) the plain
-            title text shows, so the guide is legible before the canvas paints
-            and a missing asset degrades to text rather than an empty box. */}
-        {!rive && <span className={styles.titleFallback}>Token Lab</span>}
-        <RiveComponent className={styles.titleCanvas} />
-      </span>
-    </h2>
+    <>
+      {/* Fallback: until rive loads (or if the file is absent) the plain
+          title text shows, so the guide is legible before the canvas paints
+          and a missing asset degrades to text rather than an empty box. */}
+      {!rive && <span className={styles.titleFallback}>Token Lab</span>}
+      <RiveComponent className={styles.titleCanvas} />
+    </>
   )
 }

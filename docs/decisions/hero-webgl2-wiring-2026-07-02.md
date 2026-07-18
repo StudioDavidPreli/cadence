@@ -299,11 +299,16 @@ for `src/components/HeroAnimation/index.jsx`:
 Sections above that describe the `Dark`/`Light`/`Contrast` + inline-flip wiring are
 retained as history but are superseded by this section.
 
-Note: `heromobile.riv` (the MobileGate asset) still carries its own instances and
+~~Note: `heromobile.riv` (the MobileGate asset) still carries its own instances and
 `MobileGate/index.jsx` still uses the `Dark`/`Light`/`Contrast` + inline-flip
 contract. It was NOT homogenized in this pass and is tracked separately — if that
 asset is ever re-authored to the four-instance convention, MobileGate must be
-updated the same way or it will fail to bind.
+updated the same way or it will fail to bind.~~ **Closed 2026-07-18:** David
+re-exported `heromobile.riv` with the four homogenized instances and
+`MobileGate/index.jsx` moved to the same clean 1:1 map the desktop hero uses
+(flip deleted). Both heroes now share one contract; the divergence this note
+tracked no longer exists. Verified on built output: the gate binds
+`contrastDark` console-clean in HC-dark (`e2e/themes.spec.js`).
 
 ### Landing presentation — full-bleed, lifted text, and the drift fix
 

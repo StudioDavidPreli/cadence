@@ -98,6 +98,37 @@ test.describe('reduced motion', () => {
     await expect(page.getByRole('button', { name: 'View motion' })).toBeVisible()
   })
 
+  test('the home page renders static posters and fetches no Rive at all', async ({ page }) => {
+    // The 2026-07-18 poster upgrade: under reduce-motion the hero and the
+    // bug-report button render per-theme SVGs instead of mounting canvases,
+    // so no .riv and no WASM binary is ever requested on the home page. The
+    // network assertion is the point: the posters are not just a visual
+    // fallback, they remove the entire Rive payload for reduce users.
+    const riveLoads = []
+    page.on('request', (r) => {
+      const u = r.url()
+      if (u.endsWith('.riv') || u.endsWith('.wasm')) riveLoads.push(u)
+    })
+    await page.goto('/')
+    await expect(page.locator('img[src*="/fallBacks/hero3"]')).toBeVisible()
+    await expect(page.locator('img[src*="/fallBacks/problems"]')).toBeVisible()
+    expect(riveLoads).toEqual([])
+  })
+
+  test('the tool titles and the Enter button render their posters', async ({ page }) => {
+    await page.goto('/#/token-lab')
+    await expect(page.locator('img[src*="/fallBacks/tokenLab"]')).toBeVisible()
+    await page.goto('/#/motion-tiles')
+    await expect(page.locator('img[src*="/fallBacks/motionTilesOverview"]')).toBeVisible()
+    await expect(page.locator('img[src*="/fallBacks/enter"]')).toBeVisible()
+  })
+
+  test('the mobile gate renders its poster under reduce-motion', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 })
+    await page.goto('/')
+    await expect(page.locator('img[src*="/fallBacks/hero3Mobile"]')).toBeVisible()
+  })
+
   test('the Motion Tiles field starts paused under reduce-motion: its button reads Play', async ({ page }) => {
     // The 2026-07-17 Rive policy: demonstration surfaces start paused behind
     // an explicit play affordance. The field's clock defaults to paused (rest
@@ -123,6 +154,30 @@ test.describe('reduced motion', () => {
     await pauseButton.click()
     await expect(page.getByRole('button', { name: 'Pause', exact: true })).toHaveAttribute('aria-pressed', 'false')
   })
+})
+
+test('the mobile gate binds the homogenized hero file console-clean in HC-dark', async ({ browser }) => {
+  // 2026-07-18: heromobile.riv was re-exported with the same four homogenized
+  // theme instances as hero3.riv, and MobileGate dropped the old runtime
+  // stroke/fill flip. HC-dark is the probe because it is the theme the flip
+  // existed for: the contrastDark instance must bind and paint console-clean.
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 800 },
+    colorScheme: 'dark',
+    contrast: 'more',
+  })
+  const page = await context.newPage()
+  const errors = []
+  page.on('console', (m) => {
+    if (m.type() === 'error') errors.push(m.text())
+  })
+  await page.goto('/')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'high-contrast-dark')
+  // Generous timeout: this is a cold context fetching two .riv files through
+  // the built Worker; the first run of this test flaked at the default 5s.
+  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 15000 })
+  expect(errors).toEqual([])
+  await context.close()
 })
 
 test('the View motion gate never renders without the OS reduce-motion preference', async ({ page, context }) => {

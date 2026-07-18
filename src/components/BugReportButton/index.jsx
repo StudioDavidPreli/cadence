@@ -6,6 +6,7 @@ import {
   useViewModelInstance,
 } from '@rive-app/react-webgl2'
 import { useTheme } from '../../context/ThemeContext'
+import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import { useNavState } from '../../context/NavigationContext'
 import { MOTION_TILES_GRID } from '../../data/navigation'
 import { Modal } from '../Modal'
@@ -55,8 +56,43 @@ const themeToInstanceName = {
 // pointer-events:none) so problemSM runs its own hover-scale and pointer-down
 // animation; the DOM click still bubbles up to the <button>, which opens the dialog.
 function ProblemButton({ instanceName, onClick }) {
+  const { theme } = useTheme()
   const [aspect, setAspect] = useState(null)
+  // prefers-reduced-motion (2026-07-18): render the per-theme static SVG poster
+  // instead of mounting the Rive canvas (upgrading the 2026-07-17 held-frame
+  // freeze to a designed still). The wrapping <button> keeps the click and the
+  // accessible name either way, so the report dialog opens identically.
   const reduce = useReducedMotion()
+
+  return (
+    <button
+      type="button"
+      className={styles.problemButton}
+      style={aspect ? { '--problem-aspect': aspect } : undefined}
+      onClick={onClick}
+      aria-label="Report a problem"
+    >
+      {reduce ? (
+        <img
+          className={`${styles.problemCanvas} ${styles.fallbackImg}`}
+          src={riveFallbackSrc('problems', theme)}
+          alt=""
+          onLoad={(e) => {
+            const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+            if (w > 0 && h > 0) setAspect(w / h)
+          }}
+        />
+      ) : (
+        <ProblemRive instanceName={instanceName} onAspect={setAspect} />
+      )}
+    </button>
+  )
+}
+
+// The Rive half, isolated so its hooks only run when motion is allowed (the
+// poster branch above never fetches the .riv). Same isolation rule as
+// HeroAnimation/HeroRive.
+function ProblemRive({ instanceName, onAspect }) {
   const { rive, RiveComponent } = useRive({
     src: PROBLEM_SRC,
     artboard: PROBLEM_ARTBOARD,
@@ -70,14 +106,10 @@ function ProblemButton({ instanceName, onClick }) {
 
   // Play once both the runtime and the theme instance are ready. instanceName
   // changes on a theme switch, so useViewModelInstance rebinds and this re-runs,
-  // swapping the button's baked palette live. Under OS reduce-motion, chrome
-  // freezes (2026-07-17 policy): hold the bound first frame instead of
-  // playing. The click still opens the dialog.
+  // swapping the button's baked palette live.
   useEffect(() => {
-    if (!rive || !instance) return
-    if (reduce) rive.pause(PROBLEM_STATE_MACHINE)
-    else rive.play(PROBLEM_STATE_MACHINE)
-  }, [rive, instance, reduce])
+    if (rive && instance) rive.play(PROBLEM_STATE_MACHINE)
+  }, [rive, instance])
 
   // Derive the aspect ratio from the loaded artboard bounds (w/h). The CSS
   // fallback holds the box open until this resolves. Inline style sets ONLY the
@@ -88,20 +120,10 @@ function ProblemButton({ instanceName, onClick }) {
     if (!b) return
     const w = b.maxX - b.minX
     const h = b.maxY - b.minY
-    if (w > 0 && h > 0) setAspect(w / h)
-  }, [rive])
+    if (w > 0 && h > 0) onAspect(w / h)
+  }, [rive, onAspect])
 
-  return (
-    <button
-      type="button"
-      className={styles.problemButton}
-      style={aspect ? { '--problem-aspect': aspect } : undefined}
-      onClick={onClick}
-      aria-label="Report a problem"
-    >
-      <RiveComponent className={styles.problemCanvas} />
-    </button>
-  )
+  return <RiveComponent className={styles.problemCanvas} />
 }
 
 export function BugReportButton() {

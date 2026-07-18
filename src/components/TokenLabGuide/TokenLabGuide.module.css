@@ -133,3 +133,11 @@
   color: var(--color-text-base);
   font-size: 0.9em;
 }
+
+/* The reduced-motion poster (riveFallbacks). Shares .titleCanvas for size;
+   object-fit/position mirror the canvas's Contain + CenterLeft layout so the
+   word reads from the left edge like the animated title. */
+.fallbackImg {
+  object-fit: contain;
+  object-position: left center;
+}

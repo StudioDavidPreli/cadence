@@ -162,3 +162,24 @@ left in place, no follow-up.
 Narrow desktop window below / above 720px; phone portrait and landscape; a deep
 link opened under the gate then at desktop width; reduced motion on; all three
 theme families (light, dark, both high-contrast).
+
+---
+
+## Addendum (2026-07-18): the hero contract homogenized; a poster under reduce-motion
+
+Two changes, one session:
+
+- **`heromobile.riv` joined the four-instance convention.** David re-exported
+  the file with `darkMode` / `lightMode` / `contrastDark` / `contrastLight`
+  (the same homogenized set as `hero3.riv`, and the same convention the
+  Studio logo link used from day one), and `MobileGate/index.jsx` moved to
+  the clean 1:1 map: the `Dark`/`Light`/`Contrast` instances and the runtime
+  stroke/fill flip are gone. The "keep the two heroes in step" warning in the
+  hero wiring doc is closed; there is now one contract to keep.
+- **Reduced motion renders a poster, not a paused canvas.** Under the OS
+  preference the gate shows a per-theme static SVG
+  (`/public/fallBacks/hero3Mobile<Theme>.svg`, `riveFallbackSrc`) instead of
+  mounting the Rive canvas, so the `.riv` and the WebGL surface are skipped
+  entirely. The box's aspect var comes from the SVG's natural size on load,
+  mirroring the `rive.bounds` read on the Rive path. The Studio logo link
+  still holds its first frame under reduce; it has no poster yet.

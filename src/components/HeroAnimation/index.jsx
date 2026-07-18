@@ -20,6 +20,7 @@ import {
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './HeroAnimation.module.css'
 
 // The landing .riv (1920x1080 widescreen). artboard and stateMachine are the
@@ -42,51 +43,31 @@ const themeToInstanceName = {
 export function HeroAnimation() {
   const { theme } = useTheme()
 
-  // prefers-reduced-motion: load the file but do not play it, so the hero holds
-  // a static first frame instead of looping. Consistent with P17.
+  // prefers-reduced-motion (2026-07-18): render the per-theme static SVG poster
+  // instead of mounting the Rive canvas at all. The hero's art is clock-driven
+  // (frame 0 draws nothing designed), so a paused canvas is not a usable still,
+  // and skipping the mount also skips the .riv fetch and the WebGL surface for
+  // users who will never see the animation.
   const reduce = useReducedMotion()
-
-  const { rive, RiveComponent } = useRive({
-    src: HERO_RIV.src,
-    artboard: HERO_RIV.artboard,
-    stateMachines: HERO_RIV.stateMachine,
-    autoplay: !reduce,
-    autoBind: false,
-  })
-
-  // This file names its view model 'Hero3ViewModel', not the 'ViewModel1' the
-  // principle files use. Each theme binds its own authored instance.
-  const viewModel = useViewModel(rive, { name: 'Hero3ViewModel' })
-  // { rive } makes the hook bind the instance and rebind when the name (theme)
-  // changes. No manual useEffect needed — same as RiveCanvas. With per-theme
-  // instances there are no colors to write: each instance carries its own.
-  useViewModelInstance(viewModel, {
-    name: themeToInstanceName[theme],
-    rive,
-  })
 
   return (
     <div className={styles.hero}>
       {/* The Rive container. The title (Cadence) and byline (how things move)
           are baked into the artwork itself, so React renders no text here. */}
       <div className={styles.riveContainer}>
-        {/* Graceful fallback: until rive loads (or if hero.riv is absent), show a
-            quiet themed prompt. Once the file loads, the canvas paints over it.
-            A missing asset therefore degrades to this prompt rather than erroring,
-            so the build runs before the .riv is authored. */}
-        {!rive && (
-          <p className={styles.fallbackText}>
-            Pick a tool to begin. Token Lab edits the system; Principles shows it at work.
-          </p>
+        {reduce ? (
+          <div className={styles.canvasClip}>
+            {/* Decorative alt="": the poster carries the same baked wordmark the
+                canvas would; the page's accessible structure is unchanged. */}
+            <img
+              className={`${styles.canvas} ${styles.fallbackImg}`}
+              src={riveFallbackSrc('hero3', theme)}
+              alt=""
+            />
+          </div>
+        ) : (
+          <HeroRive theme={theme} />
         )}
-        {/* Clip wrapper. It fills the padded content box and owns the overflow
-            clip, so scaling the canvas above 1 (--hero-art-scale) grows the art
-            inside the padding rather than out over it. Without this inner box the
-            clip would fall at .riveContainer's outer edge (overflow clips at the
-            padding box), and the scale would erase the padding entirely. */}
-        <div className={styles.canvasClip}>
-          <RiveComponent className={styles.canvas} />
-        </div>
       </div>
 
       {/* Short description beneath the artwork: states the tool's purpose, then
@@ -104,5 +85,51 @@ export function HeroAnimation() {
         </p>
       </div>
     </div>
+  )
+}
+
+// The Rive half, isolated so its hooks only run when motion is allowed: under
+// reduce-motion the poster branch above renders and this never mounts, so the
+// .riv is never fetched. Same isolation rule as PrincipleAnimation/RiveCanvas.
+function HeroRive({ theme }) {
+  const { rive, RiveComponent } = useRive({
+    src: HERO_RIV.src,
+    artboard: HERO_RIV.artboard,
+    stateMachines: HERO_RIV.stateMachine,
+    autoplay: true,
+    autoBind: false,
+  })
+
+  // This file names its view model 'Hero3ViewModel', not the 'ViewModel1' the
+  // principle files use. Each theme binds its own authored instance.
+  const viewModel = useViewModel(rive, { name: 'Hero3ViewModel' })
+  // { rive } makes the hook bind the instance and rebind when the name (theme)
+  // changes. No manual useEffect needed — same as RiveCanvas. With per-theme
+  // instances there are no colors to write: each instance carries its own.
+  useViewModelInstance(viewModel, {
+    name: themeToInstanceName[theme],
+    rive,
+  })
+
+  return (
+    <>
+      {/* Graceful fallback: until rive loads (or if hero.riv is absent), show a
+          quiet themed prompt. Once the file loads, the canvas paints over it.
+          A missing asset therefore degrades to this prompt rather than erroring,
+          so the build runs before the .riv is authored. */}
+      {!rive && (
+        <p className={styles.fallbackText}>
+          Pick a tool to begin. Token Lab edits the system; Principles shows it at work.
+        </p>
+      )}
+      {/* Clip wrapper. It fills the padded content box and owns the overflow
+          clip, so scaling the canvas above 1 (--hero-art-scale) grows the art
+          inside the padding rather than out over it. Without this inner box the
+          clip would fall at .riveContainer's outer edge (overflow clips at the
+          padding box), and the scale would erase the padding entirely. */}
+      <div className={styles.canvasClip}>
+        <RiveComponent className={styles.canvas} />
+      </div>
+    </>
   )
 }

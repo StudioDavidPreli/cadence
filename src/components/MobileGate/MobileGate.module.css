@@ -117,3 +117,10 @@
   font-size: 13px;
   color: var(--color-text-muted);
 }
+
+/* The reduced-motion poster (riveFallbacks). Shares .canvas for size; the
+   container's aspect var comes from the SVG's natural size on load, so the
+   box fits the art exactly. object-fit guards the pre-load fallback ratio. */
+.fallbackImg {
+  object-fit: contain;
+}

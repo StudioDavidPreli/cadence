@@ -52,3 +52,10 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* The reduced-motion poster (riveFallbacks). Shares .canvas for size;
+   object-fit/position mirror the canvas's Contain + CenterLeft layout. */
+.fallbackImg {
+  object-fit: contain;
+  object-position: left center;
+}

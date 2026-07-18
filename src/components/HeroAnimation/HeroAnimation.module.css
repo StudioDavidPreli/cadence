@@ -101,3 +101,10 @@
   margin: 0;
   color: var(--color-text-muted);
 }
+
+/* The reduced-motion poster (riveFallbacks). Shares .canvas for size and the
+   --hero-art-scale transform so it frames like the canvas; object-fit keeps
+   the SVG's own proportions inside the box instead of stretching. */
+.fallbackImg {
+  object-fit: contain;
+}
