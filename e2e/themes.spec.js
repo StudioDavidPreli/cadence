@@ -123,10 +123,11 @@ test.describe('reduced motion', () => {
     await expect(page.locator('img[src*="/fallBacks/enter"]')).toBeVisible()
   })
 
-  test('the mobile gate renders its poster under reduce-motion', async ({ page }) => {
+  test('the mobile gate renders its posters under reduce-motion', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.goto('/')
     await expect(page.locator('img[src*="/fallBacks/hero3Mobile"]')).toBeVisible()
+    await expect(page.locator('img[src*="/fallBacks/singleLineLogo"]')).toBeVisible()
   })
 
   test('the Motion Tiles field starts paused under reduce-motion: its button reads Play', async ({ page }) => {

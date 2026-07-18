@@ -18,6 +18,7 @@ import {
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './MobileGate.module.css'
 
 const LOGO_RIV = {
@@ -43,18 +44,50 @@ const STUDIO_URL = 'https://davidpreli.com'
 
 export function StudioLogoLink() {
   const { theme } = useTheme()
+  // prefers-reduced-motion (2026-07-18): render the per-theme static SVG poster
+  // instead of mounting the Rive canvas, same as the gate's hero. The anchor
+  // keeps its href and accessible name either way.
   const reduce = useReducedMotion()
 
-  // Size the link to the artboard's real aspect ratio, read once the file loads
-  // (the 4/1 fallback holds a wide single-line box open until then). Same
-  // rive.bounds → aspect-ratio pattern the gate hero and the grid logo use.
+  // Size the link to the artboard's real aspect ratio (the 4/1 fallback holds a
+  // wide single-line box open until it resolves). The Rive path reads it from
+  // rive.bounds; the poster path reads it from the SVG's natural size on load.
+  // Same pattern as the gate hero and the Enter button.
   const [aspect, setAspect] = useState(null)
 
+  return (
+    <a
+      className={styles.studioLink}
+      href={STUDIO_URL}
+      style={aspect ? { '--studio-aspect': aspect } : undefined}
+      aria-label="Visit Studio David Preli at davidpreli.com"
+    >
+      {reduce ? (
+        <img
+          className={`${styles.studioCanvas} ${styles.fallbackImg}`}
+          src={riveFallbackSrc('singleLineLogo', theme)}
+          alt=""
+          onLoad={(e) => {
+            const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+            if (w > 0 && h > 0) setAspect(w / h)
+          }}
+        />
+      ) : (
+        <StudioRive theme={theme} onAspect={setAspect} />
+      )}
+    </a>
+  )
+}
+
+// The Rive half, isolated so its hooks only run when motion is allowed (the
+// poster branch above never fetches the .riv). Same isolation rule as
+// MobileGate/MobileHeroRive.
+function StudioRive({ theme, onAspect }) {
   const { rive, RiveComponent } = useRive({
     src: LOGO_RIV.src,
     artboard: LOGO_RIV.artboard,
     stateMachines: LOGO_RIV.stateMachine,
-    autoplay: !reduce,
+    autoplay: true,
     autoBind: false,
     layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
   })
@@ -69,16 +102,11 @@ export function StudioLogoLink() {
     if (!b) return
     const w = b.maxX - b.minX
     const h = b.maxY - b.minY
-    if (w > 0 && h > 0) setAspect(w / h)
-  }, [rive])
+    if (w > 0 && h > 0) onAspect(w / h)
+  }, [rive, onAspect])
 
   return (
-    <a
-      className={styles.studioLink}
-      href={STUDIO_URL}
-      style={aspect ? { '--studio-aspect': aspect } : undefined}
-      aria-label="Visit Studio David Preli at davidpreli.com"
-    >
+    <>
       {/* Text stand-in until the canvas paints (or if the .riv is absent), so the
           link is legible immediately and a missing asset still reads as a link. */}
       {!rive && (
@@ -89,6 +117,6 @@ export function StudioLogoLink() {
       {/* pointer-events: none so the click reaches the anchor, never Rive's own
           pointer handling on the canvas. The logo animates on its own. */}
       <RiveComponent className={styles.studioCanvas} />
-    </a>
+    </>
   )
 }

@@ -182,4 +182,6 @@ Two changes, one session:
   mounting the Rive canvas, so the `.riv` and the WebGL surface are skipped
   entirely. The box's aspect var comes from the SVG's natural size on load,
   mirroring the `rive.bounds` read on the Rive path. The Studio logo link
-  still holds its first frame under reduce; it has no poster yet.
+  followed the same evening once David exported its four posters
+  (`singleLineLogo<Theme>.svg`), so the whole gate is Rive-free under the
+  preference.
