@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import {
   useRive,
   useViewModel,
@@ -55,6 +56,7 @@ const themeToInstanceName = {
 // animation; the DOM click still bubbles up to the <button>, which opens the dialog.
 function ProblemButton({ instanceName, onClick }) {
   const [aspect, setAspect] = useState(null)
+  const reduce = useReducedMotion()
   const { rive, RiveComponent } = useRive({
     src: PROBLEM_SRC,
     artboard: PROBLEM_ARTBOARD,
@@ -68,10 +70,14 @@ function ProblemButton({ instanceName, onClick }) {
 
   // Play once both the runtime and the theme instance are ready. instanceName
   // changes on a theme switch, so useViewModelInstance rebinds and this re-runs,
-  // swapping the button's baked palette live.
+  // swapping the button's baked palette live. Under OS reduce-motion, chrome
+  // freezes (2026-07-17 policy): hold the bound first frame instead of
+  // playing. The click still opens the dialog.
   useEffect(() => {
-    if (rive && instance) rive.play(PROBLEM_STATE_MACHINE)
-  }, [rive, instance])
+    if (!rive || !instance) return
+    if (reduce) rive.pause(PROBLEM_STATE_MACHINE)
+    else rive.play(PROBLEM_STATE_MACHINE)
+  }, [rive, instance, reduce])
 
   // Derive the aspect ratio from the loaded artboard bounds (w/h). The CSS
   // fallback holds the box open until this resolves. Inline style sets ONLY the

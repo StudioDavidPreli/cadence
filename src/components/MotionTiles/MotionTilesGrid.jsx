@@ -32,6 +32,7 @@
 // so all canvases share one offscreen GL context, past the browser's per-page cap.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import {
   useRive,
   useRiveFile,
@@ -505,6 +506,7 @@ function ClawdLogoButton({ instanceName, onClick }) {
   // it via aspect-ratio. Inline style sets ONLY the var (no literal styling), the same
   // convention the grid uses for --cols/--tile.
   const [aspect, setAspect] = useState(null)
+  const reduce = useReducedMotion()
   const { rive, RiveComponent } = useRive({
     src: LOGO_SRC,
     artboard: LOGO_ARTBOARD,
@@ -516,12 +518,19 @@ function ClawdLogoButton({ instanceName, onClick }) {
   const viewModel = useViewModel(rive, { name: VIEW_MODEL })
   const instance = useViewModelInstance(viewModel, { rive, name: instanceName })
 
+  // Chrome freezes under OS reduce-motion (2026-07-17 policy): hold the bound
+  // first frame instead of playing, same as the landing hero. A paused SM also
+  // skips its hover/press responses; the wrapping <button> still owns the click.
   useEffect(() => {
-    if (rive && instance) rive.play(LOGO_STATE_MACHINE)
-  }, [rive, instance])
+    if (!rive || !instance) return
+    if (reduce) rive.pause(LOGO_STATE_MACHINE)
+    else rive.play(LOGO_STATE_MACHINE)
+  }, [rive, instance, reduce])
 
   // Deliberately NOT wired to Pause: the logo is chrome, not part of the board's
   // motion, so its wave and hover/press keep running while the grid is paused.
+  // (The OS reduce-motion freeze above is the one exception, and it is the
+  // user's own machine-level signal, not the board's Pause.)
 
   // Derive the aspect ratio from the loaded artboard bounds (maxX-minX / maxY-minY).
   // Until this resolves, the CSS fallback ratio holds the box open.
@@ -557,6 +566,7 @@ function ClawdLogoButton({ instanceName, onClick }) {
 // opens the report dialog.
 function ProblemButton({ instanceName, onClick }) {
   const [aspect, setAspect] = useState(null)
+  const reduce = useReducedMotion()
   const { rive, RiveComponent } = useRive({
     src: PROBLEM_SRC,
     artboard: PROBLEM_ARTBOARD,
@@ -568,9 +578,13 @@ function ProblemButton({ instanceName, onClick }) {
   const viewModel = useViewModel(rive, { name: PROBLEM_VIEW_MODEL })
   const instance = useViewModelInstance(viewModel, { rive, name: instanceName })
 
+  // Chrome freezes under OS reduce-motion (2026-07-17 policy): hold the bound
+  // first frame instead of playing. The click still opens the dialog.
   useEffect(() => {
-    if (rive && instance) rive.play(PROBLEM_STATE_MACHINE)
-  }, [rive, instance])
+    if (!rive || !instance) return
+    if (reduce) rive.pause(PROBLEM_STATE_MACHINE)
+    else rive.play(PROBLEM_STATE_MACHINE)
+  }, [rive, instance, reduce])
 
   // Derive the aspect ratio from the loaded artboard bounds; the CSS fallback holds
   // the box open until this resolves.
@@ -717,8 +731,23 @@ export function MotionTilesGrid() {
   // Pause freezes the one clock. A ref so the rAF loop reads it without re-subscribing;
   // the state drives the button label. Freezing accumulated time (not just skipping
   // writes) means resume picks up exactly where it left off — no phase jump.
-  const [paused, setPaused] = useState(false)
+  //
+  // Reduced motion (2026-07-17): under the OS preference the field starts
+  // paused at its rest state (progress 0, blessed by the Tier 3 r1c6 scrub)
+  // and the existing Pause/Play button is the explicit-playback affordance.
+  // `pausedChoice` is the user's override (null until they press the button);
+  // a press wins from then on, in either direction. Same pattern as the
+  // principle library's icon pause.
+  const prefersReduced = useReducedMotion()
+  const [pausedChoice, setPausedChoice] = useState(null)
+  const paused = pausedChoice ?? prefersReduced
   const pausedRef = useRef(paused)
+  // Keep the clock's ref in step when `paused` changes without a button press
+  // (the preference resolving after mount); the button's handler also writes
+  // the ref synchronously so a press takes effect on the very next frame.
+  useEffect(() => {
+    pausedRef.current = paused
+  }, [paused])
 
   // Forced clawd cells — the test scaffold for the future click-to-add easter egg.
   // A Set of absolute cell indices that render a self-driven clawd Tile, overriding
@@ -1000,11 +1029,9 @@ export function MotionTilesGrid() {
             className={styles.actionButton}
             aria-pressed={paused}
             onClick={() => {
-              setPaused((p) => {
-                const next = !p
-                pausedRef.current = next
-                return next
-              })
+              const next = !paused
+              pausedRef.current = next
+              setPausedChoice(next)
             }}
           >
             {paused ? 'Play' : 'Pause'}

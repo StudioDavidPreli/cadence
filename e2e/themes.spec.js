@@ -98,6 +98,19 @@ test.describe('reduced motion', () => {
     await expect(page.getByRole('button', { name: 'View motion' })).toBeVisible()
   })
 
+  test('the Motion Tiles field starts paused under reduce-motion: its button reads Play', async ({ page }) => {
+    // The 2026-07-17 Rive policy: demonstration surfaces start paused behind
+    // an explicit play affordance. The field's clock defaults to paused (rest
+    // state, progress 0) and the existing Pause/Play control is the
+    // affordance; a press overrides in either direction.
+    await page.goto('/#/motion-tiles/grid')
+    const playButton = page.getByRole('button', { name: 'Play', exact: true })
+    await expect(playButton).toBeVisible()
+    await expect(playButton).toHaveAttribute('aria-pressed', 'true')
+    await playButton.click()
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  })
+
   test('grid icons start paused under reduce-motion: the header button reads Play', async ({ page, context }) => {
     // The universal pause defaults on under the OS preference; the existing
     // Pause/Play button is the explicit-playback affordance and stays a live
