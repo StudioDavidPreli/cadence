@@ -36,9 +36,9 @@ Four scopes opt out of OS-level reduce-motion by passing `respectReducedMotion={
 
 1. **TokenLab live demo** (`src/components/TokenLab/index.jsx`). TokenLab is a motion-exploration tool. The user is here specifically to perceive motion. Honoring OS-level reduce-motion would flatten every preview to instant and defeat the tool's purpose.
 
-2. **P9 Timing's `TogglePresetSlot`** (`src/components/PrincipleCard/index.jsx`). The slot exists to demonstrate a preset's motion personality. Flattening it under OS reduce would erase the distinction between Default and Cinematic.
+2. **P9 Timing's `TogglePresetSlot`** (`src/components/PrincipleCard/index.jsx`). The slot exists to demonstrate a preset's motion personality. Flattening it under OS reduce would erase the distinction between Default and Cinematic. *(Revoked 2026-07-17: see the addendum. The slot now derives the prop from the card's gate.)*
 
-3. **P13 Systematization's demo** (`src/components/PrincipleCard/index.jsx`). The Tempo slider needs to drive visible change across three demo components. Flattening would freeze the demo and obscure the principle.
+3. **P13 Systematization's demo** (`src/components/PrincipleCard/index.jsx`). The Tempo slider needs to drive visible change across three demo components. Flattening would freeze the demo and obscure the principle. *(Revoked 2026-07-17: see the addendum. The demo now derives the prop from the card's gate.)*
 
 4. **P17 Reduced Motion's demo** (`src/components/PrincipleCard/index.jsx`). The demo's own local toggle is the source of truth for whether motion is reduced inside its scope. The user can see both "before" and "after" states regardless of OS setting.
 
@@ -77,3 +77,27 @@ This pattern — read-raw, transform-locally, provide-with-opt-out — is the ca
 - **Principle demo opt-outs are per-provider, not per-card.** P14 (Hierarchy of Motion), P15 (Economy), P16 (Token Fidelity), and others read `useMotionTokens()` directly without their own provider, so they currently respect OS reduce-motion. A user with reduce-motion enabled visiting those demos sees them snap. If we later decide every principle demo should opt out (because the user has explicitly opened the demo to see motion), the simplest change is to wrap the entire `.animationHalf` content in a `MotionTokensProvider` with `respectReducedMotion={false}`. This is documented as a possible future change but not made now — the snap-version of those demos still teaches the principle's structure (see the cascade in P14, the layer separation in P15) even at near-zero duration.
 
 - **`reduceMotion()` lives in `MotionTokensContext.jsx`.** It could live in a separate utility module, but it is tightly coupled to the token shape that the context defines. Co-locating keeps the dependency graph simple — `useMotionTokens.js` already imports from this file, and adding a third file for one helper would be over-modularization.
+
+---
+
+## Addendum (2026-07-17): library demos respect the OS preference; a per-card gate provides explicit playback
+
+David's decision, closing the open question the 2026-07-16 audit carried as "Reduced-motion pedagogy for P14, P15, P16": the principle library's demos are real UI wired to the token system, so they follow the machine's reduced-motion setting like any other UI. The pedagogical escape hatch is explicit, per-instance playback, not a blanket opt-out. The "wrap `.animationHalf` in an opt-out provider" alternative sketched in the trade-offs section above was considered and rejected: opening a card is not consent to motion.
+
+What changed (revised same day: David's first reduce-motion sweep found the original single-layer version undiscoverable, since the control only rendered in the UI view while the Rive layer, the first thing an expanded card shows, kept playing; the control now sits at card level and governs both layers):
+
+- **One per-card boolean governs both demo layers.** `PrincipleCard` holds `showDemoMotion` and resets it on collapse: consent is per-instance, never remembered. Under `prefers-reduced-motion` the card renders `DemoMotionControl` (the "View motion" button, `src/components/DemoMotionGate/`) below the Motion/UI crossfade wrapper, so it is reachable in both views. The boolean drives the Rive animation layer via a new `paused` prop on `PrincipleAnimation` (same `rive.pause()`/`rive.play()` pattern as `PrincipleIcon`'s universal pause; the animation draws its first frame and holds), and drives the UI demo layer via `DemoMotionGate`, the controlled token scope: with no OS preference it renders children untouched, otherwise it provides flattened tokens while off and raw tokens while on. The scope's mechanism is the canonical P17 pattern: read raw via `useMotionTokens({ respectReducedMotion: false })`, flatten or not locally, provide with `respectReducedMotion={false}` so the provider does not re-flatten.
+
+- **The P9 and P13 opt-outs are revoked.** `TogglePresetSlot` (Timing) and the Systematization demo now pass `respectReducedMotion={!motionAllowed}`, where `motionAllowed` comes from `useDemoMotionAllowed()` (`src/components/DemoMotionGate/motionGateContext.js`): true when there is no OS preference, otherwise the enclosing gate's on state. Under OS reduce with the gate off they flatten like every other demo; the gate restores their real timing.
+
+- **The collapsed grid starts still.** The library's universal icon pause defaults on under the OS preference; the existing header Pause/Play button is the explicit-playback affordance and a user press overrides in either direction (`pausedChoice ?? prefersReduced` in `PrinciplesLibrary`).
+
+- **P17 is exempt from the token scope only.** Its own Reduce toggle owns its demo, and wrapping it would put a provider above its raw-token read (`useMotionTokens` ignores the `respectReducedMotion` option when a provider is in scope), breaking its Full state. The card's View motion control still renders on P17 and still governs its Rive layer.
+
+- **Token Lab's opt-out is unchanged.** The whole tool is a motion-exploration surface; this decision's scope was the principles library.
+
+The general rule replaces the one stated in the Opt-outs section: **library demos respect the OS preference, and per-card user-initiated playback is the demonstration path.** Rule for future principles: never pass a literal `respectReducedMotion={false}` in a principle demo; a demo that builds its own scoped provider derives the prop from `useDemoMotionAllowed()`.
+
+Known remaining gap, scoped as its own pass: the rest of the Rive surface (hero rest states, the bug-report buttons, the Motion Tiles field and its chrome). The policy for that pass: chrome Rive freezes at a designed rest state; demonstration Rive starts paused behind an explicit play affordance.
+
+Verified on built output via the Tier 1 suite: under `page.emulateMedia({ reducedMotion: 'reduce' })` the control renders in the first (Motion) view off by default and toggles `aria-pressed`, P17 carries the control too, the grid's header button reads Play with `aria-pressed` true and flips on press, and without the emulation the control never renders (`e2e/themes.spec.js`).

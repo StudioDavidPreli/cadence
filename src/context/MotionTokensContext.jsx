@@ -52,12 +52,18 @@ export function reduceMotion(tokens) {
 // uses MotionTokensProvider.
 //
 // Pass false to opt out — the provider passes its tokens through unchanged.
-// This is correct for motion-exploration scopes where the user's intent is
-// to perceive motion (TokenLab's live demos, principle demos that teach by
-// showing). The P17 Reduced Motion demo also opts out so its local toggle
-// can be the single source of truth within its scope.
+// This is correct for TokenLab's live demos (the user is there specifically
+// to perceive motion) and for scopes that manage the preference themselves:
+// the P17 Reduced Motion demo (its local toggle is the single source of
+// truth) and DemoMotionGate (it flattens or not before providing, so the
+// provider must not re-flatten). Principle demos must NOT pass a literal
+// false: since 2026-07-17 they flatten under OS reduce-motion like any other
+// UI, and the card's DemoMotionGate supplies per-card explicit playback.
+// Scoped providers inside demos derive the prop from useDemoMotionAllowed()
+// (see src/components/DemoMotionGate/motionGateContext.js).
 //
 // Architecture decision: docs/decisions/reduced-motion-2026-05-06.md
+// (including the 2026-07-17 addendum)
 export function MotionTokensProvider({ children, tokens, respectReducedMotion = true }) {
   const prefersReduced = useReducedMotion()
   const finalTokens = (respectReducedMotion && prefersReduced)

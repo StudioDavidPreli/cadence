@@ -3,7 +3,7 @@
 // colorScheme/contrast must be set before the pre-paint script in index.html
 // runs; that script is the code under test.
 import { test, expect } from '@playwright/test'
-import { readToken, seedStorage } from './helpers'
+import { readToken, seedStorage, INTRO_SEEN } from './helpers'
 
 test.describe('OS-preference first load (no stored choice)', () => {
   const matrix = [
@@ -49,7 +49,14 @@ test('theme switch re-reads tokens: custom properties resolve to new values', as
 })
 
 test.describe('reduced motion', () => {
-  test.use({ reducedMotion: 'reduce' })
+  // page.emulateMedia, NOT test.use({ reducedMotion: 'reduce' }): the context
+  // option silently fails to apply in this suite (verified empirically
+  // 2026-07-17: matchMedia('(prefers-reduced-motion: reduce)') stays false
+  // under the option, flips true under emulateMedia). Every test in this block
+  // depends on the emulation being real, so it is applied before navigation.
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+  })
 
   test('the Modal fully appears and fully leaves under prefers-reduced-motion', async ({ page }) => {
     // Reduced motion must reduce ambition, not strand the user: the dialog
@@ -64,4 +71,51 @@ test.describe('reduced motion', () => {
     await page.keyboard.press('Escape')
     await expect(dialog).toBeHidden()
   })
+
+  test('expanded cards offer the View motion control in the first view, off by default', async ({ page, context }) => {
+    // The 2026-07-17 decision: library demos flatten under OS reduce-motion
+    // like any other UI, and each card offers explicit playback governing
+    // BOTH demo layers. The control must be reachable without switching to
+    // the UI view (discoverability was the first review's finding). P13
+    // Systematization is the probe because it formerly carried a blanket
+    // respectReducedMotion={false} opt-out; the control must govern it too.
+    await seedStorage(context, INTRO_SEEN)
+    await page.goto('/#/principles')
+    await page.getByRole('heading', { level: 3, name: 'Systematization' }).click()
+    const control = page.getByRole('button', { name: 'View motion' })
+    await expect(control).toBeVisible()
+    await expect(control).toHaveAttribute('aria-pressed', 'false')
+    await control.click()
+    await expect(control).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('P17 Reduced Motion also carries the control; its demo keeps its own toggle', async ({ page, context }) => {
+    // The control on P17 governs the Rive animation layer; the UI demo stays
+    // exempt from the token scope because its local Reduce toggle owns it.
+    await seedStorage(context, INTRO_SEEN)
+    await page.goto('/#/principles')
+    await page.getByRole('heading', { level: 3, name: 'Reduced Motion' }).click()
+    await expect(page.getByRole('button', { name: 'View motion' })).toBeVisible()
+  })
+
+  test('grid icons start paused under reduce-motion: the header button reads Play', async ({ page, context }) => {
+    // The universal pause defaults on under the OS preference; the existing
+    // Pause/Play button is the explicit-playback affordance and stays a live
+    // override in both directions.
+    await seedStorage(context, INTRO_SEEN)
+    await page.goto('/#/principles')
+    const pauseButton = page.getByRole('button', { name: 'Play', exact: true })
+    await expect(pauseButton).toBeVisible()
+    await expect(pauseButton).toHaveAttribute('aria-pressed', 'true')
+    await pauseButton.click()
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+test('the View motion gate never renders without the OS reduce-motion preference', async ({ page, context }) => {
+  await seedStorage(context, INTRO_SEEN)
+  await page.goto('/#/principles')
+  await page.getByRole('heading', { level: 3, name: 'Systematization' }).click()
+  await page.getByRole('button', { name: 'UI', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'View motion' })).toHaveCount(0)
 })

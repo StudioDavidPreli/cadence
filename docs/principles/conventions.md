@@ -59,6 +59,12 @@ The "Hard rules" section of CLAUDE.md (Writing Style) prohibits em-dashes in any
 
 ---
 
+## Reduced motion in demos
+
+Principle demos never pass a literal `respectReducedMotion={false}`. `PrincipleCard` owns one per-card `showDemoMotion` boolean that governs both layers of the demo area under OS `prefers-reduced-motion`: the Rive layer through `PrincipleAnimation`'s `paused` prop, and the UI demo's tokens through the controlled `DemoMotionGate` scope. The "View motion" control renders below the crossfade wrapper so it is reachable in both views; with no OS preference none of this renders and the demo mounts untouched. A demo that builds its own scoped `MotionTokensProvider` derives the prop from `useDemoMotionAllowed()` (`src/components/DemoMotionGate/motionGateContext.js`) so the card's control reaches it; Timing and Systematization are the reference examples. P17 is exempt from the token scope only (its own Reduce toggle owns its demo); the control still governs its Rive layer. Decision record: `docs/decisions/reduced-motion-2026-05-06.md` (2026-07-17 addendum).
+
+---
+
 ## Documentation requirements
 
 Every principle component requires:

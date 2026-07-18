@@ -1,0 +1,44 @@
+/* DemoMotionControl only renders under OS prefers-reduced-motion (PrincipleCard
+   gates it), so this styles a reduce-only surface. It sits below
+   .animationStateWrapper in the card's .animationHalf flex column, visible in
+   both the Motion and UI views. */
+
+/* Chrome timing (fixed --feedback-* constants), same idiom as .stateToggle in
+   PrincipleCard.module.css. Under reduce-motion the color shifts are near-static
+   anyway; what matters is that no --motion-* token is consulted. */
+.control {
+  align-self: center;
+  margin: 6px 0 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color var(--feedback-ui-duration) var(--motion-ease-standard),
+    color var(--feedback-ui-duration) var(--motion-ease-standard),
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard);
+}
+
+.control:hover {
+  border-color: var(--color-border2);
+  color: var(--color-text-base);
+  background-color: var(--color-surface-active);
+}
+
+/* aria-pressed carries the on state; accent border because the gate is then
+   actively affecting the system (the accent role, CLAUDE.md contrast rules;
+   as a UI stroke it is governed by the 3:1 bar, which accent clears in every
+   theme). Text stays --color-text-base for the 4.5:1 text bar. */
+.control[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-text-base);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

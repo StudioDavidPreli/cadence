@@ -4,6 +4,7 @@
 // component view) and re-initialized when it mounts again. Do not move useRive
 // usage to parent components — that breaks the canvas lifecycle.
 
+import { useEffect } from 'react'
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-webgl2'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
@@ -54,7 +55,11 @@ const themeToInstanceName = {
 // a text fallback when one does not. PrincipleCard uses this component
 // unconditionally — the missing-animation case is handled here, not there.
 
-export function PrincipleAnimation({ principleId, className }) {
+// `paused` (2026-07-17): under OS reduce-motion, PrincipleCard holds the
+// animation still until the card's "View motion" control is toggled on. The
+// one boolean governs both demo layers; see the reduced-motion decision doc's
+// addendum.
+export function PrincipleAnimation({ principleId, className, paused = false }) {
   const { theme } = useTheme()
   const rivFile = RIV_FILES[principleId]
 
@@ -80,6 +85,7 @@ export function PrincipleAnimation({ principleId, className }) {
       stateMachine={rivFile.stateMachine}
       theme={theme}
       className={className}
+      paused={paused}
     />
   )
 }
@@ -101,7 +107,7 @@ export function PrincipleAnimation({ principleId, className }) {
 // changes. This is confirmed in the @rive-app/react-webgl2 source. No separate
 // useEffect is needed for binding — the hook handles it.
 
-function RiveCanvas({ src, stateMachine, theme, className }) {
+function RiveCanvas({ src, stateMachine, theme, className, paused }) {
   const { rive, RiveComponent } = useRive({
     src,
     stateMachines: stateMachine,
@@ -112,6 +118,18 @@ function RiveCanvas({ src, stateMachine, theme, className }) {
   // 2x supersampling: the webgl2 renderer's MSAA is coarser than the old
   // canvas runtime's rasterizer on this thin-stroke art. See the hook.
   useRiveSupersampling(rive)
+
+  // Reduced-motion pause, same pattern as RiveIcon's universal pause:
+  // rive.pause() halts the state machine in place, rive.play() resumes it.
+  // The effect also runs when `rive` first becomes non-null, so an animation
+  // mounting under an already-engaged pause draws its first frame and holds
+  // rather than playing. A paused state machine also ignores its internal
+  // hitboxes, which is correct: the user consented to a still image.
+  useEffect(() => {
+    if (!rive) return
+    if (paused) rive.pause()
+    else rive.play()
+  }, [rive, paused])
 
   const viewModel = useViewModel(rive, { name: 'ViewModel1' })
 

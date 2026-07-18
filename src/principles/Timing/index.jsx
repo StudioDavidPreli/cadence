@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Toggle } from '../../components/Toggle'
 import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
+import { useDemoMotionAllowed } from '../../components/DemoMotionGate/motionGateContext'
 import styles from './Timing.module.css'
 
 // P09 Timing. Two Toggles, one per preset (Standard, Cinematic). Identical
@@ -56,11 +57,15 @@ const CINEMATIC_TOKENS = scaleDurations(
 // except in response to the Toggle's onChange.
 function TogglePresetSlot({ presetLabel, presetTokens }) {
   const [on, setOn] = useState(false)
+  // Like every library demo, this slot flattens under OS reduce-motion; the
+  // card's "View motion" gate restores the preset's real timing on request.
+  // motionAllowed folds both signals (no OS preference, or gate toggled on),
+  // so the provider opts out exactly when motion is permitted. The former
+  // blanket respectReducedMotion={false} was revoked 2026-07-17; see
+  // docs/decisions/reduced-motion-2026-05-06.md (addendum).
+  const motionAllowed = useDemoMotionAllowed()
   return (
-    // respectReducedMotion={false}: this slot exists to demonstrate a preset's
-    // motion personality. Flattening it under OS reduce-motion would erase the
-    // distinction between Standard and Cinematic and defeat the demo.
-    <MotionTokensProvider tokens={presetTokens} respectReducedMotion={false}>
+    <MotionTokensProvider tokens={presetTokens} respectReducedMotion={!motionAllowed}>
       <div className={styles.timingRow}>
         <span className={styles.timingPresetLabel}>{presetLabel}</span>
         <Toggle label={on ? 'On' : 'Off'} mode="expressive" onChange={setOn} />

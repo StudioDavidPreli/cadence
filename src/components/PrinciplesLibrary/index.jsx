@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { PrincipleCard } from '../PrincipleCard'
 import { Modal } from '../Modal'
@@ -250,7 +251,16 @@ export function PrinciplesLibrary({ filter = 'all' }) {
   // on its own instance. Held here (not per-card) so the whole grid stops and
   // resumes together. The expanded card's full PrincipleAnimation is unaffected
   // — this only governs the decorative grid icons.
-  const [iconsPaused, setIconsPaused] = useState(false)
+  //
+  // Reduced motion (2026-07-17): under the OS preference the grid starts
+  // paused and the existing Pause/Play button is the explicit-playback
+  // affordance. `pausedChoice` is the user's override (null until they press
+  // the button); until then the effective state follows the preference, which
+  // also covers framer's useReducedMotion resolving a tick after first
+  // render. A user press always wins from then on, in either direction.
+  const prefersReduced = useReducedMotion()
+  const [pausedChoice, setPausedChoice] = useState(null)
+  const iconsPaused = pausedChoice ?? prefersReduced
 
   // Intro modal. Auto-opens on the first visit, then the header button reopens
   // it. Dismissing (close button, backdrop, or Escape — all routed through
@@ -343,7 +353,7 @@ export function PrinciplesLibrary({ filter = 'all' }) {
         <button
           type="button"
           className={styles.pauseButton}
-          onClick={() => setIconsPaused(prev => !prev)}
+          onClick={() => setPausedChoice(!iconsPaused)}
           aria-pressed={iconsPaused}
         >
           {iconsPaused ? 'Play' : 'Pause'}

@@ -4,6 +4,7 @@ import { Card } from '../../components/Card'
 import { ProgressBar } from '../../components/ProgressBar'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
+import { useDemoMotionAllowed } from '../../components/DemoMotionGate/motionGateContext'
 import styles from './Systematization.module.css'
 
 // P13 Systematization. One Tempo slider drives a scoped MotionTokensProvider
@@ -21,6 +22,11 @@ import styles from './Systematization.module.css'
 // principle is about timing, not curve shape.
 export function Systematization() {
   const baseTokens = useMotionTokens()
+  // Gate-aware reduced motion (2026-07-17): under OS reduce-motion this demo
+  // flattens like the rest of the library, and the card's "View motion" gate
+  // restores real timing. The former blanket respectReducedMotion={false} was
+  // revoked; see docs/decisions/reduced-motion-2026-05-06.md (addendum).
+  const motionAllowed = useDemoMotionAllowed()
   const [tempo, setTempo] = useState(1)
   const [running, setRunning] = useState(false)
 
@@ -45,10 +51,7 @@ export function Systematization() {
   }), [baseTokens, tempo])
 
   return (
-    // respectReducedMotion={false}: the Tempo slider needs to drive visible
-    // change across the three demo components. Flattening would freeze the
-    // demo and obscure the principle.
-    <MotionTokensProvider tokens={tokens} respectReducedMotion={false}>
+    <MotionTokensProvider tokens={tokens} respectReducedMotion={!motionAllowed}>
       <div className={styles.systemDemo}>
         <label className={styles.systemSliderRow}>
           <span className={styles.systemSliderLabel}>Tempo</span>

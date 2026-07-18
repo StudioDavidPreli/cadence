@@ -24,7 +24,17 @@ import { Economy } from '../../principles/Economy'
 import { TokenFidelity } from '../../principles/TokenFidelity'
 import { ReducedMotion } from '../../principles/ReducedMotion'
 import { SharedVocabulary } from '../../principles/SharedVocabulary'
+import { DemoMotionGate, DemoMotionControl } from '../DemoMotionGate'
 import styles from './PrincipleCard.module.css'
+
+// P17 Reduced Motion is the one demo DemoMotionGate's token scope must not
+// wrap: its own Reduce toggle already governs its demo, and a provider above
+// it would break its raw-token read (useMotionTokens ignores the
+// respectReducedMotion option when a provider is in scope). The card's View
+// motion control still renders on P17 and still governs its Rive animation
+// layer; only the UI demo's tokens are exempt. See
+// docs/decisions/reduced-motion-2026-05-06.md (2026-07-17 addendum).
+const REDUCED_MOTION_PRINCIPLE_ID = 17
 
 // Hover animations only apply to pointer devices. Touch devices have no hover
 // state and exposing scale feedback there would be distracting.
@@ -283,6 +293,12 @@ export function PrincipleCard({
 
   const [uiMode, setUiMode] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  // Reduced-motion consent for this card's demo area. One boolean governs
+  // BOTH layers: the Rive animation (paused prop on PrincipleAnimation) and
+  // the token-driven UI demo (DemoMotionGate flattens or restores tokens).
+  // Only meaningful under OS prefers-reduced-motion; the control that flips
+  // it renders only then. Reset on collapse below: consent is per-instance.
+  const [showDemoMotion, setShowDemoMotion] = useState(false)
   // isStable: true only while card is fully expanded and settled. Gates inner
   // AnimatePresence crossfades so they don't fire during expand/collapse.
   const [isStable, setIsStable] = useState(false)
@@ -315,6 +331,7 @@ export function PrincipleCard({
     if (!isExpanded) {
       setUiMode(false)
       setDrawerOpen(false)
+      setShowDemoMotion(false)
     }
   }, [isExpanded])
 
@@ -592,7 +609,12 @@ export function PrincipleCard({
                     transition={{ duration: dur.fast, ease: tokens.ease.enter }}
                     style={{ pointerEvents: uiMode ? 'none' : 'auto' }}
                   >
-                    <PrincipleAnimation principleId={principle.id} />
+                    {/* Under OS reduce-motion the Rive layer holds still until
+                        the card's View motion control (below) is toggled on. */}
+                    <PrincipleAnimation
+                      principleId={principle.id}
+                      paused={prefersReducedMotion && !showDemoMotion}
+                    />
                   </motion.div>
                   <motion.div
                     className={styles.animationState}
@@ -600,9 +622,26 @@ export function PrincipleCard({
                     transition={{ duration: dur.fast, ease: tokens.ease.enter }}
                     style={{ pointerEvents: uiMode ? 'auto' : 'none' }}
                   >
-                    {getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen, uiMode)}
+                    {/* The same showDemoMotion boolean governs the UI demo's
+                        tokens through the gate. P17 is exempt from the token
+                        scope only (its own Reduce toggle owns its demo); the
+                        control below still governs its Rive layer. */}
+                    {principle.id === REDUCED_MOTION_PRINCIPLE_ID ? (
+                      getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen, uiMode)
+                    ) : (
+                      <DemoMotionGate on={showDemoMotion}>
+                        {getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen, uiMode)}
+                      </DemoMotionGate>
+                    )}
                   </motion.div>
                 </div>
+                {/* Below the crossfade wrapper, not inside a layer: the
+                    control must be reachable in BOTH views, not buried behind
+                    the Motion/UI switch. Renders only under OS reduce-motion,
+                    so the normal layout never carries it. */}
+                {prefersReducedMotion && (
+                  <DemoMotionControl on={showDemoMotion} onChange={setShowDemoMotion} />
+                )}
               </div>
 
               {/* Right half: meta, title, crossfading summary, toggle. */}
