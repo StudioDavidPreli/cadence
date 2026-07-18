@@ -2,6 +2,8 @@
 
 This document captures the design choice made when wiring `prefers-reduced-motion` into Cadence as part of building Principle 17 (Reduced Motion). Read it before changing anything in `src/context/MotionTokensContext.jsx`, `src/hooks/useMotionTokens.js`, or any `MotionTokensProvider` call site.
 
+The 2026-07-17/18 addenda below took this architecture app-wide (the per-card gate, the Rive surface policy, the SVG posters). The narrative session record, written as a case-study source, is `reduced-motion-completion-2026-07-18.md`.
+
 ---
 
 ## What changed
