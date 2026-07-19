@@ -774,7 +774,14 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
 // buried in syntax. See CodeBlock for the live-value behavior.
 // `instructionClass` (optional) appends a layout variant to the instruction
 // paragraph — the centered-caption classes the two canvas demos use.
-function DemoWrapper({ componentName, instruction, children, code, instructionClass }) {
+// mainClass: optional extra class on .demoMain. The carousel demo uses it to
+// make its .demoMain a CSS size container so the caption can follow the
+// carousel's own container-query breakpoint. Opt-in per demo, not on .demoMain
+// itself: container-type applies layout containment, which turns the element
+// into the containing block for absolutely-positioned descendants — safe for
+// the carousel (nothing in it positions absolutely), not something to impose
+// on every demo at once.
+function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
   const chrome = useChromeTransition()
@@ -808,7 +815,7 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
       {/* The demo's own stack is wrapped so it can be the left grid column when
           the code view splits out beside it. Narrow layouts are unchanged:
           .demoMain mirrors .demoGroup's stacking. */}
-      <div className={styles.demoMain}>
+      <div className={mainClass ? `${styles.demoMain} ${mainClass}` : styles.demoMain}>
         <div className={styles.demoLabelRow}>
           <span className={styles.demoLabel}>{componentName}</span>
           {code && (
@@ -1524,6 +1531,7 @@ export function TokenLab() {
           instruction="Drag to advance — flick fast or drag far enough to commit"
           code={DEMO_SNIPPETS.Carousel}
           instructionClass={styles.demoInstructionCarousel}
+          mainClass={styles.demoMainCarousel}
         >
           {/* Carousel is a lazy chunk (see the lazy-boundaries block up top).
               The idle prefetch usually resolves it long before this category is

@@ -997,6 +997,27 @@
   text-align: center;
 }
 
+/* The carousel demo's .demoMain (via DemoWrapper's mainClass prop) is a size
+   container so the caption can follow the same breakpoint as the carousel's
+   own wide layout. .demoMain's width is parent-driven in both of its layouts
+   (flex-column child, and the split grid's minmax(0, 1fr) column), so
+   inline-size containment changes nothing about how it sizes. */
+.demoMainCarousel {
+  container-type: inline-size;
+}
+
+/* Wide carousel layout: the card grows to 560px (image left, text right), so
+   the 320px caption cap would wrap the caption under a much wider card. 560px
+   fits the whole instruction on one line, and because the caption block and
+   the card share a left origin and a width cap, text-align: center keeps the
+   line centered under the card at every column width. The 480px threshold and
+   560px cap must mirror the @container rule in Carousel.module.css. */
+@container (min-width: 480px) {
+  .demoInstructionCarousel {
+    max-width: 560px;
+  }
+}
+
 /* ── Active token highlighting ───────────────────────────────────────────── */
 
 /* The demo group whose component is affected by the slider being dragged.

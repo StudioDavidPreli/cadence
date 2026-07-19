@@ -1,3 +1,14 @@
+/* The component's outer wrapper is a size container so the @container query
+   below can respond to the space the demo column actually offers, not the
+   window width — the column's width depends on the panel layout (e.g. the
+   ≥1280px code-aside split), so a viewport media query could disagree with
+   the real available space. inline-size containment only isolates the
+   element's width, which is 100% of the parent anyway. */
+.host {
+  container-type: inline-size;
+  width: 100%;
+}
+
 .carousel {
   display: flex;
   flex-direction: column;
@@ -7,11 +18,51 @@
      image frame over the text, so the card reads as a tall media card rather
      than a band spanning the whole demo panel. The compact variant lives in a
      ~165 px column, so this cap never binds there. slideWidth is measured from
-     the viewport's offsetWidth, so the drag/snap math follows this cap
-     automatically. */
+     the viewport's offsetWidth (and kept live by a ResizeObserver), so the
+     drag/snap math follows this cap automatically — including when the wide
+     layout below raises it. */
   max-width: 320px;
   /* Prevent the drag gesture from selecting text in surrounding UI */
   user-select: none;
+}
+
+/* ── Wide layout ─────────────────────────────────────────────────────────── */
+
+/* When the demo column offers ≥480px, the full-mode card turns landscape:
+   the 4:5 image frame moves to the left, the text column fills the right,
+   and the card widens to 560px (≈220px of image + a comfortable text column).
+   The compact variant is excluded by selector even though its ~165px column
+   can never satisfy the query — the guard documents the intent.
+   Narrower containers keep the portrait stack above, which is the layout the
+   card was designed around. */
+@container (min-width: 480px) {
+  .carousel:not(.carouselCompact) {
+    max-width: 560px;
+  }
+
+  .carousel:not(.carouselCompact) .slide {
+    flex-direction: row;
+    /* Centers the text block against the image, which is the taller child
+       and therefore sets the row height. */
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* Fixed image width; aspect-ratio 4/5 still derives the height, so the art
+     renders at its authored ratio in both layouts. flex 0 0 auto: the image
+     never donates width to the text column. */
+  .carousel:not(.carouselCompact) .slidePlaceholder {
+    width: 220px;
+    flex: 0 0 auto;
+  }
+
+  /* min-width: 0 lets the text column actually shrink inside the flex row
+     instead of forcing the slide wider than the viewport (flex items default
+     to min-width: auto, which refuses to shrink below content size). */
+  .carousel:not(.carouselCompact) .slideText {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* Compact variant — used by the Follow Through principle demo where the
@@ -35,24 +86,12 @@
   font-size: 16px;
 }
 
-/* Shrink the edge-fade overlays in compact mode. The 48 px default is half the
-   visible viewport width here, so the slide content reads as smothered. 16 px
-   still hints at adjacent slides without consuming the legible center. */
-.carouselCompact .fadeLeft,
-.carouselCompact .fadeRight {
-  width: 16px;
-}
-
 /* ── Viewport ────────────────────────────────────────────────────────────── */
 
-/* overflow: hidden clips all slides except the current one.
-   position: relative contains the absolutely-positioned edge gradients.
-   border-radius gives the viewport itself rounded corners so the fade
-   overlays clip correctly at the edges. */
+/* overflow: hidden clips all slides except the current one. */
 .viewport {
   width: 100%;
   overflow: hidden;
-  position: relative;
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background-color: var(--color-surface-raised);
@@ -103,18 +142,19 @@
   gap: 12px;
 }
 
-/* Image frame — top of a full slide, a 4:5 portrait holding the slide's static
-   Rive art. aspect-ratio drives the height from the (capped) slide width.
-   overflow: hidden clips the canvas to the rounded corners; the surface-raised
-   fill is the backdrop while the .riv loads. The Rive art owns its own theme
-   colors (Light/Dark/Contrast view-model instances), so no paired color rule
-   is needed here. */
+/* Image frame — a 4:5 portrait holding the slide's static Rive art. Top of the
+   slide in the narrow stack; left edge in the wide row (see the container
+   query above). aspect-ratio drives the height from the width. Frameless
+   (border removed, David 2026-07-19): the background matches the viewport's
+   surface-raised fill, so the art sits directly on the card with no visible
+   box; the fill still acts as the backdrop while the .riv loads. The Rive art
+   owns its own theme colors (Light/Dark/Contrast view-model instances), so no
+   paired color rule is needed here. */
 .slidePlaceholder {
   width: 100%;
   aspect-ratio: 4 / 5;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--color-border);
   background-color: var(--color-surface-raised);
 }
 
@@ -150,40 +190,6 @@
   color: var(--color-text-muted);
   line-height: 1.6;
   max-width: 42ch;
-}
-
-/* ── Edge gradients ──────────────────────────────────────────────────────── */
-
-/* Gradient overlays hint that adjacent slides exist beyond the visible edge.
-   The color matches --color-surface-raised so the fade blends seamlessly with
-   the slide background. pointer-events:none lets drag gestures pass through.
-   z-index: 1 places them above the slides but below nothing (they're decorative). */
-.fadeLeft,
-.fadeRight {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 48px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.fadeLeft {
-  left: 0;
-  background: linear-gradient(
-    to right,
-    var(--color-surface-raised),
-    transparent
-  );
-}
-
-.fadeRight {
-  right: 0;
-  background: linear-gradient(
-    to left,
-    var(--color-surface-raised),
-    transparent
-  );
 }
 
 /* ── Dot indicators ──────────────────────────────────────────────────────── */

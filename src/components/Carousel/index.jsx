@@ -141,7 +141,10 @@ function SlideImage({ src, stateMachine, theme }) {
 // useLayoutEffect reads offsetWidth before the first browser paint.
 // This avoids a flash of incorrectly-sized slides on the first render —
 // slideWidth is set synchronously after DOM commit, so the browser only
-// ever paints the correctly-sized layout.
+// ever paints the correctly-sized layout. A ResizeObserver then keeps the
+// measurement live: the carousel is width-responsive (the container query in
+// the CSS widens the card when the demo column offers ≥480px), so the slide
+// width can change after mount and every snap target moves with it.
 
 // compact: when true, the slide description is omitted and slide padding is
 // tightened. Used by the Follow Through principle demo where the carousel sits
@@ -171,11 +174,35 @@ export function Carousel({ compact = false, slides = SLIDES }) {
 
   // Measure the slide width synchronously after the first DOM commit.
   // useLayoutEffect fires before the browser paints, so there is no frame
-  // where slides appear at the wrong size.
+  // where slides appear at the wrong size. The ResizeObserver keeps the value
+  // current afterward — the wide-layout container query changes the carousel's
+  // max-width at runtime, and a stale slideWidth would leave every snap target
+  // (index × -slideWidth) pointing at the wrong pixel position.
   useLayoutEffect(() => {
-    if (!containerRef.current) return
-    setSlideWidth(containerRef.current.offsetWidth)
+    const node = containerRef.current
+    if (!node) return
+    const measure = () => setSlideWidth(node.offsetWidth)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    return () => observer.disconnect()
   }, [])
+
+  // currentSlide mirrored into a ref so the reposition effect below can read
+  // it without listing it as a dependency — depending on currentSlide would
+  // re-run the effect on every slide change and jump-cut the animated snap.
+  const currentSlideRef = useRef(currentSlide)
+  currentSlideRef.current = currentSlide
+
+  // When the measured width changes (container resize, wide-layout breakpoint
+  // crossing), jump the track straight to the current slide's new resting
+  // position. x.set, not animate: a resize is not a gesture, so the track
+  // shouldn't appear to respond to one.
+  useEffect(() => {
+    if (!slideWidth) return
+    animRef.current?.stop()
+    x.set(currentSlideRef.current * -slideWidth)
+  }, [slideWidth, x])
 
   // Cancel any running animation on unmount so Framer Motion's internal
   // MotionValue subscriptions (from the drag system) don't receive updates
@@ -238,11 +265,15 @@ export function Carousel({ compact = false, slides = SLIDES }) {
     : styles.carousel
 
   return (
+    // The host div is the CSS container the @container query in the module
+    // measures. A container query can only respond to an ancestor's size, so
+    // the carousel needs a wrapper — it can't query its own width to decide
+    // its own max-width.
+    <div className={styles.host}>
     <div className={carouselClass}>
 
       {/* ── Slide viewport ──────────────────────────────────────────────── */}
-      {/* overflow:hidden clips the non-active slides out of view.
-          position:relative contains the edge-fade gradient overlays. */}
+      {/* overflow:hidden clips the non-active slides out of view. */}
       <div className={styles.viewport} ref={containerRef}>
 
         <motion.div
@@ -267,7 +298,7 @@ export function Carousel({ compact = false, slides = SLIDES }) {
               animate={{ scale: currentSlide === i ? tokens.scale.lift : 1 }}
               transition={{ duration: tokens.duration.fast, ease: tokens.ease.standard }}
             >
-              {/* Image (top) — full mode only. A 4:5 portrait frame holding the
+              {/* Image — full mode only. A 4:5 portrait frame holding the
                   slide's static Rive art, which tracks the active theme. The
                   frame renders even if a slide has no `riv` (graceful empty
                   frame). aria-hidden: the title/description carry the meaning. */}
@@ -282,8 +313,9 @@ export function Carousel({ compact = false, slides = SLIDES }) {
                   )}
                 </div>
               )}
-              {/* Text (below the image). Wrapped so the slide can stack image
-                  over text as a portrait card. */}
+              {/* Text. Below the image in the narrow (portrait-card) layout;
+                  beside it, on the right, once the container query flips the
+                  slide to a row. */}
               <div className={styles.slideText}>
                 <h3 className={styles.slideTitle}>{slide.title}</h3>
                 {!compact && (
@@ -293,12 +325,6 @@ export function Carousel({ compact = false, slides = SLIDES }) {
             </motion.div>
           ))}
         </motion.div>
-
-        {/* Edge gradients — hint that adjacent slides exist.
-            pointer-events:none so they don't block drag interactions.
-            Color matches the demo column background so the fade is seamless. */}
-        <div className={styles.fadeLeft}  />
-        <div className={styles.fadeRight} />
 
       </div>
 
@@ -326,6 +352,7 @@ export function Carousel({ compact = false, slides = SLIDES }) {
         ))}
       </div>
 
+    </div>
     </div>
   )
 }
