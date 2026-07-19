@@ -139,16 +139,20 @@ is the file's job, driven by the two booleans through hand-built converter group
 | `RainStop` | `rainStop` | remap scrub | `idleBoole` false |
 | `FlowersDie` | `flowersDie` | remap scrub | `idleBoole` false |
 
-**The open flower-grow gate.** `FlowerGrow` cannot take the plain `postGrowthBoole`
-gate the other grow-era instances use: the flowers must stay visible through idle
-(parked at 1 while the plant sways), and `postGrowthBoole` is true then. The one
-phase where it must hide is wilt, the only phase with `postGrowthBoole` true and
-`idleBoole` false, so the gate is the compound `idleBoole OR NOT postGrowthBoole`.
-That needs a converter reading both booleans, or an equivalent David finds in the
-editor. Until it is wired, wilt shows the parked full-bloom flowers on top of
-`FlowersDie`, and the flowers will appear not to die. Related visual check, David's
-eye, not a contract term: during idle the plant sways while the parked flowers hold
-still; judge whether that reads as calm or as detached.
+**The flower-grow gate — RESOLVED 2026-07-18, authored in the editor.**
+`FlowerGrow` cannot take the plain `postGrowthBoole` gate the other grow-era
+instances use: the flowers must stay visible through idle (parked at 1 while the
+plant sways), and `postGrowthBoole` is true then. The one phase where it must
+hide is wilt, the only phase with `postGrowthBoole` true and `idleBoole` false,
+so the required logic is the compound `idleBoole OR NOT postGrowthBoole`, or an
+equivalent found in the editor. David wired it (or its equivalent) across the
+2026-07-18 export series; verified on built output the same day: mid-wilt frames
+show `FlowersDie` animating the death in sync with the plant, no parked bloom
+copies on top, and the wilt-completion capture shows no pop frame where the
+driver's `flowersGrowProgress` reset used to flash. The exact editor wiring is
+David's record. Related visual check, David's eye, not a contract term: during
+idle the plant sways while the parked flowers hold still; judge whether that
+reads as calm or as detached.
 
 The scheme is safe because the dead pose is invisible content: trunk and leaves at
 scale zero, shadows at opacity zero, rain gone. `PlantDie` and `RainStop` visible
@@ -242,8 +246,6 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 ## Not yet authored (tracked against this contract)
 
-- The compound `FlowerGrow` gate (`idleBoole OR NOT postGrowthBoole`); see
-  Instance gating. Without it, flowers do not die on wilt.
 - `plantScale : number` for the `scale.expressive` direct bind. Until it is
   authored, the demo's `scale.expressive` map row and snippet line are held
   back too (2026-07-18): the driver's write is a null-guarded no-op, and the
