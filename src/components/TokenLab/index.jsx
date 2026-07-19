@@ -129,7 +129,7 @@ const TOKEN_COMPONENT_MAP = {
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper', 'React Rive Timelines'],
   'scale.subtle':     ['Card'],
-  'scale.base':       ['Button', 'Stepper'],
+  'scale.base':       ['Button', 'Stepper', 'React Rive Timelines'],
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
 }

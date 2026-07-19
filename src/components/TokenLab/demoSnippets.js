@@ -277,7 +277,12 @@ const WATER_SEQUENCE = [
 const WILT = {
   duration: tokens.duration.slow,
   ease: tokens.ease.exit,
-}`
+}
+
+// The scene group scales as one: a direct bind, written on
+// change, outside the frame loop. The file speaks Rive's
+// percent, the token stays a unitless multiplier.
+sceneScale.set(tokens.scale.base * 100)`
 
 export const DEMO_SNIPPETS = {
   Drawer,

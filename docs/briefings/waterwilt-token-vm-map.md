@@ -93,7 +93,7 @@ sits when animation moves to canvas.
 | `delay.medium` | not consumed | — | — | Reserved for a specs cascade if that split ever happens. |
 | `delay.long` | driver clock | — | — | Growth-complete to flower-start. |
 | `scale.subtle` | not consumed | — | — | |
-| `scale.base` | direct bind | `sceneScale : number` (planned) | On-change effect write | Whole-composition scale through the `scene` group (David's 2026-07-18 addition), 1 = authored size. Also read by the DOM toggle Button under Button's own contract, so one slider moves both, deliberately. Not yet in the VM. |
+| `scale.base` | direct bind | `sceneScale : number` | On-change effect write, token × 100 | Whole-composition scale through the `scene` group (authored 2026-07-18). The property's neutral is 100, Rive's percent; the token stays a unitless multiplier and the driver converts at the boundary. Also read by the DOM toggle Button under Button's own contract, so one slider moves both, deliberately. |
 | `scale.expressive` | direct bind | `plantScale : number` (planned) | On-change effect write | Plant scale multiplier, 1 = authored size. Not yet in the VM. |
 | `scale.lift` | not consumed | — | — | |
 
@@ -114,7 +114,8 @@ timeline's working area equals its full duration; see Invariants.
 | `idleBoole` | boolean | driver, at phase boundaries | true at bloom rest | Gates both idle loops (playing and opacity together) and, inverted, the die/rain-stop instances. |
 | `rainBoole` | boolean | driver, at phase boundaries | true from rain-ramp landing through bloom; false from any wilt or reversal | Authored and wired 2026-07-18 (the frozen-rain seam's fix). The driver holds it true across bloom, so `RainIdle` binds to `rainBoole` ALONE — a straight source swap from `idleBoole`, no OR converter (simplified from the original OR plan). Verified on built output: rain falls through the growth-to-flowers delay. |
 | `postGrowthBoole` | boolean | driver, at phase boundaries | true from bloom until wilt completes | Gates the grow-era instances off. The flower-grow gate is compound; see Instance gating. |
-| `sceneScale` | number | driver, on token change | outside the frame loop | Planned, not yet authored. Scales the `scene` group (the whole composition); 1 = authored size. Bound from `scale.base`. Needs data binds to the group's scaleX and scaleY, one source. |
+| `sceneScale` | number | driver, on token change | outside the frame loop | Authored 2026-07-18. Scales the `scene` group (the whole composition); neutral 100 (Rive percent), written as `scale.base × 100`. |
+| `plantIdleBoole` | boolean | driver, at phase boundaries | true from grow-scrub landing through bloom | Authored 2026-07-18 (the rain solution applied to the plant, David's call: sway may begin before flowersGrow finishes). Gates `PlantIdle` alone; the driver retires the landed grow scrub to 0 behind it and restores the scrub to 1 for reversals, exactly the rainBoole pattern. |
 | 13 colors, 2 planter opacities, `artboardBG` | color / number | theme instances | never at runtime | Authored per instance, `flowerPetals` and `flowerFaces` included. React rebinds the instance on theme change and writes nothing. |
 | completion signal | — | — | — | None, and none needed. The driver owns the clock, so React knows every phase boundary without a VM read-back. The button label flips on driver state. |
 
@@ -132,7 +133,7 @@ is the file's job, driven by the two booleans through hand-built converter group
 | `PlantGrow` | `grow` | remap scrub | `postGrowthBoole` false |
 | `RainFall` | `rainFall` | remap scrub | `postGrowthBoole` false |
 | `FlowerGrow` | `flowersGrow` | remap scrub | **open**: `idleBoole` true OR `postGrowthBoole` false (see below) |
-| `PlantIdle` | `idleGrow` | self-playing loop | `idleBoole` true |
+| `PlantIdle` | `idleGrow` | self-playing loop | `plantIdleBoole` true (re-bound from `idleBoole` 2026-07-18; see the plantIdleBoole row) |
 | `RainIdle` | `rainingIdle` | self-playing loop | `rainBoole` true (re-bound from `idleBoole` 2026-07-18; see the rainBoole row) |
 | `PlantDie` | `die` | remap scrub | `idleBoole` false |
 | `RainStop` | `rainStop` | remap scrub | `idleBoole` false |
@@ -247,10 +248,6 @@ discrete steps. The DOM button flattens like every other DOM component.
   authored, the demo's `scale.expressive` map row and snippet line are held
   back too (2026-07-18): the driver's write is a null-guarded no-op, and the
   Token Lab highlight must not claim a connection that does nothing.
-- `sceneScale : number` for the `scale.base` direct bind (the `scene` group's
-  whole-composition scale, added to the art 2026-07-18). Same held-back rule:
-  the driver half is live and null-guarded; the map row and snippet line land
-  with the property.
 - `flowerPetals` and `flowerFaces` values verified in all four theme instances.
 - Verify the nested instances' bindable `quantize` property as the reduced-motion
   mechanism for the two self-playing loops, which the driver cannot scrub.

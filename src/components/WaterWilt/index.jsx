@@ -207,6 +207,8 @@ function WaterWiltRive({ watered, children }) {
     reversalFrom: null, // per-channel start values for the unwater reversal
     rainLooping: false, // mirrors the rainBoole write, restored on rebind
     rainHandoff: null, // frames until the landed rain ramp retires to 0
+    plantIdling: false, // mirrors the plantIdleBoole write, restored on rebind
+    growHandoff: null, // frames until the landed grow scrub retires to 0
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
 
@@ -247,6 +249,23 @@ function WaterWiltRive({ watered, children }) {
   function writeRainLoop(on) {
     driver.current.rainLooping = on
     const handle = settersRef.current.rainLoop
+    if (handle) handle.value = on
+  }
+
+  // plantIdleBoole — the rain solution applied to the plant (David's call,
+  // 2026-07-18: the sway may begin before flowersGrow finishes). Once the
+  // grow scrub lands, PlantGrow would hold a frozen still through delay.long
+  // and the whole flower beat; instead the driver raises plantIdleBoole (the
+  // sway appears pose-matched: idleGrow's first frame is the grown pose,
+  // contract invariant), retires the grow scrub to 0 after a settle window
+  // (grow at 0 renders nothing, so no double plant), and drops the boolean
+  // the moment any wilt or reversal starts, restoring the scrub first so the
+  // plant un-grows visibly. PlantIdle's gate reads this boolean alone;
+  // idleBoole keeps its remaining jobs (die-era inverse gates, the compound
+  // FlowerGrow gate).
+  function writePlantIdle(on) {
+    driver.current.plantIdling = on
+    const handle = settersRef.current.plantIdle
     if (handle) handle.value = on
   }
 
@@ -326,8 +345,13 @@ function WaterWiltRive({ watered, children }) {
       d.q = 0
       d.from = 0
       d.rainHandoff = null // RainFall is hidden through wilt; step 9 zeroes it
+      d.growHandoff = null
       writeBooleans()
       writeRainLoop(false)
+      // The sway yields to PlantDie in the same frame; the die instances at 0
+      // are the bloom the sway was orbiting, so the snap is bounded by the
+      // sway's own amplitude (the accepted mid-sway snap).
+      writePlantIdle(false)
       for (const ch of WILT_CHANNELS) writeChannel(ch, 0)
       return
     }
@@ -342,8 +366,14 @@ function WaterWiltRive({ watered, children }) {
       d.mode = 'unwater'
       d.q = 0
       d.rainHandoff = null
+      d.growHandoff = null
       if (d.rainLooping) writeChannel('rain', 1)
       writeRainLoop(false)
+      // Same restore for the plant: if the sway took over and the grow scrub
+      // was retired, put the scrub back at its full pose in the frame the
+      // sway drops, so the reversal un-grows instead of blinking.
+      if (d.plantIdling) writeChannel('grow', 1)
+      writePlantIdle(false)
       d.reversalFrom = {
         rain: d.values.rain,
         grow: d.values.grow,
@@ -368,11 +398,13 @@ function WaterWiltRive({ watered, children }) {
     d.mode = 'bloom'
     // Contract bloom entry: both booleans go true. The idle loops appear at
     // the bloom pose; the grow-era instances hide (flowers stay, per their
-    // compound gate); the die-era instances hide. rainBoole re-asserts true
-    // (idleBoole covers the loop at bloom either way; this keeps the mirror
-    // honest for the next rebind restore).
+    // compound gate); the die-era instances hide. rainBoole and
+    // plantIdleBoole re-assert true, keeping the mirrors honest for the next
+    // rebind restore (after an un-wilt they are the writes that actually
+    // bring the loops back).
     writeBooleans()
     writeRainLoop(true)
+    writePlantIdle(true)
   }
 
   // Wilt's landing. The contract's step-9 "then" is literal: reset the
@@ -385,7 +417,9 @@ function WaterWiltRive({ watered, children }) {
     writeChannel('rain', 0)
     writeChannel('grow', 0)
     writeChannel('flowers', 0)
-    writeRainLoop(false) // already false since the wilt press; asserted for the mirror
+    // Both already false since the wilt press; asserted for the mirrors.
+    writeRainLoop(false)
+    writePlantIdle(false)
     d.mode = 'settle'
     d.q = 0
   }
@@ -437,11 +471,12 @@ function WaterWiltRive({ watered, children }) {
       flowersDie: instance.number('flowersDieProgress'),
       idle: instance.boolean('idleBoole'),
       postGrowth: instance.boolean('postGrowthBoole'),
-      // In the contract as planned, not yet authored: null until the file
-      // carries them, and every write guards on the handle existing.
+      // plantScale is still planned, not yet authored: null until the file
+      // carries it, and its write guards on the handle existing.
       plantScale: instance.number('plantScale'),
       sceneScale: instance.number('sceneScale'),
       rainLoop: instance.boolean('rainBoole'),
+      plantIdle: instance.boolean('plantIdleBoole'),
     }
     const d = driver.current
     for (const key of Object.keys(d.values)) writeChannel(key, d.values[key])
@@ -466,7 +501,12 @@ function WaterWiltRive({ watered, children }) {
 
   useEffect(() => {
     const handle = settersRef.current.sceneScale
-    if (handle) handle.value = tokens.scale.base
+    // The token is a unitless multiplier (1 = authored size); the property's
+    // neutral is 100, Rive's native percent for group scale. The driver
+    // converts at the boundary so the file stays idiomatic — writing the
+    // token raw collapsed the scene to about 1% (found 2026-07-18, first
+    // run against the authored property).
+    if (handle) handle.value = tokens.scale.base * 100
   }, [instance, tokens.scale.base])
 
   // Artboard aspect from the loaded bounds (the ClawdLogoButton pattern), so
@@ -497,15 +537,22 @@ function WaterWiltRive({ watered, children }) {
       const ease = easingsRef.current
 
       if (ease) {
-        // Pending rain-ramp retirement (see the handoff in the water case).
-        // Counted in advances so the loop is on screen before the frozen ramp
-        // frame goes; cancelled by any wilt or reversal press, which reclaims
-        // the ramp first.
+        // Pending scrub retirements (see the handoffs in the water case).
+        // Counted in advances so each loop is on screen before its frozen
+        // scrub frame goes; cancelled by any wilt or reversal press, which
+        // reclaims the scrub first.
         if (d.rainHandoff != null) {
           d.rainHandoff -= 1
           if (d.rainHandoff <= 0) {
             d.rainHandoff = null
             writeChannel('rain', 0)
+          }
+        }
+        if (d.growHandoff != null) {
+          d.growHandoff -= 1
+          if (d.growHandoff <= 0) {
+            d.growHandoff = null
+            writeChannel('grow', 0)
           }
         }
         switch (d.mode) {
@@ -532,18 +579,20 @@ function WaterWiltRive({ watered, children }) {
                 d.trackQ[track.channel] = q
                 const from = d.trackFrom[track.channel]
                 writeChannel(track.channel, from + (1 - from) * ease[track.ease](q))
-                // The arrival ramp has landed: hand the rain to the looping
-                // instance so it keeps falling through the rest of growth
-                // (the frozen-rain seam's driver half). The parked ramp then
-                // retires to 0 after two settled frames — its gate is
-                // postGrowthBoole, which flips only at bloom, so without the
-                // retirement the frozen last frame sits on top of the loop
-                // from here into idle. Pose-matched: rainingIdle starts
-                // playing this same frame, and its first frame is authored to
-                // follow rainFall's last (the original SM's 100%-exit chain).
+                // A landed scrub hands off to its self-playing loop, then
+                // retires to 0 after two settled frames so its frozen last
+                // frame never sits on top of the loop (the scrub gates read
+                // postGrowthBoole, which flips only at bloom). Both handoffs
+                // are pose-matched: each loop's first frame is authored to
+                // follow its scrub's last, and the loop starts playing the
+                // frame its boolean goes true.
                 if (q >= 1 && track.channel === 'rain') {
                   writeRainLoop(true)
                   d.rainHandoff = SETTLE_FRAMES
+                }
+                if (q >= 1 && track.channel === 'grow') {
+                  writePlantIdle(true)
+                  d.growHandoff = SETTLE_FRAMES
                 }
                 if (q < 1) beatDone = false
               }
