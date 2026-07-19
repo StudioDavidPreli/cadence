@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavState } from '../../context/NavigationContext'
-import { TOKEN_LAB_GUIDE } from '../../data/navigation'
+import { CATEGORY_IDS, TOKEN_LAB_GUIDE } from '../../data/navigation'
 import { navDurationSeconds, FEEDBACK_EASE } from '../../utils/feedbackDuration'
+import { DemoField } from '../DemoField'
 import { DemoOverlayContext } from './overlayContext'
 import styles from './DemoArea.module.css'
 
@@ -93,6 +94,15 @@ export function DemoArea({ categoryContent, principlesContent, hero, guide }) {
             exit={{ opacity: 0, transition: { delay: navDur, duration: 0 } }}
             transition={{ duration: navDur, ease: FEEDBACK_EASE }}
           >
+            {/* The procedural backdrop, Token Lab category pages only — the
+                hero, the guide, and the Principles grid stay clean (David's
+                scope, 2026-07-19). Seeded by the destination key, so each
+                page always draws the same field, and rendered inside the
+                layer so the crossfade transitions between two fields with no
+                extra choreography. AnimatePresence caches the exiting layer's
+                element, so the outgoing field keeps its own seed the same way
+                the frozen content slot keeps its children. */}
+            {CATEGORY_IDS.includes(activeKey) && <DemoField seed={activeKey} />}
             {frozen.current[activeKey]}
           </motion.div>
         </AnimatePresence>

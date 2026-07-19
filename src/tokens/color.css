@@ -119,6 +119,12 @@ body {
   --color-border:         #2e2e2e;  /* subtle outlines */
   --color-border2:        #3d3d3d;  /* slightly more prominent borders */
 
+  /* Token Lab demo backdrop ink (the DemoField tick marks). Decorative only:
+     never text, never a UI stroke, so no WCAG minimum applies — the design
+     constraint runs the other way, it must stay quieter than real borders.
+     Matches border2 here; the field's 0.8 group opacity softens it further. */
+  --color-demo-field:     #3d3d3d;
+
   --color-text-primary:   #e1e1e1;  /* primary text — headings, labels */
   --color-text-base:      #e1e1e1;  /* default body text */
   /* #909090 replaces #888888 — bumped from 4.26:1 to 4.75:1 on surface-active,
@@ -197,6 +203,10 @@ body {
   --color-border:         #e2e2e2;
   --color-border2:        #cccccc;
 
+  /* Demo backdrop ink — the value David tuned the field against in the
+     sandbox (2026-07-19). Decorative only; see the dark block's note. */
+  --color-demo-field:     #cccccc;
+
   --color-text-primary:   #ffffff;  /* text on dark interactive surfaces */
   --color-text-base:      #1a1a1a;
   /* #666666 replaces #6b6b6b — bumped from 4.47:1 to 4.82:1 on surface-active
@@ -266,6 +276,10 @@ body {
 
   --color-border:         #000000;
   --color-border2:        #000000;
+
+  /* Demo backdrop ink. No quiet gray exists in high contrast, so the field
+     switches to sparse mode instead of a softer color (DemoField). */
+  --color-demo-field:     #000000;
 
   --color-text-primary:   #ffffff;  /* text on black interactive surfaces */
   --color-text-base:      #000000;
@@ -341,6 +355,9 @@ body {
 
   --color-border:         #ffffff;
   --color-border2:        #ffffff;
+
+  /* Demo backdrop ink — sparse mode applies, same as HC-light. */
+  --color-demo-field:     #ffffff;
 
   --color-text-primary:   #000000;  /* text on white interactive surfaces */
   --color-text-base:      #ffffff;

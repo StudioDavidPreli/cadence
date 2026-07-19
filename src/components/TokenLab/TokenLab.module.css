@@ -905,12 +905,36 @@
    .demoGroup so the code view can sit beside it as a sibling column at the
    wide breakpoint. Mirrors .demoGroup's stacking so narrow layouts render
    exactly as before the wrapper existed. min-width: 0 lets the grid shrink
-   it below its content width instead of blowing the column out. */
+   it below its content width instead of blowing the column out.
+
+   Also the clearing plate for the DemoField backdrop (2026-07-19). The fill
+   matches the layer color exactly, so this is a mask, not a card: the
+   procedural field simply stops under the component area, which is what kept
+   text legible in the sandbox (its mock card was opaque). Three choices here
+   are deliberate:
+   - max-width: 520px matches the generator's calm band, so the ramp to
+     entropy starts right at the plate's edge. It also ends the label row at
+     the plate, which lands the </> toggle at the component area's top-right
+     corner — constant per component, corner-anchored like the app's other
+     windows (David's placement call).
+   - padding + equal negative margin carve a 20px apron around the content
+     without moving it: the demos keep their exact pre-plate position.
+   - demoContent's 40px gap minus the two 20px aprons means consecutive
+     plates touch, so the demo column reads as one continuous clearing with
+     no stray slivers of pattern between groups.
+   border-radius matches .demoGroupHighlighted so the highlight outline and
+   the plate share corners; on the invisible fill it only softens how ticks
+   are clipped at the corners. */
 .demoMain {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  max-width: 520px;
+  background-color: var(--color-surface-raised);
+  border-radius: 8px;
+  padding: 20px;
+  margin: -20px;
 }
 
 /* ≥1280px: an open code view becomes a second column to the right of the demo
@@ -1004,6 +1028,12 @@
    inline-size containment changes nothing about how it sizes. */
 .demoMainCarousel {
   container-type: inline-size;
+  /* Wider plate for the Gesture page: the carousel's wide layout fires at a
+     480px container width and grows the card to 560px. The standard 520px
+     plate leaves exactly 480px of content — right on the breakpoint with no
+     room for the wide card. 620px leaves 580px of content: the 560px card
+     and its matching caption cap fit with slack. */
+  max-width: 620px;
 }
 
 /* Wide carousel layout: the card grows to 560px (image left, text right), so
@@ -1021,12 +1051,20 @@
 /* ── Active token highlighting ───────────────────────────────────────────── */
 
 /* The demo group whose component is affected by the slider being dragged.
-   Green accent background + outline makes the connection explicit without noise. */
-.demoGroupHighlighted {
-  background-color: var(--color-accent-subtle);
-  border-radius: 8px;
-  padding: 12px;
-  margin: -12px;
+   Green accent tint + outline make the connection explicit without noise.
+
+   Since the clearing plates (2026-07-19), the highlight lives on .demoMain,
+   not on the group box. The group spans the full demo column, so styling it
+   directly would run the outline and tint across hundreds of pixels of open
+   field to the right of the plate; the plate IS the component area now, and
+   its built-in 20px apron replaces the padding/negative-margin pair the group
+   version used. The tint is a background-image layer so it composites over
+   the plate's opaque fill — same accent-subtle-over-surface look as before,
+   with no way for the pattern to show through behind the text. In the wide
+   split layout the code panel sits outside the outline, which is the honest
+   reading: the token affects the component, and the code view is reference. */
+.demoGroupHighlighted .demoMain {
+  background-image: linear-gradient(var(--color-accent-subtle), var(--color-accent-subtle));
   outline: 1px solid var(--color-accent);
   transition: opacity var(--feedback-ui-duration);
 }
@@ -1037,7 +1075,7 @@
    to the Highlight system color and thicken it; the dimmed siblings keep their
    opacity (forced-colors preserves opacity), so the highlight/dim contrast holds. */
 @media (forced-colors: active) {
-  .demoGroupHighlighted {
+  .demoGroupHighlighted .demoMain {
     outline: 2px solid Highlight;
   }
 }
