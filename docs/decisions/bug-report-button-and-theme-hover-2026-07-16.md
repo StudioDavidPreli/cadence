@@ -32,6 +32,16 @@ distinction. The now-redundant `.active:hover` rule was removed; the new
 `.themeButton:hover` produces the identical result and covers the active button's
 own hover.
 
+**Addendum 2026-07-19: the invert became the app-wide hover language.** On
+David's direction, every chip and pill chrome button now hovers this way
+(eleven stylesheets: preset pills, export controls, easing tabs, code
+toggles, copy buttons, Motion Tiles pills, modal/drawer closes, the error
+reload, bug-report actions, the reduced-motion gate, the library info/pause
+pair). The pattern comment lives at `.presetItem:hover` in
+`TokenLab.module.css`; demo components are exempt. Same rationale as above,
+generalized: the surface-active tint this replaced was the same
+under-the-floor HC hover this document first fixed on the theme switcher.
+
 ## 2. Bug-report button on the home page
 
 `src/components/BugReportButton/` is a new app-level affordance. It floats in the
