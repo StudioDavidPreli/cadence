@@ -277,10 +277,7 @@ const WATER_SEQUENCE = [
 const WILT = {
   duration: tokens.duration.slow,
   ease: tokens.ease.exit,
-}
-
-// The one direct bind, written outside the frame loop.
-plantScale.set(tokens.scale.expressive)`
+}`
 
 export const DEMO_SNIPPETS = {
   Drawer,

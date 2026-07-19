@@ -107,11 +107,15 @@ const Carousel = lazy(() =>
 // is the first canvas demo in the map. Its rows are exactly what the rAF
 // driver reads (docs/briefings/waterwilt-token-vm-map.md): rain on
 // fast+linear and growth on slower+enter together, flowers on slow+standard
-// after delay.long, the wilt out on slow+exit, and scale.expressive as the
-// plantScale direct bind. delay.short left the demo when rain and growth
-// became simultaneous, and duration.base left when rain moved to fast and
-// the wilt to slow (both 2026-07-18, David's reviews). ease.linear has no
-// slider, so the rain scrub adds no easing row.
+// after delay.long, the wilt out on slow+exit. delay.short left the demo
+// when rain and growth became simultaneous, and duration.base left when rain
+// moved to fast and the wilt to slow (both 2026-07-18, David's reviews).
+// ease.linear has no slider, so the rain scrub adds no easing row.
+// scale.expressive is deliberately NOT listed yet: the driver's plantScale
+// write is a null-guarded no-op until the property is authored in the .riv,
+// and the highlight must not promise a connection that does nothing (David's
+// 2026-07-18 catch). Restore the row, and the snippet's plantScale line,
+// when plantScale lands.
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Rive Timelines'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
@@ -126,7 +130,7 @@ const TOKEN_COMPONENT_MAP = {
   'delay.long':       ['Stepper', 'React Rive Timelines'],
   'scale.subtle':     ['Card'],
   'scale.base':       ['Button', 'Stepper'],
-  'scale.expressive': ['Notification Badge', 'React Rive Timelines'],
+  'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
 }
 

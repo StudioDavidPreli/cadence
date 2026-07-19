@@ -242,7 +242,10 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 - The compound `FlowerGrow` gate (`idleBoole OR NOT postGrowthBoole`); see
   Instance gating. Without it, flowers do not die on wilt.
-- `plantScale : number` for the `scale.expressive` direct bind.
+- `plantScale : number` for the `scale.expressive` direct bind. Until it is
+  authored, the demo's `scale.expressive` map row and snippet line are held
+  back too (2026-07-18): the driver's write is a null-guarded no-op, and the
+  Token Lab highlight must not claim a connection that does nothing.
 - `flowerPetals` and `flowerFaces` values verified in all four theme instances.
 - Verify the nested instances' bindable `quantize` property as the reduced-motion
   mechanism for the two self-playing loops, which the driver cannot scrub.
