@@ -489,7 +489,14 @@ function WaterWiltRive({ watered, children }) {
     const d = driver.current
     for (const key of Object.keys(d.values)) writeChannel(key, d.values[key])
     writeBooleans()
+    // BOTH loop mirrors, always. plantIdling was missing here when the plant
+    // handoff landed, and a theme switch after growth erased the plant: the
+    // fresh instance held plantIdleBoole's authored false while the grow
+    // scrub was already retired to 0, so neither instance drew (David's
+    // deploy diff, 2026-07-19). Any future driver-owned boolean must be
+    // restored in this block or a rebind silently drops it.
     writeRainLoop(d.rainLooping)
+    writePlantIdle(d.plantIdling)
     rive.play(RIV.stateMachine)
   }, [rive, instance])
 

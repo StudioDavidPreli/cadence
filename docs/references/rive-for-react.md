@@ -380,6 +380,7 @@ Every failure this build produced, in order of appearance:
 | Token highlight green with nothing moving | Map row claimed a null-guarded no-op write | Hold map rows and snippet lines back until the property exists |
 | HC button hover invisible | Hover outline color equals the page background in both HC themes | Ring in the surface color, scoped to `[data-theme^="high-contrast"]` |
 | Tests pass, deploy looks broken | Verification sampled while rAF was throttled to 1fps | `bringToFront()` before measuring; distrust plateaus |
+| Theme switch after growth erases the plant; rain and flowers keep working | The rebind restore replayed every mirror except `plantIdling`, so the fresh instance held the gate's authored false over a retired scrub | Restore every driver-owned boolean in the bind effect; a rebind silently drops whatever the block forgets |
 
 ## What the demo argues
 
