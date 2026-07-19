@@ -2,16 +2,18 @@
    below the demo area's --color-surface-raised) so it reads as a distinct panel.
 
    Syntax highlighting (2026-07-19, replacing the original all-monotone design,
-   which read as a wall of same-color text): Prism tokenizes each line and the
+   which read as a wall of same-color text; expanded the same day to VS Code
+   style scope coverage): Prism tokenizes the whole snippet as jsx and the
    component renders the spans itself, so every color below routes through the
-   --color-syntax-* tokens in color.css. The palette is three hues (keyword,
-   string, number) plus muted comments, all off the accent wheel — green,
-   purple, and amber keep their system roles, and the changing-value chip
-   (.commentActive) remains the only accent in the block. Identifiers,
-   punctuation, and the token reads themselves stay base, so the live comment
-   row beneath a read is still the strongest signal. High contrast carries its
-   own AAA trio (rust/navy/plum on white, salmon/mint/orchid on black) — David's
-   call, 2026-07-19: editors' HC modes color code, and legible beats pretty. */
+   --color-syntax-* tokens in color.css. Six visual roles — keyword, string,
+   number, entity (functions and JSX tags), property (object keys and JSX
+   attrs), comment — distributed VS Code-fashion per theme but kept off each
+   theme's role hues, so the changing-value chip (.commentActive) remains the
+   only accent in the block. Identifiers, punctuation, and the token reads
+   themselves stay base, so the live comment row beneath a read is still the
+   strongest signal. High contrast carries its own AAA hues (David's call:
+   editors' HC modes color code, and legible beats pretty), with properties
+   dropped to text-base there — VS Code's HC themes shrink the palette too. */
 .block {
   position: relative;
   margin-top: 12px;
@@ -72,6 +74,21 @@
 
 .tokComment {
   color: var(--color-text-muted);
+}
+
+/* entity.name.function / entity.name.tag — function calls and JSX component
+   names (useMotionTokens, motion.div). */
+.tokEntity {
+  color: var(--color-syntax-entity);
+}
+
+/* variable.other.property / entity.other.attribute-name — object keys and JSX
+   attribute names (duration:, whileTap=). In the HC themes this token
+   resolves to text-base: VS Code's own HC themes also shrink the palette, and
+   properties are the highest-frequency scope, so they carry HC's maximum
+   contrast instead of a hue. */
+.tokProperty {
+  color: var(--color-syntax-property);
 }
 
 /* Live resolved-value comment. Muted so it reads as annotation, not source.

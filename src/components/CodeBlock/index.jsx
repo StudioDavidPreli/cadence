@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Prism from 'prismjs'
+// The jsx grammar (markup tags + embedded JS expressions) — the core bundle
+// carries markup/clike/javascript; jsx is an add-on component.
+import 'prismjs/components/prism-jsx'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useActiveToken } from '../../context/ActiveTokenContext'
 import { TOKEN_REF, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
@@ -10,32 +13,91 @@ import styles from './CodeBlock.module.css'
 // spans ourselves, so that pass has nothing to do — switch it off.
 Prism.manual = true
 
-// Prism token type → CSS-module class. Only these types are colored; anything
-// else (identifiers, punctuation, operators, JSX angle brackets) stays in the
-// base text color, which keeps the palette to three hues plus muted comments
-// and leaves the token reads (tokens.duration.fast) in base so the accent chip
-// under them stays the loudest signal in the block.
+// Prism token type → CSS-module class, grouped the way VS Code's TextMate
+// scopes group (David's direction, 2026-07-19: an expansive, editor-grade
+// scope map). Six visual roles:
+//   keyword.* / constant.language  → tokKeyword   (const, return, true)
+//   string / JSX attr values       → tokString
+//   constant.numeric               → tokNumber
+//   entity.name.function / .tag    → tokEntity    (useMotionTokens, motion.div)
+//   variable.other.property /
+//     entity.other.attribute-name  → tokProperty  (duration:, whileTap=)
+//   comment                        → tokComment
+// Identifiers, punctuation, and operators stay base — VS Code leaves them at
+// the default foreground too — and member-access reads (tokens.duration.fast)
+// classify as plain identifiers, so the token reads stay base and the accent
+// chip under them stays the loudest signal in the block.
 const SYNTAX_CLASS = {
-  keyword: 'tokKeyword',
-  boolean: 'tokKeyword',
-  string:  'tokString',
-  number:  'tokNumber',
-  comment: 'tokComment',
+  'keyword':          'tokKeyword',
+  'boolean':          'tokKeyword',
+  'string':           'tokString',
+  'attr-value':       'tokString',
+  'number':           'tokNumber',
+  'comment':          'tokComment',
+  'function':         'tokEntity',
+  'class-name':       'tokEntity',
+  'tag':              'tokEntity',
+  'literal-property': 'tokProperty',
+  'property':         'tokProperty',
+  'attr-name':        'tokProperty',
+  // variable.other.constant — SCREAMING_CASE names (WATER_SEQUENCE, WILT).
+  // VS Code puts constants in the same ice-blue family as properties.
+  'constant':         'tokProperty',
 }
 
-// Render one line's Prism tokens as spans. A token's content can be a string,
-// a nested token, or an array of both, so this recurses. Unstyled tokens
-// render as bare strings — no wrapper span needed.
-function renderTokens(tokens) {
-  return tokens.map((tok, i) => {
-    if (typeof tok === 'string') return tok
-    const inner = Array.isArray(tok.content)
-      ? renderTokens(tok.content)
-      : typeof tok.content === 'string'
-        ? tok.content
-        : renderTokens([tok.content])
-    const cls = SYNTAX_CLASS[tok.type]
-    return cls ? <span key={i} className={styles[cls]}>{inner}</span> : inner
+// Types that CONTAIN other tokens rather than being spans of one kind:
+// Prism's 'tag' wraps the entire JSX tag (name, attrs, embedded scripts), so
+// every leaf inside a tag carries it in its stack. Without this guard, any
+// unclassified leaf inside a tag (a brace, an =, whitespace) would fall back
+// up the stack to 'tag' and paint as an entity — the first build did exactly
+// that, 193 teal spans in one snippet. A container classifies only when it IS
+// the leaf's own type (the tag name itself).
+const CONTAINER_TYPES = new Set(['tag', 'script'])
+
+// Flatten Prism's nested token tree into per-line runs of { types, text }.
+// The snippet tokenizes as ONE text (a JSX tag and its attributes span
+// several lines, so per-line lexing can never classify them), and this walk
+// re-splits the result at newlines while carrying each leaf's full type
+// stack — the same normalization prism-react-renderer performs. A leaf's
+// class resolves from the INNERMOST matching type (VS Code semantics: the
+// most specific scope wins), so e.g. the quote punctuation nested inside a
+// JSX attr-value falls back to base while the value text reads as a string.
+function splitTokensIntoLines(tokens) {
+  const lines = [[]]
+  const push = (text, types) => {
+    text.split('\n').forEach((part, i) => {
+      if (i > 0) lines.push([])
+      if (part) lines[lines.length - 1].push({ types, text: part })
+    })
+  }
+  const walk = (toks, stack) => {
+    for (const tok of toks) {
+      if (typeof tok === 'string') {
+        push(tok, stack)
+        continue
+      }
+      const aliases = tok.alias ? [].concat(tok.alias) : []
+      const types = [...stack, tok.type, ...aliases]
+      walk(Array.isArray(tok.content) ? tok.content : [tok.content], types)
+    }
+  }
+  walk(tokens, [])
+  return lines
+}
+
+function runClass(types) {
+  for (let i = types.length - 1; i >= 0; i--) {
+    if (CONTAINER_TYPES.has(types[i]) && i !== types.length - 1) continue
+    const cls = SYNTAX_CLASS[types[i]]
+    if (cls) return cls
+  }
+  return null
+}
+
+function renderRuns(runs) {
+  return runs.map((run, i) => {
+    const cls = runClass(run.types)
+    return cls ? <span key={i} className={styles[cls]}>{run.text}</span> : run.text
   })
 }
 
@@ -75,14 +137,15 @@ export function CodeBlock({ code }) {
   const activeToken = useActiveToken()
   const [copied, setCopied] = useState(false)
 
-  // Each line tokenized once per snippet, not once per render — the component
-  // re-renders on every slider tick (live values), but the source text never
-  // changes. Lines tokenize independently with the JavaScript grammar: the
-  // snippets' multi-line JSX tags mean a full-file jsx parse buys nothing
-  // per-line, and per-line keeps a stray construct from bleeding style into
-  // the rest of the block (worst case, one line renders unstyled base text).
-  const lineTokens = useMemo(
-    () => code.split('\n').map(line => Prism.tokenize(line, Prism.languages.javascript)),
+  // Tokenized once per snippet, not once per render — the component re-renders
+  // on every slider tick (live values), but the source text never changes.
+  // Whole-snippet jsx tokenization (then re-split into lines) is what lets the
+  // multi-line JSX tags classify: <motion.div plus its attribute lines only
+  // read as tag/attr-name scopes when the lexer sees the full tag. A construct
+  // the grammar can't match degrades to plain JS tokens for that stretch,
+  // never to a broken block.
+  const lineRuns = useMemo(
+    () => splitTokensIntoLines(Prism.tokenize(code, Prism.languages.jsx)),
     [code],
   )
 
@@ -153,7 +216,7 @@ export function CodeBlock({ code }) {
     const paths = [...line.matchAll(TOKEN_REF)].map(m => `${m[1]}.${m[2]}`)
     const sourceRow = (
       <div className={styles.line} key={`src-${i}`}>
-        <span className={styles.source}>{renderTokens(lineTokens[i])}</span>
+        <span className={styles.source}>{renderRuns(lineRuns[i])}</span>
       </div>
     )
     if (paths.length === 0) return [sourceRow]
