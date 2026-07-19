@@ -112,7 +112,7 @@ timeline's working area equals its full duration; see Invariants.
 | `rainFallProgress` | number | driver, per frame | during the fall ramp | Scrubs `rainFall` in `RainFall`. |
 | `rainStopProgress` | number | driver, per frame | during wilt | Scrubs `rainStop` in `RainStop`. Parks at 1 when inactive. |
 | `idleBoole` | boolean | driver, at phase boundaries | true at bloom rest | Gates both idle loops (playing and opacity together) and, inverted, the die/rain-stop instances. |
-| `rainBoole` | boolean | driver, at phase boundaries | true from rain-ramp landing through bloom; false from any wilt or reversal | Authored 2026-07-18 (the frozen-rain seam's fix). The driver holds it true across bloom as well, so `RainIdle` binds to `rainBoole` ALONE — a straight source swap from `idleBoole`, no OR converter (simplified 2026-07-18 from the original OR plan). Gate re-bind pending in the editor. |
+| `rainBoole` | boolean | driver, at phase boundaries | true from rain-ramp landing through bloom; false from any wilt or reversal | Authored and wired 2026-07-18 (the frozen-rain seam's fix). The driver holds it true across bloom, so `RainIdle` binds to `rainBoole` ALONE — a straight source swap from `idleBoole`, no OR converter (simplified from the original OR plan). Verified on built output: rain falls through the growth-to-flowers delay. |
 | `postGrowthBoole` | boolean | driver, at phase boundaries | true from bloom until wilt completes | Gates the grow-era instances off. The flower-grow gate is compound; see Instance gating. |
 | 13 colors, 2 planter opacities, `artboardBG` | color / number | theme instances | never at runtime | Authored per instance, `flowerPetals` and `flowerFaces` included. React rebinds the instance on theme change and writes nothing. |
 | completion signal | — | — | — | None, and none needed. The driver owns the clock, so React knows every phase boundary without a VM read-back. The button label flips on driver state. |
@@ -132,7 +132,7 @@ is the file's job, driven by the two booleans through hand-built converter group
 | `RainFall` | `rainFall` | remap scrub | `postGrowthBoole` false |
 | `FlowerGrow` | `flowersGrow` | remap scrub | **open**: `idleBoole` true OR `postGrowthBoole` false (see below) |
 | `PlantIdle` | `idleGrow` | self-playing loop | `idleBoole` true |
-| `RainIdle` | `rainingIdle` | self-playing loop | `idleBoole` true (**planned**: `rainBoole` alone; see the rainBoole row) |
+| `RainIdle` | `rainingIdle` | self-playing loop | `rainBoole` true (re-bound from `idleBoole` 2026-07-18; see the rainBoole row) |
 | `PlantDie` | `die` | remap scrub | `idleBoole` false |
 | `RainStop` | `rainStop` | remap scrub | `idleBoole` false |
 | `FlowersDie` | `flowersDie` | remap scrub | `idleBoole` false |
@@ -214,18 +214,16 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 ## Known seams, recorded as decisions
 
-- **Frozen rain during growth — promoted from seam to fix in flight.** `RainIdle`
-  is gated by `idleBoole`, which goes true only at bloom, so `RainFall` holds its
-  last frame from the end of its ramp until bloom. David's visual review
-  (2026-07-18) confirmed it reads as a glitch: the rain must fall while the plant
-  grows. `rainBoole` is authored (same-day export, verified in the binary) and
-  the driver writes it: true when the ramp lands, held true through bloom, false
-  the moment any wilt or reversal starts. Because the driver covers bloom, the
-  gate needs no OR: re-bind `RainIdle`'s existing gate (playing and opacity
-  together) from `idleBoole` to `rainBoole`, a one-source swap with no new
-  converters. That re-bind is the one remaining step; verified on built output
-  that with the gate still on `idleBoole`, rain stays frozen through the
-  growth-to-flowers delay. No other row changes.
+- **Frozen rain during growth — RESOLVED 2026-07-18.** `RainIdle` was gated by
+  `idleBoole`, which goes true only at bloom, so `RainFall` held its last frame
+  from the end of its ramp until bloom; David's visual review confirmed it read
+  as a glitch. The fix landed in two halves the same day: the driver writes
+  `rainBoole` (true when the ramp lands, held true through bloom, false the
+  moment any wilt or reversal starts), and the file re-bound `RainIdle`'s
+  playing and opacity to `rainBoole` alone — a one-source swap, no OR converter,
+  because the driver covers bloom. Verified on built output: rain falls through
+  the growth-to-flowers delay, rest is unchanged, and no interrupt path shows
+  double rain.
 - **Mid-sway snap on Wilt.** Bounded by sway amplitude; accepted without machinery.
 - **Overshoot clamps.** `ease.overshoot` stays unconsumed until a timeline authors
   headroom past its rest pose.
@@ -234,9 +232,6 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 - The compound `FlowerGrow` gate (`idleBoole OR NOT postGrowthBoole`); see
   Instance gating. Without it, flowers do not die on wilt.
-- The `RainIdle` gate re-bind from `idleBoole` to `rainBoole` (the property
-  itself is authored; see Known seams). Without the re-bind, rain freezes
-  mid-air through growth. The driver half is live.
 - `plantScale : number` for the `scale.expressive` direct bind.
 - `flowerPetals` and `flowerFaces` values verified in all four theme instances.
 - Verify the nested instances' bindable `quantize` property as the reduced-motion
