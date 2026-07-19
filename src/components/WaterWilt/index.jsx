@@ -197,6 +197,7 @@ function WaterWiltRive({ watered, children }) {
     trackFrom: {},
     reversalFrom: null, // per-channel start values for the unwater reversal
     rainLooping: false, // mirrors the rainBoole write, restored on rebind
+    rainHandoff: null, // frames until the landed rain ramp retires to 0
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
 
@@ -315,6 +316,7 @@ function WaterWiltRive({ watered, children }) {
       d.mode = 'wilt'
       d.q = 0
       d.from = 0
+      d.rainHandoff = null // RainFall is hidden through wilt; step 9 zeroes it
       writeBooleans()
       writeRainLoop(false)
       for (const ch of WILT_CHANNELS) writeChannel(ch, 0)
@@ -324,9 +326,14 @@ function WaterWiltRive({ watered, children }) {
       // Wilt mid-growth: every grow-era channel above 0 travels back to 0
       // together, one duration.base beat on ease.exit. Reversed travel is the
       // accepted policy; the parked die instances render nothing, so there is
-      // no interference. The reversing rain ramp owns the rain again.
+      // no interference. The reversing rain ramp owns the rain again: if the
+      // ramp was already retired to 0 (the loop handoff), restore it to its
+      // full pose in the same frame the loop drops, so the rain un-falls
+      // instead of vanishing. The swap is bounded like the mid-sway snap.
       d.mode = 'unwater'
       d.q = 0
+      d.rainHandoff = null
+      if (d.rainLooping) writeChannel('rain', 1)
       writeRainLoop(false)
       d.reversalFrom = {
         rain: d.values.rain,
@@ -471,6 +478,17 @@ function WaterWiltRive({ watered, children }) {
       const ease = easingsRef.current
 
       if (ease) {
+        // Pending rain-ramp retirement (see the handoff in the water case).
+        // Counted in advances so the loop is on screen before the frozen ramp
+        // frame goes; cancelled by any wilt or reversal press, which reclaims
+        // the ramp first.
+        if (d.rainHandoff != null) {
+          d.rainHandoff -= 1
+          if (d.rainHandoff <= 0) {
+            d.rainHandoff = null
+            writeChannel('rain', 0)
+          }
+        }
         switch (d.mode) {
           case 'water': {
             const beat = WATER_SEQUENCE[d.step]
@@ -497,8 +515,17 @@ function WaterWiltRive({ watered, children }) {
                 writeChannel(track.channel, from + (1 - from) * ease[track.ease](q))
                 // The arrival ramp has landed: hand the rain to the looping
                 // instance so it keeps falling through the rest of growth
-                // (the frozen-rain seam's driver half).
-                if (q >= 1 && track.channel === 'rain') writeRainLoop(true)
+                // (the frozen-rain seam's driver half). The parked ramp then
+                // retires to 0 after two settled frames — its gate is
+                // postGrowthBoole, which flips only at bloom, so without the
+                // retirement the frozen last frame sits on top of the loop
+                // from here into idle. Pose-matched: rainingIdle starts
+                // playing this same frame, and its first frame is authored to
+                // follow rainFall's last (the original SM's 100%-exit chain).
+                if (q >= 1 && track.channel === 'rain') {
+                  writeRainLoop(true)
+                  d.rainHandoff = SETTLE_FRAMES
+                }
                 if (q < 1) beatDone = false
               }
             }

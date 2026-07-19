@@ -166,7 +166,13 @@ review: rain and growth trigger together, and the soak beat is gone.)
 
 1. Water press: `rainFallProgress` 0 to 1 on `duration.base` + `ease.enter` and
    `growProgress` 0 to 1 on `duration.slower` + `ease.enter`, together. The
-   beat completes when the slower channel lands.
+   beat completes when the slower channel lands. When the rain track lands,
+   `rainBoole` goes true and, two settled frames later, the driver retires the
+   ramp to 0 (added 2026-07-18): `RainFall`'s gate is `postGrowthBoole`, which
+   flips only at bloom, so an unretired ramp parks its frozen last frame on
+   top of the loop from here into idle. The handoff is pose-matched:
+   `rainingIdle` starts playing the frame the ramp lands, and its first frame
+   follows `rainFall`'s last.
 2. `delay.long` elapses.
 3. `flowersGrowProgress` 0 to 1 on `duration.slow` + `ease.standard`.
 4. `idleBoole` and `postGrowthBoole` both go true. Idle loops appear at the bloom
@@ -188,7 +194,9 @@ review: rain and growth trigger together, and the soak beat is gone.)
 
 **Interrupts.** Wilt pressed mid-growth: reverse the running grow-era channels back
 down on `ease.exit`; the parked die/rain-stop are visible but render nothing, so
-there is no interference. Water pressed mid-wilt: reverse `dieProgress`,
+there is no interference. If the rain ramp was already retired to 0, the driver
+restores it to 1 in the same frame `rainBoole` drops, so the rain un-falls with
+the reversal instead of vanishing (bounded swap, the mid-sway precedent). Water pressed mid-wilt: reverse `dieProgress`,
 `rainStopProgress`, and `flowersDieProgress` back to 0 on `ease.enter`, then
 continue from bloom. The wilt
 animation from full bloom is the authored `die` timeline; a partial-state wilt is
