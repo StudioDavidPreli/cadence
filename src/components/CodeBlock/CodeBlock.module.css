@@ -72,6 +72,13 @@
   padding: 1px 5px;
 }
 
+/* Secondary bordered chip, the exportCopyButton treatment ("Copy is
+   secondary: bordered"). The resting fill is the block's own --color-bg, NOT
+   --color-surface: surface is the dark interactive fill whose legible partner
+   is --color-text-primary, and pairing it with muted text failed light (3.0:1)
+   and collapsed to invisible in both HC themes, where surface and text-muted
+   share a color (2026-07-19 theme pass). Opaque rather than none so the button
+   stays legible even if a code line ever ran beneath it. */
 .copy {
   position: absolute;
   top: 8px;
@@ -79,7 +86,7 @@
   padding: 4px 9px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  background-color: var(--color-bg);
   color: var(--color-text-muted);
   font-size: 11px;
   font-weight: 500;

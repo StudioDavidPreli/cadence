@@ -855,6 +855,49 @@
   gap: 8px;
 }
 
+/* The demo's own stack (label row, component, instruction), split out of
+   .demoGroup so the code view can sit beside it as a sibling column at the
+   wide breakpoint. Mirrors .demoGroup's stacking so narrow layouts render
+   exactly as before the wrapper existed. min-width: 0 lets the grid shrink
+   it below its content width instead of blowing the column out. */
+.demoMain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ≥1280px: an open code view becomes a second column to the right of the demo
+   instead of a reveal beneath it, so the component and its source stay visible
+   together (the wide-layout feedback, 2026-07-19). 1280, not the 1024 layout
+   breakpoint: the demo column is roughly viewport − 300 (controls) − 220 (nav)
+   − 80 (app padding), so below ~1280 a split leaves each half under ~300px,
+   too narrow for either side. The code column is capped at 420px so the demo
+   keeps the larger share on very wide screens. Applied only while a snippet is
+   open (the class comes and goes with showCode), so a closed demo keeps the
+   full column width. Must mirror the useMediaQuery call in DemoWrapper
+   (TokenLab/index.jsx). */
+@media (min-width: 1280px) {
+  .demoGroupSplit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    column-gap: 24px;
+    align-items: start;
+  }
+}
+
+.demoCode {
+  min-width: 0;
+}
+
+/* In the side column, CodeBlock's own margin-top (which spaces it from the demo
+   in the inline reveal) would push its top edge below the demo's label row.
+   Zero it via the child selector — CSS Modules scope CodeBlock's class name to
+   its own stylesheet, so it can't be referenced from here directly. */
+.demoCode > :first-child {
+  margin-top: 0;
+}
+
 .demoRow {
   display: flex;
   gap: 10px;

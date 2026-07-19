@@ -776,6 +776,12 @@ function DemoWrapper({ componentName, instruction, children, code }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
   const chrome = useChromeTransition()
+  // ≥1280px an open code view sits in a column beside the demo (.demoGroupSplit)
+  // instead of revealing beneath it, so the component and its source are visible
+  // together without scrolling (the wide-layout feedback, 2026-07-19). Below
+  // that, the inline height reveal stays. Breakpoint must mirror the
+  // @media rule in TokenLab.module.css.
+  const codeAside = useMediaQuery('(min-width: 1280px)')
 
   let state = 'idle'
   if (activeToken !== null) {
@@ -787,50 +793,75 @@ function DemoWrapper({ componentName, instruction, children, code }) {
     }
   }
 
+  const codeOpen = Boolean(code) && showCode
+
   return (
     <div
       className={[
         styles.demoGroup,
+        codeAside && codeOpen ? styles.demoGroupSplit : '',
         state === 'highlighted' ? styles.demoGroupHighlighted : '',
       ].join(' ')}
     >
-      <div className={styles.demoLabelRow}>
-        <span className={styles.demoLabel}>{componentName}</span>
-        {code && (
-          <button
-            type="button"
-            className={`${styles.codeToggle} ${showCode ? styles.codeToggleActive : ''}`}
-            onClick={() => setShowCode(s => !s)}
-            aria-expanded={showCode}
-            aria-label={showCode ? 'Hide code' : 'Show code'}
-          >
-            {'</>'}
-          </button>
+      {/* The demo's own stack is wrapped so it can be the left grid column when
+          the code view splits out beside it. Narrow layouts are unchanged:
+          .demoMain mirrors .demoGroup's stacking. */}
+      <div className={styles.demoMain}>
+        <div className={styles.demoLabelRow}>
+          <span className={styles.demoLabel}>{componentName}</span>
+          {code && (
+            <button
+              type="button"
+              className={`${styles.codeToggle} ${showCode ? styles.codeToggleActive : ''}`}
+              onClick={() => setShowCode(s => !s)}
+              aria-expanded={showCode}
+              aria-label={showCode ? 'Hide code' : 'Show code'}
+            >
+              {'</>'}
+            </button>
+          )}
+        </div>
+        {children}
+        {state !== 'no-demo' && instruction && (
+          <p className={styles.demoInstruction}>{instruction}</p>
+        )}
+        {state === 'no-demo' && (
+          <p className={styles.noDemoNote}>Token unused by present components.</p>
         )}
       </div>
-      {children}
-      {state !== 'no-demo' && instruction && (
-        <p className={styles.demoInstruction}>{instruction}</p>
-      )}
-      {state === 'no-demo' && (
-        <p className={styles.noDemoNote}>Token unused by present components.</p>
-      )}
-      {/* Reveal mirrors the Presets save-area reveal: height-auto at the 0.15s
-          tool-chrome timing, not an editable token. */}
-      <AnimatePresence initial={false}>
-        {code && showCode && (
+      {codeAside ? (
+        // Side column: fade in at the tool-chrome timing. No exit animation on
+        // purpose — the grid's second column collapses the moment showCode goes
+        // false, so an exiting panel would reflow into a row under the demo
+        // mid-fade. An instant close is the predictable form here.
+        codeOpen && (
           <motion.div
-            key="code"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            className={styles.demoCode}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={chrome.ui}
-            style={{ overflow: 'hidden' }}
           >
             <CodeBlock code={code} />
           </motion.div>
-        )}
-      </AnimatePresence>
+        )
+      ) : (
+        // Inline reveal mirrors the Presets save-area reveal: height-auto at the
+        // 0.15s tool-chrome timing, not an editable token.
+        <AnimatePresence initial={false}>
+          {codeOpen && (
+            <motion.div
+              key="code"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={chrome.ui}
+              style={{ overflow: 'hidden' }}
+            >
+              <CodeBlock code={code} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   )
 }
