@@ -196,6 +196,7 @@ function WaterWiltRive({ watered, children }) {
     trackQ: {},
     trackFrom: {},
     reversalFrom: null, // per-channel start values for the unwater reversal
+    rainLooping: false, // mirrors the rainBoole write, restored on rebind
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
 
@@ -223,6 +224,20 @@ function WaterWiltRive({ watered, children }) {
       s.postGrowth.value =
         mode === 'bloom' || mode === 'wilt' || mode === 'unwilt' || mode === 'settle'
     }
+  }
+
+  // rainBoole, the frozen-rain seam's recorded fix (contract, Known seams):
+  // rainFall is only the arrival ramp, so once it lands at 1 the rain hangs
+  // frozen mid-air until idleBoole shows the rainingIdle loop at bloom. The
+  // driver raises rainBoole when the ramp lands and drops it the moment any
+  // wilt or reversal starts (RainStop and the reversing ramp own the rain
+  // then; the loop on top would double it). File side pending: author the
+  // boolean in WaterWiltVM and gate RainIdle on rainBoole OR idleBoole. The
+  // handle is null until then, so this no-ops, same as plantScale.
+  function writeRainLoop(on) {
+    driver.current.rainLooping = on
+    const handle = settersRef.current.rainLoop
+    if (handle) handle.value = on
   }
 
   // ── Press handlers ───────────────────────────────────────────────────────
@@ -293,13 +308,15 @@ function WaterWiltRive({ watered, children }) {
   function pressWilt() {
     const d = driver.current
     if (d.mode === 'bloom') {
-      // Contract step 7: same frame, idleBoole false and the die trio snaps
-      // to 0. The die instances at 0 are the bloom the idle loop was
-      // orbiting, so the handoff is pose-matched.
+      // Contract wilt entry: same frame, idleBoole false and the die trio
+      // snaps to 0. The die instances at 0 are the bloom the idle loop was
+      // orbiting, so the handoff is pose-matched. The rain loop yields to
+      // RainStop in the same frame.
       d.mode = 'wilt'
       d.q = 0
       d.from = 0
       writeBooleans()
+      writeRainLoop(false)
       for (const ch of WILT_CHANNELS) writeChannel(ch, 0)
       return
     }
@@ -307,9 +324,10 @@ function WaterWiltRive({ watered, children }) {
       // Wilt mid-growth: every grow-era channel above 0 travels back to 0
       // together, one duration.base beat on ease.exit. Reversed travel is the
       // accepted policy; the parked die instances render nothing, so there is
-      // no interference.
+      // no interference. The reversing rain ramp owns the rain again.
       d.mode = 'unwater'
       d.q = 0
+      writeRainLoop(false)
       d.reversalFrom = {
         rain: d.values.rain,
         grow: d.values.grow,
@@ -332,10 +350,13 @@ function WaterWiltRive({ watered, children }) {
   function enterBloom() {
     const d = driver.current
     d.mode = 'bloom'
-    // Contract step 6: both booleans go true. The idle loops appear at the
-    // bloom pose; the grow-era instances hide (flowers stay, per their
-    // compound gate); the die-era instances hide.
+    // Contract bloom entry: both booleans go true. The idle loops appear at
+    // the bloom pose; the grow-era instances hide (flowers stay, per their
+    // compound gate); the die-era instances hide. rainBoole re-asserts true
+    // (idleBoole covers the loop at bloom either way; this keeps the mirror
+    // honest for the next rebind restore).
     writeBooleans()
+    writeRainLoop(true)
   }
 
   // Wilt's landing. The contract's step-9 "then" is literal: reset the
@@ -348,6 +369,7 @@ function WaterWiltRive({ watered, children }) {
     writeChannel('rain', 0)
     writeChannel('grow', 0)
     writeChannel('flowers', 0)
+    writeRainLoop(false) // already false since the wilt press; asserted for the mirror
     d.mode = 'settle'
     d.q = 0
   }
@@ -400,12 +422,14 @@ function WaterWiltRive({ watered, children }) {
       idle: instance.boolean('idleBoole'),
       postGrowth: instance.boolean('postGrowthBoole'),
       // In the contract as planned, not yet authored: null until the file
-      // carries it, and every write guards on the handle existing.
+      // carries them, and every write guards on the handle existing.
       plantScale: instance.number('plantScale'),
+      rainLoop: instance.boolean('rainBoole'),
     }
     const d = driver.current
     for (const key of Object.keys(d.values)) writeChannel(key, d.values[key])
     writeBooleans()
+    writeRainLoop(d.rainLooping)
     rive.play(RIV.stateMachine)
   }, [rive, instance])
 
@@ -471,6 +495,10 @@ function WaterWiltRive({ watered, children }) {
                 d.trackQ[track.channel] = q
                 const from = d.trackFrom[track.channel]
                 writeChannel(track.channel, from + (1 - from) * ease[track.ease](q))
+                // The arrival ramp has landed: hand the rain to the looping
+                // instance so it keeps falling through the rest of growth
+                // (the frozen-rain seam's driver half).
+                if (q >= 1 && track.channel === 'rain') writeRainLoop(true)
                 if (q < 1) beatDone = false
               }
             }
