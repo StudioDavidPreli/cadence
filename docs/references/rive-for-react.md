@@ -1,6 +1,6 @@
 ---
 Purpose: Workflow and troubleshooting reference for driving Rive files from React
-Source: The Water & Wilt build, one session, 2026-07-18. Sixteen commits, 88f05e4 through 9bc6fe2.
+Source: The Water & Wilt build, one session, 2026-07-18 into 2026-07-19. Fifteen commits, 88f05e4 through bc78c3a.
 ---
 
 # Rive for React
@@ -362,6 +362,19 @@ What worked, session-tested:
 - **Route through `about:blank`.** A `goto` that differs only in hash does
   not renavigate, and a stale bundle will happily fake a result.
 
+### The deploy diff
+
+The push is not the last gate. David runs the live site against the timing
+chart and the contract after every deploy, and that pass caught three things
+automated verification had structurally missed: an idle that read wrong
+against the chart (an authoring issue, fixed in the editor), a fixed-size
+button over a scaling scene (a design gap, one CSS variable), and a theme
+switch that erased the plant (a missing mirror restore, one line). Each
+report arrived as a precise symptom description, and twice the symptom alone
+named the broken line before any tool ran. Byte fingerprints prove poses;
+only a person who knows what the animation is supposed to feel like can
+notice what it fails to say.
+
 ## Troubleshooting log
 
 Every failure this build produced, in order of appearance:
@@ -392,5 +405,5 @@ React. The named preset stayed the unit of communication, and when the two
 sides disagreed about what a number meant, the contract document, not the
 code, was where the argument got settled.
 
-Sixteen commits, one day, one wall. The plant waits in the pot for the next
+Fifteen commits, two days, one wall. The plant waits in the pot for the next
 press.
