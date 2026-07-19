@@ -233,9 +233,22 @@
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover (2026-07-19): every chip/pill chrome button in
+   the app hovers the way the theme switcher does — invert to a solid
+   --color-surface-hover fill (border included) with --color-text-primary text,
+   rather than the old --color-surface-active tint. Two reasons, both from the
+   theme-switcher fix (bug-report-button-and-theme-hover-2026-07-16.md): the
+   tint sits under the 3:1 UI floor in both high-contrast themes, and one hover
+   language across the tool reads as one system. surface-hover, not surface,
+   keeps a hovered button one step from a persistent active fill in light/dark;
+   in HC the two coincide and the active weight/context carries it. Active
+   pills rest at --color-surface and hover to surface-hover, so hover covers
+   active buttons too. Demo components (Button, Toggle, the demos themselves)
+   are exempt: they speak the token system, not the chrome language. */
 .presetItem:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Active preset — dark background (same as easeButtonActive) signals "loaded" */
@@ -251,17 +264,33 @@
   color: var(--color-text-primary);
 }
 
-/* Delete target on user presets. Hover turns amber to signal destructive action. */
+/* Delete target on user presets. Hover pops a small --color-bg chip with amber
+   text to signal destructive action. */
 .presetDelete {
   font-size: 9px;
   color: var(--color-text-muted);
   line-height: 1;
   cursor: pointer;
   border-radius: 2px;
-  transition: color var(--feedback-ui-duration);
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: color var(--feedback-ui-duration), background-color var(--feedback-ui-duration);
 }
 
-.presetDelete:hover {
+/* The pill's inverted hover fill would leave the muted ✕ illegible (muted on
+   surface-hover is 3.0:1 in light), so the glyph lifts to text-primary with
+   the pill. */
+.presetItem:hover .presetDelete {
+  color: var(--color-text-primary);
+}
+
+/* The ✕'s own hover keeps the amber destructive cue, but amber-as-text fails
+   on the inverted fill in three themes (e.g. #905e18 on #333333 is 1.9:1). So
+   it sits on its own --color-bg chip instead: accent3-on-bg is the audited
+   pairing (dark 10.1:1, light 5.1:1, HC-light 8.6:1, HC-dark 13.0:1). The
+   selector needs the extra :hover depth to outrank the lift rule above. */
+.presetItem:hover .presetDelete:hover {
+  background-color: var(--color-bg);
   color: var(--color-accent3);
 }
 
@@ -279,12 +308,15 @@
   color: var(--color-text-muted);
   cursor: pointer;
   overflow: hidden;
-  transition: border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
+/* Unified hover invert (see .presetItem:hover). The dashed "potential action"
+   border stays the resting identity; hover reads as any other chrome button. */
 .presetSaveButton:hover {
-  border-color: var(--color-border2);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Inline save row — input + confirm button side by side */
@@ -372,15 +404,22 @@
   border-right: 1px solid var(--color-border);
 }
 
+/* Unified hover invert (see .presetItem:hover). Segments carry no own border,
+   so only fill and text flip; the shared shell border stays. */
 .exportFormatOption:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
-/* Active format — dark fill, matching the loaded-preset and active-ease pills. */
-.exportFormatOptionActive,
-.exportFormatOptionActive:hover {
+/* Active format — dark fill, matching the loaded-preset and active-ease pills.
+   Its own hover steps to surface-hover like every active pill. */
+.exportFormatOptionActive {
   background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.exportFormatOptionActive:hover {
+  background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
 
@@ -417,9 +456,9 @@
 }
 
 .exportCopyButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-border2);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* ── Token import ────────────────────────────────────────────────────────────
@@ -444,12 +483,15 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
+/* Unified hover invert (see .presetItem:hover); dashed rest, solid hover,
+   same as .presetSaveButton. */
 .importButton:hover {
-  border-color: var(--color-border2);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* ── Import report (modal body) ──────────────────────────────────────────── */
@@ -686,8 +728,9 @@
 }
 
 .easingTab:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .easingTabActive {
@@ -723,8 +766,9 @@
 }
 
 .easeButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .easeButtonActive {
@@ -736,9 +780,6 @@
 .easeButtonActive:hover {
   background-color: var(--color-surface-hover);
   border-color: var(--color-surface-hover);
-  /* .easeButton:hover sets color: --color-text-base (dark in light/HC themes).
-     This rule must explicitly override it — the dark hover background needs
-     light text, which is what --color-text-primary provides. */
   color: var(--color-text-primary);
 }
 
@@ -837,16 +878,21 @@
 }
 
 .codeToggle:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-border2);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
-.codeToggleActive,
-.codeToggleActive:hover {
+.codeToggleActive {
   background-color: var(--color-surface);
+  border-color: var(--color-surface);
   color: var(--color-text-primary);
-  border-color: var(--color-border2);
+}
+
+.codeToggleActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .demoGroup {

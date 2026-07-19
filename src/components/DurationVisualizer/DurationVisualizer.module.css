@@ -51,15 +51,23 @@
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .tokenTab:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
-.tokenTabActive,
-.tokenTabActive:hover {
+.tokenTabActive {
   background-color: var(--color-surface);
   border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.tokenTabActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
 
@@ -89,9 +97,13 @@
   border-right: 1px solid var(--color-border);
 }
 
+/* Unified hover invert; the segment has no own border, so fill and text flip
+   inside the shared shell (same as .exportFormatOption). The ACTIVE segment
+   below keeps its accent treatment — accent means "currently driving the
+   dots", an accent-role statement, not a hover state. */
 .modeOption:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Active segment uses the accent — this mode is the one currently driving the
@@ -224,8 +236,10 @@
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .replayButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-border2);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }

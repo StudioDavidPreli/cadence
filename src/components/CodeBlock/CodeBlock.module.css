@@ -95,8 +95,11 @@
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css): surface-hover fill and border, text-primary text,
+   the same flip the theme-switcher buttons make. */
 .copy:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-border2);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }

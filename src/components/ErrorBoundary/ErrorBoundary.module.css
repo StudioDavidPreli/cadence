@@ -52,10 +52,14 @@
   font: inherit;
   cursor: pointer;
   transition: background-color var(--feedback-ui-duration),
-    color var(--feedback-ui-duration);
+    color var(--feedback-ui-duration),
+    border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .reload:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }

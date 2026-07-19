@@ -114,12 +114,16 @@
   flex-shrink: 0;
   transition:
     background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .closeButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* ── Content ──────────────────────────────────────────────────────────────── */

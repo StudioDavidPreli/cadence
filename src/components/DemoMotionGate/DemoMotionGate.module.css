@@ -23,12 +23,6 @@
     background-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
-.control:hover {
-  border-color: var(--color-border2);
-  color: var(--color-text-base);
-  background-color: var(--color-surface-active);
-}
-
 /* aria-pressed carries the on state; accent border because the gate is then
    actively affecting the system (the accent role, CLAUDE.md contrast rules;
    as a UI stroke it is governed by the 3:1 bar, which accent clears in every
@@ -36,6 +30,17 @@
 .control[aria-pressed='true'] {
   border-color: var(--color-accent);
   color: var(--color-text-base);
+}
+
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). Placed AFTER the pressed rule (equal specificity, so
+   source order decides): hover must cover the pressed button too, or pressed
+   text-base would sit on the inverted fill — 1.4:1 in light. Same convention
+   as the theme switcher, where one hover rule covers the active button. */
+.control:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .control:focus-visible {

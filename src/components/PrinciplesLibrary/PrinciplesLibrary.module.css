@@ -49,10 +49,12 @@
     border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .infoButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-text-muted);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Pause/Play toggle. Same neutral pill as .infoButton — accent (green) is
@@ -78,16 +80,23 @@
     border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.pauseButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-text-muted);
+/* Held (paused) state takes the standard active-pill inversion — the same
+   "persistent selected" fill the loaded preset and active tabs use. The old
+   surface-active tint was a near-invisible step from the page in both HC
+   themes, the same failure the theme-switcher hover fix documented. */
+.pauseButton[aria-pressed='true'] {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
-.pauseButton[aria-pressed='true'] {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
-  border-color: var(--color-text-muted);
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). After the pressed rule so hover covers the held
+   button too (equal specificity, source order decides). */
+.pauseButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* The "i" mark in its own circle so it reads as an info glyph next to the

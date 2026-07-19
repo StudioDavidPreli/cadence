@@ -202,9 +202,11 @@
               background-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). Borderless circle, so only fill and glyph flip. */
 .closeButton:hover {
-  color: var(--color-text-base);
-  background-color: var(--color-surface-active);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-hover);
 }
 
 /* Left half: stretches full card height (overrides parent align-items: center)
@@ -314,10 +316,12 @@
               background-color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .stateToggle:hover {
-  border-color: var(--color-border2);
-  color: var(--color-text-base);
-  background-color: var(--color-surface-active);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 /* Dashed placeholder for component demo area (left half State 2).

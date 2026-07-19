@@ -77,9 +77,12 @@
     color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). */
 .pill:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .pillActive {
@@ -134,14 +137,14 @@
     color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
-/* Hover darkens/lightens the surface only; text stays --color-text-base, which is
-   the token verified to read on --color-surface-active in every theme (see the Card
-   hover contrast notes in tokens/color.css). --color-text-primary is white/black for
-   DARK interactive surfaces, so it vanished on the light surface-active in light and
-   both high-contrast modes — mirror .pill:hover, which uses text-base for this reason. */
-.actionButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+/* Unified hover invert, mirroring .pill:hover. The old rule kept text-base on a
+   surface-active tint (text-primary vanishes on a LIGHT tint in light/HC); with
+   the inverted surface-hover fill, text-primary is the verified pairing.
+   :not(:disabled) so the half-opacity disabled button doesn't light up. */
+.actionButton:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .actionButton:disabled {

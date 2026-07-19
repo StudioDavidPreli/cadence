@@ -123,9 +123,13 @@
     color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
-.actionButton:hover {
-  background-color: var(--color-surface-active);
-  color: var(--color-text-base);
+/* Unified chrome-button hover invert (see the .presetItem:hover note in
+   TokenLab.module.css). :not(:disabled) so the half-opacity sending state
+   doesn't light up under the pointer. */
+.actionButton:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .actionButton:disabled {
