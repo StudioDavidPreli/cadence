@@ -980,6 +980,23 @@
   margin-top: 4px;
 }
 
+/* Centered caption variants (David, 2026-07-19): the two canvas demos carry
+   the longest captions in the tool, and a wide demo column ran them out as a
+   full-width line disconnected from the art. Each variant's cap matches its
+   demo's own width cap, so the caption wraps into a block that sits flush
+   under the art and text-align centers the lines within it. Keep the caps in
+   step with WaterWilt's .stage (340px) and Carousel's root (320px) if those
+   change. */
+.demoInstructionEmbed {
+  max-width: 340px;
+  text-align: center;
+}
+
+.demoInstructionCarousel {
+  max-width: 320px;
+  text-align: center;
+}
+
 /* ── Active token highlighting ───────────────────────────────────────────── */
 
 /* The demo group whose component is affected by the slider being dragged.

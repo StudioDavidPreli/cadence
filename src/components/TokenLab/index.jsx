@@ -772,7 +772,9 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
 // toggle sits beside the component name and reveals a CodeBlock below the demo.
 // On-demand per demo: nothing renders until the user asks, so the column is not
 // buried in syntax. See CodeBlock for the live-value behavior.
-function DemoWrapper({ componentName, instruction, children, code }) {
+// `instructionClass` (optional) appends a layout variant to the instruction
+// paragraph — the centered-caption classes the two canvas demos use.
+function DemoWrapper({ componentName, instruction, children, code, instructionClass }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
   const chrome = useChromeTransition()
@@ -823,7 +825,7 @@ function DemoWrapper({ componentName, instruction, children, code }) {
         </div>
         {children}
         {state !== 'no-demo' && instruction && (
-          <p className={styles.demoInstruction}>{instruction}</p>
+          <p className={`${styles.demoInstruction} ${instructionClass ?? ''}`}>{instruction}</p>
         )}
         {state === 'no-demo' && (
           <p className={styles.noDemoNote}>Token unused by present components.</p>
@@ -1508,6 +1510,7 @@ export function TokenLab() {
           componentName="React Rive Timelines"
           instruction="Press Water me. Rain and growth run together, rain on duration.fast, growth on duration.slower; flowers wait out delay.long. Press again and the wilt runs out on duration.slow with ease.exit"
           code={DEMO_SNIPPETS.WaterWilt}
+          instructionClass={styles.demoInstructionEmbed}
         >
           <WaterWilt />
         </DemoWrapper>
@@ -1520,6 +1523,7 @@ export function TokenLab() {
           componentName="Carousel"
           instruction="Drag to advance — flick fast or drag far enough to commit"
           code={DEMO_SNIPPETS.Carousel}
+          instructionClass={styles.demoInstructionCarousel}
         >
           {/* Carousel is a lazy chunk (see the lazy-boundaries block up top).
               The idle prefetch usually resolves it long before this category is
