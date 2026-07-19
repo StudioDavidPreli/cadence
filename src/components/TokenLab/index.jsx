@@ -105,16 +105,16 @@ const Carousel = lazy(() =>
 // and Notification Badge under easing.exit (it reads standard, not exit).
 // React Rive Timelines (2026-07-18, the Embeds category's Water & Wilt demo)
 // is the first canvas demo in the map. Its rows are exactly what the rAF
-// driver reads (docs/briefings/waterwilt-token-vm-map.md): rain on base+enter
-// and growth on slower+enter together, flowers on slow+standard after
-// delay.long, the wilt out on base+exit, and scale.expressive as the
+// driver reads (docs/briefings/waterwilt-token-vm-map.md): rain on
+// fast+linear and growth on slower+enter together, flowers on slow+standard
+// after delay.long, the wilt out on slow+exit, and scale.expressive as the
 // plantScale direct bind. delay.short left the demo when rain and growth
-// became simultaneous (visual review, 2026-07-18). duration.fast is NOT
-// listed for it: the demo's toggle is the existing Button under Button's own
-// contract.
+// became simultaneous, and duration.base left when rain moved to fast and
+// the wilt to slow (both 2026-07-18, David's reviews). ease.linear has no
+// slider, so the rain scrub adds no easing row.
 const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'React Rive Timelines'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Rive Timelines'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
   'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Rive Timelines'],
   'duration.slower':  ['Spinner', 'Stepper', 'React Rive Timelines'],
   'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Rive Timelines'],
@@ -1472,7 +1472,7 @@ export function TokenLab() {
             docs/briefings/waterwilt-token-vm-map.md. */}
         <DemoWrapper
           componentName="React Rive Timelines"
-          instruction="Press Water me. Rain and growth run together, rain on duration.base, growth on duration.slower; flowers wait out delay.long. Press again and everything exits together on ease.exit"
+          instruction="Press Water me. Rain and growth run together, rain on duration.fast, growth on duration.slower; flowers wait out delay.long. Press again and the wilt runs out on duration.slow with ease.exit"
           code={DEMO_SNIPPETS.WaterWilt}
         >
           <WaterWilt />

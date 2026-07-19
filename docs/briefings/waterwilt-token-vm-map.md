@@ -79,13 +79,13 @@ sits when animation moves to canvas.
 
 | Token path | Consumed by | VM property (name : type) | Write pattern | Notes |
 |---|---|---|---|---|
-| `duration.fast` | not consumed | — | — | The DOM toggle is the existing `Button`; its press feedback is Button's own contract. |
-| `duration.base` | driver clock | — | — | Rain-fall ramp in; die, rain-stop, and flowers-die out. Exit-faster precedent (Modal enters slow, exits base). |
-| `duration.slow` | driver clock | — | — | Flower grow phase. |
+| `duration.fast` | driver clock | — | — | Rain-fall ramp in (moved from `base` 2026-07-18, David's token-lab review: fast's default sits under the ~130ms window where the arrival reads as one transient). The DOM toggle Button also reads it under Button's own contract. |
+| `duration.base` | not consumed | — | — | Re-owned away 2026-07-18: rain moved to `fast`, the wilt to `slow`, so base stopped driving two unrelated beats. |
+| `duration.slow` | driver clock | — | — | Flower grow phase; and die, rain-stop, and flowers-die out on Wilt (moved from `base` 2026-07-18; 400ms is still faster than the 600ms entry, exit-faster holds). |
 | `duration.slower` | driver clock | — | — | Growth, the hero beat. |
-| `ease.linear` | not consumed | — | — | Fixed reference. Quantization quantizes the eased value; linear is never read. |
+| `ease.linear` | driver clock | — | — | Rain-fall ramp scrub (2026-07-18 experiment): enter's flat tail made the drops stall before snapping to the loop's speed; linear holds the scrub speed steady into the handoff. Still a fixed reference, no slider. |
 | `ease.standard` | driver clock | — | — | Flower grow phase. |
-| `ease.enter` | driver clock | — | — | Rain-fall ramp and growth. |
+| `ease.enter` | driver clock | — | — | Growth, and the un-wilt reversal. |
 | `ease.exit` | driver clock | — | — | Die, rain-stop, and flowers-die, together on Wilt. |
 | `ease.overshoot` | not consumed | — | — | Eased progress above 1 clamps at the timeline end. Unlockable later by authoring headroom past the rest pose. |
 | `delay.none` | not consumed | — | — | Fixed reference. |
@@ -164,9 +164,10 @@ instances at 0: a full-bloom ghost.
 **The full cycle.** (Steps 1 to 3 revised 2026-07-18 after David's visual
 review: rain and growth trigger together, and the soak beat is gone.)
 
-1. Water press: `rainFallProgress` 0 to 1 on `duration.base` + `ease.enter` and
-   `growProgress` 0 to 1 on `duration.slower` + `ease.enter`, together. The
-   beat completes when the slower channel lands. When the rain track lands,
+1. Water press: `rainFallProgress` 0 to 1 on `duration.fast` + `ease.linear` and
+   `growProgress` 0 to 1 on `duration.slower` + `ease.enter`, together
+   (rain re-owned from base+enter 2026-07-18). The beat completes when the
+   slower channel lands. When the rain track lands,
    `rainBoole` goes true and, two settled frames later, the driver retires the
    ramp to 0 (added 2026-07-18): `RainFall`'s gate is `postGrowthBoole`, which
    flips only at bloom, so an unretired ramp parks its frozen last frame on
@@ -182,7 +183,8 @@ review: rain and growth trigger together, and the soak beat is gone.)
    and `flowersDieProgress` snap to 0. The die instances at 0 are the bloom the
    idle loop was orbiting, so the handoff is pose-matched.
 6. `dieProgress`, `rainStopProgress`, and `flowersDieProgress` 0 to 1 together on
-   `duration.base` + `ease.exit`.
+   `duration.slow` + `ease.exit` (moved from `base` 2026-07-18). Both interrupt
+   reversals mirror this duration.
 7. Wilt complete: reset `growProgress`, `flowersGrowProgress`, `rainFallProgress`
    to 0; die, rain-stop, and flowers-die stay parked at 1; then `postGrowthBoole`
    false. "Then" is load-bearing (2026-07-18): the driver holds two settled

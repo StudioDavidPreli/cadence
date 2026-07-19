@@ -57,11 +57,17 @@ const themeToInstanceName = {
 // Revised 2026-07-18 (David's visual review): rain and growth trigger
 // together on the press, each on its own tokens, instead of the contract's
 // original rain-then-soak-then-grow sequence. delay.short left the cycle
-// with the soak beat; the contract doc carries the dated revision.
+// with the soak beat; the contract doc carries the dated revisions.
+//
+// Rain rides duration.fast + ease.linear (re-owned 2026-07-18, David's
+// token-lab session): fast keeps the arrival under the ~130ms window where
+// the eye reads it as one transient, and linear removes ease.enter's flat
+// tail, the decelerate-then-snap that made the loop handoff visible at
+// longer durations. duration.base no longer drives anything here.
 const WATER_SEQUENCE = [
   {
     tracks: [
-      { channel: 'rain', duration: 'base', ease: 'enter' },
+      { channel: 'rain', duration: 'fast', ease: 'linear' },
       { channel: 'grow', duration: 'slower', ease: 'enter' }, // the hero beat
     ],
   },
@@ -69,8 +75,10 @@ const WATER_SEQUENCE = [
   { tracks: [{ channel: 'flowers', duration: 'slow', ease: 'standard' }] },
 ]
 
-// Wilt runs the three authored die timelines together on duration.base +
-// ease.exit — the exit-faster precedent (Modal enters slow, exits base).
+// Wilt runs the three authored die timelines together on duration.slow +
+// ease.exit (moved off duration.base 2026-07-18 so base stops owning two
+// unrelated beats; 400ms is still faster than the 600ms entry, so the
+// exit-faster precedent holds). Both reversals mirror the wilt's duration.
 const WILT_CHANNELS = ['die', 'rainStop', 'flowersDie']
 
 // Reduced motion, driver-side: the eased progress of every scrubbed channel is
@@ -163,6 +171,7 @@ function WaterWiltRive({ watered, children }) {
   useEffect(() => {
     tokensRef.current = tokens
     easingsRef.current = {
+      linear: cubicBezier(...tokens.ease.linear),
       standard: cubicBezier(...tokens.ease.standard),
       enter: cubicBezier(...tokens.ease.enter),
       exit: cubicBezier(...tokens.ease.exit),
@@ -324,7 +333,7 @@ function WaterWiltRive({ watered, children }) {
     }
     if (d.mode === 'water') {
       // Wilt mid-growth: every grow-era channel above 0 travels back to 0
-      // together, one duration.base beat on ease.exit. Reversed travel is the
+      // together, one duration.slow beat on ease.exit. Reversed travel is the
       // accepted policy; the parked die instances render nothing, so there is
       // no interference. The reversing rain ramp owns the rain again: if the
       // ramp was already retired to 0 (the loop handoff), restore it to its
@@ -537,7 +546,7 @@ function WaterWiltRive({ watered, children }) {
             break
           }
           case 'wilt': {
-            const dur = Math.max(t.duration.base, MIN_DURATION_S)
+            const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from + (1 - d.from) * ease.exit(d.q)
             for (const ch of WILT_CHANNELS) writeChannel(ch, v)
@@ -555,7 +564,7 @@ function WaterWiltRive({ watered, children }) {
             break
           }
           case 'unwilt': {
-            const dur = Math.max(t.duration.base, MIN_DURATION_S)
+            const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from * (1 - ease.enter(d.q))
             for (const ch of WILT_CHANNELS) writeChannel(ch, v)
@@ -566,7 +575,7 @@ function WaterWiltRive({ watered, children }) {
             break
           }
           case 'unwater': {
-            const dur = Math.max(t.duration.base, MIN_DURATION_S)
+            const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const k = ease.exit(d.q)
             for (const ch of ['rain', 'grow', 'flowers']) {

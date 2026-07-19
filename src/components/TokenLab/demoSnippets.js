@@ -256,11 +256,12 @@ const WaterWilt = `const tokens = useMotionTokens()
 // drag retimes a beat mid-flight from its current progress.
 const WATER_SEQUENCE = [
   // One press, two channels: rain and growth run together,
-  // each on its own duration and ease.
+  // each on its own duration and ease. The rain scrub rides
+  // linear so its speed holds steady into the loop handoff.
   { together: [
     { scrub: 'rainFallProgress',
-      duration: tokens.duration.base,
-      ease: tokens.ease.enter },
+      duration: tokens.duration.fast,
+      ease: tokens.ease.linear },
     { scrub: 'growProgress',
       duration: tokens.duration.slower,
       ease: tokens.ease.enter },
@@ -272,9 +273,9 @@ const WATER_SEQUENCE = [
 ]
 
 // Wilt: the three authored die timelines run together,
-// one beat, exit-fast.
+// one beat, still faster than the entry.
 const WILT = {
-  duration: tokens.duration.base,
+  duration: tokens.duration.slow,
   ease: tokens.ease.exit,
 }
 
