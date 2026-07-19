@@ -103,27 +103,30 @@ const Carousel = lazy(() =>
 // enter/exit), Toggle under easing.standard + scale.base (it reads
 // duration.fast + ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
-// Water & Wilt (2026-07-18) is the first canvas demo in the map. Its rows are
-// exactly what the rAF driver reads (docs/briefings/waterwilt-token-vm-map.md):
-// rain in on base+enter, growth on slower+enter, flowers on slow+standard, the
-// wilt out on base+exit, the two delays between beats, and scale.expressive as
-// the plantScale direct bind. duration.fast is NOT listed for it: the demo's
-// toggle is the existing Button under Button's own contract.
+// React Rive Timelines (2026-07-18, the Embeds category's Water & Wilt demo)
+// is the first canvas demo in the map. Its rows are exactly what the rAF
+// driver reads (docs/briefings/waterwilt-token-vm-map.md): rain on base+enter
+// and growth on slower+enter together, flowers on slow+standard after
+// delay.long, the wilt out on base+exit, and scale.expressive as the
+// plantScale direct bind. delay.short left the demo when rain and growth
+// became simultaneous (visual review, 2026-07-18). duration.fast is NOT
+// listed for it: the demo's toggle is the existing Button under Button's own
+// contract.
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Water & Wilt'],
-  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'Water & Wilt'],
-  'duration.slower':  ['Spinner', 'Stepper', 'Water & Wilt'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Water & Wilt'],
-  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'Water & Wilt'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'Water & Wilt'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'React Rive Timelines'],
+  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Rive Timelines'],
+  'duration.slower':  ['Spinner', 'Stepper', 'React Rive Timelines'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Rive Timelines'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Rive Timelines'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Rive Timelines'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
-  'delay.short':      ['Stepper', 'Water & Wilt'],
+  'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
-  'delay.long':       ['Stepper', 'Water & Wilt'],
+  'delay.long':       ['Stepper', 'React Rive Timelines'],
   'scale.subtle':     ['Card'],
   'scale.base':       ['Button', 'Stepper'],
-  'scale.expressive': ['Notification Badge', 'Water & Wilt'],
+  'scale.expressive': ['Notification Badge', 'React Rive Timelines'],
   'scale.lift':       ['Card', 'Carousel'],
 }
 
@@ -1458,15 +1461,18 @@ export function TokenLab() {
         >
           <Stepper />
         </DemoWrapper>
+      </div>
+    ),
 
+    'embeds': (
+      <div className={styles.demoContent}>
         {/* The first canvas demo: a Rive plant scrubbed by a rAF driver that
-            reads the same live tokens as every DOM demo. It sits in Sequence &
-            Progress because its cycle is the delay tokens' clearest showcase:
-            rain, soak, growth, settle, bloom, five beats with the gaps
-            editable. Contract: docs/briefings/waterwilt-token-vm-map.md. */}
+            reads the same live tokens as every DOM demo. The file holds
+            poses; the driver holds time. Contract:
+            docs/briefings/waterwilt-token-vm-map.md. */}
         <DemoWrapper
-          componentName="Water & Wilt"
-          instruction="Press Water me. Rain lands on duration.base, growth takes duration.slower, flowers wait out delay.long. Press again and everything exits together on ease.exit"
+          componentName="React Rive Timelines"
+          instruction="Press Water me. Rain and growth run together, rain on duration.base, growth on duration.slower; flowers wait out delay.long. Press again and everything exits together on ease.exit"
           code={DEMO_SNIPPETS.WaterWilt}
         >
           <WaterWilt />

@@ -48,16 +48,25 @@ const themeToInstanceName = {
   'high-contrast-dark': 'contrastDark',
 }
 
-// The Water sequence, in order. Each animation beat names the channel it
-// scrubs and the duration/ease token that shapes it; delay beats just wait.
-// This table is the demo's whole timing story — the snippet in the code view
-// mirrors it, so keep the two in step.
+// The Water sequence, in order. An animation beat carries one or more
+// parallel tracks, each naming the channel it scrubs and the duration/ease
+// token that shapes it; the beat completes when its slowest track does.
+// Delay beats just wait. This table is the demo's whole timing story — the
+// snippet in the code view mirrors it, so keep the two in step.
+//
+// Revised 2026-07-18 (David's visual review): rain and growth trigger
+// together on the press, each on its own tokens, instead of the contract's
+// original rain-then-soak-then-grow sequence. delay.short left the cycle
+// with the soak beat; the contract doc carries the dated revision.
 const WATER_SEQUENCE = [
-  { channel: 'rain', duration: 'base', ease: 'enter' },
-  { delay: 'short' }, // the water soaks in
-  { channel: 'grow', duration: 'slower', ease: 'enter' }, // the hero beat
+  {
+    tracks: [
+      { channel: 'rain', duration: 'base', ease: 'enter' },
+      { channel: 'grow', duration: 'slower', ease: 'enter' }, // the hero beat
+    ],
+  },
   { delay: 'long' },
-  { channel: 'flowers', duration: 'slow', ease: 'standard' },
+  { tracks: [{ channel: 'flowers', duration: 'slow', ease: 'standard' }] },
 ]
 
 // Wilt runs the three authored die timelines together on duration.base +
@@ -77,6 +86,15 @@ const REDUCED_MOTION_STEPS = 5
 // 1ms makes a zero-duration beat an effectively instant cut instead.
 const MIN_DURATION_S = 0.001
 
+// Frames held between the post-wilt channel resets and the postGrowthBoole
+// release. Flipping the gate in the same tick as the zeros painted one frame
+// of the grow-era instances at their OLD poses — a full-bloom flash over the
+// dead plant, caught frame-by-frame on built output (2026-07-18). The file
+// needs the resets consumed by an advance before the gates reopen; two held
+// frames cover it with margin. During the hold the render is the dead pose,
+// identical to rest, so the pause is invisible.
+const SETTLE_FRAMES = 2
+
 export function WaterWilt() {
   // The DOM button owns interaction; the canvas gets pointer-events: none.
   // `watered` is press-owned intent: each press toggles the target state, and
@@ -84,21 +102,26 @@ export function WaterWilt() {
   // The driver knows every phase boundary because it owns the clock.
   const [watered, setWatered] = useState(false)
 
+  // The button overlays the canvas (David's design, 2026-07-18) so it reads
+  // as part of the artwork, the way the file's own in-art button did before
+  // interaction moved to the DOM. The stage has pointer-events: none; the
+  // overlay wrapper re-enables them, so the button is the only clickable
+  // surface. The wrapper (not Button itself) carries the centering transform:
+  // Button's press animates its own transform, and the two must not collide.
   return (
-    <div className={styles.demo}>
-      <WaterWiltRive watered={watered} />
-      <div className={styles.row}>
+    <WaterWiltRive watered={watered}>
+      <div className={styles.buttonOverlay}>
         <Button onClick={() => setWatered((w) => !w)}>
           {watered ? 'Dry time' : 'Water me'}
         </Button>
       </div>
-    </div>
+    </WaterWiltRive>
   )
 }
 
 // All Rive hooks live in this inner wrapper (the HeroAnimation isolation
 // pattern) so the canvas lifecycle is contained. Do not lift them to a parent.
-function WaterWiltRive({ watered }) {
+function WaterWiltRive({ watered, children }) {
   const { theme } = useTheme()
   const tokens = useMotionTokens()
   const prefersReduced = useReducedMotion()
@@ -157,16 +180,21 @@ function WaterWiltRive({ watered }) {
   //   water    running WATER_SEQUENCE forward, one beat at a time
   //   bloom    at rest in full bloom; the idle loops play (idleBoole true)
   //   wilt     die trio 0 → 1 together (the authored die from full bloom)
+  //   settle   wilt done, zeros written, holding SETTLE_FRAMES before the
+  //            postGrowthBoole release (the bloom-flash guard)
   //   unwilt   Water pressed mid-wilt: die trio reversed back toward bloom
   //   unwater  Wilt pressed mid-growth: grow-era channels reversed to 0
   // `values` mirrors every channel's last written (un-quantized) value, so a
   // theme rebind can restore the new instance and interrupts know where each
-  // channel stands.
+  // channel stands. `trackQ`/`trackFrom` are the per-track integrator state
+  // of the current animation beat (a beat can run parallel tracks).
   const driver = useRef({
     mode: 'rest',
     step: 0,
-    q: 0, // progress of the current beat / reversal, 0..1 (seconds for delays)
-    from: 0, // start value of the current travel (continuity across interrupts)
+    q: 0, // reversal progress 0..1, delay seconds, or settle frame count
+    from: 0, // start value of the die trio's current travel
+    trackQ: {},
+    trackFrom: {},
     reversalFrom: null, // per-channel start values for the unwater reversal
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
@@ -185,14 +213,15 @@ function WaterWiltRive({ watered }) {
   }
 
   // The two gate booleans, derived from mode so a rebind can re-assert them.
-  // postGrowthBoole holds true from bloom until wilt completes (contract);
-  // idleBoole only at bloom rest.
+  // postGrowthBoole holds true from bloom until wilt fully completes,
+  // including the settle hold (contract step 9); idleBoole only at bloom rest.
   function writeBooleans() {
     const { mode } = driver.current
     const s = settersRef.current
     if (s.idle) s.idle.value = mode === 'bloom'
     if (s.postGrowth) {
-      s.postGrowth.value = mode === 'bloom' || mode === 'wilt' || mode === 'unwilt'
+      s.postGrowth.value =
+        mode === 'bloom' || mode === 'wilt' || mode === 'unwilt' || mode === 'settle'
     }
   }
 
@@ -201,13 +230,37 @@ function WaterWiltRive({ watered }) {
   // open (Water pressed while a mid-growth wilt is still reversing), which
   // resumes the forward sequence from the earliest unfinished beat.
 
+  // Arm an animation beat: every track integrates from its current value, so
+  // a resume out of a partial reversal continues where the channel stands. A
+  // track already at 1 (completed before an interrupt) starts done.
+  function startBeat(index) {
+    const d = driver.current
+    d.step = index
+    d.q = 0
+    d.trackQ = {}
+    d.trackFrom = {}
+    const beat = WATER_SEQUENCE[index]
+    if (beat.tracks) {
+      for (const track of beat.tracks) {
+        const v = d.values[track.channel]
+        d.trackQ[track.channel] = v >= 1 ? 1 : 0
+        d.trackFrom[track.channel] = v
+      }
+    }
+  }
+
   function pressWater() {
     const d = driver.current
-    if (d.mode === 'rest') {
+    if (d.mode === 'rest' || d.mode === 'settle') {
+      // A press during the settle window releases the gate now: the zeros
+      // were written at least one advance ago, so the reopen is safe, and
+      // the new cycle must not start behind a closed gate.
+      if (d.mode === 'settle') {
+        d.mode = 'rest'
+        writeBooleans()
+      }
       d.mode = 'water'
-      d.step = 0
-      d.q = 0
-      d.from = 0
+      startBeat(0)
       return
     }
     if (d.mode === 'wilt') {
@@ -222,19 +275,17 @@ function WaterWiltRive({ watered }) {
     }
     if (d.mode === 'unwater') {
       // Not in the contract: resume forward from wherever the reversal left
-      // the plant. The earliest channel still short of 1 is the beat to
+      // the plant. The earliest beat with any track short of 1 is the one to
       // re-enter; delays ahead of it run again in full.
-      const stepIdx = WATER_SEQUENCE.findIndex(
-        (s) => s.channel && d.values[s.channel] < 1,
+      const beatIdx = WATER_SEQUENCE.findIndex(
+        (b) => b.tracks && b.tracks.some((track) => d.values[track.channel] < 1),
       )
-      if (stepIdx === -1) {
+      if (beatIdx === -1) {
         enterBloom()
         return
       }
       d.mode = 'water'
-      d.step = stepIdx
-      d.q = 0
-      d.from = d.values[WATER_SEQUENCE[stepIdx].channel]
+      startBeat(beatIdx)
     }
     // 'water' and 'bloom' ignore a Water press; the toggle never offers it.
   }
@@ -274,7 +325,8 @@ function WaterWiltRive({ watered }) {
       d.mode = 'wilt'
       writeBooleans()
     }
-    // 'rest' and 'wilt' ignore a Wilt press.
+    // 'rest', 'settle', and 'wilt' ignore a Wilt press: the first two are
+    // already at (or finishing into) the dry state.
   }
 
   function enterBloom() {
@@ -286,11 +338,25 @@ function WaterWiltRive({ watered }) {
     writeBooleans()
   }
 
+  // Wilt's landing. The contract's step-9 "then" is literal: reset the
+  // grow-era channels while the gates are still shut, hold SETTLE_FRAMES so
+  // an advance consumes the zeros, and only then (in the loop's settle case)
+  // release postGrowthBoole. Doing both in one tick painted the grow-era
+  // instances at their old poses for a frame: the full-bloom flash.
+  function beginRestSettle() {
+    const d = driver.current
+    writeChannel('rain', 0)
+    writeChannel('grow', 0)
+    writeChannel('flowers', 0)
+    d.mode = 'settle'
+    d.q = 0
+  }
+
+  // The unwater reversal's landing needs no settle: postGrowthBoole was
+  // false the whole way down (the instances were visibly reversing), so
+  // there is no gate flip to race.
   function enterRest() {
     const d = driver.current
-    // Contract step 9 order: reset the grow-era channels first (invisible,
-    // their instances are still gated off), then release postGrowthBoole so
-    // they return at their 0 poses. Rest state now equals initial state.
     writeChannel('rain', 0)
     writeChannel('grow', 0)
     writeChannel('flowers', 0)
@@ -384,28 +450,34 @@ function WaterWiltRive({ watered }) {
         switch (d.mode) {
           case 'water': {
             const beat = WATER_SEQUENCE[d.step]
+            let beatDone
             if (beat.delay) {
               // Delays accumulate seconds and compare against the live token,
               // so shortening a delay mid-wait ends the wait immediately.
               d.q += dt
-              if (d.q >= t.delay[beat.delay]) {
-                d.step += 1
-                d.q = 0
-                d.from = 0
-              }
+              beatDone = d.q >= t.delay[beat.delay]
             } else {
-              const dur = Math.max(t.duration[beat.duration], MIN_DURATION_S)
-              d.q = Math.min(1, d.q + dt / dur)
-              // from > 0 only when resuming out of an interrupted reversal;
-              // the travel eases over the remaining distance so the value
-              // stays continuous across the interrupt.
-              writeChannel(beat.channel, d.from + (1 - d.from) * ease[beat.ease](d.q))
-              if (d.q >= 1) {
-                d.step += 1
-                d.q = 0
-                d.from = 0
-                if (d.step >= WATER_SEQUENCE.length) enterBloom()
+              // Parallel tracks each integrate on their own duration; the
+              // beat completes when the slowest track lands. trackFrom > 0
+              // only when resuming out of an interrupted reversal; the
+              // travel eases over the remaining distance so the value stays
+              // continuous across the interrupt.
+              beatDone = true
+              for (const track of beat.tracks) {
+                let q = d.trackQ[track.channel]
+                if (q >= 1) continue
+                const dur = Math.max(t.duration[track.duration], MIN_DURATION_S)
+                q = Math.min(1, q + dt / dur)
+                d.trackQ[track.channel] = q
+                const from = d.trackFrom[track.channel]
+                writeChannel(track.channel, from + (1 - from) * ease[track.ease](q))
+                if (q < 1) beatDone = false
               }
+            }
+            if (beatDone) {
+              const next = d.step + 1
+              if (next >= WATER_SEQUENCE.length) enterBloom()
+              else startBeat(next)
             }
             break
           }
@@ -414,7 +486,17 @@ function WaterWiltRive({ watered }) {
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from + (1 - d.from) * ease.exit(d.q)
             for (const ch of WILT_CHANNELS) writeChannel(ch, v)
-            if (d.q >= 1) enterRest()
+            if (d.q >= 1) beginRestSettle()
+            break
+          }
+          case 'settle': {
+            // Count advances, not time: the guard exists so the runtime has
+            // consumed the zeroed channels before the gates reopen.
+            d.q += 1
+            if (d.q >= SETTLE_FRAMES) {
+              d.mode = 'rest'
+              writeBooleans()
+            }
             break
           }
           case 'unwilt': {
@@ -457,12 +539,15 @@ function WaterWiltRive({ watered }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // children is the DOM control overlay (the toggle button): rendered inside
+  // the stage so it sits on the artwork, positioned by the module CSS.
   return (
     <div
       className={styles.stage}
       style={aspect ? { '--ww-aspect': aspect } : undefined}
     >
       <RiveComponent className={styles.canvas} />
+      {children}
     </div>
   )
 }

@@ -89,7 +89,7 @@ sits when animation moves to canvas.
 | `ease.exit` | driver clock | — | — | Die, rain-stop, and flowers-die, together on Wilt. |
 | `ease.overshoot` | not consumed | — | — | Eased progress above 1 clamps at the timeline end. Unlockable later by authoring headroom past the rest pose. |
 | `delay.none` | not consumed | — | — | Fixed reference. |
-| `delay.short` | driver clock | — | — | Rain-complete to growth-start: the water soaks in. |
+| `delay.short` | not consumed | — | — | Was the rain-complete-to-growth soak. Dropped 2026-07-18 (David's visual review): rain and growth now trigger together on the press. |
 | `delay.medium` | not consumed | — | — | Reserved for a specs cascade if that split ever happens. |
 | `delay.long` | driver clock | — | — | Growth-complete to flower-start. |
 | `scale.subtle` | not consumed | — | — | |
@@ -160,25 +160,30 @@ main artboard.
 the recommended second line of defense). Without this, first load shows the die
 instances at 0: a full-bloom ghost.
 
-**The full cycle.**
+**The full cycle.** (Steps 1 to 3 revised 2026-07-18 after David's visual
+review: rain and growth trigger together, and the soak beat is gone.)
 
-1. Water press: `rainFallProgress` 0 to 1 on `duration.base` + `ease.enter`.
-2. `delay.short` elapses.
-3. `growProgress` 0 to 1 on `duration.slower` + `ease.enter`.
-4. `delay.long` elapses.
-5. `flowersGrowProgress` 0 to 1 on `duration.slow` + `ease.standard`.
-6. `idleBoole` and `postGrowthBoole` both go true. Idle loops appear at the bloom
+1. Water press: `rainFallProgress` 0 to 1 on `duration.base` + `ease.enter` and
+   `growProgress` 0 to 1 on `duration.slower` + `ease.enter`, together. The
+   beat completes when the slower channel lands.
+2. `delay.long` elapses.
+3. `flowersGrowProgress` 0 to 1 on `duration.slow` + `ease.standard`.
+4. `idleBoole` and `postGrowthBoole` both go true. Idle loops appear at the bloom
    pose; grow-era instances hide (flowers stay, per their compound gate);
    die-era instances hide.
-7. Wilt press: same frame, `idleBoole` false; `dieProgress`, `rainStopProgress`,
+5. Wilt press: same frame, `idleBoole` false; `dieProgress`, `rainStopProgress`,
    and `flowersDieProgress` snap to 0. The die instances at 0 are the bloom the
    idle loop was orbiting, so the handoff is pose-matched.
-8. `dieProgress`, `rainStopProgress`, and `flowersDieProgress` 0 to 1 together on
+6. `dieProgress`, `rainStopProgress`, and `flowersDieProgress` 0 to 1 together on
    `duration.base` + `ease.exit`.
-9. Wilt complete: reset `growProgress`, `flowersGrowProgress`, `rainFallProgress`
+7. Wilt complete: reset `growProgress`, `flowersGrowProgress`, `rainFallProgress`
    to 0; die, rain-stop, and flowers-die stay parked at 1; then `postGrowthBoole`
-   false. The grow-era instances return at their invisible 0 poses. Rest state now
-   equals initial state.
+   false. "Then" is load-bearing (2026-07-18): the driver holds two settled
+   frames between the resets and the release, because flipping the gate in the
+   same tick as the zeros paints the grow-era instances at their old poses for
+   one frame, a full-bloom flash over the dead plant (reproduced frame-by-frame
+   on built output). The grow-era instances return at their invisible 0 poses.
+   Rest state now equals initial state.
 
 **Interrupts.** Wilt pressed mid-growth: reverse the running grow-era channels back
 down on `ease.exit`; the parked die/rain-stop are visible but render nothing, so
@@ -209,9 +214,11 @@ discrete steps. The DOM button flattens like every other DOM component.
 ## Known seams, recorded as decisions
 
 - **Frozen rain during growth.** `RainIdle` is gated by `idleBoole`, which goes true
-  only at bloom, so `RainFall` holds its last frame through growth and both delays:
-  roughly 850ms at default tokens, seconds under Cinematic or Explore values. If it
-  reads as a glitch on built output, the fix is one later driver-written `rainBoole`
+  only at bloom, so `RainFall` holds its last frame from the end of its ramp until
+  bloom: with the simultaneous rain-and-growth start (2026-07-18) that is the tail
+  of the growth beat plus `delay.long` and the flower beat, roughly a second at
+  default tokens, seconds under Cinematic or Explore values. If it reads as a
+  glitch on built output, the fix is one later driver-written `rainBoole`
   following the existing fan-out pattern; it touches no other row of this contract.
 - **Mid-sway snap on Wilt.** Bounded by sway amplitude; accepted without machinery.
 - **Overshoot clamps.** `ease.overshoot` stays unconsumed until a timeline authors

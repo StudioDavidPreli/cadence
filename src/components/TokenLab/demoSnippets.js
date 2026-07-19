@@ -255,13 +255,16 @@ const WaterWilt = `const tokens = useMotionTokens()
 // p += dt / duration is the whole timing model, so a slider
 // drag retimes a beat mid-flight from its current progress.
 const WATER_SEQUENCE = [
-  { scrub: 'rainFallProgress',
-    duration: tokens.duration.base,
-    ease: tokens.ease.enter },
-  { wait: tokens.delay.short },  // the water soaks in
-  { scrub: 'growProgress',
-    duration: tokens.duration.slower,
-    ease: tokens.ease.enter },
+  // One press, two channels: rain and growth run together,
+  // each on its own duration and ease.
+  { together: [
+    { scrub: 'rainFallProgress',
+      duration: tokens.duration.base,
+      ease: tokens.ease.enter },
+    { scrub: 'growProgress',
+      duration: tokens.duration.slower,
+      ease: tokens.ease.enter },
+  ]},
   { wait: tokens.delay.long },
   { scrub: 'flowersGrowProgress',
     duration: tokens.duration.slow,

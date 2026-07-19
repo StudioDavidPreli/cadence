@@ -1,18 +1,14 @@
 /* WaterWilt — demo layout only. No timings here: the demonstration motion is
    the driver's, and the canvas paints it. */
 
-.demo {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 /* The canvas box. Aspect follows the loaded artboard bounds via --ww-aspect
    (set inline by the component, the ClawdLogoButton convention); the fallback
    holds the box open until the file resolves. pointer-events: none is a
    contract term: the DOM button owns all interaction, the file's listeners
-   were removed, and the canvas must never swallow a click. */
+   were removed, and the canvas must never swallow a click. position: relative
+   anchors the button overlay. */
 .stage {
+  position: relative;
   width: 100%;
   max-width: 340px;
   aspect-ratio: var(--ww-aspect, 4 / 3);
@@ -24,6 +20,15 @@
   height: 100%;
 }
 
-.row {
-  display: flex;
+/* The toggle sits on the artwork (David's design, 2026-07-18), bottom-center
+   like the in-art button the file used to carry. pointer-events: auto punches
+   the one clickable hole through the stage's none. The centering transform
+   lives here, not on the Button: Framer Motion animates Button's own
+   transform on press, and inline transforms replace, not compose. */
+.buttonOverlay {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(-50%);
+  pointer-events: auto;
 }
