@@ -70,8 +70,11 @@ Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 + P12 wired).
   `getPrincipleComponent(principleId, ...)` returning the demo. The default
   branch returns the "Component example coming in Phase 2" placeholder.
 - P5 Carousel renders in a new `compact` mode: slide description omitted,
-  slide padding tightened, edge-fade overlays shrunk from 48 px to 16 px.
-  The full Carousel still renders in TokenLab's Gesture tab unchanged.
+  slide padding tightened. (This note once tracked the compact edge-fade
+  overlays at 16 px; the fades were removed from both variants 2026-07-19.)
+  The full Carousel renders in TokenLab's Gesture tab, since 2026-07-19
+  with a container-query wide layout: past 480 px of demo column the card
+  turns landscape, image left, text right, capped at 560 px.
 - P6 ProgressBar gained a `showLabel` prop (default `true`) so the demo
   can hide the percentage in this context.
 - P9 Timing's two Toggles run with token sets resolved from the Default
