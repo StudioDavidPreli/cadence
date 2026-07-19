@@ -134,6 +134,18 @@ body {
   --color-accent2-subtle: rgba(185, 176, 255, 0.12); /* extended principle badge background */
   --color-accent3:        #e8b86d;  /* amber — warnings, no-demo indicator */
 
+  /* Code-view syntax colors (2026-07-19). Three hues, all deliberately OFF the
+     accent wheel: green is active/connected, purple is easing, amber is warning,
+     and syntax must not dilute those roles — the changing-value chip
+     (--color-accent-subtle) stays the code view's only accent. Comments reuse
+     --color-text-muted. Verified on --color-bg (the CodeBlock surface):
+     keyword (coral #e5988a)  7.8:1  AAA ✓
+     string  (sky    #9ecbff) 10.6:1 AAA ✓
+     number  (orchid #dda3d8)  8.8:1 AAA ✓ */
+  --color-syntax-keyword: #e5988a;
+  --color-syntax-string:  #9ecbff;
+  --color-syntax-number:  #dda3d8;
+
   /* Principle-card category chips (David, 2026-07-16): taxonomy color, deliberately
      decoupled from the accent role so accent stays "active/connected" only.
      Dark keeps the tinted-text style: green 6.5:1, purple 7.0:1 on the tint. */
@@ -195,6 +207,15 @@ body {
      4.5:1 AA requirement for 11px noDemoNote text. New value: 5.5:1. */
   --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
 
+  /* Code-view syntax colors — the dark hues' darkened light-theme siblings,
+     same off-the-accent-wheel rule. Verified on --color-bg (#f5f5f5):
+     keyword (rust   #b3402e) 5.2:1 AA ✓
+     string  (blue   #1d5fbf) 5.6:1 AA ✓
+     number  (plum   #8c2f73) 6.9:1 AA ✓ */
+  --color-syntax-keyword: #b3402e;
+  --color-syntax-string:  #1d5fbf;
+  --color-syntax-number:  #8c2f73;
+
   /* Category chips: light shares the dark theme's brand hues (David, 2026-07-16),
      but as solid fills with near-black text — the hues themselves are too light
      to read as text on white. #141414 on #76c17d 8.5:1, on #b9b0ff 9.4:1. */
@@ -248,6 +269,14 @@ body {
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
+
+  /* Code-view syntax stays monochrome in high contrast, same reasoning as the
+     chips going monochrome: the theme's rule is pure black/white with no
+     mid-tones, and hue carries nothing the changing-value chip doesn't already
+     mark. All three resolve to text-base. */
+  --color-syntax-keyword: #000000;
+  --color-syntax-string:  #000000;
+  --color-syntax-number:  #000000;
 
   /* Category chips go monochrome in high contrast (David, 2026-07-16):
      classic is an outline chip, extended a solid inversion. Both 21:1. */
@@ -305,6 +334,11 @@ body {
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */
+
+  /* Code-view syntax: monochrome, the inversion of HC-light's block above. */
+  --color-syntax-keyword: #ffffff;
+  --color-syntax-string:  #ffffff;
+  --color-syntax-number:  #ffffff;
 
   /* Category chips: the surface/text inversion of HC-light's pair (David,
      2026-07-16): classic outline chip, extended solid inversion. Both 21:1. */

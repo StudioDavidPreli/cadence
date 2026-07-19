@@ -1,8 +1,43 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import Prism from 'prismjs'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useActiveToken } from '../../context/ActiveTokenContext'
 import { TOKEN_REF, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
 import styles from './CodeBlock.module.css'
+
+// Prism ships an auto-highlight pass that scans the whole DOM on
+// DOMContentLoaded. We use only its tokenizer (Prism.tokenize) and render the
+// spans ourselves, so that pass has nothing to do — switch it off.
+Prism.manual = true
+
+// Prism token type → CSS-module class. Only these types are colored; anything
+// else (identifiers, punctuation, operators, JSX angle brackets) stays in the
+// base text color, which keeps the palette to three hues plus muted comments
+// and leaves the token reads (tokens.duration.fast) in base so the accent chip
+// under them stays the loudest signal in the block.
+const SYNTAX_CLASS = {
+  keyword: 'tokKeyword',
+  boolean: 'tokKeyword',
+  string:  'tokString',
+  number:  'tokNumber',
+  comment: 'tokComment',
+}
+
+// Render one line's Prism tokens as spans. A token's content can be a string,
+// a nested token, or an array of both, so this recurses. Unstyled tokens
+// render as bare strings — no wrapper span needed.
+function renderTokens(tokens) {
+  return tokens.map((tok, i) => {
+    if (typeof tok === 'string') return tok
+    const inner = Array.isArray(tok.content)
+      ? renderTokens(tok.content)
+      : typeof tok.content === 'string'
+        ? tok.content
+        : renderTokens([tok.content])
+    const cls = SYNTAX_CLASS[tok.type]
+    return cls ? <span key={i} className={styles[cls]}>{inner}</span> : inner
+  })
+}
 
 // How long the flash chip holds before the CSS transition on .comment fades it
 // back out. Tool chrome, so a fixed timing (like the Copy button's transition
@@ -39,6 +74,17 @@ export function CodeBlock({ code }) {
   const tokens = useMotionTokens()
   const activeToken = useActiveToken()
   const [copied, setCopied] = useState(false)
+
+  // Each line tokenized once per snippet, not once per render — the component
+  // re-renders on every slider tick (live values), but the source text never
+  // changes. Lines tokenize independently with the JavaScript grammar: the
+  // snippets' multi-line JSX tags mean a full-file jsx parse buys nothing
+  // per-line, and per-line keeps a stray construct from bleeding style into
+  // the rest of the block (worst case, one line renders unstyled base text).
+  const lineTokens = useMemo(
+    () => code.split('\n').map(line => Prism.tokenize(line, Prism.languages.javascript)),
+    [code],
+  )
 
   // Every token path this snippet reads, with its current resolved display value.
   // `sig` is the value fingerprint: it changes only when a displayed value
@@ -107,7 +153,7 @@ export function CodeBlock({ code }) {
     const paths = [...line.matchAll(TOKEN_REF)].map(m => `${m[1]}.${m[2]}`)
     const sourceRow = (
       <div className={styles.line} key={`src-${i}`}>
-        <span className={styles.source}>{line}</span>
+        <span className={styles.source}>{renderTokens(lineTokens[i])}</span>
       </div>
     )
     if (paths.length === 0) return [sourceRow]

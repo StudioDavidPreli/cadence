@@ -1,8 +1,16 @@
 /* Read-only code view for a Token Lab demo. Sunken surface (--color-bg, one step
    below the demo area's --color-surface-raised) so it reads as a distinct panel.
-   No syntax highlighter by design: source in the base text color, resolved-value
-   comments in the muted color. Theme-safe in dark, light, and HC without an
-   accent-as-text contrast risk. */
+
+   Syntax highlighting (2026-07-19, replacing the original all-monotone design,
+   which read as a wall of same-color text): Prism tokenizes each line and the
+   component renders the spans itself, so every color below routes through the
+   --color-syntax-* tokens in color.css. The palette is three hues (keyword,
+   string, number) plus muted comments, all off the accent wheel — green,
+   purple, and amber keep their system roles, and the changing-value chip
+   (.commentActive) remains the only accent in the block. Identifiers,
+   punctuation, and the token reads themselves stay base, so the live comment
+   row beneath a read is still the strongest signal. High contrast resolves all
+   three syntax tokens to text-base: monochrome, per the no-mid-tones rule. */
 .block {
   position: relative;
   margin-top: 12px;
@@ -43,6 +51,26 @@
 
 .source {
   color: var(--color-text-base);
+}
+
+/* Syntax token classes — mapped from Prism token types in index.jsx
+   (SYNTAX_CLASS). Colors are per-theme tokens, ratios documented in
+   color.css. Snippet comments share the muted annotation color the live-value
+   rows use, so both kinds of comment sit in the same register. */
+.tokKeyword {
+  color: var(--color-syntax-keyword);
+}
+
+.tokString {
+  color: var(--color-syntax-string);
+}
+
+.tokNumber {
+  color: var(--color-syntax-number);
+}
+
+.tokComment {
+  color: var(--color-text-muted);
 }
 
 /* Live resolved-value comment. Muted so it reads as annotation, not source.
