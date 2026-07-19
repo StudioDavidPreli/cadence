@@ -9,8 +9,9 @@
    purple, and amber keep their system roles, and the changing-value chip
    (.commentActive) remains the only accent in the block. Identifiers,
    punctuation, and the token reads themselves stay base, so the live comment
-   row beneath a read is still the strongest signal. High contrast resolves all
-   three syntax tokens to text-base: monochrome, per the no-mid-tones rule. */
+   row beneath a read is still the strongest signal. High contrast carries its
+   own AAA trio (rust/navy/plum on white, salmon/mint/orchid on black) — David's
+   call, 2026-07-19: editors' HC modes color code, and legible beats pretty. */
 .block {
   position: relative;
   margin-top: 12px;

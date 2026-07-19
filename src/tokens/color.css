@@ -270,13 +270,18 @@ body {
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
 
-  /* Code-view syntax stays monochrome in high contrast, same reasoning as the
-     chips going monochrome: the theme's rule is pure black/white with no
-     mid-tones, and hue carries nothing the changing-value chip doesn't already
-     mark. All three resolve to text-base. */
-  --color-syntax-keyword: #000000;
-  --color-syntax-string:  #000000;
-  --color-syntax-number:  #000000;
+  /* Code-view syntax carries real hues in high contrast (David, 2026-07-19:
+     function defeats form here — editors' HC modes color code, and legible
+     beats pretty; this reverses the same-day monochrome first pass). Same
+     off-the-role-wheel rule applied to THIS theme's roles: amber is accent and
+     accent3, blue-violet is accent2, so the trio darkens to rust / navy /
+     plum. All AAA on the white bg:
+     keyword (rust #8a2a1c) 8.6:1
+     string  (navy #16437e) 9.8:1  (deep navy, separated from accent2's #5a4fcf blue-violet)
+     number  (plum #7a2260) 9.5:1 */
+  --color-syntax-keyword: #8a2a1c;
+  --color-syntax-string:  #16437e;
+  --color-syntax-number:  #7a2260;
 
   /* Category chips go monochrome in high contrast (David, 2026-07-16):
      classic is an outline chip, extended a solid inversion. Both 21:1. */
@@ -335,10 +340,17 @@ body {
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */
 
-  /* Code-view syntax: monochrome, the inversion of HC-light's block above. */
-  --color-syntax-keyword: #ffffff;
-  --color-syntax-string:  #ffffff;
-  --color-syntax-number:  #ffffff;
+  /* Code-view syntax trio, brightened for black the same way the accents are.
+     HC-dark's roles occupy light blue (accent), blue-violet (accent2), and
+     amber (accent3), so strings LEAVE the blue family the other themes use
+     and go mint — the one clearly free hue — while keywords stay in the
+     salmon family and numbers in orchid. All AAA on the black bg:
+     keyword (salmon #f4a99a) 11.0:1
+     string  (mint   #8fdf9b) 13.2:1
+     number  (orchid #eeafe6) 11.9:1 */
+  --color-syntax-keyword: #f4a99a;
+  --color-syntax-string:  #8fdf9b;
+  --color-syntax-number:  #eeafe6;
 
   /* Category chips: the surface/text inversion of HC-light's pair (David,
      2026-07-16): classic outline chip, extended solid inversion. Both 21:1. */

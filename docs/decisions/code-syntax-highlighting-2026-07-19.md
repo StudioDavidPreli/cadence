@@ -44,11 +44,25 @@ deliberate restraint twice over: it keeps the palette small, and it keeps the
 token reads (`tokens.duration.fast`) uncolored so the live resolved comment
 beneath them, and its chip, stay the strongest signal in the block.
 
-High contrast resolves all three syntax tokens to text-base — monochrome, the
-same reasoning as the category chips going monochrome in HC: the theme's rule
-is pure black/white with no mid-tones, and hue adds nothing the chip does not
-already mark. If HC highlighting is ever wanted, the tokens exist; give them
-HC values and the audit a new row.
+## High contrast: colored after all
+
+The first pass resolved the HC syntax tokens to text-base — monochrome, by
+analogy with the category chips. David reversed it the same day: high
+contrast modes in real editors color code, and "ugly and legible is better
+than pretty and illegible." Function defeats form here.
+
+The HC values follow the same off-the-role-wheel rule, applied to each HC
+theme's own roles, which differ from dark/light. HC-light's roles hold amber
+(accent, accent3) and blue-violet (accent2), so its trio darkens to rust
+`#8a2a1c` (8.6:1), navy `#16437e` (9.8:1), and plum `#7a2260` (9.5:1) on
+white. HC-dark's roles hold light blue (accent), blue-violet (accent2), and
+amber (accent3) — blue is taken, so strings leave the blue family the other
+themes use and go mint: salmon `#f4a99a` (11.0:1), mint `#8fdf9b` (13.2:1),
+orchid `#eeafe6` (11.9:1) on black. Everything clears AAA, in keeping with a
+theme whose entire premise is maximum contrast.
+
+Comments stay text-base in HC: the muted annotation color resolves to pure
+black/white there by the no-grays rule, which predates highlighting.
 
 ## Per-line tokenization
 
