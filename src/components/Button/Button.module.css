@@ -35,15 +35,30 @@
 
 .button:hover {
   background-color: var(--color-surface-hover);
+  /* Explicit color with every background change (contrast rule: never rely
+     on inheritance to stay legible after a background shift). Same audited
+     pair as rest — rows 6-7 of the 2026-04-16 audit. */
+  color: var(--color-text-primary);
+}
 
-  /* High-contrast theme: background stays black, so we signal hover
-     via a white outline instead. In light/dark themes outline stays
-     transparent and this rule has no visual effect. */
-  outline-color: var(--color-text-primary);
+/* High-contrast themes: surface-hover equals surface (pure black / pure
+   white), so the background shift carries no signal there. The hover ring
+   does the job instead, in the SURFACE color: a black ring around the black
+   button in HC-light, a white ring around the white button in HC-dark, held
+   off the button by the 2px offset gap. The previous value,
+   --color-text-primary, equals the page background in both HC themes and
+   rendered invisible — found in the 2026-07-18 embeds contrast check, the
+   same failure class as the theme-switcher hover
+   (docs/decisions/bug-report-button-and-theme-hover-2026-07-16.md). It also
+   leaked a light ring into the dark theme, against this file's own comment;
+   light and dark now signal hover by the audited surface shift alone. */
+:root[data-theme^="high-contrast"] .button:hover {
+  outline-color: var(--color-surface);
 }
 
 .button:active {
   /* Scale is handled by Framer Motion's whileTap — only color changes here */
   background-color: var(--color-surface-press);
+  color: var(--color-text-primary);
   outline-color: transparent;
 }
