@@ -440,6 +440,7 @@ function WaterWiltRive({ watered, children }) {
       // In the contract as planned, not yet authored: null until the file
       // carries them, and every write guards on the handle existing.
       plantScale: instance.number('plantScale'),
+      sceneScale: instance.number('sceneScale'),
       rainLoop: instance.boolean('rainBoole'),
     }
     const d = driver.current
@@ -449,15 +450,24 @@ function WaterWiltRive({ watered, children }) {
     rive.play(RIV.stateMachine)
   }, [rive, instance])
 
-  // scale.expressive → plantScale, the one direct bind: a VM number written
-  // outside the frame loop, on change only (the tiles' cellSize pattern).
-  // 1 = authored size. No-op until the property is authored in the file.
-  // `instance` is a dep so a rebind re-applies it to the fresh handle; this
-  // effect is declared after bind sync, so the handle is already current.
+  // The direct binds: VM numbers written outside the frame loop, on change
+  // only (the tiles' cellSize pattern). 1 = authored size for both.
+  // scale.expressive → plantScale (the plant alone); scale.base → sceneScale
+  // (the whole composition through the scene group, David's 2026-07-18
+  // addition; scale.base also drives the toggle Button's press squash, so
+  // one slider moves both, deliberately). Each is a no-op until its property
+  // is authored in the file. `instance` is a dep so a rebind re-applies to
+  // the fresh handle; these effects are declared after bind sync, so the
+  // handles are already current.
   useEffect(() => {
     const handle = settersRef.current.plantScale
     if (handle) handle.value = tokens.scale.expressive
   }, [instance, tokens.scale.expressive])
+
+  useEffect(() => {
+    const handle = settersRef.current.sceneScale
+    if (handle) handle.value = tokens.scale.base
+  }, [instance, tokens.scale.base])
 
   // Artboard aspect from the loaded bounds (the ClawdLogoButton pattern), so
   // the canvas box matches the art with no letterboxing and no literal guess.
