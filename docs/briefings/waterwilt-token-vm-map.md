@@ -93,8 +93,8 @@ sits when animation moves to canvas.
 | `delay.medium` | not consumed | — | — | Reserved for a specs cascade if that split ever happens. |
 | `delay.long` | driver clock | — | — | Growth-complete to flower-start. |
 | `scale.subtle` | not consumed | — | — | |
-| `scale.base` | direct bind | `sceneScale : number` | On-change effect write, token × 100 | Whole-composition scale through the `scene` group (authored 2026-07-18). The property's neutral is 100, Rive's percent; the token stays a unitless multiplier and the driver converts at the boundary. Also read by the DOM toggle Button under Button's own contract, so one slider moves both, deliberately. |
-| `scale.expressive` | direct bind | `plantScale : number` (planned) | On-change effect write | Plant scale multiplier, 1 = authored size. Not yet in the VM. |
+| `scale.base` | direct bind | `sceneScale : number` | On-change effect write, token × 100 | Whole-composition scale through the `scene` group (authored 2026-07-18). The property's neutral is 100, Rive's percent; the token stays a unitless multiplier and the driver converts at the boundary. The DOM toggle rides the same token twice: its overlay wrapper scales with the scene through a CSS custom property (2026-07-18, so the button tracks the composition it sits on), and Button's own press squash reads it under Button's contract. |
+| `scale.expressive` | not consumed | — | — | The planned `plantScale` bind was withdrawn 2026-07-18 (David's call): composition scale is `sceneScale`'s job and the plant does not get a separate dial. |
 | `scale.lift` | not consumed | — | — | |
 
 ## VM contract
@@ -246,10 +246,6 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 ## Not yet authored (tracked against this contract)
 
-- `plantScale : number` for the `scale.expressive` direct bind. Until it is
-  authored, the demo's `scale.expressive` map row and snippet line are held
-  back too (2026-07-18): the driver's write is a null-guarded no-op, and the
-  Token Lab highlight must not claim a connection that does nothing.
 - `flowerPetals` and `flowerFaces` values verified in all four theme instances.
 - Verify the nested instances' bindable `quantize` property as the reduced-motion
   mechanism for the two self-playing loops, which the driver cannot scrub.

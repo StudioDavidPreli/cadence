@@ -111,11 +111,10 @@ const Carousel = lazy(() =>
 // when rain and growth became simultaneous, and duration.base left when rain
 // moved to fast and the wilt to slow (both 2026-07-18, David's reviews).
 // ease.linear has no slider, so the rain scrub adds no easing row.
-// scale.expressive is deliberately NOT listed yet: the driver's plantScale
-// write is a null-guarded no-op until the property is authored in the .riv,
-// and the highlight must not promise a connection that does nothing (David's
-// 2026-07-18 catch). Restore the row, and the snippet's plantScale line,
-// when plantScale lands.
+// scale.expressive is NOT listed: the planned plantScale bind was withdrawn
+// (sceneScale covers composition scale, David's 2026-07-18 call), so the
+// demo reads scale.base (scene + button overlay + Button squash) and no
+// other scale token.
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Rive Timelines'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],

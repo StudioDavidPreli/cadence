@@ -22,13 +22,18 @@
 
 /* The toggle sits on the artwork (David's design, 2026-07-18), bottom-center
    like the in-art button the file used to carry. pointer-events: auto punches
-   the one clickable hole through the stage's none. The centering transform
-   lives here, not on the Button: Framer Motion animates Button's own
-   transform on press, and inline transforms replace, not compose. */
+   the one clickable hole through the stage's none. The transforms live here,
+   not on the Button: Framer Motion animates Button's own transform on press,
+   and inline transforms replace, not compose. --ww-scene-scale is the
+   scale.base token (set inline by the component), so the button tracks the
+   scene the same way the sceneScale VM bind scales the artwork; the origin
+   sits at the wrapper's bottom center so the button shrinks toward its
+   anchor point, like the art shrinks toward the planter. */
 .buttonOverlay {
   position: absolute;
   left: 50%;
   bottom: 6%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--ww-scene-scale, 1));
+  transform-origin: 50% 100%;
   pointer-events: auto;
 }

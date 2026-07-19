@@ -110,15 +110,26 @@ export function WaterWilt() {
   // The driver knows every phase boundary because it owns the clock.
   const [watered, setWatered] = useState(false)
 
+  // The button rides scale.base with the scene (David's 2026-07-18 call: a
+  // fixed-size button over a scaling composition read as unwired). The token
+  // reaches CSS as a custom property; the module CSS applies it on the
+  // overlay wrapper, whose transform is separate from Button's own press
+  // transform, so Framer Motion and this scale never collide.
+  const tokens = useMotionTokens()
+
   // The button overlays the canvas (David's design, 2026-07-18) so it reads
   // as part of the artwork, the way the file's own in-art button did before
   // interaction moved to the DOM. The stage has pointer-events: none; the
   // overlay wrapper re-enables them, so the button is the only clickable
-  // surface. The wrapper (not Button itself) carries the centering transform:
-  // Button's press animates its own transform, and the two must not collide.
+  // surface. The wrapper (not Button itself) carries the centering and scene
+  // transforms: Button's press animates its own transform, and the two must
+  // not collide.
   return (
     <WaterWiltRive watered={watered}>
-      <div className={styles.buttonOverlay}>
+      <div
+        className={styles.buttonOverlay}
+        style={{ '--ww-scene-scale': tokens.scale.base }}
+      >
         <Button onClick={() => setWatered((w) => !w)}>
           {watered ? 'Dry time' : 'Water me'}
         </Button>
@@ -471,9 +482,6 @@ function WaterWiltRive({ watered, children }) {
       flowersDie: instance.number('flowersDieProgress'),
       idle: instance.boolean('idleBoole'),
       postGrowth: instance.boolean('postGrowthBoole'),
-      // plantScale is still planned, not yet authored: null until the file
-      // carries it, and its write guards on the handle existing.
-      plantScale: instance.number('plantScale'),
       sceneScale: instance.number('sceneScale'),
       rainLoop: instance.boolean('rainBoole'),
       plantIdle: instance.boolean('plantIdleBoole'),
@@ -485,20 +493,12 @@ function WaterWiltRive({ watered, children }) {
     rive.play(RIV.stateMachine)
   }, [rive, instance])
 
-  // The direct binds: VM numbers written outside the frame loop, on change
-  // only (the tiles' cellSize pattern). 1 = authored size for both.
-  // scale.expressive → plantScale (the plant alone); scale.base → sceneScale
-  // (the whole composition through the scene group, David's 2026-07-18
-  // addition; scale.base also drives the toggle Button's press squash, so
-  // one slider moves both, deliberately). Each is a no-op until its property
-  // is authored in the file. `instance` is a dep so a rebind re-applies to
-  // the fresh handle; these effects are declared after bind sync, so the
-  // handles are already current.
-  useEffect(() => {
-    const handle = settersRef.current.plantScale
-    if (handle) handle.value = tokens.scale.expressive
-  }, [instance, tokens.scale.expressive])
-
+  // The one direct bind: a VM number written outside the frame loop, on
+  // change only (the tiles' cellSize pattern). scale.base → sceneScale, the
+  // whole composition through the scene group. (A separate plantScale bind
+  // for scale.expressive was planned and withdrawn 2026-07-18: sceneScale
+  // covers it, David's call.) `instance` is a dep so a rebind re-applies to
+  // the fresh handle; declared after bind sync, so the handle is current.
   useEffect(() => {
     const handle = settersRef.current.sceneScale
     // The token is a unitless multiplier (1 = authored size); the property's
