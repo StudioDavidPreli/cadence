@@ -48,6 +48,8 @@ const Drawer = `const tokens = useMotionTokens()
 const Button = `const tokens = useMotionTokens()
 
 // Press dips the button to a smaller scale: the squash.
+// The release returns it: Overshoot rides a bezier back past
+// rest, Spring rides the real physics. The switch picks which.
 <motion.button
   whileTap={{
     scale: tokens.scale.base,
@@ -56,24 +58,32 @@ const Button = `const tokens = useMotionTokens()
       ease: tokens.ease.standard,
     },
   }}
-  // Release rides the overshoot back past rest: the stretch.
-  transition={{
-    duration: tokens.duration.fast,
-    ease: tokens.ease.overshoot,
-  }}
+  transition={motionMode === 'spring'
+    ? { type: 'spring',
+        stiffness: tokens.spring.stiffness,
+        damping: tokens.spring.damping,
+        mass: tokens.spring.mass }
+    : { duration: tokens.duration.fast,
+        ease: tokens.ease.overshoot }}
 />`
 
 const Card = `const tokens = useMotionTokens()
 
-// Selection lifts the card a couple percent; clicking again
-// returns it to rest. Overshoot in reads as "chosen"; standard
-// out reads as "returning". Two curves, one toggle.
+// Selection lifts the card; clicking again returns it. In reads
+// as "chosen": overshoot, or a real spring when switched. Out
+// reads as "returning": always standard.
 <motion.div
   animate={{ scale: isSelected ? tokens.scale.lift : 1 }}
-  transition={{
-    duration: tokens.duration.base,
-    ease: isSelected ? tokens.ease.overshoot : tokens.ease.standard,
-  }}
+  transition={isSelected
+    ? (motionMode === 'spring'
+        ? { type: 'spring',
+            stiffness: tokens.spring.stiffness,
+            damping: tokens.spring.damping,
+            mass: tokens.spring.mass }
+        : { duration: tokens.duration.base,
+            ease: tokens.ease.overshoot })
+    : { duration: tokens.duration.base,
+        ease: tokens.ease.standard }}
 />`
 
 const NavItem = `const tokens = useMotionTokens()
@@ -91,16 +101,19 @@ const NavItem = `const tokens = useMotionTokens()
 
 const Toggle = `const tokens = useMotionTokens()
 
-// The thumb slides between slots. spring overshoots slightly
-// before settling, so the switch feels physical. The track
-// color CSS transition mirrors duration.fast to stay in sync.
+// The thumb slides between slots. Overshoot rides a bezier back
+// past rest; Spring rides the real physics. The switch picks.
+// The track color CSS transition mirrors duration.fast to sync.
 <motion.span
   className={styles.thumb}
   animate={{ x: on ? THUMB_TRAVEL : 0 }}
-  transition={{
-    duration: tokens.duration.fast,
-    ease: tokens.ease.overshoot,
-  }}
+  transition={motionMode === 'spring'
+    ? { type: 'spring',
+        stiffness: tokens.spring.stiffness,
+        damping: tokens.spring.damping,
+        mass: tokens.spring.mass }
+    : { duration: tokens.duration.fast,
+        ease: tokens.ease.overshoot }}
 />`
 
 const Spring = `const tokens = useMotionTokens()

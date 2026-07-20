@@ -63,11 +63,12 @@ arrival with almost no bounce. The values are tuned by feel against the live
 SpringDemo, not by table.
 
 Spring varies per preset, like duration, so it lives in each preset's state and
-resolves per preset. It is an editable-class token (in `EDITABLE_TOKEN_SCHEMA`,
-round-trips through import), but it has no slider yet: the spring editor UI and a
-settle-curve visualizer are a deferred follow-up. Until then it is set only by
-switching presets. The SpringDemo in Token Lab's Press & State group is the
-consumer that reads it.
+resolves per preset. It has its own Spring control section (three sliders plus a
+settle-curve visualizer) and round-trips through import. Its consumers are the
+SpringDemo in Press & State and, through the per-demo Overshoot/Spring switch,
+Button, Card, and Toggle, which carry a `motionMode` prop that swaps
+`ease.overshoot` for the real spring on request (default `'bezier'`, so shipped
+usage is unchanged).
 
 ## Fixed constants
 

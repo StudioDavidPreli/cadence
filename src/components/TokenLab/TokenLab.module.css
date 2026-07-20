@@ -423,6 +423,64 @@
   color: var(--color-text-primary);
 }
 
+/* ── Spring switch ───────────────────────────────────────────────────────────
+   The per-demo Overshoot/Spring toggle. A labeled two-segment control above the
+   demo instances, sharing the segmented-toggle construction with the export
+   format toggle above. */
+.springSwitchWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.springSwitch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.springSwitchLabel {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.springSwitchToggle {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.springSwitchOption {
+  padding: 4px 10px;
+  border: none;
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+}
+
+.springSwitchOption:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+.springSwitchOption:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Active segment carries the accent-subtle fill: it names the mode currently
+   driving the demo, the same "currently affecting the system" statement the
+   DurationVisualizer mode toggle makes. */
+.springSwitchOptionActive,
+.springSwitchOptionActive:hover {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+}
+
 /* Export is the primary action: solid fill. Copy is secondary: bordered. */
 .exportButton {
   margin-left: auto;

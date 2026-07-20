@@ -46,13 +46,25 @@ const THUMB_TRAVEL = 18
 // (the original behavior used everywhere except the P13 Systematization demo).
 // When passed, parent owns state; click still fires onChange so the parent
 // can update. Mirrors the controlled/uncontrolled split in Card.
-export function Toggle({ label, mode = 'subtle', onChange, on: onProp }) {
+export function Toggle({ label, mode = 'subtle', onChange, on: onProp, motionMode = 'bezier' }) {
   const [internalOn, setInternalOn] = useState(false)
   const isControlled = onProp !== undefined
   const on = isControlled ? onProp : internalOn
   const tokens = useMotionTokens()
 
   const isExpressive = mode === 'expressive'
+
+  // The thumb slide. 'spring' rides the real physics spring instead of the
+  // overshoot bezier; only Token Lab's per-demo switch passes it, so shipped
+  // Toggles are unchanged. Both branches read tokens, no literals.
+  const thumbTransition = motionMode === 'spring'
+    ? {
+        type: 'spring',
+        stiffness: tokens.spring.stiffness,
+        damping: tokens.spring.damping,
+        mass: tokens.spring.mass,
+      }
+    : { duration: tokens.duration.fast, ease: tokens.ease.overshoot }
 
   function handleClick() {
     const next = !on
@@ -75,10 +87,7 @@ export function Toggle({ label, mode = 'subtle', onChange, on: onProp }) {
         <motion.span
           className={styles.thumb}
           animate={{ x: on ? THUMB_TRAVEL : 0 }}
-          transition={{
-            duration: tokens.duration.fast,
-            ease: tokens.ease.overshoot,
-          }}
+          transition={thumbTransition}
         />
       </button>
 

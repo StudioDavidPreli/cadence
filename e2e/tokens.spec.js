@@ -25,6 +25,23 @@ test.describe('token propagation (the thesis)', () => {
     await expect(page.locator('pre').filter({ hasText: '0.15s' }).first()).toBeVisible()
   })
 
+  test('a spring slider edit rewrites the custom property and the live code view follows', async ({ page }) => {
+    await page.goto('/#/token-lab/press-state')
+    const slider = page.getByRole('slider', { name: 'spring.stiffness' })
+    await expect(slider).toBeVisible()
+
+    // Spring is unitless, so this is the thesis without the ms→s conversion.
+    // stiffness defaults to 400, step 10 -> five presses = 450.
+    for (let i = 0; i < 5; i++) await slider.press('ArrowRight')
+
+    await expect.poll(() => readToken(page, '--motion-spring-stiffness')).toBe('450')
+    // The Button snippet reads tokens.spring.stiffness in its motionMode branch;
+    // the resolved value renders unitless in the code view. This is the
+    // propagation half, not just storage.
+    await page.getByRole('button', { name: 'Show code' }).first().click()
+    await expect(page.locator('pre').filter({ hasText: '450' }).first()).toBeVisible()
+  })
+
   test('an easing preset click rewrites each slot (standard, enter, exit)', async ({ page }) => {
     await page.goto('/#/token-lab')
     // Tab names and preset-button names collide (Standard, Enter, Exit exist

@@ -28,12 +28,26 @@ export function Card({
   isSelected: isSelectedProp,
   onSelect,
   dimmed = false,
+  motionMode = 'bezier',
   ...props
 }) {
   const [internalSelected, setInternalSelected] = useState(false)
   const isControlled = isSelectedProp !== undefined
   const isSelected = isControlled ? isSelectedProp : internalSelected
   const tokens = useMotionTokens()
+
+  // The select-in transition. 'spring' replaces the overshoot bezier with the
+  // real spring on the way in only; deselecting always returns on standard, so
+  // the switch changes how the card arrives, not how it lets go. motionMode is
+  // passed only by Token Lab's per-demo switch, so shipped Cards are unchanged.
+  const selectTransition = motionMode === 'spring'
+    ? {
+        type: 'spring',
+        stiffness: tokens.spring.stiffness,
+        damping: tokens.spring.damping,
+        mass: tokens.spring.mass,
+      }
+    : { duration: tokens.duration.base, ease: tokens.ease.overshoot }
 
   // Selection wins over dim. When neither: rest. When dimmed and not
   // selected: shrink to scale.subtle and ramp opacity down.
@@ -66,13 +80,14 @@ export function Card({
         scale: targetScale,
         opacity: targetOpacity,
       }}
-      transition={{
-        // Different curves for select vs deselect — spring in, standard out.
-        // Overshoot communicates "something was chosen" (expressive).
-        // Standard communicates "returning to rest" (neutral).
-        duration: tokens.duration.base,
-        ease: isSelected ? tokens.ease.overshoot : tokens.ease.standard,
-      }}
+      // Different transitions for select vs deselect: overshoot (or a real
+      // spring) in, standard out. In communicates "something was chosen"
+      // (expressive); out communicates "returning to rest" (neutral).
+      transition={
+        isSelected
+          ? selectTransition
+          : { duration: tokens.duration.base, ease: tokens.ease.standard }
+      }
       onClick={handleClick}
       // The card is a toggle, so it carries a button's full contract:
       // aria-pressed is only valid ARIA on role="button", and the role alone

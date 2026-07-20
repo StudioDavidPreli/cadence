@@ -122,15 +122,44 @@ consumer reads `useReducedMotion()` and swaps to a near-instant tween, or
 `reduceMotion()` grows a spring branch that collapses it. Scope A has no such
 consumer, so neither was built.
 
-## What is deferred
+## Scope B, same day: the editor and the switch
 
-Scope B: the spring editor. Three sliders or one combined control, and a
-settle-curve visualizer that draws displacement over time from stiffness, damping,
-and mass and redraws as they move. It extends the token-propagation thesis test the
-same way the easing slots did. The data is already shaped for it. It ships when
-David wants the editing surface, not before the values feel right.
+David took the editor next, in the same session. Two pieces.
+
+The spring editor. A Spring control section with three sliders (stiffness, damping,
+mass) dispatching `SET_SPRING`, the same shape as `SET_SCALE`, and a settle-curve
+visualizer. The visualizer is the beat scope A could not make in the tool bar: a
+plot of displacement over time, the curve rising, overshooting the target, and
+settling, redrawn as the sliders move. Its math is the damped harmonic oscillator,
+the same second-order system Framer Motion integrates, kept in a pure
+`springCurve.js` so the three regimes (underdamped rings, critical arrives clean,
+overdamped crawls) test without React, the way `parse.js` does. The chart reads the
+params as a prop because the controls column sits outside the provider, the stance
+`DurationVisualizer` already takes. Constrained slider ranges cover usable UI
+springs; Explore ranges are the `SPRING_BOUNDS` from scope A, so an import always
+lands on the track.
+
+The switch. David chose per-component toggles over a global mode, on Button, Card,
+and Toggle. Each takes an optional `motionMode` prop defaulting to `'bezier'`, and
+a small `SpringSwitch` render-prop gives the demo an Overshoot/Spring toggle that
+passes the mode down. When it reads `'spring'`, the component's overshoot-role
+transition becomes `{ type: 'spring', ...tokens.spring }`; Button swaps its release,
+Card its select-in only (deselect stays standard), Toggle its thumb. No shipped call
+site passes the prop, so nothing ships rewired: the switch is the imitation next to
+the physics on one component, an exploration, not a decision. The `motionMode`
+branch shows in each demo's code view, so the `</>` panel names the spring tokens
+the moment a demo is switched, and the connection-highlight lists all four
+spring-capable demos when a spring slider moves.
+
+The tight loop this builds: switch a Button to Spring, drag stiffness, and the
+button, the settle-curve chart, and the SpringDemo all move together, every one
+reading the same `tokens.spring` through the existing context. No new global
+wiring. `springCurve` added eleven tests; the whole suite and the e2e gate stayed
+green.
 
 ## Files
+
+Scope A:
 
 - `src/tokens/motion.css`
 - `src/data/motionPresets.js`
@@ -141,3 +170,12 @@ David wants the editing surface, not before the values feel right.
 - Tests: `motionPresets.test.js`, `resolveToken.test.js`, `parse.test.js`
 - Docs: `token-architecture.md`, `references/motion-presets.md`,
   `references/motion-presets-harmonized.md`, this record
+
+Scope B (same day):
+
+- `src/components/SpringVisualizer/` (new: `index.jsx`, `springCurve.js`,
+  `springCurve.test.js`, `.module.css`)
+- `src/components/Button/index.jsx`, `Card/index.jsx`, `Toggle/index.jsx`
+  (the `motionMode` prop)
+- `src/components/TokenLab/index.jsx` (`SET_SPRING`, the Spring section, the
+  `SpringSwitch` helper), `TokenLab.module.css`, `demoSnippets.js`
