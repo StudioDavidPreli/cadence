@@ -185,9 +185,15 @@ review: rain and growth trigger together, and the soak beat is gone.)
 4. `idleBoole` and `postGrowthBoole` both go true. Idle loops appear at the bloom
    pose; grow-era instances hide (flowers stay, per their compound gate);
    die-era instances hide.
-5. Wilt press: same frame, `idleBoole` false; `dieProgress`, `rainStopProgress`,
-   and `flowersDieProgress` snap to 0. The die instances at 0 are the bloom the
-   idle loop was orbiting, so the handoff is pose-matched.
+5. Wilt press: `idleBoole` false; `dieProgress`, `rainStopProgress`, and
+   `flowersDieProgress` snap to 0. The die instances at 0 are the bloom the
+   idle loop was orbiting, so the handoff is pose-matched. `rainBoole` and
+   `plantIdleBoole` do NOT drop in the same frame (revised 2026-07-19): the
+   loops hide through direct boolean binds while the die instances reveal
+   through idleBoole's three-stage inverter, and the latency difference
+   painted one empty frame. The driver holds the loop booleans for two
+   settled frames over the arriving die layer, clock parked at 0, then drops
+   them and starts the death: the wilt preroll.
 6. `dieProgress`, `rainStopProgress`, and `flowersDieProgress` 0 to 1 together on
    `duration.slow` + `ease.exit` (moved from `base` 2026-07-18). Both interrupt
    reversals mirror this duration.
