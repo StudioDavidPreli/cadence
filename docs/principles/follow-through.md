@@ -4,7 +4,9 @@ When a runner stops, the body halts but the hair keeps going. A coat swings forw
 
 ## UI demonstration
 
-The expanded card renders the Carousel from Token Lab's Gesture demo in `compact` mode, text only. Flick or drag to a new slide and it snaps into place, but the dot indicator catches up a beat behind it. That lag is the overlapping action. The dot runs on a CSS transition rather than the slide's spring, so it is not pinned to the slide's timing; the two move on their own clocks and the dot trails. The slide arrives, then the dot admits it arrived.
+The expanded card renders the Carousel from Token Lab's Gesture demo in `compact` mode, text only. Flick or drag to a new slide and it snaps into place on a real physics spring: the slide carries past its target and eases back, and that overshoot is the follow through, momentum spending itself against the rest position. The dot indicator springs on the same transition, so the slide and its indicator move as one control and overshoot together.
+
+Earlier the dot trailed on its own CSS clock, a beat behind the slide, and that lag was the overlapping action. Harmonizing it onto the slide's spring (2026-07-20) trades the lag for a unified settle, so the demonstration now leads with follow through rather than overlap. Under reduced motion the snap falls back to the flattened overshoot bezier, so the card respects the OS setting like every other demo.
 
 ## Animation
 
@@ -16,4 +18,4 @@ The expanded card renders the Carousel from Token Lab's Gesture demo in `compact
 
 ## Tokens used
 
-`duration.slow`, `ease.overshoot` (the slide snap). The dot indicator trails on its own CSS transition so the lag survives alongside the snap.
+`spring.stiffness`, `spring.damping`, `spring.mass` (the snap and the dot, one shared spring). Under reduced motion the snap falls back to `duration.slow` on `ease.overshoot`, flattened like the rest of the UI.

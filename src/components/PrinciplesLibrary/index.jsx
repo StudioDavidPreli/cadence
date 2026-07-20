@@ -68,12 +68,12 @@ const PRINCIPLES = [
   {
     id: 5, title: 'Follow Through', category: 'classic',
     summary: 'Not everything stops at the same time. Secondary elements continue past the primary action.',
-    componentSummary: 'Slide snaps. Dot catches up. The lag is how the system admits to mass.',
+    componentSummary: 'Slide and dot ride one spring past rest, then settle.',
     animationQuote: 'When an object stops, all parts of it do not stop at the same time.',
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
-    componentQuote: 'The slide arrives. The indicator follows. Secondary motion is how the interface says: that was real.',
+    componentQuote: 'The slide carries past its mark and settles. The dot rides the same spring, so the whole control has weight.',
     componentQuoteAttribution: null,
-    tokens: 'duration.slow · ease.overshoot',
+    tokens: 'spring.stiffness · spring.damping · spring.mass',
   },
   {
     id: 6, title: 'Slow In & Slow Out', category: 'classic',
