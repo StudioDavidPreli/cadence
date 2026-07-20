@@ -24,16 +24,24 @@ const Drawer = `const tokens = useMotionTokens()
   }}
 />
 
-// Panel: rises in and settles on enter; dips, then
-// drops out on exit. Same duration, opposite shape.
+// Panel: rises in and settles on enter. Overshoot fakes a
+// spring with keyframes (100% -> -10% -> 0%); Spring runs the
+// real physics to a single 0% target. Exit dips, then drops.
 <motion.div
   initial={{ y: '100%', opacity: 0 }}
-  animate={{ y: ['100%', '-10%', '0%'], opacity: [0, 1, 1] }}
-  transition={{
-    duration: tokens.duration.slow,
-    times: [0, 0.7, 1],
-    ease: tokens.ease.enter,
-  }}
+  animate={motionMode === 'spring'
+    ? { y: '0%', opacity: 1 }
+    : { y: ['100%', '-10%', '0%'], opacity: [0, 1, 1] }}
+  transition={motionMode === 'spring'
+    ? { y: { type: 'spring',
+             stiffness: tokens.spring.stiffness,
+             damping: tokens.spring.damping,
+             mass: tokens.spring.mass },
+        opacity: { duration: tokens.duration.base,
+                   ease: tokens.ease.enter } }
+    : { duration: tokens.duration.slow,
+        times: [0, 0.7, 1],
+        ease: tokens.ease.enter }}
   exit={{
     y: ['0%', '-10%', '100%'],
     opacity: [1, 1, 0],

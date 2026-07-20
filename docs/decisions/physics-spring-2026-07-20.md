@@ -195,6 +195,19 @@ is already flattened to instant. In Token Lab, the demo column opts out of
 flattening, so the flag is absent and the spring plays. One flag closed a gap that
 had been sitting open since the family shipped.
 
+## Drawer (same day)
+
+The fifth switchable component, and the cleanest case for what the spring is: the
+Drawer's entrance was already a keyframe overshoot (`y: 100% → -10% → 0%`), a
+spring faked by hand. In spring mode that becomes a single 0% target on a real
+spring, which overshoots on its own from the params; the opacity rides a short
+tween beside it, and the exit keeps its keyframe anticipation (a spring is for
+arriving, not for clearing the frame). Same `motionMode` prop, default `'bezier'`,
+so the P02 Anticipation principle demo (which also renders the Drawer) is
+untouched; only Token Lab's Enter & Exit toggle passes `'spring'`. Gated on
+`!tokens.reducedMotion` like the Carousel, though the Drawer's spring only runs in
+Token Lab's opt-out column today.
+
 ## Files
 
 Scope A:
@@ -230,3 +243,9 @@ Carousel + the reduced-motion flag (same day):
 - `src/principles/FollowThrough/index.jsx` (P5 runs the spring)
 - `src/components/TokenLab/index.jsx` (Carousel in the map, `springCapable` on the
   Gesture demo), `demoSnippets.js`, and CLAUDE.md's dot passages
+
+Drawer (same day):
+
+- `src/components/Drawer/index.jsx` (the `motionMode` prop, spring entrance)
+- `src/components/TokenLab/index.jsx` (Drawer in the map, `springCapable` on the
+  Enter & Exit demo), `demoSnippets.js`

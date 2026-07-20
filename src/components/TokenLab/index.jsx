@@ -134,13 +134,13 @@ const TOKEN_COMPONENT_MAP = {
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
-  // Toggle, and Carousel consume it when their per-demo switch is flipped to
-  // Spring. The switch is per-instance state the static map cannot read, so these
-  // list every spring-capable demo: dragging a spring slider highlights the
+  // Toggle, Carousel, and Drawer consume it when their per-demo switch is flipped
+  // to Spring. The switch is per-instance state the static map cannot read, so
+  // these list every spring-capable demo: dragging a spring slider highlights the
   // components the spring can drive, whether or not each is currently switched.
-  'spring.stiffness': ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
-  'spring.damping':   ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
-  'spring.mass':      ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
+  'spring.stiffness': ['Spring', 'Button', 'Card', 'Toggle', 'Carousel', 'Drawer'],
+  'spring.damping':   ['Spring', 'Button', 'Card', 'Toggle', 'Carousel', 'Drawer'],
+  'spring.mass':      ['Spring', 'Button', 'Card', 'Toggle', 'Carousel', 'Drawer'],
 }
 
 // EASING_CURVES, INITIAL_STATE, BUILT_IN_PRESETS, and stateToTokens now live
@@ -990,37 +990,44 @@ function DrawerDemo() {
   return (
     <DemoWrapper
       componentName="Drawer"
-      instruction="Open the drawer. ease.enter brings it in, ease.exit takes it out, both on duration.slow"
+      instruction="Open the drawer. ease.enter brings it in, ease.exit takes it out; the spring toggle swaps the entrance for a real spring"
       code={DEMO_SNIPPETS.Drawer}
+      springCapable
     >
-      <button
-        className={styles.demoTrigger}
-        onClick={() => setIsOpen(true)}
-      >
-        Open Drawer
-      </button>
+      {mode => (
+        <>
+          <button
+            className={styles.demoTrigger}
+            onClick={() => setIsOpen(true)}
+          >
+            Open Drawer
+          </button>
 
-      <Drawer
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Enter & Exit"
-        scoped
-        portalTarget={overlay}
-      >
-        <p>
-          The drawer arrives on <strong>ease.enter</strong>. It rises past
-          its mark, then settles, so the eye catches it before it lands.
-        </p>
-        <p style={{ marginTop: '12px' }}>
-          It leaves on <strong>ease.exit</strong>. Same{' '}
-          <strong>duration.slow</strong>, a different shape: a short dip, then
-          it drops and clears the frame.
-        </p>
-        <p style={{ marginTop: '12px' }}>
-          Drag <strong>duration.slow</strong> and both halves retime together.
-          Drag the enter and exit curves and they pull apart.
-        </p>
-      </Drawer>
+          <Drawer
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            title="Enter & Exit"
+            scoped
+            portalTarget={overlay}
+            motionMode={mode}
+          >
+            <p>
+              The drawer arrives on <strong>ease.enter</strong>, or a real spring
+              when you flip the toggle. Either way it rises past its mark, then
+              settles, so the eye catches it before it lands.
+            </p>
+            <p style={{ marginTop: '12px' }}>
+              It leaves on <strong>ease.exit</strong>. Same{' '}
+              <strong>duration.slow</strong>, a different shape: a short dip, then
+              it drops and clears the frame.
+            </p>
+            <p style={{ marginTop: '12px' }}>
+              Drag <strong>duration.slow</strong> and both halves retime together.
+              Drag the enter and exit curves and they pull apart.
+            </p>
+          </Drawer>
+        </>
+      )}
     </DemoWrapper>
   )
 }

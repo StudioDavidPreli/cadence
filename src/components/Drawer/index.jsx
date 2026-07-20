@@ -35,6 +35,15 @@ import styles from './Drawer.module.css'
 // Enter and exit both use keyframes to demonstrate anticipation. The component
 // must exhibit the principle it teaches — exit without anticipation would
 // contradict the lesson.
+//
+// ── motionMode: the keyframe overshoot, or a real spring ─────────────────────
+// The enter keyframe (100% → -10% → 0%) fakes a spring: the panel rises past its
+// mark and settles. When motionMode is 'spring', the entrance runs an actual
+// physics spring instead (a single target of 0%, which overshoots on its own
+// from stiffness/damping/mass), while the exit keeps its keyframe anticipation.
+// Default 'bezier' leaves the shipped motion untouched; only Token Lab's Enter &
+// Exit toggle passes 'spring'. Under reduced motion the spring falls back to the
+// keyframe branch (whose duration is flattened), read from tokens.reducedMotion.
 
 // scoped=true anchors the Drawer to its nearest positioned ancestor instead of
 // the viewport. The parent container must have position:relative and
@@ -45,9 +54,31 @@ import styles from './Drawer.module.css'
 // drawer fills the visible demo column rather than escaping it to the viewport.
 // When portalTarget is null the Drawer renders in place (the principle-card use,
 // which anchors to the card frame).
-export function Drawer({ isOpen, onClose, title, children, scoped = false, portalTarget = null }) {
+export function Drawer({ isOpen, onClose, title, children, scoped = false, portalTarget = null, motionMode = 'bezier' }) {
   const tokens = useMotionTokens()
   const anchored = scoped || portalTarget != null
+
+  // The entrance. In spring mode the panel springs to a single 0% target and
+  // overshoots on its own physics; otherwise it runs the keyframe overshoot.
+  // Gated on !reducedMotion so a flattening context falls to the keyframe branch,
+  // whose duration is already flattened (a spring has no duration to flatten).
+  const useSpring = motionMode === 'spring' && !tokens.reducedMotion
+  const enterAnimate = useSpring
+    ? { y: '0%', opacity: 1 }
+    : { y: ['100%', '-10%', '0%'], opacity: [0, 1, 1] }
+  const enterTransition = useSpring
+    ? {
+        y: {
+          type: 'spring',
+          stiffness: tokens.spring.stiffness,
+          damping: tokens.spring.damping,
+          mass: tokens.spring.mass,
+        },
+        // Opacity has no business overshooting, so it rides a short tween while
+        // the panel springs.
+        opacity: { duration: tokens.duration.base, ease: tokens.ease.enter },
+      }
+    : { duration: tokens.duration.slow, times: [0, 0.7, 1], ease: tokens.ease.enter }
 
   // prefers-reduced-transparency: opaque scrim (1) instead of the translucent
   // 0.8. Same reasoning as Modal — the backdrop is --color-bg, so full opacity
@@ -80,10 +111,9 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
           key="drawer-panel"
           className={[styles.drawer, anchored && styles.drawerScoped].filter(Boolean).join(' ')}
           initial={{ y: '100%', opacity: 0 }}
-          animate={{
-            y: ['100%', '-10%', '0%'],
-            opacity: [0, 1, 1],
-          }}
+          animate={enterAnimate}
+          // Exit keeps its keyframe anticipation in both modes: you dip, then
+          // leave. A spring is for arriving, not for clearing the frame.
           exit={{
             y: ['0%', '-10%', '100%'],
             opacity: [1, 1, 0],
@@ -93,11 +123,7 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
               ease: tokens.ease.exit,
             },
           }}
-          transition={{
-            duration: tokens.duration.slow,
-            times: [0, 0.7, 1],
-            ease: tokens.ease.enter,
-          }}
+          transition={enterTransition}
         >
 
           {/* Drag handle — three stacked lines signal that the panel can be

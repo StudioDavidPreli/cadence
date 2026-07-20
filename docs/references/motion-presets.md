@@ -66,10 +66,12 @@ Spring varies per preset, like duration, so it lives in each preset's state and
 resolves per preset. It has its own Spring control section (three sliders plus a
 settle-curve visualizer) and round-trips through import. Its consumers are the
 SpringDemo in Press & State and, through the per-demo spring toggle, Button, Card,
-Toggle, and Carousel, which carry a `motionMode` prop that swaps `ease.overshoot`
-for the real spring on request (default `'bezier'`, so shipped usage is unchanged).
-The Carousel harmonizes snap and dot on one transition, and the P5 Follow Through
-principle runs it on the spring.
+Toggle, Carousel, and Drawer, which carry a `motionMode` prop that swaps
+`ease.overshoot` for the real spring on request (default `'bezier'`, so shipped
+usage is unchanged). The Carousel harmonizes snap and dot on one transition, and
+the P5 Follow Through principle runs it on the spring. The Drawer springs its
+entrance to a single target (its keyframe overshoot was faking a spring) while the
+exit keeps its keyframe anticipation.
 
 ## Fixed constants
 
