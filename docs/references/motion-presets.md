@@ -43,6 +43,32 @@ for each.
 | `scale.expressive` | 0.90 | 0.87 | 0.94 |
 | `scale.lift` | 1.02 | 1.04 | 1.01 |
 
+## Spring (physics)
+
+A real spring, added 2026-07-20. Unlike `ease.overshoot`, it is not time-based:
+it has no duration. Stiffness, damping, and mass define it, and its settle time
+emerges from those. Framer Motion consumes it as `{ type: 'spring', stiffness,
+damping, mass }`. The three params are unitless numbers, so they read from the
+`--motion-spring-*` custom properties at runtime like every other token.
+
+| Param (unitless) | Standard | Snappy | Cinematic |
+|---|---|---|---|
+| `spring.stiffness` | 400 | 600 | 180 |
+| `spring.damping` | 30 | 22 | 26 |
+| `spring.mass` | 1 | 1 | 1.2 |
+
+Standard settles cleanly with a hint of overshoot. Snappy is stiffer and lighter,
+so it bounces harder and arrives faster. Cinematic is soft and heavy, a slow
+arrival with almost no bounce. The values are tuned by feel against the live
+SpringDemo, not by table.
+
+Spring varies per preset, like duration, so it lives in each preset's state and
+resolves per preset. It is an editable-class token (in `EDITABLE_TOKEN_SCHEMA`,
+round-trips through import), but it has no slider yet: the spring editor UI and a
+settle-curve visualizer are a deferred follow-up. Until then it is set only by
+switching presets. The SpringDemo in Token Lab's Press & State group is the
+consumer that reads it.
+
 ## Fixed constants
 
 Not editable through the tool. Identical across every preset, resolved in

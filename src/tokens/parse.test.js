@@ -32,6 +32,16 @@ describe('parseCubicBezier (CSS easing → [x1,y1,x2,y2])', () => {
 describe('parseUnitless', () => {
   it('passes a decimal through', () => expect(parseUnitless('.95')).toBeCloseTo(0.95, 12))
   it('handles values above 1', () => expect(parseUnitless('1.02')).toBeCloseTo(1.02, 12))
+
+  // Spring params ride the same unitless parser as scale. They are the only
+  // tokens that read as large whole numbers (stiffness, damping), so pin those
+  // and the fractional mass. Unitless values are minifier-safe (no ms→s
+  // rewrite), but the parser is verified here regardless.
+  it('reads whole-number stiffness and damping', () => {
+    expect(parseUnitless('400')).toBe(400)
+    expect(parseUnitless('30')).toBe(30)
+  })
+  it('reads a fractional mass', () => expect(parseUnitless('1.2')).toBeCloseTo(1.2, 12))
 })
 
 describe('parseTokenValue (NaN-fallback guard)', () => {

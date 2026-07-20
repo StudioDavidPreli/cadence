@@ -31,6 +31,11 @@ export const INITIAL_STATE = {
   easing:   { standard: 'standard', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
   delay:    { short: 50, medium: 100, long: 200 },
   scale:    { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  // Physics spring: unitless numbers fed to Framer Motion as
+  // { type: 'spring', ... }. Varies per preset like duration does, so it lives
+  // in state and resolves per preset (not a fixed reference). Standard settles
+  // cleanly with a hint of overshoot.
+  spring:   { stiffness: 400, damping: 30, mass: 1 },
 }
 
 // ─── Built-in presets ─────────────────────────────────────────────────────────
@@ -57,6 +62,8 @@ export const BUILT_IN_PRESETS = [
       easing:   { standard: 'overshoot', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 20, medium: 40, long: 80 },
       scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
+      // Stiffer and lighter than Standard: it bounces harder and arrives faster.
+      spring:   { stiffness: 600, damping: 22, mass: 1 },
     },
   },
   {
@@ -72,6 +79,9 @@ export const BUILT_IN_PRESETS = [
       easing:   { standard: 'enter', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 100, medium: 200, long: 400 },
       scale:    { subtle: 0.99, base: 0.97, expressive: 0.94, lift: 1.01 },
+      // Soft and heavy: low stiffness plus extra mass make a slow arrival with
+      // almost no bounce.
+      spring:   { stiffness: 180, damping: 26, mass: 1.2 },
     },
   },
 ]
@@ -112,6 +122,9 @@ export function stateToTokens(state) {
       long:   state.delay.long   / 1000,
     },
     scale: { ...state.scale },
+    // Spring params are unitless, so they pass straight through (no /1000 like
+    // duration/delay). Framer Motion consumes them as { type: 'spring', ... }.
+    spring: { ...state.spring },
   }
 }
 
@@ -150,6 +163,7 @@ export function stateToExport(state) {
       long:   state.delay.long,
     },
     scale: { ...state.scale },
+    spring: { ...state.spring },
   }
 }
 
@@ -165,8 +179,13 @@ const bezierCss = arr => `cubic-bezier(${arr.join(', ')})`
 // This is the interchange shape Style Dictionary, Tokens Studio, and Figma
 // Variables consume. The draft spec has no motion-specific delay type, so
 // delays serialize as `duration` (a delay is a duration measured from a
-// trigger). Tokens are grouped under a top-level `motion` namespace so the
-// file composes cleanly if colour or spacing tokens are ever added beside it.
+// trigger). It also has no spring type, so the three spring params serialize as
+// plain `number` leaves under a `spring` group (the same $type scale already
+// uses): a spring is not one composite value here, it is three unitless numbers,
+// and the group name carries the "these compose one spring" meaning. No invented
+// type, and it round-trips through importTokens. Tokens are grouped under a
+// top-level `motion` namespace so the file composes cleanly if colour or spacing
+// tokens are ever added beside it.
 export function toDtcgJson(state) {
   const t = stateToExport(state)
   const duration = ms => ({ $type: 'duration', $value: `${ms}ms` })
@@ -178,6 +197,7 @@ export function toDtcgJson(state) {
       easing:   mapGroup(t.easing, bezier),
       delay:    mapGroup(t.delay, duration),
       scale:    mapGroup(t.scale, number),
+      spring:   mapGroup(t.spring, number),
     },
   }
   return JSON.stringify(doc, null, 2)
@@ -194,6 +214,7 @@ export function toFlatJson(state) {
     easing:   mapGroup(t.easing, bezierCss),
     delay:    mapGroup(t.delay, ms => `${ms}ms`),
     scale:    { ...t.scale },
+    spring:   { ...t.spring },
   }
   return JSON.stringify(doc, null, 2)
 }
@@ -218,6 +239,8 @@ export function toCssVars(state) {
     ...block('delay', t.delay, ms => `${ms}ms`),
     '',
     ...block('scale', t.scale, n => n),
+    '',
+    ...block('spring', t.spring, n => n),
   ]
   return `:root {\n${lines.join('\n')}\n}`
 }
@@ -252,6 +275,20 @@ export const EXPLORE_BOUNDS = {
   scale:    { min: 0.5, max: 1.2  },
 }
 
+// Spring needs its own bounds map because its three params have three different
+// ranges, unlike duration/delay/scale, where every key in a family shares one
+// range, so EXPLORE_BOUNDS keys by family. These are per-key, and they double as
+// the scope-B slider ranges when the spring editor lands. Import clamps a
+// too-large value to the nearest edge and reports it (same as the other
+// scalars); a structurally invalid value (<= 0) is rejected before clamping, in
+// buildState, because a spring with no stiffness/mass or no damping never
+// settles.
+export const SPRING_BOUNDS = {
+  stiffness: { min: 1,   max: 2000 },
+  damping:   { min: 1,   max: 100  },
+  mass:      { min: 0.1, max: 10   },
+}
+
 // The editable token schema — the exact keys each family carries in rawState,
 // which is also the exact set the tool bar renders a control for. This is the
 // single source of truth for "can the user tune this token?": the importer
@@ -266,11 +303,20 @@ export const EXPLORE_BOUNDS = {
 // in the schema because it is a real editable token: it resolves from state,
 // exports its edited value, and imports as a curve. Constrained mode simply
 // hides its tab, leaving it at the default overshoot curve.
+// `spring` is an editable-CLASS token: it varies per preset (so it cannot be a
+// fixed reference, which are identical across presets), lives in state, and
+// round-trips through import. It is listed here so the importer validates it and
+// the drift guard (schema ∪ fixed = every runtime token) stays satisfied. It has
+// no slider yet: the spring editor UI and its settle-curve visualizer are a
+// deferred follow-up (scope B). Controls are rendered by explicit *Section
+// components, not by iterating this schema, so listing spring adds no control on
+// its own. Same posture as `overshoot`, which is schema-listed but Explore-gated.
 export const EDITABLE_TOKEN_SCHEMA = {
   duration: ['fast', 'base', 'slow', 'slower'],
   easing:   ['standard', 'enter', 'exit', 'overshoot'],
   delay:    ['short', 'medium', 'long'],
   scale:    ['subtle', 'base', 'expressive', 'lift'],
+  spring:   ['stiffness', 'damping', 'mass'],
 }
 
 // Paths a Cadence export legitimately carries but the editor cannot hold: the
@@ -351,7 +397,7 @@ function detectFormat(parsed) {
     throw new ImportError('Unrecognized token file: expected a JSON object.')
   }
   if (parsed.motion && typeof parsed.motion === 'object') return 'dtcg'
-  if (EDITABLE_TOKEN_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale)) {
+  if (EDITABLE_TOKEN_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale || parsed.spring)) {
     return 'flat'
   }
   throw new ImportError('Unrecognized token file: expected a Cadence DTCG or flat export.')
@@ -361,7 +407,7 @@ function detectFormat(parsed) {
 // are filled from Standard; present scalars are clamped to the explore bounds;
 // present curves are canonicalized. Each adjustment is recorded for the report.
 function buildState(parsed, format) {
-  const state = { duration: {}, easing: {}, delay: {}, scale: {} }
+  const state = { duration: {}, easing: {}, delay: {}, scale: {}, spring: {} }
   const clamped = []
   const filled = []
   const curvesOutOfRange = []
@@ -401,6 +447,31 @@ function buildState(parsed, format) {
     }
   }
 
+  // Spring is a scalar family, but with per-key bounds and a validity gate the
+  // range-only scalars above do not have: stiffness, damping, and mass must all
+  // be positive or the spring never settles, so a <= 0 (or non-finite) value is
+  // rejected as a structural error, the same class as a cubic-bezier with an
+  // out-of-range x, rather than clamped. In-range-but-too-large values clamp to
+  // SPRING_BOUNDS and report like every other scalar; missing keys fill from
+  // Standard.
+  const springGroup = getGroup(parsed, format, 'spring')
+  for (const key of EDITABLE_TOKEN_SCHEMA.spring) {
+    const path = `spring.${key}`
+    const leaf = springGroup?.[key]
+    if (leaf === undefined) {
+      state.spring[key] = INITIAL_STATE.spring[key]
+      filled.push({ path, to: INITIAL_STATE.spring[key] })
+      continue
+    }
+    const raw = readScalar(leaf, format, path)
+    if (raw <= 0) {
+      throw new ImportError(`${path}: spring ${key} must be greater than 0.`)
+    }
+    const value = clampScalar(raw, SPRING_BOUNDS[key])
+    if (value !== raw) clamped.push({ path, from: raw, to: value })
+    state.spring[key] = value
+  }
+
   return { state, clamped, filled, curvesOutOfRange }
 }
 
@@ -432,7 +503,8 @@ const TOTAL_TOKENS =
   EDITABLE_TOKEN_SCHEMA.duration.length +
   EDITABLE_TOKEN_SCHEMA.easing.length +
   EDITABLE_TOKEN_SCHEMA.delay.length +
-  EDITABLE_TOKEN_SCHEMA.scale.length
+  EDITABLE_TOKEN_SCHEMA.scale.length +
+  EDITABLE_TOKEN_SCHEMA.spring.length
 
 export function importTokens(text) {
   let parsed

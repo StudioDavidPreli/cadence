@@ -11,11 +11,11 @@
 
 import { EDITABLE_TOKEN_SCHEMA } from '../../data/motionPresets'
 
-// Matches `tokens.<group>.<key>` for the four editable families. Global so a
+// Matches `tokens.<group>.<key>` for the five editable families. Global so a
 // single line with two reads (rare, snippets put one read per line) is fully
 // scanned. matchAll does not depend on lastIndex carry-over, so sharing this
 // constant across calls is safe.
-export const TOKEN_REF = /tokens\.(duration|ease|delay|scale)\.([A-Za-z]+)/g
+export const TOKEN_REF = /tokens\.(duration|ease|delay|scale|spring)\.([A-Za-z]+)/g
 
 // Every `group.key` path referenced in a snippet, in source order. Used by the
 // drift-guard test to assert each path resolves against the real token shape.
@@ -79,6 +79,6 @@ export function resolveTokenDisplay(path, tokens) {
   // ease is a four-number bezier array; round each coordinate the same way.
   if (group === 'ease') return `[${value.map(n => +n.toFixed(3)).join(', ')}]`
 
-  // scale is unitless.
+  // scale and spring are unitless numbers.
   return `${+value.toFixed(3)}`
 }

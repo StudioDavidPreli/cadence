@@ -103,6 +103,23 @@ const Toggle = `const tokens = useMotionTokens()
   }}
 />`
 
+const Spring = `const tokens = useMotionTokens()
+
+// A real spring: no duration, no ease. Stiffness, damping, and
+// mass decide how the dot crosses and when it settles, so
+// switching presets retimes it with no timing value changing
+// hands. ease.overshoot only imitates this look on a clock.
+<motion.span
+  className={styles.dot}
+  animate={{ x: atEnd ? TRAVEL : 0 }}
+  transition={{
+    type: 'spring',
+    stiffness: tokens.spring.stiffness,
+    damping: tokens.spring.damping,
+    mass: tokens.spring.mass,
+  }}
+/>`
+
 const Spinner = `const tokens = useMotionTokens()
 
 // A continuous rotation. linear holds the speed constant, so
@@ -290,6 +307,7 @@ export const DEMO_SNIPPETS = {
   Card,
   NavItem,
   Toggle,
+  Spring,
   Spinner,
   NotificationBadge,
   ProgressBar,

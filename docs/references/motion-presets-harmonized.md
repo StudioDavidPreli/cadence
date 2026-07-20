@@ -84,7 +84,17 @@ CSS-literate reviewer would catch.
 
 ---
 
-## Spring (physics) — proposed addition
+## Spring (physics): shipped 2026-07-20 (scope A)
+
+> **Shipped, David, 2026-07-20.** The fixed spring family landed:
+> `--motion-spring-stiffness / -damping / -mass` in `motion.css`, per-preset
+> values in the three presets, all three exports (DTCG as `number` leaves under
+> `motion.spring`, flat, CSS), import with per-key bounds and a positive-value
+> validity gate, and one consumer (the SpringDemo in Token Lab's Press & State
+> group). `ease.overshoot` stayed. The starting values below are the first pass;
+> David tunes them by feel against the live demo. Deferred to scope B: the spring
+> editor sliders and a settle-curve visualizer. Record:
+> `docs/decisions/physics-spring-2026-07-20.md`.
 
 The problem the rename exposes: a cubic-bezier cannot be a spring. A real spring is
 not time-based. It has no fixed duration. It is defined by stiffness, damping, and
@@ -236,6 +246,11 @@ family.** The rename is safe and I would ship it regardless. The physics-spring
 family is optional because it needs JS-side work (Framer Motion spring config, a new
 read path for three params). It is the highest-value addition for the case study.
 Confirm whether to build the physics family now or keep only the honest rename.
+
+> **Built, David, 2026-07-20 (scope A).** The rename shipped 2026-07-08; the
+> physics family shipped now, as a fixed family with one consumer. The spring
+> editor UI and settle-curve visualizer are deferred to scope B. See the Spring
+> section above and `docs/decisions/physics-spring-2026-07-20.md`.
 
 **3. Scale split into press and lift.** The original mixed two directions in one
 family: subtle, base, and expressive are compression below 1, while lift sits above

@@ -24,6 +24,7 @@ import { Button } from '../Button'
 import { Card } from '../Card'
 import { NavItem } from '../NavItem'
 import { Toggle } from '../Toggle'
+import { SpringDemo } from '../SpringDemo'
 import { Spinner } from '../Spinner'
 import { ProgressBar } from '../ProgressBar'
 import { Stepper } from '../Stepper'
@@ -131,6 +132,13 @@ const TOKEN_COMPONENT_MAP = {
   'scale.base':       ['Button', 'Stepper', 'React Rive Timelines'],
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
+  // The physics-spring family. Only the SpringDemo consumes it. These rows are
+  // wired for completeness, but nothing dispatches an active `spring.*` token
+  // yet: the spring has no slider (the editor UI is the deferred scope-B pass),
+  // so the connection-highlight for these lights up only once controls land.
+  'spring.stiffness': ['Spring'],
+  'spring.damping':   ['Spring'],
+  'spring.mass':      ['Spring'],
 }
 
 // EASING_CURVES, INITIAL_STATE, BUILT_IN_PRESETS, and stateToTokens now live
@@ -189,6 +197,11 @@ function writeAllTokensToCss(state) {
   el.style.setProperty('--motion-scale-base',       `${state.scale.base}`)
   el.style.setProperty('--motion-scale-expressive', `${state.scale.expressive}`)
   el.style.setProperty('--motion-scale-lift',       `${state.scale.lift}`)
+  // Spring params are unitless (no ms), written so a preset switch carries the
+  // spring to any CSS-reading consumer and to keep this in step with the export.
+  el.style.setProperty('--motion-spring-stiffness', `${state.spring.stiffness}`)
+  el.style.setProperty('--motion-spring-damping',   `${state.spring.damping}`)
+  el.style.setProperty('--motion-spring-mass',      `${state.spring.mass}`)
 }
 
 // Triggers a client-side file download for a text payload. Builds a Blob, points
@@ -344,6 +357,17 @@ function migratePresetEasing(preset) {
   // reducer and writeAllTokensToCss never read undefined.
   if (slots.overshoot === undefined) slots.overshoot = 'overshoot'
   return { ...preset, state: { ...preset.state, easing: slots } }
+}
+
+// Backfill state.spring for presets saved before the physics-spring family
+// (2026-07-20). A pre-spring preset has no spring key at all; default the whole
+// group from Standard so the reducer, writeAllTokensToCss, and stateToTokens
+// never read undefined. Same precedent as the overshoot default above, kept a
+// separate pass so it also covers a preset that migratePresetEasing returns
+// early (one with no easing at all).
+function migratePresetSpring(preset) {
+  if (preset?.state == null || preset.state.spring != null) return preset
+  return { ...preset, state: { ...preset.state, spring: { ...INITIAL_STATE.spring } } }
 }
 
 // Auto-generates a compact token summary for user preset tooltips.
@@ -1272,7 +1296,7 @@ export function TokenLab() {
     try {
       const stored = JSON.parse(localStorage.getItem('cadence-presets') || '[]')
       if (Array.isArray(stored)) {
-        setUserPresets(stored.map(migratePresetEasing))
+        setUserPresets(stored.map(p => migratePresetSpring(migratePresetEasing(p))))
       }
     } catch { /* ignore corrupt storage */ }
   }, [])
@@ -1445,6 +1469,16 @@ export function TokenLab() {
           <div className={styles.demoRow}>
             <Toggle label="Subtle"     mode="subtle" />
             <Toggle label="Expressive" mode="expressive" />
+          </div>
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Spring"
+          instruction="Click to send the dot across on a spring; switch presets to feel it retime"
+          code={DEMO_SNIPPETS.Spring}
+        >
+          <div className={styles.demoRow}>
+            <SpringDemo />
           </div>
         </DemoWrapper>
 

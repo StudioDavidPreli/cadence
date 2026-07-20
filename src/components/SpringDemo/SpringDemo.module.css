@@ -1,0 +1,40 @@
+/* The lane is the clickable button. It holds the dot's full travel (TRAVEL in
+   index.jsx) plus the dot's width, with a little breathing room each side. */
+.lane {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 268px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* The rail: a thin decorative track under the dot. --color-border is the same
+   neutral stroke the other controls use. */
+.rail {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--color-border);
+}
+
+/* The dot: the element the spring drives. --color-accent means "currently
+   affecting the system", the same graphical-indicator role the DurationVisualizer
+   dots use. As a filled graphical element it clears the 3:1 UI-component bar in
+   all four themes (dark 8.5, light 5.6, HC-light 6.1, HC-dark 12.7), so it needs
+   no per-theme handling. position: relative lifts it above the rail. */
+.dot {
+  position: relative;
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}

@@ -36,8 +36,22 @@ Defined in `src/tokens/motion.css`.
   --motion-scale-base: 0.95;
   --motion-scale-expressive: 0.9;
   --motion-scale-lift: 1.02;
+
+  /* Spring (physics) */
+  --motion-spring-stiffness: 400;
+  --motion-spring-damping: 30;
+  --motion-spring-mass: 1;
 }
 ```
+
+The spring family is the one token group that is not a duration plus a bezier. A
+spring is not time-based: it has no duration, and its settle time emerges from
+stiffness, damping, and mass. The three params are unitless numbers, so they read
+from custom properties at runtime like everything else, and Framer Motion
+consumes them as `{ type: 'spring', stiffness, damping, mass }`. `ease.overshoot`
+stays alongside them as the CSS-only and reduced-motion fallback for anything that
+cannot run a JS spring. Added 2026-07-20;
+`docs/decisions/physics-spring-2026-07-20.md` carries the reasoning.
 
 ---
 
@@ -46,6 +60,8 @@ Defined in `src/tokens/motion.css`.
 Not every token is a dial. The token set splits in two, and the split governs how Token Lab and the live code view behave.
 
 **Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the four easing slots (standard, enter, exit, overshoot), the three delays (short, medium, long), and the four scales (subtle, base, expressive, lift). Overshoot is the one editable slot whose control only surfaces in Explore mode: its Y > 1 handle needs the visualizer's extended vertical range, so Constrained mode hides its tab and leaves it at the default curve. `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
+
+The three spring params (`spring.stiffness`, `spring.damping`, `spring.mass`) are a fourth editable-token case, and a new one: editable-class but with no slider yet. Spring varies per preset like duration, so it cannot be a fixed reference (those are identical across every preset); it lives in state, resolves per preset, and round-trips through import. So it belongs in `EDITABLE_TOKEN_SCHEMA` for the importer and the drift guard, and the code view classifies it editable (never `(fixed)`). It has no control because the spring editor UI and its settle-curve visualizer are a deferred pass; until then a spring changes only by switching presets. The posture matches overshoot's control-gating: schema-listed, no control surfaced. Controls are rendered by explicit `*Section` components, not by iterating the schema, so listing spring renders nothing on its own.
 
 **Fixed reference tokens** are real tokens components use, but no control reaches them: `ease.linear` and `delay.none`. `stateToTokens` wires these to constants instead of editor state, and `FIXED_REFERENCE_PATHS` lists them as the exact complement of the editable schema.
 
@@ -78,7 +94,7 @@ Token Lab exports the live token state as a downloadable file. Export is the inv
 The export pipeline is four pure functions in `src/data/motionPresets.js`:
 
 1. `stateToExport(state)` normalizes the editor's `rawState` into a format-agnostic object in CSS-side units (ms numbers, four-number bezier arrays, unitless scale). It emits the complete token set, including the members the editor never exposes as sliders: `ease.linear` and `delay.none`. An export that dropped those would be a partial file, not a usable one.
-2. `toDtcgJson(state)` serializes that object to the W3C Design Tokens Community Group format, wrapping each leaf in `$type` / `$value` under a top-level `motion` namespace. This is the shape Style Dictionary, Tokens Studio, and Figma Variables consume. The draft spec has no motion-specific delay type, so delays serialize as `duration`.
+2. `toDtcgJson(state)` serializes that object to the W3C Design Tokens Community Group format, wrapping each leaf in `$type` / `$value` under a top-level `motion` namespace. This is the shape Style Dictionary, Tokens Studio, and Figma Variables consume. The draft spec has no motion-specific delay type, so delays serialize as `duration`. It also has no spring type, so the three spring params serialize as plain `number` leaves (the same `$type` scale uses) under a `spring` group. A spring is not one composite value here, it is three unitless numbers, and the group name carries the "these compose one spring" meaning. No invented type, and it round-trips through `importTokens`.
 3. `toFlatJson(state)` serializes the same object to a flat JSON mirroring the CSS variable names: ms strings, `cubic-bezier()` strings, bare scale numbers.
 4. `toCssVars(state)` serializes the same object to a `:root` block of the editable `--motion-*` custom properties, in the exact variable names and units used by `src/tokens/motion.css`. It is a drop-in replacement for that block. Only the editable token scale is emitted; the `--feedback-*` chrome timings in `motion.css` are not design tokens and are left out.
 
@@ -94,6 +110,7 @@ The rules:
 
 - **Always flips to Explore.** The widened slider ranges (`EXPLORE_BOUNDS`) double as the clamp bounds, so the flip is also what lets an imported value be displayed and edited. A 1500ms duration is unreachable on a constrained slider; in Explore it sits on the track.
 - **Clamps scalars, never curves.** Duration, delay, and scale values outside `EXPLORE_BOUNDS` are pulled to the nearest edge and reported. Easing curves are not clamped: a control point with `y` outside `[0,1]` renders outside the visualizer's draggable region (the same state the Overshoot curve is in), so it loads and is reported as not-editable rather than bent. A curve with `x` outside `[0,1]` is a structural error (CSS rejects it) and fails the import.
+- **Spring params clamp and also reject.** They are scalars, so a too-large value clamps to `SPRING_BOUNDS` (a separate per-key map, because stiffness, damping, and mass have three different ranges, unlike the range-per-family `EXPLORE_BOUNDS`) and is reported like any other scalar. But they also carry a validity gate the other scalars do not: stiffness, damping, and mass must all be greater than zero, or the spring never settles. A zero or negative value is rejected as a structural error, the same class as an out-of-range bezier `x`, rather than clamped.
 - **Fills missing tokens from Standard** (the baseline preset, labeled Default until 2026-07-16) and reports each, so a partial file imports rather than failing.
 - **Re-canonicalizes easing.** Export flattens named curves to arrays; import maps a matching array back to its named key, so a round-tripped preset keeps its identity and lights up as active.
 - **Reports foreign keys** but suppresses the two expected constants (`ease.linear`, `delay.none`) so a clean round trip shows nothing.

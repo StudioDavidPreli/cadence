@@ -45,6 +45,21 @@
   --motion-scale-expressive:  0.9;
   --motion-scale-lift:        1.02;
 
+  /* Spring (physics)
+     A real spring, unlike ease-overshoot above. It is not time-based: it has
+     no duration. Stiffness, damping, and mass define it, and its settle time
+     emerges from those three. Fed to Framer Motion as
+     { type: 'spring', stiffness, damping, mass }. The values are unitless
+     numbers, so they read from custom properties at runtime like every other
+     token; ease-overshoot stays as the CSS-only / reduced-motion fallback for
+     anything that cannot run a JS spring.
+       Stiffness: pull toward rest. Higher is faster and snappier.
+       Damping:   resistance. Higher settles sooner with less bounce.
+       Mass:      inertia. Higher is heavier, slower to start and stop. */
+  --motion-spring-stiffness: 400;
+  --motion-spring-damping:   30;
+  --motion-spring-mass:      1;
+
   /* System-feedback cue — NOT part of the editable token scale.
      The "Tokens" title flash, fired when the P06 demo points back at this
      panel. Deliberately decoupled from the --motion-* tokens above: in Explore

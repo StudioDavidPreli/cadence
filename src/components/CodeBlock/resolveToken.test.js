@@ -24,6 +24,7 @@ const TOKENS = {
   },
   delay: { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
   scale: { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  spring: { stiffness: 400, damping: 30, mass: 1 },
 }
 
 describe('resolveTokenDisplay', () => {
@@ -38,6 +39,11 @@ describe('resolveTokenDisplay', () => {
 
   it('formats scale as a unitless number', () => {
     expect(resolveTokenDisplay('scale.base', TOKENS)).toBe('0.95')
+  })
+
+  it('formats spring params as unitless numbers', () => {
+    expect(resolveTokenDisplay('spring.stiffness', TOKENS)).toBe('400')
+    expect(resolveTokenDisplay('spring.mass', TOKENS)).toBe('1')
   })
 
   it('returns null for a path the token set does not carry', () => {
@@ -90,6 +96,10 @@ describe('isEditableToken', () => {
     expect(isEditableToken('duration.slow')).toBe(true)
     expect(isEditableToken('delay.short')).toBe(true)
     expect(isEditableToken('scale.lift')).toBe(true)
+    // spring is editable-CLASS (per-preset, in the schema) even though its
+    // slider is deferred, so it is never marked (fixed) in the code view.
+    expect(isEditableToken('spring.stiffness')).toBe(true)
+    expect(isEditableToken('spring.mass')).toBe(true)
   })
 
   it('normalizes the runtime "ease." family to the schema\'s "easing."', () => {

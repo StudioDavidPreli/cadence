@@ -63,6 +63,13 @@ describe('stateToTokens', () => {
     expect(tokens.scale).toEqual(INITIAL_STATE.scale)
     expect(tokens.scale).not.toBe(INITIAL_STATE.scale)
   })
+
+  it('passes spring params through unitless (no ms → s conversion)', () => {
+    // Spring is not time-based, so unlike duration it is not divided by 1000.
+    const tokens = stateToTokens(INITIAL_STATE)
+    expect(tokens.spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
+    expect(tokens.spring).not.toBe(INITIAL_STATE.spring)
+  })
 })
 
 // stateToExport is the format-agnostic serializer feeding both JSON exporters.
@@ -98,6 +105,11 @@ describe('stateToExport', () => {
     expect(out.easing.standard).toEqual(EASING_CURVES.overshoot.fm)
     expect(out.duration.fast).toBe(60)
   })
+
+  it('includes the spring family, per preset', () => {
+    expect(stateToExport(INITIAL_STATE).spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
+    expect(stateToExport(snappy).spring).toEqual({ stiffness: 600, damping: 22, mass: 1 })
+  })
 })
 
 describe('toDtcgJson', () => {
@@ -115,6 +127,15 @@ describe('toDtcgJson', () => {
     expect(doc.motion.easing.overshoot.$value).toEqual(EASING_CURVES.overshoot.fm)
     expect(doc.motion.delay.none).toEqual({ $type: 'duration', $value: '0ms' })
   })
+
+  it('serializes spring params as plain number leaves under motion.spring', () => {
+    // DTCG has no spring type; the three params are unitless numbers, same $type
+    // scale uses. The `spring` group name carries the composite meaning.
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    expect(doc.motion.spring.stiffness).toEqual({ $type: 'number', $value: 400 })
+    expect(doc.motion.spring.damping).toEqual({ $type: 'number', $value: 30 })
+    expect(doc.motion.spring.mass).toEqual({ $type: 'number', $value: 1 })
+  })
 })
 
 describe('toFlatJson', () => {
@@ -130,6 +151,11 @@ describe('toFlatJson', () => {
     const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, 0.2, 0.3, 0.4] } }
     const doc = JSON.parse(toFlatJson(state))
     expect(doc.easing.standard).toBe('cubic-bezier(0.1, 0.2, 0.3, 0.4)')
+  })
+
+  it('emits spring params as bare numbers', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    expect(doc.spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
   })
 })
 
@@ -157,6 +183,13 @@ describe('toCssVars', () => {
   it('serializes a custom bezier slot as a cubic-bezier() value', () => {
     const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, 0.2, 0.3, 0.4] } }
     expect(toCssVars(state)).toContain('--motion-ease-standard: cubic-bezier(0.1, 0.2, 0.3, 0.4);')
+  })
+
+  it('emits the unitless spring custom properties', () => {
+    const css = toCssVars(INITIAL_STATE)
+    expect(css).toContain('--motion-spring-stiffness: 400;')
+    expect(css).toContain('--motion-spring-damping: 30;')
+    expect(css).toContain('--motion-spring-mass: 1;')
   })
 })
 
@@ -252,5 +285,49 @@ describe('importTokens', () => {
     const res = importTokens(JSON.stringify(doc))
     expect(res.ok).toBe(false)
     expect(res.error).toMatch(/x values/)
+  })
+
+  it('round-trips the spring family, per preset', () => {
+    const res = importTokens(toDtcgJson(snappy))
+    expect(res.ok).toBe(true)
+    expect(res.state.spring).toEqual({ stiffness: 600, damping: 22, mass: 1 })
+  })
+
+  it('clamps an out-of-range spring param to its bound and reports it', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.spring.stiffness = 5000  // above the 2000 ceiling
+    doc.spring.mass = 20         // above the 10 ceiling
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.spring.stiffness).toBe(2000)
+    expect(res.state.spring.mass).toBe(10)
+    expect(res.report.clamped).toContainEqual({ path: 'spring.stiffness', from: 5000, to: 2000 })
+    expect(res.report.clamped).toContainEqual({ path: 'spring.mass', from: 20, to: 10 })
+  })
+
+  it('rejects a non-positive spring param as a structural error', () => {
+    // A spring with zero/negative stiffness, damping, or mass never settles, so
+    // it is rejected (like an out-of-range bezier x), not clamped.
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.spring.damping = 0
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/greater than 0/)
+  })
+
+  it('fills a missing spring family from Standard and reports each param', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    delete doc.spring
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.spring).toEqual(INITIAL_STATE.spring)
+    expect(res.report.filled).toContainEqual({ path: 'spring.stiffness', to: 400 })
+  })
+
+  it('reports a foreign spring key', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.spring.wobble = 3
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.report.ignored).toContainEqual({ path: 'spring.wobble' })
   })
 })

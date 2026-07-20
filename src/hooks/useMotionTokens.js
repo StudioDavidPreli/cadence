@@ -24,6 +24,7 @@ const FALLBACKS = {
   },
   delay:   { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
   scale:   { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  spring:  { stiffness: 400, damping: 30, mass: 1 },
 }
 
 // --- Hook ---
@@ -98,6 +99,13 @@ export function useMotionTokens({ respectReducedMotion = true } = {}) {
         base:       read('--motion-scale-base',       parseUnitless, FALLBACKS.scale.base),
         expressive: read('--motion-scale-expressive', parseUnitless, FALLBACKS.scale.expressive),
         lift:       read('--motion-scale-lift',       parseUnitless, FALLBACKS.scale.lift),
+      },
+      // Spring params are unitless, read like scale. Fed to Framer Motion as
+      // { type: 'spring', stiffness, damping, mass }.
+      spring: {
+        stiffness: read('--motion-spring-stiffness', parseUnitless, FALLBACKS.spring.stiffness),
+        damping:   read('--motion-spring-damping',   parseUnitless, FALLBACKS.spring.damping),
+        mass:      read('--motion-spring-mass',      parseUnitless, FALLBACKS.spring.mass),
       },
     })
   }, [override])
