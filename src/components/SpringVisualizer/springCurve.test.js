@@ -10,7 +10,7 @@ import {
 
 // The three built-in presets, plus a critical and an overdamped set, exercise
 // all three regimes of the damped oscillator.
-const STANDARD = { stiffness: 400, damping: 30, mass: 1 }   // zeta 0.75, underdamped
+const STANDARD = { stiffness: 170, damping: 20, mass: 1.5 } // zeta ~0.63, underdamped
 const SNAPPY = { stiffness: 600, damping: 22, mass: 1 }     // zeta ~0.45, bigger bounce
 const CRITICAL = { stiffness: 100, damping: 20, mass: 1 }   // zeta 1.0
 const OVERDAMPED = { stiffness: 100, damping: 100, mass: 1 } // zeta 5, no bounce
@@ -22,7 +22,7 @@ describe('the two dimensionless numbers', () => {
   })
 
   it('damping ratio is c / (2·sqrt(k·m))', () => {
-    expect(dampingRatio(STANDARD)).toBeCloseTo(0.75, 6)
+    expect(dampingRatio(STANDARD)).toBeCloseTo(0.626, 3)
     expect(dampingRatio(CRITICAL)).toBeCloseTo(1, 6)
     expect(dampingRatio(OVERDAMPED)).toBeCloseTo(5, 6)
   })

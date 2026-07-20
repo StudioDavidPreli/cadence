@@ -56,9 +56,9 @@
        Stiffness: pull toward rest. Higher is faster and snappier.
        Damping:   resistance. Higher settles sooner with less bounce.
        Mass:      inertia. Higher is heavier, slower to start and stop. */
-  --motion-spring-stiffness: 400;
-  --motion-spring-damping:   30;
-  --motion-spring-mass:      1;
+  --motion-spring-stiffness: 170;
+  --motion-spring-damping:   20;
+  --motion-spring-mass:      1.5;
 
   /* System-feedback cue — NOT part of the editable token scale.
      The "Tokens" title flash, fired when the P06 demo points back at this

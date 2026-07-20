@@ -53,9 +53,9 @@ damping, mass }`. The three params are unitless numbers, so they read from the
 
 | Param (unitless) | Standard | Snappy | Cinematic |
 |---|---|---|---|
-| `spring.stiffness` | 400 | 600 | 180 |
-| `spring.damping` | 30 | 22 | 26 |
-| `spring.mass` | 1 | 1 | 1.2 |
+| `spring.stiffness` | 170 | 600 | 180 |
+| `spring.damping` | 20 | 22 | 26 |
+| `spring.mass` | 1.5 | 1 | 1.2 |
 
 Standard settles cleanly with a hint of overshoot. Snappy is stiffer and lighter,
 so it bounces harder and arrives faster. Cinematic is soft and heavy, a slow

@@ -33,9 +33,9 @@ export const INITIAL_STATE = {
   scale:    { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
   // Physics spring: unitless numbers fed to Framer Motion as
   // { type: 'spring', ... }. Varies per preset like duration does, so it lives
-  // in state and resolves per preset (not a fixed reference). Standard settles
-  // cleanly with a hint of overshoot.
-  spring:   { stiffness: 400, damping: 30, mass: 1 },
+  // in state and resolves per preset (not a fixed reference). Standard is a soft,
+  // weighted settle with a hint of overshoot (tuned by feel, David 2026-07-20).
+  spring:   { stiffness: 170, damping: 20, mass: 1.5 },
 }
 
 // ─── Built-in presets ─────────────────────────────────────────────────────────

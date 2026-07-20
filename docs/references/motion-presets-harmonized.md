@@ -91,9 +91,12 @@ CSS-literate reviewer would catch.
 > values in the three presets, all three exports (DTCG as `number` leaves under
 > `motion.spring`, flat, CSS), import with per-key bounds and a positive-value
 > validity gate, and one consumer (the SpringDemo in Token Lab's Press & State
-> group). `ease.overshoot` stayed. The starting values below are the first pass;
-> David tunes them by feel against the live demo. Deferred to scope B: the spring
-> editor sliders and a settle-curve visualizer. Record:
+> group). `ease.overshoot` stayed. The starting values below were the first pass;
+> David tunes them by feel against the live demo. Standard was tuned to
+> 170 / 20 / 1.5 (stiffness / damping / mass) on 2026-07-20; the table below keeps
+> the first-pass numbers as the proposal record, and `motion-presets.md` mirrors
+> the shipped values. The spring editor sliders and the settle-curve visualizer
+> (once deferred to scope B) shipped the same day. Record:
 > `docs/decisions/physics-spring-2026-07-20.md`.
 
 The problem the rename exposes: a cubic-bezier cannot be a spring. A real spring is

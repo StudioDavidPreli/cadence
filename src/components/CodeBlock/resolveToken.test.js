@@ -24,7 +24,7 @@ const TOKENS = {
   },
   delay: { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
   scale: { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
-  spring: { stiffness: 400, damping: 30, mass: 1 },
+  spring: { stiffness: 170, damping: 20, mass: 1.5 },
 }
 
 describe('resolveTokenDisplay', () => {
@@ -42,8 +42,8 @@ describe('resolveTokenDisplay', () => {
   })
 
   it('formats spring params as unitless numbers', () => {
-    expect(resolveTokenDisplay('spring.stiffness', TOKENS)).toBe('400')
-    expect(resolveTokenDisplay('spring.mass', TOKENS)).toBe('1')
+    expect(resolveTokenDisplay('spring.stiffness', TOKENS)).toBe('170')
+    expect(resolveTokenDisplay('spring.mass', TOKENS)).toBe('1.5')
   })
 
   it('returns null for a path the token set does not carry', () => {

@@ -31,15 +31,15 @@ test.describe('token propagation (the thesis)', () => {
     await expect(slider).toBeVisible()
 
     // Spring is unitless, so this is the thesis without the ms→s conversion.
-    // stiffness defaults to 400, step 10 -> five presses = 450.
+    // stiffness defaults to 170 (Standard), step 10 -> five presses = 220.
     for (let i = 0; i < 5; i++) await slider.press('ArrowRight')
 
-    await expect.poll(() => readToken(page, '--motion-spring-stiffness')).toBe('450')
+    await expect.poll(() => readToken(page, '--motion-spring-stiffness')).toBe('220')
     // The Button snippet reads tokens.spring.stiffness in its motionMode branch;
     // the resolved value renders unitless in the code view. This is the
     // propagation half, not just storage.
     await page.getByRole('button', { name: 'Show code' }).first().click()
-    await expect(page.locator('pre').filter({ hasText: '450' }).first()).toBeVisible()
+    await expect(page.locator('pre').filter({ hasText: '220' }).first()).toBeVisible()
   })
 
   test('an easing preset click rewrites each slot (standard, enter, exit)', async ({ page }) => {

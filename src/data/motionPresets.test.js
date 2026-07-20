@@ -67,7 +67,7 @@ describe('stateToTokens', () => {
   it('passes spring params through unitless (no ms → s conversion)', () => {
     // Spring is not time-based, so unlike duration it is not divided by 1000.
     const tokens = stateToTokens(INITIAL_STATE)
-    expect(tokens.spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
+    expect(tokens.spring).toEqual({ stiffness: 170, damping: 20, mass: 1.5 })
     expect(tokens.spring).not.toBe(INITIAL_STATE.spring)
   })
 })
@@ -107,7 +107,7 @@ describe('stateToExport', () => {
   })
 
   it('includes the spring family, per preset', () => {
-    expect(stateToExport(INITIAL_STATE).spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
+    expect(stateToExport(INITIAL_STATE).spring).toEqual({ stiffness: 170, damping: 20, mass: 1.5 })
     expect(stateToExport(snappy).spring).toEqual({ stiffness: 600, damping: 22, mass: 1 })
   })
 })
@@ -132,9 +132,9 @@ describe('toDtcgJson', () => {
     // DTCG has no spring type; the three params are unitless numbers, same $type
     // scale uses. The `spring` group name carries the composite meaning.
     const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
-    expect(doc.motion.spring.stiffness).toEqual({ $type: 'number', $value: 400 })
-    expect(doc.motion.spring.damping).toEqual({ $type: 'number', $value: 30 })
-    expect(doc.motion.spring.mass).toEqual({ $type: 'number', $value: 1 })
+    expect(doc.motion.spring.stiffness).toEqual({ $type: 'number', $value: 170 })
+    expect(doc.motion.spring.damping).toEqual({ $type: 'number', $value: 20 })
+    expect(doc.motion.spring.mass).toEqual({ $type: 'number', $value: 1.5 })
   })
 })
 
@@ -155,7 +155,7 @@ describe('toFlatJson', () => {
 
   it('emits spring params as bare numbers', () => {
     const doc = JSON.parse(toFlatJson(INITIAL_STATE))
-    expect(doc.spring).toEqual({ stiffness: 400, damping: 30, mass: 1 })
+    expect(doc.spring).toEqual({ stiffness: 170, damping: 20, mass: 1.5 })
   })
 })
 
@@ -187,9 +187,9 @@ describe('toCssVars', () => {
 
   it('emits the unitless spring custom properties', () => {
     const css = toCssVars(INITIAL_STATE)
-    expect(css).toContain('--motion-spring-stiffness: 400;')
-    expect(css).toContain('--motion-spring-damping: 30;')
-    expect(css).toContain('--motion-spring-mass: 1;')
+    expect(css).toContain('--motion-spring-stiffness: 170;')
+    expect(css).toContain('--motion-spring-damping: 20;')
+    expect(css).toContain('--motion-spring-mass: 1.5;')
   })
 })
 
@@ -321,7 +321,7 @@ describe('importTokens', () => {
     const res = importTokens(JSON.stringify(doc))
     expect(res.ok).toBe(true)
     expect(res.state.spring).toEqual(INITIAL_STATE.spring)
-    expect(res.report.filled).toContainEqual({ path: 'spring.stiffness', to: 400 })
+    expect(res.report.filled).toContainEqual({ path: 'spring.stiffness', to: 170 })
   })
 
   it('reports a foreign spring key', () => {

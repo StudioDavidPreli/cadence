@@ -28,9 +28,9 @@ that Framer Motion consumes `{ type: 'spring', stiffness, damping, mass }` inste
 of a duration plus a bezier.
 
 ```css
---motion-spring-stiffness: 400;
---motion-spring-damping:   30;
---motion-spring-mass:      1;
+--motion-spring-stiffness: 170;
+--motion-spring-damping:   20;
+--motion-spring-mass:      1.5;
 ```
 
 `ease.overshoot` stayed. It is the CSS-only fallback for anything that cannot run
@@ -93,7 +93,7 @@ duration plus a bezier. Every place that assumption lived:
 - **`parse.js` and `useMotionTokens`.** The unitless parser already handled it;
   spring got fallbacks and three reads. Unitless values are safe from the CSS
   minifier that rewrote `400ms` to `.4s` and blanked the site once, but the built
-  CSS was checked anyway: `--motion-spring-stiffness:400`, unchanged.
+  CSS was checked anyway: the params stay unitless and uncorrupted.
 - **The code view.** The token-reference regex learned a fifth family, and the
   unitless display branch already covered the numbers.
 - **localStorage.** A preset saved before today has no spring key. A separate
