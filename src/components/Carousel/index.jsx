@@ -111,8 +111,8 @@ function SlideImage({ src, stateMachine, theme }) {
 // speed (I did it quickly) and distance (I moved it far enough). Requiring
 // only one would either miss slow drags or require excessive force for flicks.
 //
-// ── Why spring easing for snap ────────────────────────────────────────────────
-// The snap uses ease.overshoot (cubic-bezier(0.34, 1.56, 0.64, 1)) — an
+// ── Why the snap overshoots, and the two ways it can ──────────────────────────
+// The snap defaults to ease.overshoot (cubic-bezier(0.34, 1.56, 0.64, 1)), an
 // overshooting curve. This is deliberate:
 //
 // The overshoot IS the Follow Through.
@@ -124,8 +124,12 @@ function SlideImage({ src, stateMachine, theme }) {
 // that makes analog controls feel authoritative.
 //
 // Ease.standard would produce a cleaner stop but a less believable one.
-// The spring overshoot is the difference between a software animation and
-// something that feels like it has mass.
+//
+// The bezier only imitates that momentum on a fixed clock. When motionMode is
+// 'spring', the snap runs a real physics spring instead (stiffness, damping,
+// mass, no duration), and the dot indicator springs with it: the whole control
+// moves as one system. That harmonization is the point. ease.overshoot stays
+// the default and the reduced-motion fallback.
 //
 // ── useMotionValue + useAnimation ────────────────────────────────────────────
 // useMotionValue(0) creates the x position that both the drag gesture and the
@@ -156,11 +160,39 @@ function SlideImage({ src, stateMachine, theme }) {
 // working. A caller can pass its own array to vary content per instance
 // (option 1 from the tracker's carousel note) — the P5 principle demo and the
 // TokenLab Gesture tab currently share this default.
-export function Carousel({ compact = false, slides = SLIDES }) {
+// The dot pip's two widths, mirroring .dotPip (8px circle) and .dotPipActive
+// (20px pill) in the stylesheet. In spring mode Framer Motion owns the width so
+// the pip can spring, and it needs the numbers in JS; the height and the 4px
+// border-radius stay constant (a circle at 8px, rounded pill ends at 20px), so
+// only the width animates. Keep these in step with the CSS if it changes.
+const DOT_WIDTH = 8
+const PILL_WIDTH = 20
+
+// motionMode: 'bezier' (default) snaps on ease.overshoot; 'spring' snaps on the
+// real physics spring. Passed by Token Lab's Gesture demo toggle and by the P5
+// Follow Through principle (a real spring is the truest follow-through). Every
+// other call site omits it and is unchanged.
+export function Carousel({ compact = false, slides = SLIDES, motionMode = 'bezier' }) {
   const tokens      = useMotionTokens()
   const { theme }   = useTheme()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideWidth, setSlideWidth]     = useState(0)
+
+  // Use the spring only when asked AND not in a flattening context. A spring has
+  // no duration, so under reduced motion it would ignore the flattening the rest
+  // of the UI honors; there we fall to the bezier branch, whose duration.slow is
+  // already flattened to ~instant. tokens.reducedMotion is set by reduceMotion()
+  // (see MotionTokensContext). In Token Lab the demo column opts out of
+  // flattening, so the spring plays there as expected.
+  const useSpring = motionMode === 'spring' && !tokens.reducedMotion
+  const snapTransition = useSpring
+    ? {
+        type: 'spring',
+        stiffness: tokens.spring.stiffness,
+        damping: tokens.spring.damping,
+        mass: tokens.spring.mass,
+      }
+    : { duration: tokens.duration.slow, ease: tokens.ease.overshoot }
 
   const containerRef = useRef(null)
   const x            = useMotionValue(0)
@@ -230,14 +262,12 @@ export function Carousel({ compact = false, slides = SLIDES }) {
     setCurrentSlide(index)
     // Cancel any in-progress snap before starting a new one.
     animRef.current?.stop()
-    // Overshoot easing: the overshoot is the Follow Through principle made visible.
-    // The slide carries past its resting point and settles — physical momentum.
-    // duration.slow matches Stepper's cascade — sequential components share
-    // the same token so adjusting duration.slow affects both simultaneously.
-    animRef.current = animate(x, index * -slideWidth, {
-      duration: tokens.duration.slow,
-      ease: tokens.ease.overshoot,
-    })
+    // The snap is the Follow Through made visible: the slide carries past its
+    // resting point and settles. In bezier mode that is ease.overshoot on
+    // duration.slow (which also drives Stepper's cascade, so one token retimes
+    // both). In spring mode it is the real physics, no duration at all: the
+    // difference between imitating momentum and computing it.
+    animRef.current = animate(x, index * -slideWidth, snapTransition)
   }
 
   // dragEnd receives the Framer Motion PanInfo object: { velocity, offset, ... }
@@ -329,16 +359,19 @@ export function Carousel({ compact = false, slides = SLIDES }) {
       </div>
 
       {/* ── Dot indicators ──────────────────────────────────────────────── */}
-      {/* Each dot is always rendered — no conditional mounting or layoutId.
-          The active dot expands from a circle to a pill via CSS transitions,
-          driven by --motion-duration-fast and --motion-ease-overshoot tokens.
-          This avoids Framer Motion's layout animation system entirely.
-          The layoutId + LayoutGroup approach was removed because LayoutGroup
-          does not isolate from the global ProjectionNode tree — it only scopes
-          the layoutId namespace. The ongoing spring animation on carouselActiveDot
-          was triggering global ProjectionNode snapshots that corrupted the
-          opacity animation on newly-mounted tab panels, leaving them at
-          opacity: 0 until page reload. CSS transitions are immune to this. */}
+      {/* Each dot is always rendered, no conditional mounting or layoutId. The
+          active pip morphs from an 8px circle to a 20px pill; its width animates
+          on snapTransition, the SAME transition object the snap uses, so the pip
+          and the slide move as one. In spring mode that is the physics spring; in
+          bezier mode, ease.overshoot on duration.slow, matching the shipped feel.
+          This is a DIRECT value animation (animate={{ width }}), not layoutId, so
+          it stays out of the projection system the way the old CSS transition
+          did. The layoutId approach was removed because LayoutGroup does not
+          isolate from the global ProjectionNode tree; its FLIP snapshots once
+          corrupted concurrent opacity animations. Direct value animation carries
+          none of that (see CLAUDE.md). initial={false} renders the pip at its
+          resting width with no mount animation. Only width animates; the 4px
+          border-radius and the accent fade stay in the stylesheet. */}
       <div className={styles.dots}>
         {slides.map((_, i) => (
           <button
@@ -347,7 +380,12 @@ export function Carousel({ compact = false, slides = SLIDES }) {
             onClick={() => goToSlide(i)}
             aria-label={`Go to slide ${i + 1}`}
           >
-            <span className={`${styles.dotPip} ${currentSlide === i ? styles.dotPipActive : ''}`} />
+            <motion.span
+              className={`${styles.dotPip} ${currentSlide === i ? styles.dotPipActive : ''}`}
+              initial={false}
+              animate={{ width: currentSlide === i ? PILL_WIDTH : DOT_WIDTH }}
+              transition={snapTransition}
+            />
           </button>
         ))}
       </div>

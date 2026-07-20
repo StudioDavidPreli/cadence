@@ -216,28 +216,25 @@
   justify-content: center;
 }
 
-/* Single element per dot — morphs between circle (inactive) and pill (active)
-   via CSS transitions. Uses --motion-duration-slow to match the carousel snap
-   speed (which also uses duration.slow). Both animations respond to the same
-   slider so the dot and slide feel synchronized.
-   No Framer Motion involvement: CSS transitions are immune to the global
-   ProjectionNode snapshot cycle that layout animations trigger. */
+/* Single element per dot, morphing between an 8px circle (inactive) and a 20×8px
+   pill (active). The WIDTH is animated by Framer Motion on the carousel's
+   snapTransition (see index.jsx), so the pip springs when the snap springs and
+   rides the overshoot bezier otherwise; the width numbers live in JS
+   (DOT_WIDTH / PILL_WIDTH) and must stay in step with these. It is a direct
+   value animation, not layoutId, so it stays clear of the projection system the
+   old CSS transition avoided. Only background-color transitions here; the 4px
+   border-radius is constant (a circle at 8px, rounded pill ends at 20px). */
 .dotPip {
   display: block;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 4px;
   background-color: var(--color-border);
   flex-shrink: 0;
-  transition:
-    width var(--motion-duration-slow, 400ms) var(--motion-ease-overshoot, cubic-bezier(0.34, 1.56, 0.64, 1)),
-    border-radius var(--motion-duration-slow, 400ms) var(--motion-ease-overshoot, cubic-bezier(0.34, 1.56, 0.64, 1)),
-    background-color var(--motion-duration-slow, 400ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background-color var(--motion-duration-slow, 400ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-/* Active state — expands to a 20×8px pill in the accent color. */
+/* Active state: the accent color. Width comes from Framer Motion, not here. */
 .dotPipActive {
-  width: 20px;
-  border-radius: 4px;
   background-color: var(--color-accent);
 }

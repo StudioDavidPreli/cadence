@@ -134,13 +134,13 @@ const TOKEN_COMPONENT_MAP = {
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
-  // and Toggle consume it when their per-demo switch is flipped to Spring. The
-  // switch is per-instance state the static map cannot read, so these list every
-  // spring-capable demo: dragging a spring slider highlights the components the
-  // spring can drive, whether or not each is currently switched to it.
-  'spring.stiffness': ['Spring', 'Button', 'Card', 'Toggle'],
-  'spring.damping':   ['Spring', 'Button', 'Card', 'Toggle'],
-  'spring.mass':      ['Spring', 'Button', 'Card', 'Toggle'],
+  // Toggle, and Carousel consume it when their per-demo switch is flipped to
+  // Spring. The switch is per-instance state the static map cannot read, so these
+  // list every spring-capable demo: dragging a spring slider highlights the
+  // components the spring can drive, whether or not each is currently switched.
+  'spring.stiffness': ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
+  'spring.damping':   ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
+  'spring.mass':      ['Spring', 'Button', 'Card', 'Toggle', 'Carousel'],
 }
 
 // EASING_CURVES, INITIAL_STATE, BUILT_IN_PRESETS, and stateToTokens now live
@@ -1634,10 +1634,11 @@ export function TokenLab() {
       <div className={styles.demoContent}>
         <DemoWrapper
           componentName="Carousel"
-          instruction="Drag to advance — flick fast or drag far enough to commit"
+          instruction="Drag to advance: flick fast or drag far enough to commit; the spring toggle swaps the snap for a real spring"
           code={DEMO_SNIPPETS.Carousel}
           instructionClass={styles.demoInstructionCarousel}
           mainClass={styles.demoMainCarousel}
+          springCapable
         >
           {/* Carousel is a lazy chunk (see the lazy-boundaries block up top).
               The idle prefetch usually resolves it long before this category is
@@ -1645,14 +1646,16 @@ export function TokenLab() {
               layer from collapsing for the rare frame it does. ErrorBoundary
               outside Suspense catches both a chunk-load failure and a render
               throw, degrading in place instead of blanking the app. */}
-          <ErrorBoundary
-            title="The carousel demo hit a snag"
-            message="The Carousel demo ran into an unexpected error. Reloading usually clears it."
-          >
-            <Suspense fallback={<div className={styles.carouselFallback}>Loading the carousel…</div>}>
-              <Carousel />
-            </Suspense>
-          </ErrorBoundary>
+          {mode => (
+            <ErrorBoundary
+              title="The carousel demo hit a snag"
+              message="The Carousel demo ran into an unexpected error. Reloading usually clears it."
+            >
+              <Suspense fallback={<div className={styles.carouselFallback}>Loading the carousel…</div>}>
+                <Carousel motionMode={mode} />
+              </Suspense>
+            </ErrorBoundary>
+          )}
         </DemoWrapper>
       </div>
     ),

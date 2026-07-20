@@ -236,13 +236,22 @@ const Dropdown = `const tokens = useMotionTokens()
 
 const Carousel = `const tokens = useMotionTokens()
 
-// Snapping to a slide animates a MotionValue directly (no scope,
-// no broadcast). spring overshoots and settles, so the slide
-// arrives with weight.
-animate(x, index * -slideWidth, {
-  duration: tokens.duration.slow,
-  ease: tokens.ease.overshoot,
-})
+// The snap animates a MotionValue directly (no scope, no
+// broadcast). Overshoot rides a bezier; Spring rides the real
+// physics. The dot indicator shares this exact transition, so it
+// springs when the snap does.
+const snap = motionMode === 'spring'
+  ? { type: 'spring',
+      stiffness: tokens.spring.stiffness,
+      damping: tokens.spring.damping,
+      mass: tokens.spring.mass }
+  : { duration: tokens.duration.slow,
+      ease: tokens.ease.overshoot }
+
+animate(x, index * -slideWidth, snap)
+
+// The active dot morphs to a pill on the same transition.
+<motion.span animate={{ width: isCurrent ? 20 : 8 }} transition={snap} />
 
 // Each slide scales up slightly when it becomes current.
 <motion.div

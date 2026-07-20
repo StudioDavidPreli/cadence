@@ -33,11 +33,23 @@ export const MotionTokensContext = createContext(null)
 // behavior. Overshoot is a special case worth flagging — at 10 ms it
 // resolves before the eye can register, so users who explicitly prefer no
 // bounce still get effectively no bounce.
+//
+// The reducedMotion flag:
+// A physics spring has no duration, so flattening duration does nothing to it.
+// A spring consumer therefore cannot tell it is in a flattening context from the
+// timing tokens alone. This flag rides with the flattened tokens so it can: a
+// consumer using { type: 'spring', ... } reads tokens.reducedMotion and falls
+// back to an instant transition instead. It is set only here, so it is true
+// exactly when the tokens have been flattened (a provider with
+// respectReducedMotion, or the no-provider OS path); everywhere else it is
+// absent and reads falsy, which is correct. This is the spring branch the
+// physics-spring decision doc anticipated (docs/decisions/physics-spring-2026-07-20.md).
 export function reduceMotion(tokens) {
   return {
     ...tokens,
     duration: { fast: 0.01, base: 0.01, slow: 0.01, slower: 0.01 },
     delay:    { none: 0, short: 0, medium: 0, long: 0 },
+    reducedMotion: true,
   }
 }
 

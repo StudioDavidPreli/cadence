@@ -162,6 +162,39 @@ reading the same `tokens.spring` through the existing context. No new global
 wiring. `springCurve` added eleven tests; the whole suite and the e2e gate stayed
 green.
 
+## Carousel, and the harmonized dot (same day)
+
+David added the Carousel to the switchable set, and asked for the harder, better
+version: not just the snap, but the dot indicator springing with it, and the P5
+Follow Through principle demonstrating the real spring rather than the bezier.
+
+The snap was the easy half: `goToSlide` already drives a MotionValue through the
+imperative `animate()`, which takes a spring config natively, so the transition
+became `{ type: 'spring', ...tokens.spring }` behind the same `motionMode` prop.
+
+The dot was the point. It had been moved to a CSS transition on purpose, to stay
+clear of the projection system a `layoutId` pill once corrupted. CSS cannot run a
+JS spring, so harmonizing it meant driving its width from Framer Motion again, and
+the record warned against exactly that. The distinction that makes it safe: the old
+failure was `layoutId`, the FLIP projection system, not animation as such. A direct
+`animate={{ width }}` writes a style value each frame and never touches projection.
+So the pip now animates its width on the *same* `snapTransition` object the snap
+uses, `initial={false}` to skip the mount, and the dot and the slide move as one
+system. That shared transition is the harmonization made literal: one object, two
+elements. Only width animates; the 4px border-radius and the accent fade stay in
+CSS. CLAUDE.md's dot passages were updated to match.
+
+P5 was the reason the reduced-motion gap finally had to close. Follow Through runs
+the Carousel with `motionMode="spring"`, and P5 is a real reduced-motion-respecting
+surface (its card gate flattens the tokens). A spring has no duration, so the
+flattening slid right past it, the gap the scope-A record named. The fix is the one
+that record proposed: `reduceMotion()` now sets a `reducedMotion: true` flag on the
+flattened tokens, and the Carousel reads it (`useSpring = motionMode === 'spring'
+&& !tokens.reducedMotion`), falling back to the bezier branch whose `duration.slow`
+is already flattened to instant. In Token Lab, the demo column opts out of
+flattening, so the flag is absent and the spring plays. One flag closed a gap that
+had been sitting open since the family shipped.
+
 ## Files
 
 Scope A:
@@ -187,3 +220,13 @@ Scope B (same day):
   `TokenLab.module.css`, `demoSnippets.js`
 - `src/components/TokenLabGuide/index.jsx` (the overview's spring note),
   `public/titleSVGS/spring.svg` (the coil icon, David's)
+
+Carousel + the reduced-motion flag (same day):
+
+- `src/context/MotionTokensContext.jsx` (`reduceMotion()` sets `reducedMotion`),
+  `MotionTokensContext.test.js`
+- `src/components/Carousel/index.jsx` (the `motionMode` prop, the spring snap, the
+  FM-driven dot), `Carousel.module.css`
+- `src/principles/FollowThrough/index.jsx` (P5 runs the spring)
+- `src/components/TokenLab/index.jsx` (Carousel in the map, `springCapable` on the
+  Gesture demo), `demoSnippets.js`, and CLAUDE.md's dot passages

@@ -38,4 +38,11 @@ describe('reduceMotion', () => {
     expect(tokens.duration.base).toBe(0.2)
     expect(tokens.delay.short).toBe(0.05)
   })
+
+  it('sets the reducedMotion flag, absent on the input', () => {
+    // A spring has no duration to flatten, so a spring consumer reads this flag
+    // to know it is in a flattening context and fall back to an instant snap.
+    expect(reduceMotion(tokens).reducedMotion).toBe(true)
+    expect(tokens.reducedMotion).toBeUndefined()
+  })
 })
