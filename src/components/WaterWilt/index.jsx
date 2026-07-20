@@ -234,6 +234,7 @@ function WaterWiltRive({ watered, children }) {
     growHandoff: null, // frames until the landed grow scrub retires to 0
     wiltFlowers: true, // whether the current wilt/unwilt includes flowersDie
     parkDieHandoff: null, // frames until die+rainStop re-park at 1 on a resume
+    wiltPreroll: null, // frames the loops hold over the arriving die layer
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
 
@@ -337,6 +338,9 @@ function WaterWiltRive({ watered, children }) {
       // depends on wiltFlowers: a bloom wilt returns to bloom, a post-growth
       // wilt resumes the sequence (see the unwilt completion). The active
       // channels always travel together, so die's value stands for the set.
+      // A press inside the preroll cancels it with the loops still up, which
+      // is exactly where the un-wilt is heading anyway.
+      d.wiltPreroll = null
       d.from = d.values.die
       d.q = 0
       d.mode = 'unwilt'
@@ -371,10 +375,9 @@ function WaterWiltRive({ watered, children }) {
   function pressWilt() {
     const d = driver.current
     if (d.mode === 'bloom') {
-      // Contract wilt entry: same frame, idleBoole false and the die trio
-      // snaps to 0. The die instances at 0 are the bloom the idle loop was
-      // orbiting, so the handoff is pose-matched. The rain loop yields to
-      // RainStop in the same frame.
+      // Contract wilt entry: idleBoole false and the die trio snaps to 0.
+      // The die instances at 0 are the bloom the idle loop was orbiting, so
+      // the handoff is pose-matched.
       d.mode = 'wilt'
       d.q = 0
       d.from = 0
@@ -383,11 +386,16 @@ function WaterWiltRive({ watered, children }) {
       d.growHandoff = null
       d.parkDieHandoff = null
       writeBooleans()
-      writeRainLoop(false)
-      // The sway yields to PlantDie in the same frame; the die instances at 0
-      // are the bloom the sway was orbiting, so the snap is bounded by the
-      // sway's own amplitude (the accepted mid-sway snap).
-      writePlantIdle(false)
+      // The loops do NOT drop here. PlantIdle and RainIdle hide on their own
+      // direct booleans while PlantDie/RainStop reveal through idleBoole's
+      // three-stage inverter, and the two pipelines land on different
+      // advances: dropping the loops at press painted one empty frame before
+      // the die layer arrived (David's report, reproduced frame-by-frame
+      // 2026-07-19). The preroll holds the loops over the arriving die layer
+      // at its pose-matched 0 for SETTLE_FRAMES; the wilt case then drops
+      // them and starts the death. Bounded by sway amplitude, the mid-sway
+      // snap precedent.
+      d.wiltPreroll = SETTLE_FRAMES
       for (const ch of WILT_CHANNELS) writeChannel(ch, 0)
       return
     }
@@ -431,6 +439,10 @@ function WaterWiltRive({ watered, children }) {
     if (d.mode === 'unwilt') {
       // Wilt again while un-wilting: resume the die travel forward from the
       // current pose. wiltFlowers carries over from the interrupted wilt.
+      // The preroll re-arms: if the loops came back up (or never dropped),
+      // they hold over the die layer again before the death resumes; if they
+      // are already down, the drop is idempotent and only the hold remains.
+      d.wiltPreroll = SETTLE_FRAMES
       d.from = d.values.die
       d.q = 0
       d.mode = 'wilt'
@@ -456,8 +468,10 @@ function WaterWiltRive({ watered, children }) {
     d.growHandoff = null
     d.parkDieHandoff = null
     writeBooleans()
-    writeRainLoop(false)
-    writePlantIdle(false)
+    // Same preroll as the bloom wilt: the loops hold over the arriving die
+    // pair (PlantDie at 0 is the grown plant, RainStop at 0 is full rain),
+    // then the wilt case drops them and the death runs.
+    d.wiltPreroll = SETTLE_FRAMES
     writeChannel('die', 0)
     writeChannel('rainStop', 0)
   }
@@ -696,6 +710,18 @@ function WaterWiltRive({ watered, children }) {
             break
           }
           case 'wilt': {
+            // Preroll: the die layer is arriving through its inverter while
+            // the loops still hold the pose on top. The clock waits with it,
+            // so the death's first visible frame is its authored 0.
+            if (d.wiltPreroll != null) {
+              d.wiltPreroll -= 1
+              if (d.wiltPreroll <= 0) {
+                d.wiltPreroll = null
+                writeRainLoop(false)
+                writePlantIdle(false)
+              }
+              break
+            }
             const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from + (1 - d.from) * ease.exit(d.q)
