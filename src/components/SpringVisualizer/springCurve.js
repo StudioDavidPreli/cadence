@@ -109,7 +109,6 @@ export function overshootFraction(params) {
 export function settleTime(params, band = 0.02) {
   const p = safe(params)
   if (!p) return 0
-  const zeta = dampingRatio(p)
   const rate = decayRate(p)
   if (!(rate > 0)) return settleWindow(p)
   // Envelope amplitude at t=0 is ~1 for the underdamped cosine and for the

@@ -29,6 +29,14 @@ export function SpringVisualizer({ spring }) {
   const { points, window, yMax, overshoot, settleTime, zeta } = useMemo(() => {
     const sampled = sampleSettleCurve(spring)
     return { ...sampled, zeta: dampingRatio(spring) }
+    // Deps are the three primitive params, not the spring object, by design.
+    // The memo reads only spring.stiffness/damping/mass (through
+    // sampleSettleCurve and dampingRatio), so keying on the primitives covers
+    // everything it reads and is more precise than object identity: a new
+    // spring object with identical values will not force a needless redraw.
+    // Dragging any slider changes one primitive, so the settle curve still
+    // redraws live as the reducer hands down a new spring.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spring.stiffness, spring.damping, spring.mass])
 
   // Top of the Y range: the real peak plus headroom, floored so the rest line at
