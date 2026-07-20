@@ -75,11 +75,19 @@ const WATER_SEQUENCE = [
   { tracks: [{ channel: 'flowers', duration: 'slow', ease: 'standard' }] },
 ]
 
-// Wilt runs the three authored die timelines together on duration.slow +
-// ease.exit (moved off duration.base 2026-07-18 so base stops owning two
-// unrelated beats; 400ms is still faster than the 600ms entry, so the
-// exit-faster precedent holds). Both reversals mirror the wilt's duration.
+// Wilt runs the authored die timelines together on duration.slow + ease.exit
+// (moved off duration.base 2026-07-18 so base stops owning two unrelated
+// beats; 400ms is still faster than the 600ms entry, so the exit-faster
+// precedent holds). Both reversals mirror the wilt's duration.
+//
+// Which channels participate depends on where the wilt began (David's
+// 2026-07-19 review): from bloom, all three; from the post-growth region
+// (delay.long or the flower beat), only die and rain-stop, because
+// FlowersDie is authored from full bloom and flowers that never finished
+// growing have no death to play. flowersDieProgress stays parked at 1 there,
+// rendering nothing: the phantom-flower rule.
 const WILT_CHANNELS = ['die', 'rainStop', 'flowersDie']
+const POST_GROWTH_WILT_CHANNELS = ['die', 'rainStop']
 
 // Reduced motion, driver-side: the eased progress of every scrubbed channel is
 // quantized into discrete steps — stop-motion at the same tempo, not a faster
@@ -199,11 +207,15 @@ function WaterWiltRive({ watered, children }) {
   //   rest     initial state; die channels parked at 1, everything else 0
   //   water    running WATER_SEQUENCE forward, one beat at a time
   //   bloom    at rest in full bloom; the idle loops play (idleBoole true)
-  //   wilt     die trio 0 → 1 together (the authored die from full bloom)
+  //   wilt     die channels 0 → 1 together (the authored die); which
+  //            channels depends on wiltFlowers, see the channel lists
+  //   retract  Wilt pressed mid-flower-beat: the young flowers pull back to
+  //            0 first, then the established plant dies (two-stage wilt)
   //   settle   wilt done, zeros written, holding SETTLE_FRAMES before the
   //            postGrowthBoole release (the bloom-flash guard)
-  //   unwilt   Water pressed mid-wilt: die trio reversed back toward bloom
-  //   unwater  Wilt pressed mid-growth: grow-era channels reversed to 0
+  //   unwilt   Water pressed mid-wilt: die channels reversed back down
+  //   unwater  Wilt pressed mid-GROWTH only: grow-era channels reversed to 0
+  //            (after the grow track lands, a wilt is a death, not a rewind)
   // `values` mirrors every channel's last written (un-quantized) value, so a
   // theme rebind can restore the new instance and interrupts know where each
   // channel stands. `trackQ`/`trackFrom` are the per-track integrator state
@@ -220,6 +232,8 @@ function WaterWiltRive({ watered, children }) {
     rainHandoff: null, // frames until the landed rain ramp retires to 0
     plantIdling: false, // mirrors the plantIdleBoole write, restored on rebind
     growHandoff: null, // frames until the landed grow scrub retires to 0
+    wiltFlowers: true, // whether the current wilt/unwilt includes flowersDie
+    parkDieHandoff: null, // frames until die+rainStop re-park at 1 on a resume
     values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
   })
 
@@ -319,13 +333,22 @@ function WaterWiltRive({ watered, children }) {
       return
     }
     if (d.mode === 'wilt') {
-      // Reverse the die trio back to 0 on ease.enter, then continue from
-      // bloom. The trio always travels together, so one channel's value
-      // stands for all three.
+      // Reverse the die channels back to 0 on ease.enter. Where they land
+      // depends on wiltFlowers: a bloom wilt returns to bloom, a post-growth
+      // wilt resumes the sequence (see the unwilt completion). The active
+      // channels always travel together, so die's value stands for the set.
       d.from = d.values.die
       d.q = 0
       d.mode = 'unwilt'
       writeBooleans()
+      return
+    }
+    if (d.mode === 'retract') {
+      // Water again while the young flowers pull back: regrow them from
+      // where they stand. The flowers beat is re-entered directly; rain and
+      // grow are retired scrubs here and must not be re-run from 0.
+      d.mode = 'water'
+      startBeat(WATER_SEQUENCE.length - 1)
       return
     }
     if (d.mode === 'unwater') {
@@ -355,8 +378,10 @@ function WaterWiltRive({ watered, children }) {
       d.mode = 'wilt'
       d.q = 0
       d.from = 0
+      d.wiltFlowers = true
       d.rainHandoff = null // RainFall is hidden through wilt; step 9 zeroes it
       d.growHandoff = null
+      d.parkDieHandoff = null
       writeBooleans()
       writeRainLoop(false)
       // The sway yields to PlantDie in the same frame; the die instances at 0
@@ -367,24 +392,35 @@ function WaterWiltRive({ watered, children }) {
       return
     }
     if (d.mode === 'water') {
+      // After the grow track lands (plantIdling is the marker), a wilt is a
+      // death, not a rewind (David's 2026-07-19 review): the established
+      // plant runs the authored die. Young flowers mid-beat pull back first,
+      // the two-stage wilt; flowers still at 0 skip straight to the die.
+      if (d.plantIdling) {
+        if (d.values.flowers > 0) {
+          d.mode = 'retract'
+          d.q = 0
+          d.from = d.values.flowers
+          return
+        }
+        beginPostGrowthWilt()
+        return
+      }
       // Wilt mid-growth: every grow-era channel above 0 travels back to 0
       // together, one duration.slow beat on ease.exit. Reversed travel is the
-      // accepted policy; the parked die instances render nothing, so there is
-      // no interference. The reversing rain ramp owns the rain again: if the
-      // ramp was already retired to 0 (the loop handoff), restore it to its
-      // full pose in the same frame the loop drops, so the rain un-falls
-      // instead of vanishing. The swap is bounded like the mid-sway snap.
+      // accepted policy for a plant still growing; the parked die instances
+      // render nothing, so there is no interference. The reversing rain ramp
+      // owns the rain again: if the ramp was already retired to 0 (the loop
+      // handoff), restore it to its full pose in the same frame the loop
+      // drops, so the rain un-falls instead of vanishing. The swap is bounded
+      // like the mid-sway snap. (The grow scrub needs no such restore here:
+      // pre-landing, it has never been retired.)
       d.mode = 'unwater'
       d.q = 0
       d.rainHandoff = null
       d.growHandoff = null
       if (d.rainLooping) writeChannel('rain', 1)
       writeRainLoop(false)
-      // Same restore for the plant: if the sway took over and the grow scrub
-      // was retired, put the scrub back at its full pose in the frame the
-      // sway drops, so the reversal un-grows instead of blinking.
-      if (d.plantIdling) writeChannel('grow', 1)
-      writePlantIdle(false)
       d.reversalFrom = {
         rain: d.values.rain,
         grow: d.values.grow,
@@ -394,14 +430,52 @@ function WaterWiltRive({ watered, children }) {
     }
     if (d.mode === 'unwilt') {
       // Wilt again while un-wilting: resume the die travel forward from the
-      // current pose.
+      // current pose. wiltFlowers carries over from the interrupted wilt.
       d.from = d.values.die
       d.q = 0
       d.mode = 'wilt'
       writeBooleans()
     }
-    // 'rest', 'settle', and 'wilt' ignore a Wilt press: the first two are
-    // already at (or finishing into) the dry state.
+    // 'rest', 'settle', 'retract', and 'wilt' ignore a Wilt press: they are
+    // already at, or heading into, the dry state.
+  }
+
+  // The post-growth death: the authored die for plant and rain, with
+  // flowersDie left parked at 1 because the flowers never reached bloom
+  // (the phantom-flower rule). PlantDie at 0 is the grown plant and RainStop
+  // at 0 is full rain, so the handoff from sway and loop is pose-matched;
+  // FlowerGrow hides on the boolean flip while holding nothing, or having
+  // just retracted to nothing.
+  function beginPostGrowthWilt() {
+    const d = driver.current
+    d.mode = 'wilt'
+    d.q = 0
+    d.from = 0
+    d.wiltFlowers = false
+    d.rainHandoff = null
+    d.growHandoff = null
+    d.parkDieHandoff = null
+    writeBooleans()
+    writeRainLoop(false)
+    writePlantIdle(false)
+    writeChannel('die', 0)
+    writeChannel('rainStop', 0)
+  }
+
+  // Water pressed while a post-growth wilt reverses back down: the plant is
+  // grown but the flowers never were, so bloom is the wrong destination.
+  // Re-enter the water sequence at the delay beat (delays ahead of a resume
+  // run again in full, the established rule), bring the sway and rain loop
+  // back over the pose-matched die instances, and re-park die and rain-stop
+  // at 1 two settled frames later, once the loops are on screen.
+  function resumePostGrowth() {
+    const d = driver.current
+    d.mode = 'water'
+    startBeat(1)
+    writeBooleans()
+    writePlantIdle(true)
+    writeRainLoop(true)
+    d.parkDieHandoff = SETTLE_FRAMES
   }
 
   function enterBloom() {
@@ -562,6 +636,16 @@ function WaterWiltRive({ watered, children }) {
             writeChannel('grow', 0)
           }
         }
+        // Pending die re-park after a post-growth resume: the loops are on
+        // screen, so die and rain-stop can return to their invisible 1 pose.
+        if (d.parkDieHandoff != null) {
+          d.parkDieHandoff -= 1
+          if (d.parkDieHandoff <= 0) {
+            d.parkDieHandoff = null
+            writeChannel('die', 1)
+            writeChannel('rainStop', 1)
+          }
+        }
         switch (d.mode) {
           case 'water': {
             const beat = WATER_SEQUENCE[d.step]
@@ -615,8 +699,21 @@ function WaterWiltRive({ watered, children }) {
             const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from + (1 - d.from) * ease.exit(d.q)
-            for (const ch of WILT_CHANNELS) writeChannel(ch, v)
+            const channels = d.wiltFlowers ? WILT_CHANNELS : POST_GROWTH_WILT_CHANNELS
+            for (const ch of channels) writeChannel(ch, v)
             if (d.q >= 1) beginRestSettle()
+            break
+          }
+          case 'retract': {
+            // Stage one of the two-stage wilt: the young flowers pull back
+            // to 0, quick, on the functional timing; then the die runs.
+            const dur = Math.max(t.duration.fast, MIN_DURATION_S)
+            d.q = Math.min(1, d.q + dt / dur)
+            writeChannel('flowers', d.from * (1 - ease.exit(d.q)))
+            if (d.q >= 1) {
+              writeChannel('flowers', 0)
+              beginPostGrowthWilt()
+            }
             break
           }
           case 'settle': {
@@ -633,11 +730,17 @@ function WaterWiltRive({ watered, children }) {
             const dur = Math.max(t.duration.slow, MIN_DURATION_S)
             d.q = Math.min(1, d.q + dt / dur)
             const v = d.from * (1 - ease.enter(d.q))
-            for (const ch of WILT_CHANNELS) writeChannel(ch, v)
-            // The trio lands at 0 — the bloom pose — and the idle loops take
-            // over. They stay at 0 through bloom (hidden while idleBoole is
-            // true); the next Wilt press snaps them to 0 anyway, per step 7.
-            if (d.q >= 1) enterBloom()
+            const channels = d.wiltFlowers ? WILT_CHANNELS : POST_GROWTH_WILT_CHANNELS
+            for (const ch of channels) writeChannel(ch, v)
+            // A bloom wilt reverses to bloom: the channels land at 0 (the
+            // bloom pose, hidden once idleBoole is true) and the next Wilt
+            // press snaps them there anyway. A post-growth wilt reverses
+            // back into the sequence instead: the flowers were never grown,
+            // so bloom would be a lie.
+            if (d.q >= 1) {
+              if (d.wiltFlowers) enterBloom()
+              else resumePostGrowth()
+            }
             break
           }
           case 'unwater': {

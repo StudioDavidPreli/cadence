@@ -200,11 +200,33 @@ review: rain and growth trigger together, and the soak beat is gone.)
    on built output). The grow-era instances return at their invisible 0 poses.
    Rest state now equals initial state.
 
-**Interrupts.** Wilt pressed mid-growth: reverse the running grow-era channels back
-down on `ease.exit`; the parked die/rain-stop are visible but render nothing, so
-there is no interference. If the rain ramp was already retired to 0, the driver
-restores it to 1 in the same frame `rainBoole` drops, so the rain un-falls with
-the reversal instead of vanishing (bounded swap, the mid-sway precedent). Water pressed mid-wilt: reverse `dieProgress`,
+**Interrupts.** (Revised 2026-07-19, David's testing: reversed travel narrowed
+to strictly mid-growth. After the grow track lands, a wilt is a death, not a
+rewind.)
+
+Wilt pressed mid-growth (the grow track not yet landed): reverse the running
+grow-era channels back down on `ease.exit`; the parked die/rain-stop are
+visible but render nothing, so there is no interference. If the rain ramp was
+already retired to 0, the driver restores it to 1 in the same frame
+`rainBoole` drops, so the rain un-falls with the reversal instead of
+vanishing (bounded swap, the mid-sway precedent).
+
+Wilt pressed post-growth (delay.long or the flower beat; `plantIdleBoole` is
+the boundary marker): the authored die runs for plant and rain, with
+`flowersDieProgress` left parked at 1, because `flowersDie` is authored from
+full bloom and flowers that never bloomed have no death to play (the
+phantom-flower rule). Pressed mid-flower-beat, the wilt is two-stage: the
+young flowers first pull back to 0 on `duration.fast` + `ease.exit` (reversed
+travel for the young, authored death for the established), then the die runs.
+`FlowerGrow` hides on the boolean flip while holding nothing.
+
+Water pressed mid-wilt: reverse the active die channels back to 0 on
+`ease.enter`. From a bloom wilt, continue at bloom, as before. From a
+post-growth wilt, bloom would claim flowers that never grew, so the driver
+re-enters the water sequence at the delay beat instead (delays ahead of a
+resume run in full, the established rule); the sway and rain loop return over
+the pose-matched die instances, and die/rain-stop re-park at 1 two settled
+frames later. Water pressed mid-wilt: reverse `dieProgress`,
 `rainStopProgress`, and `flowersDieProgress` back to 0 on `ease.enter`, then
 continue from bloom. The wilt
 animation from full bloom is the authored `die` timeline; a partial-state wilt is

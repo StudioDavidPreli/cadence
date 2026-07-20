@@ -145,10 +145,10 @@ one-shot sequencer. It runs phases to completion and then does nothing at all.
 
 ```jsx
 const driver = useRef({
-  mode: 'rest',        // rest | water | bloom | wilt | settle | unwilt | unwater
+  mode: 'rest',        // rest | water | bloom | wilt | retract | settle | unwilt | unwater
   step: 0,             // index into WATER_SEQUENCE
   q: 0,                // beat progress, delay seconds, or settle frame count
-  from: 0,             // start value of the die trio's current travel
+  from: 0,             // start value of the die channels' current travel
   trackQ: {},          // per-track integrator state for parallel beats
   trackFrom: {},
   reversalFrom: null,  // per-channel start values for the unwater reversal
@@ -156,9 +156,19 @@ const driver = useRef({
   plantIdling: false,
   rainHandoff: null,   // frames until a landed scrub retires to 0
   growHandoff: null,
+  wiltFlowers: true,   // whether this wilt includes flowersDie
+  parkDieHandoff: null, // frames until die channels re-park after a resume
   values: { rain: 0, grow: 0, flowers: 0, die: 1, rainStop: 1, flowersDie: 1 },
 })
 ```
+
+Interrupt policy splits at the grow-landing boundary, with `plantIdling` as
+the marker (David's 2026-07-19 revision): a wilt before the plant finishes
+growing is reversed travel, a wilt after is the authored death. Post-growth
+deaths leave `flowersDieProgress` parked, because a death authored from full
+bloom cannot play for flowers that never bloomed; a wilt pressed mid-flower-
+beat retracts the young flowers first, then dies. Reversed travel for the
+young, authored death for the established, decided per layer.
 
 `values` mirrors every channel's last written value. It exists so a rebind can
 restore the new instance and so interrupts know where each channel stands. The
