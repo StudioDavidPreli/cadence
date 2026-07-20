@@ -10,7 +10,7 @@ and delay between them comes from Token Lab's live reducer, and nothing in the
 canvas knows what a token is. This document records how that works, how it was
 built, and every place it broke on the way.
 
-The demo is React Rive Timelines (the Embeds category). The interface contract
+The demo is React Clock (the Embeds category). The interface contract
 is `docs/briefings/waterwilt-token-vm-map.md`; the component is
 `src/components/WaterWilt/index.jsx`. This document explains them. Where they
 disagree with it, they win.

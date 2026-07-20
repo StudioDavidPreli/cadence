@@ -10,6 +10,7 @@ import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { DurationVisualizer } from '../DurationVisualizer'
+import { SpringVisualizer } from '../SpringVisualizer'
 import { MotionTilesSection } from '../MotionTiles/MotionTilesSection'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { NavColumn } from '../NavColumn'
@@ -104,7 +105,7 @@ const Carousel = lazy(() =>
 // enter/exit), Toggle under easing.standard + scale.base (it reads
 // duration.fast + ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
-// React Rive Timelines (2026-07-18, the Embeds category's Water & Wilt demo)
+// React Clock (2026-07-18, the Embeds category's Water & Wilt demo)
 // is the first canvas demo in the map. Its rows are exactly what the rAF
 // driver reads (docs/briefings/waterwilt-token-vm-map.md): rain on
 // fast+linear and growth on slower+enter together, flowers on slow+standard
@@ -117,28 +118,29 @@ const Carousel = lazy(() =>
 // demo reads scale.base (scene + button overlay + Button squash) and no
 // other scale token.
 const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Rive Timelines'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
-  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Rive Timelines'],
-  'duration.slower':  ['Spinner', 'Stepper', 'React Rive Timelines'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Rive Timelines'],
-  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Rive Timelines'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Rive Timelines'],
+  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock'],
+  'duration.slower':  ['Spinner', 'Stepper', 'React Clock'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
   'delay.short':      ['Stepper'],
   'delay.medium':     ['Stepper'],
-  'delay.long':       ['Stepper', 'React Rive Timelines'],
+  'delay.long':       ['Stepper', 'React Clock'],
   'scale.subtle':     ['Card'],
-  'scale.base':       ['Button', 'Stepper', 'React Rive Timelines'],
+  'scale.base':       ['Button', 'Stepper', 'React Clock'],
   'scale.expressive': ['Notification Badge'],
   'scale.lift':       ['Card', 'Carousel'],
-  // The physics-spring family. Only the SpringDemo consumes it. These rows are
-  // wired for completeness, but nothing dispatches an active `spring.*` token
-  // yet: the spring has no slider (the editor UI is the deferred scope-B pass),
-  // so the connection-highlight for these lights up only once controls land.
-  'spring.stiffness': ['Spring'],
-  'spring.damping':   ['Spring'],
-  'spring.mass':      ['Spring'],
+  // The physics-spring family. The SpringDemo always consumes it; Button, Card,
+  // and Toggle consume it when their per-demo switch is flipped to Spring. The
+  // switch is per-instance state the static map cannot read, so these list every
+  // spring-capable demo: dragging a spring slider highlights the components the
+  // spring can drive, whether or not each is currently switched to it.
+  'spring.stiffness': ['Spring', 'Button', 'Card', 'Toggle'],
+  'spring.damping':   ['Spring', 'Button', 'Card', 'Toggle'],
+  'spring.mass':      ['Spring', 'Button', 'Card', 'Toggle'],
 }
 
 // EASING_CURVES, INITIAL_STATE, BUILT_IN_PRESETS, and stateToTokens now live
@@ -159,6 +161,8 @@ function reducer(state, action) {
       return { ...state, delay: { ...state.delay, [action.key]: action.value } }
     case 'SET_SCALE':
       return { ...state, scale: { ...state.scale, [action.key]: action.value } }
+    case 'SET_SPRING':
+      return { ...state, spring: { ...state.spring, [action.key]: action.value } }
     case 'RESET_TO_DEFAULTS':
       return { ...INITIAL_STATE }
     case 'LOAD_PRESET':
@@ -235,6 +239,10 @@ function syncToCss(action) {
     case 'SET_SCALE':
       el.style.setProperty(`--motion-scale-${action.key}`, `${action.value}`)
       break
+    case 'SET_SPRING':
+      // Spring params are unitless (no ms suffix), like scale.
+      el.style.setProperty(`--motion-spring-${action.key}`, `${action.value}`)
+      break
     case 'RESET_TO_DEFAULTS':
       writeAllTokensToCss(INITIAL_STATE)
       break
@@ -298,6 +306,22 @@ const SCALE_CONFIG_EXPLORE = {
   base:       { min: 0.50, max: 1.20, step: 0.01, unit: '' },
   expressive: { min: 0.50, max: 1.20, step: 0.01, unit: '' },
   lift:       { min: 0.50, max: 1.20, step: 0.01, unit: '' },
+}
+
+// Spring — unitless. Constrained ranges cover the band that produces usable UI
+// springs (a legible arrival, a little bounce, not a rubber ball and not a
+// door-closer). Explore ranges are the SPRING_BOUNDS from motionPresets.js, so an
+// imported value always lands on the track. The three params carry different
+// ranges, so unlike the families above each key is tuned on its own.
+const SPRING_CONFIG = {
+  stiffness: { min: 80,  max: 800, step: 10,  unit: '' },
+  damping:   { min: 8,   max: 60,  step: 1,   unit: '' },
+  mass:      { min: 0.5, max: 3,   step: 0.1, unit: '' },
+}
+const SPRING_CONFIG_EXPLORE = {
+  stiffness: { min: 1,   max: 2000, step: 10,  unit: '' },
+  damping:   { min: 1,   max: 100,  step: 1,   unit: '' },
+  mass:      { min: 0.1, max: 10,   step: 0.1, unit: '' },
 }
 
 // ─── Preset helpers ───────────────────────────────────────────────────────────
@@ -919,6 +943,47 @@ function ControlsTitle() {
   )
 }
 
+// ─── SpringSwitch ─────────────────────────────────────────────────────────────
+// A per-demo Overshoot/Spring toggle. Renders a labeled two-segment control and
+// hands the chosen mode to its render-prop child, so a demo can flip its
+// component between the ease.overshoot bezier and the real physics spring in
+// place, on the same instances. It is the A/B the whole spring family exists to
+// make: the imitation next to the physics.
+//
+// The mode is local, unsaved state, and it defaults to 'bezier' so the demo shows
+// the shipped motion until the user asks for the spring. `label` names the motion
+// the switch governs (the Button's release, the Card's select, the Toggle's
+// thumb) so the control reads without a legend.
+function SpringSwitch({ label, children }) {
+  const [mode, setMode] = useState('bezier')
+  return (
+    <div className={styles.springSwitchWrap}>
+      <div className={styles.springSwitch} role="group" aria-label={`${label} motion: overshoot or spring`}>
+        <span className={styles.springSwitchLabel}>{label}</span>
+        <div className={styles.springSwitchToggle}>
+          <button
+            type="button"
+            className={`${styles.springSwitchOption} ${mode === 'bezier' ? styles.springSwitchOptionActive : ''}`}
+            onClick={() => setMode('bezier')}
+            aria-pressed={mode === 'bezier'}
+          >
+            Overshoot
+          </button>
+          <button
+            type="button"
+            className={`${styles.springSwitchOption} ${mode === 'spring' ? styles.springSwitchOptionActive : ''}`}
+            onClick={() => setMode('spring')}
+            aria-pressed={mode === 'spring'}
+          >
+            Spring
+          </button>
+        </div>
+      </div>
+      {children(mode)}
+    </div>
+  )
+}
+
 // ─── DrawerDemo ───────────────────────────────────────────────────────────────
 // Manages local open/close state for the Drawer demo in the Enter & Exit tab.
 // portalTarget is the demo-area overlay node (see DemoArea.useDemoOverlay), so
@@ -1242,7 +1307,7 @@ const DEMO_NAV_ITEMS = ['Overview', 'Token Lab', 'Principles']
 export function TokenLab() {
   const [rawState, rawDispatch] = useReducer(reducer, INITIAL_STATE)
   const [openSections, setOpenSections] = useState(
-    new Set(['duration', 'easing', 'scale'])
+    new Set(['duration', 'easing', 'scale', 'spring'])
   )
   // Which Principles filter is active comes from NavigationContext (the nav
   // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
@@ -1328,6 +1393,7 @@ export function TokenLab() {
   const durationConfig = exploreMode ? DURATION_CONFIG_EXPLORE : DURATION_CONFIG
   const delayConfig    = exploreMode ? DELAY_CONFIG_EXPLORE    : DELAY_CONFIG
   const scaleConfig    = exploreMode ? SCALE_CONFIG_EXPLORE    : SCALE_CONFIG
+  const springConfig   = exploreMode ? SPRING_CONFIG_EXPLORE   : SPRING_CONFIG
 
   function dispatch(action) {
     syncToCss(action)
@@ -1415,33 +1481,43 @@ export function TokenLab() {
       <div className={styles.demoContent}>
         <DemoWrapper
           componentName="Button"
-          instruction="Press to see scale and easing"
+          instruction="Press to see scale and easing; switch the release to feel a real spring"
           code={DEMO_SNIPPETS.Button}
         >
-          <div className={styles.demoRow}>
-            <Button>Press me</Button>
-            <Button>Action</Button>
-          </div>
+          <SpringSwitch label="Release">
+            {mode => (
+              <div className={styles.demoRow}>
+                <Button motionMode={mode}>Press me</Button>
+                <Button motionMode={mode}>Action</Button>
+              </div>
+            )}
+          </SpringSwitch>
         </DemoWrapper>
 
         <DemoWrapper
           componentName="Card"
-          instruction="Click to toggle selected state"
+          instruction="Click to toggle selected state; switch the select to a real spring"
           code={DEMO_SNIPPETS.Card}
         >
-          <div className={styles.demoCards}>
-            <Card
-              tag="Principle"
-              title="Squash & Stretch"
-              description="The illusion of weight and flexibility."
-              style={{ maxWidth: '220px' }}
-            />
-            <Card
-              title="Timing"
-              description="Duration gives weight and personality."
-              style={{ maxWidth: '220px' }}
-            />
-          </div>
+          <SpringSwitch label="Select">
+            {mode => (
+              <div className={styles.demoCards}>
+                <Card
+                  tag="Principle"
+                  title="Squash & Stretch"
+                  description="The illusion of weight and flexibility."
+                  style={{ maxWidth: '220px' }}
+                  motionMode={mode}
+                />
+                <Card
+                  title="Timing"
+                  description="Duration gives weight and personality."
+                  style={{ maxWidth: '220px' }}
+                  motionMode={mode}
+                />
+              </div>
+            )}
+          </SpringSwitch>
         </DemoWrapper>
 
         <DemoWrapper
@@ -1463,13 +1539,17 @@ export function TokenLab() {
 
         <DemoWrapper
           componentName="Toggle"
-          instruction="Toggle to compare subtle vs expressive signaling"
+          instruction="Compare subtle vs expressive signaling; switch the thumb to a real spring"
           code={DEMO_SNIPPETS.Toggle}
         >
-          <div className={styles.demoRow}>
-            <Toggle label="Subtle"     mode="subtle" />
-            <Toggle label="Expressive" mode="expressive" />
-          </div>
+          <SpringSwitch label="Thumb">
+            {mode => (
+              <div className={styles.demoRow}>
+                <Toggle label="Subtle"     mode="subtle"     motionMode={mode} />
+                <Toggle label="Expressive" mode="expressive" motionMode={mode} />
+              </div>
+            )}
+          </SpringSwitch>
         </DemoWrapper>
 
         <DemoWrapper
@@ -1548,7 +1628,7 @@ export function TokenLab() {
             poses; the driver holds time. Contract:
             docs/briefings/waterwilt-token-vm-map.md. */}
         <DemoWrapper
-          componentName="React Rive Timelines"
+          componentName="React Clock"
           instruction="Press Water me. Rain and growth run together, rain on duration.fast, growth on duration.slower; flowers wait out delay.long. Press again and the wilt runs out on duration.slow with ease.exit"
           code={DEMO_SNIPPETS.WaterWilt}
           instructionClass={styles.demoInstructionEmbed}
@@ -1693,6 +1773,27 @@ export function TokenLab() {
             tokenKey={`scale.${key}`}
           />
         ))}
+      </ControlSection>
+
+      <ControlSection
+        label="Spring"
+        isOpen={openSections.has('spring')}
+        onToggle={() => toggleSection('spring')}
+      >
+        {Object.entries(springConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.spring[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_SPRING', key, value })}
+            tokenKey={`spring.${key}`}
+          />
+        ))}
+        {/* Reads the live spring values straight from rawState — the controls
+            column is outside MotionTokensProvider, so the visualizer takes the
+            numbers as a prop, the same as DurationVisualizer. */}
+        <SpringVisualizer spring={rawState.spring} />
       </ControlSection>
     </>
   )

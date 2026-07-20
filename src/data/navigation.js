@@ -29,7 +29,7 @@ export const MOTION_TILES_GRID = 'grid'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but
-// still answers the token reducer, starting with React Rive Timelines.
+// still answers the token reducer, starting with React Clock.
 export const CATEGORIES = [
   { id: 'press-state',       label: 'Press & State' },
   { id: 'enter-exit',        label: 'Enter & Exit' },
