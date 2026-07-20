@@ -423,62 +423,56 @@
   color: var(--color-text-primary);
 }
 
-/* ── Spring switch ───────────────────────────────────────────────────────────
-   The per-demo Overshoot/Spring toggle. A labeled two-segment control above the
-   demo instances, sharing the segmented-toggle construction with the export
-   format toggle above. */
-.springSwitchWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.springSwitch {
+/* ── Demo label-row actions ──────────────────────────────────────────────────
+   Groups the per-demo buttons at the right end of the label row so they sit
+   together: the spring toggle first, then the </> code toggle. */
+.demoLabelActions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.springSwitchLabel {
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.springSwitchToggle {
+/* ── Spring toggle ───────────────────────────────────────────────────────────
+   A single icon toggle, one metal-spring glyph, to the left of the </> button.
+   It flips the demo's components between ease.overshoot and the real spring.
+   Same bordered chrome-button construction as .codeToggle so the two read as a
+   pair. Rest: muted glyph. Engaged: the theme accent, the "currently affecting
+   the system" statement the accent role carries everywhere in the tool. The
+   glyph is a graphical element (currentColor fill), so accent clears the 3:1 bar
+   in every theme. */
+.springToggle {
   display: inline-flex;
-  border: 1px solid var(--color-border);
+  align-items: center;
+  padding: 3px 7px;
   border-radius: 5px;
-  overflow: hidden;
-}
-
-.springSwitchOption {
-  padding: 4px 10px;
-  border: none;
+  border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
-  font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
 }
 
-.springSwitchOption:not(:last-child) {
-  border-right: 1px solid var(--color-border);
-}
-
-.springSwitchOption:hover {
+.springToggle:hover {
   background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
 
-/* Active segment carries the accent-subtle fill: it names the mode currently
-   driving the demo, the same "currently affecting the system" statement the
-   DurationVisualizer mode toggle makes. */
-.springSwitchOptionActive,
-.springSwitchOptionActive:hover {
-  background-color: var(--color-accent-subtle);
-  color: var(--color-text-base);
+/* Engaged: the accent, on both the glyph and the border, so the spring reads as
+   the mode currently driving the demo. Its own hover holds the accent rather
+   than inverting, the way active pills do. */
+.springToggleOn,
+.springToggleOn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: none;
+}
+
+.springIcon {
+  display: block;
+  height: 12px;
+  width: 20px;
+  fill: currentColor;
 }
 
 /* Export is the primary action: solid fill. Copy is secondary: bordered. */

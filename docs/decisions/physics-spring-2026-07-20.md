@@ -140,16 +140,21 @@ springs; Explore ranges are the `SPRING_BOUNDS` from scope A, so an import alway
 lands on the track.
 
 The switch. David chose per-component toggles over a global mode, on Button, Card,
-and Toggle. Each takes an optional `motionMode` prop defaulting to `'bezier'`, and
-a small `SpringSwitch` render-prop gives the demo an Overshoot/Spring toggle that
-passes the mode down. When it reads `'spring'`, the component's overshoot-role
+and Toggle. Each takes an optional `motionMode` prop defaulting to `'bezier'`. The
+control is a single icon toggle, a metal-spring coil, sitting in the demo's label
+row to the left of the `</>` button; `DemoWrapper` owns the state through a
+`springCapable` prop and hands the mode to its render-prop child. The glyph is the
+inlined `spring.svg` filled with `currentColor`, muted at rest and the theme accent
+when engaged, so one asset tracks all four themes through the color token, the way
+the wordmark does. When the mode reads `'spring'`, the component's overshoot-role
 transition becomes `{ type: 'spring', ...tokens.spring }`; Button swaps its release,
 Card its select-in only (deselect stays standard), Toggle its thumb. No shipped call
-site passes the prop, so nothing ships rewired: the switch is the imitation next to
+site passes the prop, so nothing ships rewired: the toggle is the imitation next to
 the physics on one component, an exploration, not a decision. The `motionMode`
 branch shows in each demo's code view, so the `</>` panel names the spring tokens
 the moment a demo is switched, and the connection-highlight lists all four
-spring-capable demos when a spring slider moves.
+spring-capable demos when a spring slider moves. The Token Lab overview documents
+the section and the toggle.
 
 The tight loop this builds: switch a Button to Spring, drag stiffness, and the
 button, the settle-curve chart, and the SpringDemo all move together, every one
@@ -178,4 +183,7 @@ Scope B (same day):
 - `src/components/Button/index.jsx`, `Card/index.jsx`, `Toggle/index.jsx`
   (the `motionMode` prop)
 - `src/components/TokenLab/index.jsx` (`SET_SPRING`, the Spring section, the
-  `SpringSwitch` helper), `TokenLab.module.css`, `demoSnippets.js`
+  `SpringIcon` glyph, the `springCapable` toggle in `DemoWrapper`),
+  `TokenLab.module.css`, `demoSnippets.js`
+- `src/components/TokenLabGuide/index.jsx` (the overview's spring note),
+  `public/titleSVGS/spring.svg` (the coil icon, David's)

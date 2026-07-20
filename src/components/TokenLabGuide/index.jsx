@@ -36,7 +36,9 @@ export function TokenLabGuide() {
           Four families: duration (how long), easing (the shape of the change),
           delay (the wait before it starts), and scale (how far it travels). Each
           control sits at a named step, fast through slower, subtle through
-          expressive, so a value has a name before it has a number.
+          expressive, so a value has a name before it has a number. A fifth
+          section, Spring, is a real physics spring, and it works differently
+          enough to earn its own note below.
         </p>
         <p className={styles.body}>
           Constrained mode holds each control to the range the system intends.
@@ -61,6 +63,26 @@ export function TokenLabGuide() {
           graph chooses which one the graph reads and writes. Overshoot and Linear
           load as presets. A named curve is a shared word between a designer and an
           engineer, where four loose numbers are not.
+        </p>
+      </section>
+
+      <section className={styles.section}>
+        <h3 className={styles.heading}>The spring</h3>
+        <p className={styles.body}>
+          The overshoot curve is a bezier: it fakes a spring on a fixed clock. A
+          real spring has no duration. Stiffness, damping, and mass define it, and
+          the settle time falls out of those three. The Spring section holds the
+          three sliders, and the graph below them draws the settle curve they make:
+          the value rising, overshooting the target, and coming to rest. Drag a
+          slider and the curve redraws.
+        </p>
+        <p className={styles.body}>
+          Three demos carry a spring toggle, the coil icon to the left of the code
+          button: Button, Card, and Toggle. Flip it and that demo trades the
+          overshoot bezier for the real spring in place, on the same component, so
+          you can feel the difference the bezier only imitates. The icon turns the
+          accent color while it is on. Nothing ships on the spring by default. The
+          toggle is a comparison, not a change.
         </p>
       </section>
 

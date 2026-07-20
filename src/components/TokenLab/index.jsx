@@ -829,9 +829,16 @@ function SliderRow({ name, value, config, onChange, tokenKey }) {
 // into the containing block for absolutely-positioned descendants — safe for
 // the carousel (nothing in it positions absolutely), not something to impose
 // on every demo at once.
-function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass }) {
+function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass, springCapable = false }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
+  // springCapable demos carry a spring toggle in the label row (left of the </>
+  // button). It flips the demo's components between ease.overshoot and the real
+  // spring in place. children is a render prop for those demos, receiving the
+  // mode; a plain-node child (every other demo) is rendered as-is.
+  const [springOn, setSpringOn] = useState(false)
+  const springMode = springOn ? 'spring' : 'bezier'
+  const body = typeof children === 'function' ? children(springMode) : children
   const chrome = useChromeTransition()
   // ≥1280px an open code view sits in a column beside the demo (.demoGroupSplit)
   // instead of revealing beneath it, so the component and its source are visible
@@ -866,19 +873,33 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
       <div className={mainClass ? `${styles.demoMain} ${mainClass}` : styles.demoMain}>
         <div className={styles.demoLabelRow}>
           <span className={styles.demoLabel}>{componentName}</span>
-          {code && (
-            <button
-              type="button"
-              className={`${styles.codeToggle} ${showCode ? styles.codeToggleActive : ''}`}
-              onClick={() => setShowCode(s => !s)}
-              aria-expanded={showCode}
-              aria-label={showCode ? 'Hide code' : 'Show code'}
-            >
-              {'</>'}
-            </button>
-          )}
+          <div className={styles.demoLabelActions}>
+            {springCapable && (
+              <button
+                type="button"
+                className={`${styles.springToggle} ${springOn ? styles.springToggleOn : ''}`}
+                onClick={() => setSpringOn(s => !s)}
+                aria-pressed={springOn}
+                aria-label={springOn ? 'Spring motion on' : 'Spring motion off'}
+                title="Toggle spring motion"
+              >
+                <SpringIcon />
+              </button>
+            )}
+            {code && (
+              <button
+                type="button"
+                className={`${styles.codeToggle} ${showCode ? styles.codeToggleActive : ''}`}
+                onClick={() => setShowCode(s => !s)}
+                aria-expanded={showCode}
+                aria-label={showCode ? 'Hide code' : 'Show code'}
+              >
+                {'</>'}
+              </button>
+            )}
+          </div>
         </div>
-        {children}
+        {body}
         {state !== 'no-demo' && instruction && (
           <p className={`${styles.demoInstruction} ${instructionClass ?? ''}`}>{instruction}</p>
         )}
@@ -943,44 +964,17 @@ function ControlsTitle() {
   )
 }
 
-// ─── SpringSwitch ─────────────────────────────────────────────────────────────
-// A per-demo Overshoot/Spring toggle. Renders a labeled two-segment control and
-// hands the chosen mode to its render-prop child, so a demo can flip its
-// component between the ease.overshoot bezier and the real physics spring in
-// place, on the same instances. It is the A/B the whole spring family exists to
-// make: the imitation next to the physics.
-//
-// The mode is local, unsaved state, and it defaults to 'bezier' so the demo shows
-// the shipped motion until the user asks for the spring. `label` names the motion
-// the switch governs (the Button's release, the Card's select, the Toggle's
-// thumb) so the control reads without a legend.
-function SpringSwitch({ label, children }) {
-  const [mode, setMode] = useState('bezier')
+// ─── SpringIcon ───────────────────────────────────────────────────────────────
+// The metal-spring glyph for the per-demo spring toggle (public/titleSVGS/
+// spring.svg, inlined). The path carries no fill, so it inherits currentColor,
+// which the .springToggle CSS sets per state: muted at rest, the theme accent
+// when engaged. Inlining rather than an <img> is what lets one asset track all
+// four themes through the color token, the same reason the wordmark is inlined.
+function SpringIcon() {
   return (
-    <div className={styles.springSwitchWrap}>
-      <div className={styles.springSwitch} role="group" aria-label={`${label} motion: overshoot or spring`}>
-        <span className={styles.springSwitchLabel}>{label}</span>
-        <div className={styles.springSwitchToggle}>
-          <button
-            type="button"
-            className={`${styles.springSwitchOption} ${mode === 'bezier' ? styles.springSwitchOptionActive : ''}`}
-            onClick={() => setMode('bezier')}
-            aria-pressed={mode === 'bezier'}
-          >
-            Overshoot
-          </button>
-          <button
-            type="button"
-            className={`${styles.springSwitchOption} ${mode === 'spring' ? styles.springSwitchOptionActive : ''}`}
-            onClick={() => setMode('spring')}
-            aria-pressed={mode === 'spring'}
-          >
-            Spring
-          </button>
-        </div>
-      </div>
-      {children(mode)}
-    </div>
+    <svg className={styles.springIcon} viewBox="0 0 79.34 47.16" aria-hidden="true">
+      <path d="M30.57,41.02c-3.83-7.07-1.6-20.87,2.16-28.4-.81-1.22-1.89-2.26-3.21-3-2.64-1.49-6.04.56-7.93,3.09,3.26,5.56,4.77,12.59,4.37,18.94-.25,3.98-1.64,8.59-5.5,9.7-2.7.78-5.31-.38-6.56-2.89-3.38-6.79-.59-19.06,3.43-25.68-2.5-2.94-6.73-1.62-9.21,1.01-3.22,3.43-4.39,8.76-4.78,13.44-.08.99-.91,1.63-1.78,1.57S-.07,27.96,0,26.95c.4-5.68,2.13-12.28,6.33-16.14,3.59-3.31,9.29-4.52,13.03-.79,1.66-1.82,3.58-3.31,5.96-3.97,3.73-1.04,6.65.53,9.26,3.42,1.94-2.97,4.41-5.25,7.57-6.6,4.4-1.87,9.16-1.02,12.65,2.38,3.52-4.5,8.77-6.63,14.06-4.31,4.84,2.56,7.15,8.75,8.4,14.01,1.4,5.9,1.97,11.84,2.07,17.92.02,1.01-.84,1.7-1.69,1.7-.91,0-1.65-.69-1.67-1.7-.13-5.84-.65-11.54-2-17.21-1.02-4.28-3.18-10.51-7.27-11.95-3.65-1.28-7.31.87-9.56,3.98,5.22,6.96,7.66,16.97,7.66,25.56,0,5.83-1.77,13.7-7.96,13.89-4.28.13-6.84-3.45-8.02-7.54-2.7-9.34-.81-22.82,4.04-31.55-2.67-2.99-6.79-3.66-10.34-1.65-2.47,1.41-4.37,3.55-5.78,6.02,4.23,7.28,7.55,20.78,3.8,27.99-1.29,2.48-3.84,3.94-6.59,3.36-1.5-.32-2.65-1.42-3.39-2.77ZM59.14,42.5c.81-1.07,1.34-2.33,1.63-3.6,1.92-8.31-.61-20.87-5.56-28.09-3.42,6.79-4.56,14.84-4.15,22.19.33,3.37.93,7.57,3.24,9.84,1.4,1.38,3.59,1.32,4.84-.34ZM20.96,37.18c.88-1.46,1.39-2.98,1.56-4.7.57-5.64-.45-11.35-3-16.63-2.57,4.97-3.71,10.25-3.75,15.65.1,1.84.33,3.5.94,5.15.48.84,1.09,1.53,1.93,1.58s1.61-.35,2.31-1.04ZM34.72,40.48c3.05.71,4.13-4.5,4.06-7.81-.1-5.7-1.37-11.21-3.9-16.54-2.7,6.71-4.1,15.93-1.7,22.66.34.6.81,1.52,1.53,1.69Z" />
+    </svg>
   )
 }
 
@@ -1481,43 +1475,41 @@ export function TokenLab() {
       <div className={styles.demoContent}>
         <DemoWrapper
           componentName="Button"
-          instruction="Press to see scale and easing; switch the release to feel a real spring"
+          instruction="Press to see scale and easing; the spring toggle swaps the release for a real spring"
           code={DEMO_SNIPPETS.Button}
+          springCapable
         >
-          <SpringSwitch label="Release">
-            {mode => (
-              <div className={styles.demoRow}>
-                <Button motionMode={mode}>Press me</Button>
-                <Button motionMode={mode}>Action</Button>
-              </div>
-            )}
-          </SpringSwitch>
+          {mode => (
+            <div className={styles.demoRow}>
+              <Button motionMode={mode}>Press me</Button>
+              <Button motionMode={mode}>Action</Button>
+            </div>
+          )}
         </DemoWrapper>
 
         <DemoWrapper
           componentName="Card"
-          instruction="Click to toggle selected state; switch the select to a real spring"
+          instruction="Click to toggle selected state; the spring toggle swaps the select for a real spring"
           code={DEMO_SNIPPETS.Card}
+          springCapable
         >
-          <SpringSwitch label="Select">
-            {mode => (
-              <div className={styles.demoCards}>
-                <Card
-                  tag="Principle"
-                  title="Squash & Stretch"
-                  description="The illusion of weight and flexibility."
-                  style={{ maxWidth: '220px' }}
-                  motionMode={mode}
-                />
-                <Card
-                  title="Timing"
-                  description="Duration gives weight and personality."
-                  style={{ maxWidth: '220px' }}
-                  motionMode={mode}
-                />
-              </div>
-            )}
-          </SpringSwitch>
+          {mode => (
+            <div className={styles.demoCards}>
+              <Card
+                tag="Principle"
+                title="Squash & Stretch"
+                description="The illusion of weight and flexibility."
+                style={{ maxWidth: '220px' }}
+                motionMode={mode}
+              />
+              <Card
+                title="Timing"
+                description="Duration gives weight and personality."
+                style={{ maxWidth: '220px' }}
+                motionMode={mode}
+              />
+            </div>
+          )}
         </DemoWrapper>
 
         <DemoWrapper
@@ -1539,17 +1531,16 @@ export function TokenLab() {
 
         <DemoWrapper
           componentName="Toggle"
-          instruction="Compare subtle vs expressive signaling; switch the thumb to a real spring"
+          instruction="Compare subtle vs expressive signaling; the spring toggle swaps the thumb for a real spring"
           code={DEMO_SNIPPETS.Toggle}
+          springCapable
         >
-          <SpringSwitch label="Thumb">
-            {mode => (
-              <div className={styles.demoRow}>
-                <Toggle label="Subtle"     mode="subtle"     motionMode={mode} />
-                <Toggle label="Expressive" mode="expressive" motionMode={mode} />
-              </div>
-            )}
-          </SpringSwitch>
+          {mode => (
+            <div className={styles.demoRow}>
+              <Toggle label="Subtle"     mode="subtle"     motionMode={mode} />
+              <Toggle label="Expressive" mode="expressive" motionMode={mode} />
+            </div>
+          )}
         </DemoWrapper>
 
         <DemoWrapper
