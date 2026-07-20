@@ -1036,6 +1036,14 @@
   max-width: 620px;
 }
 
+/* Fitted plate for the Embeds page. The Water & Wilt stage and its centered
+   caption both cap at 340px, so the standard 520px plate left a 140px empty
+   shelf of clearing to their right (David's call, 2026-07-19). 340 plus the
+   two 20px aprons: the plate ends where the demo does. */
+.demoMainEmbed {
+  max-width: 380px;
+}
+
 /* Wide carousel layout: the card grows to 560px (image left, text right), so
    the 320px caption cap would wrap the caption under a much wider card. 560px
    fits the whole instruction on one line, and because the caption block and

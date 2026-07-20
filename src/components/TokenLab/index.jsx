@@ -1518,6 +1518,7 @@ export function TokenLab() {
           instruction="Press Water me. Rain and growth run together, rain on duration.fast, growth on duration.slower; flowers wait out delay.long. Press again and the wilt runs out on duration.slow with ease.exit"
           code={DEMO_SNIPPETS.WaterWilt}
           instructionClass={styles.demoInstructionEmbed}
+          mainClass={styles.demoMainEmbed}
         >
           <WaterWilt />
         </DemoWrapper>
