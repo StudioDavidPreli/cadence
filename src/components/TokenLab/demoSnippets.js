@@ -331,6 +331,33 @@ const WILT = {
 // percent, the token stays a unitless multiplier.
 sceneScale.set(tokens.scale.base * 100)`
 
+const PixelPlant = `const tokens = useMotionTokens()
+
+// No Framer Motion here: a WebGL shader paints a pixelated copy
+// of a live Rive machine, and a rAF driver moves three colour
+// plates over it. Rive owns the motion; the shader paints over
+// it. The plate rate ratios (blue 1, green 2/3, red 1/3) are
+// geometry; the tokens shape the chase.
+const amplitude = (1 - tokens.scale.expressive) * GAIN
+
+for (const plate of plates) {
+  if (pointer.inside) {
+    // Follow: exponential smoothing, frame-rate independent.
+    // duration.base is the time constant; delay.short staggers
+    // green one step behind blue and red two, so the fringe
+    // blooms while moving.
+    const tau = tokens.duration.base + plate.lag * tokens.delay.short
+    const k = 1 - Math.exp(-dt / tau)
+    plate.off += (pointer.v * amplitude * plate.rate - plate.off) * k
+  } else {
+    // Homecoming: a real tween back to zero over duration.slow
+    // on ease.standard, so the bezier is perceivable as a bezier.
+    // The same delay.short staggers the return.
+    q = Math.min(1, q + dt / tokens.duration.slow)
+    plate.off = plate.from * (1 - cubicBezier(...tokens.ease.standard)(q))
+  }
+}`
+
 export const DEMO_SNIPPETS = {
   Drawer,
   Button,
@@ -347,4 +374,5 @@ export const DEMO_SNIPPETS = {
   Carousel,
   Modal,
   WaterWilt,
+  PixelPlant,
 }

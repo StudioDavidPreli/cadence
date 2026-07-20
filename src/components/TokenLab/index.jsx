@@ -35,6 +35,7 @@ import { Tooltip } from '../Tooltip'
 import { Dropdown } from '../Dropdown'
 import { NotificationBadge } from '../NotificationBadge'
 import { WaterWilt } from '../WaterWilt'
+import { PixelPlant } from '../PixelPlant'
 import {
   EASING_CURVES,
   INITIAL_STATE,
@@ -113,25 +114,34 @@ const Carousel = lazy(() =>
 // when rain and growth became simultaneous, and duration.base left when rain
 // moved to fast and the wilt to slow (both 2026-07-18, David's reviews).
 // ease.linear has no slider, so the rain scrub adds no easing row.
-// scale.expressive is NOT listed: the planned plantScale bind was withdrawn
-// (sceneScale covers composition scale, David's 2026-07-18 call), so the
-// demo reads scale.base (scene + button overlay + Button squash) and no
+// scale.expressive is NOT listed for React Clock: the planned plantScale bind
+// was withdrawn (sceneScale covers composition scale, David's 2026-07-18 call),
+// so the demo reads scale.base (scene + button overlay + Button squash) and no
 // other scale token.
+//
+// Rive Clock (2026-07-20, the Embeds category's second canvas demo, the
+// pixelPlant shader embed) reads exactly what its per-plate driver reads
+// (docs/briefings/pixelplant-token-map.md): duration.base is the follow time
+// constant and duration.slow the homecoming length (split on David's call, so
+// the two tune independently); ease.standard shapes the homecoming tween;
+// delay.short staggers the three colour plates; scale.expressive sets the
+// aberration amplitude. It reads no other slot — the plate rate ratios and the
+// blocks/gap controls are geometry, not tokens, so they add no rows.
 const TOKEN_COMPONENT_MAP = {
   'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip'],
-  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock'],
+  'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock', 'Rive Clock'],
   'duration.slower':  ['Spinner', 'Stepper', 'React Clock'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock'],
   'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock'],
   'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
-  'delay.short':      ['Stepper'],
+  'delay.short':      ['Stepper', 'Rive Clock'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper', 'React Clock'],
   'scale.subtle':     ['Card'],
   'scale.base':       ['Button', 'Stepper', 'React Clock'],
-  'scale.expressive': ['Notification Badge'],
+  'scale.expressive': ['Notification Badge', 'Rive Clock'],
   'scale.lift':       ['Card', 'Carousel'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
   // Toggle, Carousel, and Drawer consume it when their per-demo switch is flipped
@@ -1633,6 +1643,21 @@ export function TokenLab() {
           mainClass={styles.demoMainEmbed}
         >
           <WaterWilt />
+        </DemoWrapper>
+
+        {/* The second canvas demo: an interactive Rive machine with a WebGL
+            shader painting a pixelated copy over it. Rive owns the motion; the
+            shader driver reads the same live tokens as every DOM demo, moving
+            three colour plates over the mosaic. Contract:
+            docs/briefings/pixelplant-token-map.md. */}
+        <DemoWrapper
+          componentName="Rive Clock"
+          instruction="Hover the pixels. Rive owns the motion; a React WebGL shader paints over it. The color plates chase your cursor on duration.base, glide home on duration.slow with ease.standard, stagger by delay.short, and travel as far as scale.expressive"
+          code={DEMO_SNIPPETS.PixelPlant}
+          instructionClass={styles.demoInstructionEmbed}
+          mainClass={styles.demoMainEmbed}
+        >
+          <PixelPlant />
         </DemoWrapper>
       </div>
     ),

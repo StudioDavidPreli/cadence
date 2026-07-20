@@ -1,0 +1,178 @@
+/* Rive Clock (pixelPlant embed) — demo layout only. No timings on the
+   demonstration motion: that is the shader driver's, reading live tokens. The
+   only durations here are on the control chrome, and they read the fixed
+   --feedback-* constants like every other Token Lab control. */
+
+.embed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  align-items: center;
+  width: 100%;
+}
+
+/* ─── The two aligned layers ─────────────────────────────────────────────────
+   Rive canvas below at opacity 0 (opacity keeps hit-testing alive, so
+   pixelPlantSM still gets hover and press; visibility or display would kill the
+   events). Shader canvas on top with pointer-events: none, so everything falls
+   through. The stage ratio comes from the artboard bounds (set as a custom
+   property by the component), which makes the contain-fit Rive layout fill the
+   box exactly and keeps pointer coordinates aligned with the pixelated image.
+   Capped at 340px to sit inside the Embeds plate (.demoMainEmbed, 380px) and to
+   match React Clock's stage above it. */
+.plantStage {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: var(--plant-aspect, 1 / 1);
+  background: var(--color-bg2, #111);
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+}
+
+.plantRive {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.plantCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.plantShader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ─── Embed-local controls ───────────────────────────────────────────────────
+   blocks / gap sliders and the two toggle rows. The slider classes mirror
+   Token Lab's SliderRow (src/components/TokenLab/TokenLab.module.css) so the
+   look is identical without importing SliderRow itself, which couples to the
+   active-token highlight system and would report a non-token key. */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  width: 100%;
+  max-width: 340px;
+}
+
+.status {
+  color: var(--color-text-base);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Mirrored from TokenLab.module.css .sliderRow / .sliderLabel / .sliderName /
+   .sliderValue / .slider — same values, so the control reads as one language
+   with the token rail. */
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sliderName {
+  font-size: 12px;
+  color: var(--color-text-base);
+  font-weight: 500;
+}
+
+.sliderValue {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+/* Keyboard focus needs a visible indicator; accent is the "active, currently
+   affecting the system" stroke, verified >=3:1 in all four themes. */
+.slider:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-text-muted2);
+  cursor: pointer;
+  transition: transform var(--feedback-ui-duration);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Single toggle buttons for the two binary aesthetic switches (plate travel,
+   cell gaps). Label left on the SliderRow layout; one button on the right whose
+   text IS the current state and flips on click. The button mirrors Token Lab's
+   button vocabulary: bordered, surface fill, --color-text-primary. Text sits on
+   surface, never on the accent, so the 4.5:1 text bar holds in all four themes.
+   A min-width keeps the row from reflowing when the label swaps between two
+   different-length words. */
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.toggleLabel {
+  font-size: 12px;
+  color: var(--color-text-base);
+  font-weight: 500;
+}
+
+.toggleButton {
+  min-width: 72px;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+}
+
+.toggleButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+}
+
+/* Keyboard focus: accent outline, the same 3:1-verified stroke the sliders use. */
+.toggleButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

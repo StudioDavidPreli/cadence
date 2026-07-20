@@ -134,6 +134,69 @@ empty pot.
 `instance.number()` returns null for a property the file does not carry, and
 every write guards on the handle. That null is the wall's friend.
 
+### The other trap: theming a machine that listens
+
+"A theme change is a rebind, nothing more" holds because `waterWiltSM` is an
+empty anchor. Rebind an *interactive* machine and it breaks. The cause is the one
+"Theme switch after growth erases the plant" already names: each named instance
+carries its OWN values, so a rebind applies the fresh instance's baked defaults
+to the machine. Water & Wilt, whose driver owns the state, hit that as a wrong
+pose. Rive Clock (the pixelPlant embed, `src/components/PixelPlant/`) is a
+click-to-water plant whose machine owns its own state in a data-bound property,
+and a rebind applies the new instance's baked value for that property. To the
+machine, that write is byte-identical to what a click writes: the click listener
+is not ignored, the rebind is indistinguishable from a click. Switching themes
+watered or dried the plant.
+
+Two fixes were tried and rejected. A keyed remount per theme reset the whole
+machine, throwing away the plant's pose. Replaying the state across the rebind
+(read the boolean off the old instance, write it back into the new one after
+binding) is fragile: you have to name the exact property the machine transitions
+on, and a *trigger* would fire on the rebind regardless of the value you write.
+
+The fix that holds is to never rebind. Bind one instance for the component's
+life, and change themes by WRITING the target theme's colors into it. This is
+`useHCContrastColors` generalized from two flip colors to the whole palette
+across four themes. The four authored instances are the palette source, harvested
+once at mount:
+
+```jsx
+// Mount: harvest each theme's values by READING the instances (never binding
+// them), keep the ones that vary by theme, then bind EXACTLY ONE instance.
+const colorNames = viewModel.properties.filter((p) => p.type === 'color').map((p) => p.name)
+const numberNames = viewModel.properties.filter((p) => p.type === 'number').map((p) => p.name)
+const palettes = {}
+for (const [t, name] of Object.entries(themeToInstanceName)) {
+  const inst = viewModel.instanceByName(name)   // read-only: no bind
+  palettes[t] = {}
+  for (const n of colorNames) palettes[t][n] = inst.color(n)?.value
+  for (const n of numberNames) palettes[t][n] = inst.number(n)?.value
+}
+// A property is theme-varying iff its baked value differs across themes. Colors
+// always do (the palette); some numbers do (per-theme opacities); the interaction
+// -state properties default the same in every instance, so a theme switch can
+// never touch them. That test protects the plant's state without naming it.
+const bound = viewModel.instanceByName(themeToInstanceName[theme])
+rive.bindViewModelInstance(bound)             // bind ONE, keep the reference
+```
+
+Do NOT bind each instance during the harvest to read it. `instanceByName` returns
+values readable without binding, and binding each in turn lets Rive's reference
+counting clean up the previously bound instance: the one you keep ends up a dead
+handle whose `.color(n)` returns null, so every write lands nowhere and the theme
+switch silently does nothing. Bind exactly once. Because you never rebind, that
+instance stays referenced, its handles stay live, and writes keep landing (proven
+on built output: harvest-bind churn wrote into a dead handle; a single bind
+turned the plant its theme colors).
+
+On a theme switch, write the target palette's varying properties into the
+already-bound instance. No rebind, so the data context, and the plant's state,
+never change, and no click can fire. The bind uses `useViewModel` for readiness
+(it retrieves the VM but binds nothing) plus manual `bindViewModelInstance`, not
+`useViewModelInstance` with a reactive `name`, whose whole job is the rebind this
+avoids. Writing the palette instead of swapping the instance is the trick: the
+colors change, the machine never notices.
+
 ## The driver
 
 One `requestAnimationFrame` loop for the component's lifetime, adapted from
@@ -405,6 +468,8 @@ Every failure this build produced, in order of appearance:
 | Tests pass, deploy looks broken | Verification sampled while rAF was throttled to 1fps | `bringToFront()` before measuring; distrust plateaus |
 | Theme switch after growth erases the plant; rain and flowers keep working | The rebind restore replayed every mirror except `plantIdling`, so the fresh instance held the gate's authored false over a retired scrub | Restore every driver-owned boolean in the bind effect; a rebind silently drops whatever the block forgets |
 | Empty frame flashes when a wilt begins | The loops hide on direct boolean binds while the die layer reveals through a three-stage inverter; two pipelines, two latencies, one blank advance between them | The wilt preroll: hold the loop booleans over the arriving die layer for the settle window, clock parked at 0, then drop and start the death |
+| Theme switch waters/dries an interactive plant (Rive Clock) | The state lives in a data-bound property; rebinding the instance re-applies the new instance's baked value for it, which the machine cannot tell from a click | Do not rebind to change theme: bind one instance for life and WRITE the target theme's colors into it (`useHCContrastColors` generalized to the whole palette) |
+| Write-the-palette build switches nothing at all | The harvest bound each instance in turn to read it, and Rive's reference counting cleaned up the kept instance, so its `.color()` handles returned null and every write landed nowhere | Read the instances without binding (`instanceByName().color(n).value` works unbound); bind exactly one and keep the reference |
 
 ## What the demo argues
 
@@ -418,3 +483,83 @@ code, was where the argument got settled.
 
 Fifteen commits, two days, one wall. The plant waits in the pot for the next
 press.
+
+## Rive Clock: theming an interactive machine (2026-07-20)
+
+The second Embeds demo, Rive Clock (the pixelPlant shader embed,
+`src/components/PixelPlant/`), added one problem Water & Wilt never had, and
+solving it is the most transferable thing in this document. Water & Wilt's
+`waterWiltSM` is an empty anchor: rebinding its instance to change theme is
+free, so "a theme change is a rebind, nothing more" held. `pixelPlantSM` is
+interactive. It is a click-to-water plant, and its watered state lives in a
+data-bound VM property. Rebinding the instance re-applies that property from the
+new instance, and the machine reads the change as a click. The click listener is
+not ignored; a data rebind and a real click write the same state, so the machine
+cannot distinguish them.
+
+Three attempts, in order, and why the first two lost:
+
+1. **Keyed remount per theme.** Dodged the rebind by tearing the runtime down.
+   It reset the machine and threw away the plant's pose. Rejected.
+2. **Pause-bracketed rebind with state replay.** Read the state booleans off the
+   old instance, pause, bind, write them back, play. Still fired, because you
+   have to name the exact property the machine transitions on, and a trigger
+   fires on a rebind whatever value you write. Naming state to preserve it is a
+   guess you lose.
+3. **Write the palette, never rebind.** Bind one instance for the component's
+   life and change theme by writing the target theme's colors into it. No
+   rebind, no data-context change, so the machine never sees an input move. This
+   is `useHCContrastColors` generalized from the two HC-flip colors to the full
+   palette across four themes. It holds because the state properties are never in
+   the write set.
+
+The general rule that falls out: **the four-instance baked-palette convention
+(the hero convention) is for non-interactive art.** A file whose state machine
+listens cannot take a theme rebind, because the rebind carries the instance's
+state defaults into a machine that reacts to them. For those files, keep the four
+instances as the palette *source* and apply theme by writing colors, not by
+binding.
+
+### Read the runtime; do not reverse-engineer the binary
+
+Two of the three attempts were built on guesses about the VM: which property
+held the state, whether the colors were writable, whether they were nested.
+`strings` on the `.riv` gives names but not types, hierarchy, or per-instance
+values, and every guess off it was wrong in a way that cost a build. What ended
+it was reading the live view model off built output with Playwright:
+
+```js
+// In the page, once PlantRive has mounted (expose rive/viewModel on window first):
+viewModel.properties                     // [{name, type}], the real shape
+viewModel.instanceByName('lightMode')
+  .color('bg').value                     // per-instance baked value, readable UNBOUND
+```
+
+That one read answered everything at once: the colors are twenty-one top-level
+writable `color` properties (not nested, not baked-opaque), the per-theme
+opacities are two `number` properties, and the four state properties
+(`waterMeBoole`, `dryTimeBoole`, `clicked2`, `grow`) carry the *same* value in
+every theme instance. That last fact is what makes "write a property only if it
+varies across themes" a safe filter for palette-versus-state without naming a
+single property.
+
+The verification that clinched the fix was equally direct: bind one instance,
+write an opaque green into `bg`/`trunk`/`leavesLight`/`planterFill`, and the
+pixelated plant went green on screen. That proved colour writes reach the render
+on a *single* bound instance, which in turn exposed the real bug: the first
+build bound four instances during the harvest, and the reference counting
+cleaned up the one it kept. Reading unbound, binding once, fixed it. `instanceByName`
+returns values readable without binding; lean on that and you never churn the
+bind at all.
+
+The reusable checklist for any Rive data-binding puzzle:
+
+- `viewModel.properties` is the source of truth for names and types. Read it;
+  do not infer from `strings`.
+- Instance property values are readable through `instanceByName(...)` without
+  binding. Harvest that way.
+- Binding an instance drops the reference to the previously bound one, whose
+  handles then go dead. Bind exactly what you need to stay bound, once.
+- A live colour write into a bound instance repaints while the machine plays.
+  Use a wild colour as a one-shot probe: if the art changes, the write path is
+  sound and the bug is upstream.
