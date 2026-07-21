@@ -83,7 +83,18 @@ The expanded card's inside is the same object in both doors, so it was extracted
 `ExpandedPrincipleBody` holds the × close, the animation/UI crossfade, the meta
 and title and summary, the toggle, and the QuoteBlock. `PrincipleCard` renders it
 inside the scale-and-footprint machinery that grows the card; the deep-link modal
-renders it at the card's own 372×480 dimensions inside a bare dialog.
+renders it larger, in a bare dialog, as a spotlight rather than a card in a row.
+
+The modal is 460×520, up from the card's 372×480. The extra width does the real
+work. The body's fonts are fixed, so a wider summary column wraps the same copy
+into fewer lines, and the content column gains slack against the QuoteBlock
+divider. The in-grid card holds the Motion/UI toggle clear of that divider with an
+80-character summary ceiling; the modal has margin to spare, for any principle,
+because the column is wider. The height grows only modestly: the modal centers in
+the demo column overlay, and a taller box overflows the column at the shortest
+viewport the app renders at (the mobile gate covers below ~720px, where the demo
+column is only ~600px tall), which would put the × close under the app shell. 520
+keeps it reachable.
 
 The body owns no state. Each caller passes `uiMode` / `drawerOpen` /
 `showDemoMotion` in, so each keeps its own reset where its reset already lived:
@@ -104,6 +115,14 @@ timing through `useChromeTransition`, never the editable motion tokens, so Explo
 mode dragging duration toward zero can never flatten it. The token-integrity gate
 holds it there. A clipboard write that fails in an insecure context is a silent
 no-op, the posture CodeBlock and the export Copy button already take.
+
+It carries no accent, since accent means active or connected in this system and a
+copy control is neither. It rests at `--color-text-muted`, which clears 4.5:1 on
+the card and panel surface in all four themes, and darkens to `--color-text-base`
+on hover, the theme's full-strength body text. It does not hover to
+`--color-text-primary`: that token is the text color for dark interactive surfaces,
+white in light and black in high-contrast dark, and on this static surface it would
+land white on white or black on black.
 
 ## The slug table
 

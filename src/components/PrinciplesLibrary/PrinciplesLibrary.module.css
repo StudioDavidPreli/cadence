@@ -127,18 +127,35 @@
 
 /* ── Deep-link modal body ─────────────────────────────────────────────────────
    The deep-link modal renders the expanded card's own body (ExpandedPrincipleBody)
-   at the card's exact 372×480 dimensions: 2 columns × 180px + one 12px gap = 372,
-   2 rows × 234px + one 12px gap = 480 (see grid-architecture.md). Reproducing the
-   .expandedWrapper environment (a flex column that stacks .expandedContent above
-   .quoteBlock) here is what lets the shared body lay out identically to the in-grid
-   card. The Modal's `bare` panel supplies the frame, so this box carries no border
-   of its own. position: relative anchors the body's absolute × close, which the
-   card otherwise gets from .expandedWrapper. */
+   inside this box. It is deliberately LARGER than the in-grid card's 372×480: the
+   modal is a spotlight, not a card in a row, so it earns the room. The extra size
+   also removes a layout hazard for free. The shared body's fonts are fixed (12px
+   mono summaries, 16px serif quotes), so a wider box wraps the same copy into
+   fewer lines while a taller box gives the content column more vertical capacity.
+   Both push the Motion/UI toggle further clear of the QuoteBlock divider, so the
+   toggle/divider invariant (which the in-grid card holds with an 80-char summary
+   ceiling) has generous margin here regardless of the principle.
+
+   The width increase does most of the work: the summary column widens from the
+   card's ~117px to ~155px, so the same fixed-size copy wraps into fewer lines and
+   the content column gains vertical slack against the divider. Height grows more
+   modestly, because the modal is centered in the demo column overlay and must fit
+   the column at the shortest supported viewport (the mobile gate covers below
+   ~720px, and at 720px tall the demo column is only ~600px): a taller box
+   overflows the column and its top (the × close) lands under the app shell, out of
+   reach. 520px keeps a comfortable top and bottom margin at that floor and grows no
+   further, since the panel is auto-height and cannot be capped to the column here.
+
+   Reproducing the .expandedWrapper environment (a flex column stacking
+   .expandedContent above .quoteBlock) is what lets the shared body lay out like
+   the card. The Modal's `bare` panel supplies the frame, so this box carries no
+   border of its own; position: relative anchors the body's absolute × close, which
+   the card otherwise gets from .expandedWrapper. */
 .deepLinkBody {
   display: flex;
   flex-direction: column;
-  width: 372px;
-  height: 480px;
+  width: 460px;
+  height: 520px;
   position: relative;
   overflow: hidden;
   border-radius: 12px;

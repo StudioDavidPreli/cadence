@@ -415,8 +415,14 @@
 
 /* Copy-link control. Chrome, borderless, mono to match the token row. It carries
    no accent (accent means active/connected in this system, which a copy control
-   is not); it inverts to the primary text color on hover like the other chrome
-   buttons. nowrap so the label does not break mid-word as it swaps to "Copied". */
+   is not). Resting is --color-text-muted, which clears 4.5:1 on the card/panel
+   surface (--color-surface-raised) in all four themes; hover darkens to
+   --color-text-base, the theme's full-strength body text, so the control gains
+   contrast on hover in every theme. It does NOT hover to --color-text-primary:
+   that token is the text color for dark INTERACTIVE surfaces (white in light,
+   black in HC-dark) and would land white-on-white / black-on-black on this
+   static surface. nowrap so the label does not break mid-word as it swaps to
+   "Copied". */
 .copyLink {
   flex-shrink: 0;
   border: none;
@@ -431,5 +437,5 @@
 }
 
 .copyLink:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-base);
 }
