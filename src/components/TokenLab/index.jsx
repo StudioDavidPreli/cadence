@@ -44,6 +44,7 @@ import {
   toDtcgJson,
   toFlatJson,
   toCssVars,
+  toFramerMotion,
   tokenKeyToCssSuffix,
   importTokens,
 } from '../../data/motionPresets'
@@ -569,10 +570,11 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   const [isSaving, setIsSaving] = useState(false)
   const [saveName, setSaveName]  = useState('')
   const fileInputRef = useRef(null)
-  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), or
-  // 'css' (a drop-in :root block). All three serialize from the same
-  // stateToExport object, so the toggle only selects which stringifier runs at
-  // export time. Import handles dtcg/flat only; css is export-only.
+  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
+  // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
+  // serialize from the same stateToExport object, so the toggle only selects
+  // which stringifier runs at export time. Import handles dtcg/flat only; css and
+  // fm are export-only (a destination, not an interchange format).
   const [exportFormat, setExportFormat] = useState('dtcg')
   const [copied, setCopied] = useState(false)
   const activePresetId = getActivePresetId(rawState, allPresets)
@@ -591,17 +593,20 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   function exportText() {
     if (exportFormat === 'dtcg') return toDtcgJson(rawState)
     if (exportFormat === 'css')  return toCssVars(rawState)
+    if (exportFormat === 'fm')   return toFramerMotion(rawState)
     return toFlatJson(rawState)
   }
 
   function handleExport() {
     // DTCG files conventionally carry the .tokens.json extension; the flat
-    // shape is a plain .json; the css block is a .css with the matching mime so
-    // the download opens as a stylesheet rather than plain text.
+    // shape is a plain .json; the css block is a .css; the Framer Motion module
+    // is a .js. Each carries the matching mime so the download opens as its own
+    // file type rather than plain text.
     const file = {
       dtcg: { name: 'cadence.tokens.json', mime: 'application/json' },
       flat: { name: 'cadence-tokens.json', mime: 'application/json' },
       css:  { name: 'cadence.tokens.css',  mime: 'text/css' },
+      fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
     }[exportFormat]
     downloadTextFile(file.name, exportText(), file.mime)
   }
@@ -730,6 +735,17 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             aria-pressed={exportFormat === 'css'}
           >
             CSS
+          </button>
+          {/* FM = a Framer Motion config module (cadence.motion.js). Two chars so
+              the fourth segment fits the fixed 300px controls column without
+              crowding Export and Copy. Export-only, like CSS. */}
+          <button
+            type="button"
+            className={`${styles.exportFormatOption} ${exportFormat === 'fm' ? styles.exportFormatOptionActive : ''}`}
+            onClick={() => setExportFormat('fm')}
+            aria-pressed={exportFormat === 'fm'}
+          >
+            FM
           </button>
         </div>
         <button type="button" className={styles.exportButton} onClick={handleExport}>

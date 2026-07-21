@@ -292,6 +292,73 @@ export function toCssVars(state) {
   return `:root {\n${lines.join('\n')}\n}`
 }
 
+// ─── Framer Motion export ─────────────────────────────────────────────────────
+// The fourth stringifier, and the only one that is not a token document. DTCG,
+// flat, and CSS hand the token SET to a pipeline; this hands the MOTION to an
+// engineer, as a JavaScript module of ready values to spread into Framer Motion
+// `transition` props. It is the one export in Framer Motion's own units (seconds,
+// four-number ease arrays), and the only one that can state the spring as what it
+// is: a native { type: 'spring', ... } config, not three loose numbers a consumer
+// has to reassemble.
+//
+// Like the other three it serializes from the single stateToExport object, so the
+// four outputs cannot drift apart. The ms → seconds step is the same divide-by-1000
+// stateToTokens performs, so the emitted values equal what the demos actually run
+// (a no-drift unit test pins this against stateToTokens). Two deliberate choices:
+// the duration scalar is absent, because a Framer Motion transition takes a
+// concrete duration, not a base × multiplier, and the scalar has no runtime
+// consumer (it is out of stateToTokens for the same reason); and this is
+// export-only, like CSS, so importTokens does not learn to read it back. A
+// Framer Motion module is a destination, not an interchange format.
+//
+// Header comment on the emitted file: generated text, voice-governed, no em-dashes.
+const FM_HEADER = `// Cadence motion tokens, as Framer Motion configuration.
+//
+// Generated from the live token state in Token Lab. The values here are what the
+// Cadence demos run: durations and delays in seconds, easing as four-number
+// bezier arrays, scale unitless, and the spring as a native Framer Motion config.
+// ease.overshoot is the bezier fallback for contexts that cannot run a spring
+// (CSS, reduced motion). Import what you need and spread it into a transition.`
+
+export function toFramerMotion(state) {
+  const t = stateToExport(state)
+  // The same ms → seconds conversion stateToTokens uses. Framer Motion measures
+  // transition.duration in seconds, so this is the format's unit, not a rewrite.
+  const sec = ms => ms / 1000
+  // One key per line, keys unquoted (JSON.stringify would quote them, which reads
+  // wrong in a hand-editable module). `fmt` maps each leaf to its printed form;
+  // the default prints the value as-is, which is correct for the unitless numbers.
+  const block = (group, fmt = v => v) =>
+    Object.entries(group).map(([k, v]) => `  ${k}: ${fmt(v)},`).join('\n')
+  const arr = a => `[${a.join(', ')}]`
+  const named = (name, body) => `export const ${name} = {\n${body}\n}`
+
+  const spring =
+    `export const spring = { type: 'spring', ` +
+    `stiffness: ${t.spring.stiffness}, damping: ${t.spring.damping}, mass: ${t.spring.mass} }`
+
+  // Composed examples: duration paired with the ease the system pairs it with
+  // (enter decelerates in, exit accelerates out), plus the spring by name. This
+  // block is static text that references the exports above, so it stays correct
+  // whatever the values are, and shows an engineer the intended usage.
+  const transitions =
+    'export const transitions = {\n' +
+    '  enter: { duration: durations.base, ease: easings.enter },\n' +
+    '  exit: { duration: durations.fast, ease: easings.exit },\n' +
+    '  spring,\n' +
+    '}'
+
+  return [
+    FM_HEADER,
+    named('durations', block(t.duration, sec)),
+    named('easings', block(t.easing, arr)),
+    named('delays', block(t.delay, sec)),
+    named('scale', block(t.scale)),
+    spring,
+    transitions,
+  ].join('\n\n') + '\n'
+}
+
 // ─── Token import ─────────────────────────────────────────────────────────────
 // Import is the strict inverse of export, plus validation. The export pipeline
 // discarded nothing the editor needs, so a Cadence file round-trips losslessly;

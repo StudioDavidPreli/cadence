@@ -5,6 +5,7 @@ import {
   toDtcgJson,
   toFlatJson,
   toCssVars,
+  toFramerMotion,
   importTokens,
   INITIAL_STATE,
   BUILT_IN_PRESETS,
@@ -219,6 +220,69 @@ describe('toCssVars', () => {
   it('emits the --motion-duration-scalar custom property', () => {
     const css = toCssVars(INITIAL_STATE)
     expect(css).toContain('--motion-duration-scalar: 1;')
+  })
+})
+
+// toFramerMotion emits a JavaScript module of ready Framer Motion values. It is
+// the one export in Framer Motion's units (seconds, four-number ease arrays) and
+// the only one that states the spring as a native { type: 'spring', ... } config.
+// Like toCssVars it produces generated text, not JSON, so these tests assert on
+// substrings of the emitted module.
+describe('toFramerMotion', () => {
+  const cinematic = BUILT_IN_PRESETS.find(p => p.id === 'cinematic').state
+
+  it('emits named exports in seconds, bezier arrays, and unitless scale', () => {
+    const js = toFramerMotion(INITIAL_STATE)
+    expect(js).toContain('export const durations = {')
+    expect(js).toContain('base: 0.2,')          // 200ms -> 0.2s
+    expect(js).toContain('slower: 0.6,')        // 600ms -> 0.6s
+    expect(js).toContain('export const easings = {')
+    expect(js).toContain('standard: [0.4, 0, 0.2, 1],')
+    expect(js).toContain('export const delays = {')
+    expect(js).toContain('short: 0.05,')        // 50ms -> 0.05s
+    expect(js).toContain('export const scale = {')
+    expect(js).toContain('pressBase: 0.95,')
+  })
+
+  it('carries linear and delay.none, the non-editable constants', () => {
+    const js = toFramerMotion(INITIAL_STATE)
+    expect(js).toContain('linear: [0, 0, 1, 1],')
+    expect(js).toContain('none: 0,')
+  })
+
+  it('states the spring as a native Framer Motion config', () => {
+    const js = toFramerMotion(INITIAL_STATE)
+    expect(js).toContain("export const spring = { type: 'spring', stiffness: 170, damping: 20, mass: 1.5 }")
+  })
+
+  it('serializes a custom bezier slot as a four-number array', () => {
+    const state = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, 0.2, 0.3, 0.4] } }
+    expect(toFramerMotion(state)).toContain('standard: [0.1, 0.2, 0.3, 0.4],')
+  })
+
+  it('composes transition examples that reference the token exports', () => {
+    const js = toFramerMotion(INITIAL_STATE)
+    expect(js).toContain('export const transitions = {')
+    expect(js).toContain('enter: { duration: durations.base, ease: easings.enter },')
+    expect(js).toContain('exit: { duration: durations.fast, ease: easings.exit },')
+  })
+
+  it('omits the duration scalar (a Framer Motion transition has no multiplier)', () => {
+    expect(toFramerMotion(INITIAL_STATE)).not.toContain('scalar')
+  })
+
+  // No-drift: the module must equal what the demos actually run, which is
+  // stateToTokens output, not a hardcoded set of values. Deriving the expected
+  // seconds and spring from stateToTokens (on a non-default preset, so a constant
+  // could not pass by coincidence) pins the two together.
+  it('tracks stateToTokens output, never a constant', () => {
+    const js = toFramerMotion(cinematic)
+    const t = stateToTokens(cinematic)
+    expect(js).toContain(`slow: ${t.duration.slow},`)     // 900ms -> 0.9s
+    expect(js).toContain(`long: ${t.delay.long},`)        // 400ms -> 0.4s
+    expect(js).toContain(
+      `stiffness: ${t.spring.stiffness}, damping: ${t.spring.damping}, mass: ${t.spring.mass}`
+    )
   })
 })
 
