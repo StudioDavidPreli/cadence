@@ -96,10 +96,10 @@ Hash-based, no router dependency, via a `useHashRoute` hook that syncs navigatio
 #/principles                    the grid, all eighteen
 #/principles/classic            grid filtered to 1 to 12
 #/principles/extended           grid filtered to 13 to 18
-#/principles/<filter>/<id>      a specific expanded principle
+#/principles/<filter>/<slug>    one principle open as a deep-link modal over the grid
 ```
 
-Section, category, and filter routing is in scope for this build. Deep-linking to a specific expanded principle is the most involved piece, because `PrinciplesLibrary` currently owns its expansion state internally and it has to sync that to the hash. If it grows past a clean change it ships as a follow-up; the rest of the routing lands regardless.
+Section, category, and filter routing is in scope for this build. Deep-linking to a specific principle was the most involved piece and shipped as the planned follow-up on 2026-07-21. The design changed from the wording above: rather than expanding the principle in the grid (which owns its expansion state internally), a direct link opens the principle in a modal over the default, unexpanded grid. The URL carries the authored slug; state carries the numeric id; a filter/id mismatch resolves in the id's favor; a bad slug fails soft to the plain grid; close rewrites the hash in place so the back button does not reopen the modal. Full record: `docs/decisions/principle-deep-links-2026-07-21.md`.
 
 ## Desktop width handling (resolved 2026-06-17)
 

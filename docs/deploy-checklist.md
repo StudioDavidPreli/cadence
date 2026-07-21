@@ -53,6 +53,7 @@ rebuilt to open Token Lab to the guide.
 - [x] Navigation keyboard operable: Tab into the accordion, Overview and category leaves reachable, Enter/Space activate: verified 2026-07-16, built output via Playwright: real Tab walk, Enter toggles aria-expanded, aria-current set
 - [x] Opening Token Lab shows the guide; the Overview leaf returns to it after a category: verified 2026-07-16, built output via Playwright: nav click lands on the guide, category leaf swaps to the demo, Overview returns to the guide
 - [x] Deep links resolve: `#/token-lab` (guide), `#/token-lab/<category>` (demo), back button traverses: verified 2026-07-16, built output via Playwright: both deep links resolve on fresh load; back traverses category -> guide -> home in order
+- [x] Principle deep link `#/principles/<filter>/<slug>` opens the principle as a modal over the default grid; close rewrites the hash in place, back closes the modal, a bad slug fails soft, the intro is suppressed on entry, copy-link writes a round-tripping URL: automated 2026-07-21, `e2e/principle-deep-links.spec.js` (7 rows), built output via the Worker
 
 ---
 

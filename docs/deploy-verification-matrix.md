@@ -201,6 +201,27 @@ David's 2026-07-16 sweep; these are the machine facts.
 - [ ] **T2** Stagger drag crosses the grid as a wave (per-tile phase offsets
       ordered by distance). Not built.
 
+## Principle deep links (added 2026-07-21)
+
+The route `#/principles/<filter>/<slug>` opens one principle as a modal over the
+default grid. Full record: `docs/decisions/principle-deep-links-2026-07-21.md`.
+
+- [x] **T1** A deep link opens the principle modal over a default (unexpanded)
+      grid, filter normalized to the card's family.
+      **Done 2026-07-21: `e2e/principle-deep-links.spec.js`.**
+- [x] **T1** Close rewrites the hash to the plain grid in place and the grid
+      stays interactive; back closes the modal.
+      **Done 2026-07-21: same spec (replaceState close, browser-history back).**
+- [x] **T1** A bad slug fails soft to the plain grid; the intro is suppressed on
+      deep-link entry and still fires on an ordinary visit.
+      **Done 2026-07-21: same spec.**
+- [x] **T1** The copy-link control writes the principle's canonical URL, which
+      round-trips through the parser (clipboard permission granted in-context).
+      **Done 2026-07-21: same spec.**
+- [x] **T1** Slug resolution, three-segment parse, serialize, and round-trip are
+      unit-covered. **Done 2026-07-21: `src/hooks/useHashRoute.test.js`,
+      `src/data/principles.test.js`.**
+
 ## Build hygiene
 
 - [ ] **T1** Repo self-contained, no orphaned code.

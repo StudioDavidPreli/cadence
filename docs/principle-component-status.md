@@ -5,8 +5,10 @@
 > "Not built" row below is finished work, and the P03 notes on the focus trap
 > and easing-slot tabs are both shipped. Rather than maintain a second copy of
 > the mapping, this file is retired as a historical record. Current sources of
-> truth: `src/components/PrinciplesLibrary/index.jsx` (summaries, tokens,
-> wiring), `docs/principles/*.md` (per-principle record), and the case study's
+> truth: `src/data/principles.js` (summaries, tokens, slugs),
+> `src/components/PrincipleCard/ExpandedPrincipleBody.jsx` (the
+> `getPrincipleComponent` wiring), `docs/principles/*.md` (per-principle
+> record), and the case study's
 > build notes (`docs/case-study.md`). Kept for the case-study history: it shows
 > what mid-build looked like.
 
@@ -14,7 +16,7 @@ Snapshot of each principle's UI demo wiring: the component summary as it
 renders in the expanded card, the tokens it consumes, the React module
 that demonstrates the principle, and whether that module exists in
 `src/components/` and is wired into `getPrincipleComponent` in
-`src/components/PrincipleCard/index.jsx`.
+`src/components/PrincipleCard/ExpandedPrincipleBody.jsx`.
 
 Status values:
 
@@ -26,8 +28,8 @@ Status values:
 
 Sources of truth for this table:
 
-- `src/components/PrinciplesLibrary/index.jsx` (componentSummary, tokens)
-- `src/components/PrincipleCard/index.jsx` (`getPrincipleComponent` switch)
+- `src/data/principles.js` (componentSummary, tokens, slugs)
+- `src/components/PrincipleCard/ExpandedPrincipleBody.jsx` (`getPrincipleComponent` switch)
 - `docs/references/principles-reference.md` (principle &rarr; component mapping)
 
 Last refreshed: 2026-05-05 (P03 + P04 + P07 + P10 + P12 wired).
