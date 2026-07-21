@@ -12,7 +12,7 @@ You are working in the Cadence repo (`/Users/david/Desktop/cadence`). Read `CLAU
 2. `src/components/IngredientGrid/PixelPlantLab.jsx`, the working lab this session promotes. Its header comments record the architecture; treat them as decisions, not suggestions
 3. `src/components/WaterWilt/index.jsx` and `docs/references/rive-for-react.md`: the first Embeds demo and its session record. The new embed follows its patterns (live token reads, driver-side easing, reduced-motion flattening)
 4. `src/hooks/useMotionTokens.js`: the canonical live-token read path, reduced motion included
-5. `src/components/TokenLab/index.jsx`: the `'embeds'` entry in the demo map (~line 1510), `DemoWrapper` (~line 797), `SliderRow` (~line 712), and `TOKEN_COMPONENT_MAP` (~line 108)
+5. `src/components/TokenLab/index.jsx`: the `'embeds'` entry in the demo map (~line 1624), `DemoWrapper` (~line 832), `SliderRow` (~line 760), and `TOKEN_COMPONENT_MAP` (~line 108)
 6. `src/tokens/parse.js` and `docs/decisions/motion-token-nan-crash-2026-07-15.md`: why token parsing is format-robust and verified on built output
 
 ## What this is
@@ -22,6 +22,14 @@ You are working in the Cadence repo (`/Users/david/Desktop/cadence`). Read `CLAU
 The experiment works. What it lacks is the reason to exist inside Token Lab: its motion is self-contained. The lerp constant is a magic number, the strength is a local slider, and no token reaches the shader. This session gives each motion token family one legible job inside the effect, so a preset switch changes the effect's personality and a slider drag retimes it live.
 
 The asset: `public/rive/pixelplant.riv` (untracked; this session commits it). Artboard `pixelPlant`, state machine `pixelPlantSM`, view model `PixelPlantVM`, four baked theme instances `darkMode`, `lightMode`, `contrastDark`, `contrastLight`. Binding follows the BugReportButton convention, with one recorded divergence explained under Constraints.
+
+## The name: Rive Clock
+
+Decided by David 2026-07-20; not open for redesign. The demo's display name is **Rive Clock**, in `componentName` and in every `TOKEN_COMPONENT_MAP` row.
+
+The Embeds category names demos by who holds time. In React Clock (the Water & Wilt demo, already renamed in the codebase), React's rAF loop holds time and Rive holds poses. Here it inverts: Rive's own state machine holds time and React paints a shader over it. "React Clock" and "Rive Clock" state that ownership in two words each, they are exactly parallel the way Button and Toggle are, and they borrow no authority they don't have: nobody reads "React Clock" as Rive's runtime being React's property, or the reverse.
+
+The shader half of this demo is real content but it is not the ownership fact; it lives in the instruction copy. David's seed line for that copy: "Rive owns the motion; a React WebGL shader paints over it." Work from it when drafting the instruction (voice rules apply).
 
 ## The token mapping
 
@@ -70,8 +78,7 @@ The demo renders in the `'embeds'` entry of the demo map in `src/components/Toke
 ## What needs David's explicit call
 
 - Token slot assignment within each family (propose, then wait).
-- The demo's display name (`componentName` in `DemoWrapper` and `TOKEN_COMPONENT_MAP`; "React Clock" is the naming register).
-- Which embed-local controls survive into the shipped panel, and the instruction line's copy.
+- Which embed-local controls survive into the shipped panel, and the final instruction copy (the name and its seed line are settled; see The name: Rive Clock).
 - The reduced-motion presentation of the Rive layer.
 - When the `?pixelplant` gate retires.
 - Final feel: the duration-to-lag mapping and the stagger multiples are tuned by hand against the live tool, by David.
@@ -90,7 +97,7 @@ The demo renders in the `'embeds'` entry of the demo map in `src/components/Toke
 
 ## Definition of done
 
-- The embed renders in Embeds below React Clock, through `DemoWrapper`, with a code-view snippet, in all four themes.
+- The embed renders in Embeds below React Clock, named Rive Clock in `DemoWrapper` and every `TOKEN_COMPONENT_MAP` row, through `DemoWrapper`, with a code-view snippet, in all four themes.
 - All four token families drive the effect per the mapping table; a preset switch audibly changes its personality; slider drags retime it live without a remount.
 - Embed-local controls match Token Lab's control style; no bare test-harness inputs ship.
 - The six load-bearing constraints hold; the phantom-click regression is checked by hand (switch themes while watching the plant).
