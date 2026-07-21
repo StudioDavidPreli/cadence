@@ -658,6 +658,25 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             </button>
           </HoverTip>
         ))}
+        {/* Import sits at the end of the preset row: a token file is brought in
+            beside the presets it becomes. The dashed border marks it an input
+            action, distinct from the solid-bordered preset chips it sits among.
+            The hidden native file input is triggered by the button; format is
+            auto-detected and the result reported back through onImport. */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className={styles.importInput}
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          className={styles.importButton}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Import
+        </button>
       </div>
 
       {/* The save area is only visible when the current state diverges from all
@@ -703,9 +722,14 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
         )}
       </AnimatePresence>
 
-      {/* Export the live token state as a downloadable file. The format toggle
-          picks the serialization; Export downloads, Copy puts the same string on
-          the clipboard. */}
+      {/* Export the live token state as a downloadable file. Two rows: the
+          format toggle spans the full toolbar width on top (its four segments
+          share the width equally), Export and Copy sit on the row beneath. The
+          single-row layout could not fit four segments plus both actions in the
+          300px controls column without clipping the last segment; stacking gives
+          the toggle the whole width and never clips. The format toggle picks the
+          serialization; Export downloads, Copy puts the same string on the
+          clipboard. */}
       <div className={styles.exportRow}>
         <div
           className={styles.exportFormatToggle}
@@ -736,9 +760,8 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
           >
             CSS
           </button>
-          {/* FM = a Framer Motion config module (cadence.motion.js). Two chars so
-              the fourth segment fits the fixed 300px controls column without
-              crowding Export and Copy. Export-only, like CSS. */}
+          {/* FM = a Framer Motion config module (cadence.motion.js). Export-only,
+              like CSS. */}
           <button
             type="button"
             className={`${styles.exportFormatOption} ${exportFormat === 'fm' ? styles.exportFormatOptionActive : ''}`}
@@ -748,32 +771,16 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
             FM
           </button>
         </div>
-        <button type="button" className={styles.exportButton} onClick={handleExport}>
-          Export
-        </button>
-        <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
-          {copied ? 'Copied' : 'Copy'}
-        </button>
-      </div>
-
-      {/* Import a token file (DTCG or flat). The hidden input is triggered by the
-          button; format is auto-detected. The result, including any clamped,
-          filled, or ignored tokens, is reported back through onImport. */}
-      <div className={styles.importRow}>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,application/json"
-          className={styles.importInput}
-          onChange={handleFileChange}
-        />
-        <button
-          type="button"
-          className={styles.importButton}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Import tokens
-        </button>
+        {/* Row two: the download actions, beneath the full-width toggle. Export
+            fills the remaining width; Copy sits compact at its right. */}
+        <div className={styles.exportActions}>
+          <button type="button" className={styles.exportButton} onClick={handleExport}>
+            Export
+          </button>
+          <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
       </div>
     </div>
   )

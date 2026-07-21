@@ -369,25 +369,33 @@
 }
 
 /* ── Token export ────────────────────────────────────────────────────────────
-   Sits at the foot of the presets section. Format toggle on the left, Export
-   and Copy actions on the right. */
+   Sits at the foot of the presets section, in two stacked rows: the format
+   toggle spans the full column width on top, the Export / Copy actions sit on
+   the row beneath. Four segments plus both actions do not fit one 300px row
+   without the toggle clipping its last segment (FM), so the toggle gets the
+   whole width and the actions drop below it. */
 .exportRow {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--color-border);
 }
 
-/* Segmented DTCG | Flat | CSS toggle. One bordered shell, the options share it. */
+/* Segmented DTCG | Flat | CSS | FM toggle. One bordered shell spanning the full
+   toolbar width; the options share it in equal flex:1 columns. */
 .exportFormatToggle {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   border: 1px solid var(--color-border);
   border-radius: 5px;
   overflow: hidden;
 }
 
 .exportFormatOption {
+  flex: 1;
+  text-align: center;
   padding: 5px 8px;
   border: none;
   background: none;
@@ -475,9 +483,16 @@
   fill: currentColor;
 }
 
-/* Export is the primary action: solid fill. Copy is secondary: bordered. */
+/* Row two: the download actions beneath the full-width toggle. */
+.exportActions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Export is the primary action: solid fill, filling the row. Copy is secondary:
+   bordered, compact at the right. */
 .exportButton {
-  margin-left: auto;
+  flex: 1;
   padding: 5px 10px;
   border-radius: 5px;
   border: none;
@@ -514,18 +529,16 @@
 }
 
 /* ── Token import ────────────────────────────────────────────────────────────
-   Import sits below export: a file is input, not output, so it gets its own
-   row. The native file input is hidden; the styled button triggers it. */
-.importRow {
-  display: flex;
-}
-
+   Import is a chip at the end of the preset row (a file is brought in beside the
+   presets it becomes). The native file input is hidden; the button triggers it.
+   It matches the preset chip's size but keeps a dashed border, the same input
+   affordance the Save preset button carries, so an input action reads apart from
+   the solid-bordered preset chips it sits among. */
 .importInput {
   display: none;
 }
 
 .importButton {
-  flex: 1;
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px dashed var(--color-border);

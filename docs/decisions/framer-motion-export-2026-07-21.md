@@ -64,6 +64,28 @@ format names. The file is `cadence.motion.js`, following the `cadence.tokens.*`
 naming of the others, with a `text/javascript` mime so the download opens as a
 script.
 
+## Correction: `FM` did not fit, and the two-row layout (2026-07-21)
+
+The fork-4 claim above was wrong in practice. `FM` clipped. The estimate that the
+row was at "roughly ninety percent" of the column understated it: the four
+segments plus Export and Copy want more than the ~268px content width, and because
+`.exportFormatToggle` carries `overflow: hidden` and the row has no `flex-wrap`,
+the toggle absorbed the shortfall by shrinking and clipped its last segment out of
+sight. The label was never the problem; the single-row arrangement was.
+
+David asked for a layout playground to settle it (a published artifact that
+renders the real 300px column and measures rendered widths live), then chose the
+two-row layout. The export row is now `flex-direction: column`: the format toggle
+spans the full column width on top with its four segments in equal `flex: 1`
+columns, and Export (filling the row) plus Copy sit on a second row beneath. This
+cannot clip regardless of how many formats are added later, which the single row
+never guaranteed. In the same pass, the Import control moved from its own row below
+export up into the preset row (a chip at the end, after Cinematic) and its label
+shortened from "Import tokens" to "Import"; a file is brought in beside the presets
+it becomes, and the dashed border keeps it reading as an input action apart from
+the solid preset chips. Verified on built output: the FM segment's right edge sits
+inside the toggle, the toggle spans the column, and Export stacks beneath it.
+
 ## The one deliberate exclusion: the duration scalar
 
 The other three exports carry the duration scalar, the lone `--motion-duration-scalar`
