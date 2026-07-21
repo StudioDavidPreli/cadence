@@ -61,12 +61,15 @@ Motion tokens are defined as CSS Custom Properties and consumed by Framer Motion
   --motion-duration-slow: 400ms;
   --motion-duration-slower: 600ms;
 
+  /* Duration scalar: a unitless multiplier on the durations (effective = base * scalar) */
+  --motion-duration-scalar: 1;
+
   /* Easing */
   --motion-ease-linear: cubic-bezier(0, 0, 1, 1);
   --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
   --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Delay */
   --motion-delay-none: 0ms;
@@ -74,10 +77,16 @@ Motion tokens are defined as CSS Custom Properties and consumed by Framer Motion
   --motion-delay-medium: 100ms;
   --motion-delay-long: 200ms;
 
-  /* Scale */
+  /* Scale: press keys shrink below 1, lift grows above 1 */
   --motion-scale-press-subtle: 0.98;
   --motion-scale-press-base: 0.95;
   --motion-scale-press-expressive: 0.9;
+  --motion-scale-lift: 1.02;
+
+  /* Spring (physics): unitless, no duration; settle emerges from these three */
+  --motion-spring-stiffness: 170;
+  --motion-spring-damping: 20;
+  --motion-spring-mass: 1.5;
 }
 ```
 

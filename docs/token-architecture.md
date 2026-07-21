@@ -38,9 +38,9 @@ Defined in `src/tokens/motion.css`.
   --motion-scale-lift: 1.02;
 
   /* Spring (physics) */
-  --motion-spring-stiffness: 400;
-  --motion-spring-damping: 30;
-  --motion-spring-mass: 1;
+  --motion-spring-stiffness: 170;
+  --motion-spring-damping: 20;
+  --motion-spring-mass: 1.5;
 
   /* Duration scalar */
   --motion-duration-scalar: 1;
