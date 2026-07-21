@@ -1109,6 +1109,19 @@
   max-width: 380px;
 }
 
+/* Extra separation before the second Embeds demo (Rive Clock, under React
+   Clock). demoContent's 40px gap minus the two 20px demoMain aprons makes
+   consecutive plates touch (0px), which is fine for idle plates but pins the two
+   embeds' highlight outlines against each other and runs the React Clock's
+   highlight into the Rive Clock title. A margin here adds to the flex gap and,
+   because it clears both aprons, becomes the literal gap between the two plates:
+   40px of breathing room so neither highlight clips the other or the title
+   below it. Only the second embed carries it; the first sits at the top of the
+   column with nothing above to clear. */
+.demoGroupEmbedGap {
+  margin-top: 40px;
+}
+
 /* Wide carousel layout: the card grows to 560px (image left, text right), so
    the 320px caption cap would wrap the caption under a much wider card. 560px
    fits the whole instruction on one line, and because the caption block and

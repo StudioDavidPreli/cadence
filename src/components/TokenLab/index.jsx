@@ -948,7 +948,7 @@ function SliderRow({ name, value, config, onChange, tokenKey, label = name }) {
 // into the containing block for absolutely-positioned descendants — safe for
 // the carousel (nothing in it positions absolutely), not something to impose
 // on every demo at once.
-function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass, springCapable = false }) {
+function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass, groupClass, springCapable = false }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
   // springCapable demos carry a spring toggle in the label row (left of the </>
@@ -982,6 +982,7 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
     <div
       className={[
         styles.demoGroup,
+        groupClass || '',
         codeAside && codeOpen ? styles.demoGroupSplit : '',
         state === 'highlighted' ? styles.demoGroupHighlighted : '',
       ].join(' ')}
@@ -1765,6 +1766,7 @@ export function TokenLab() {
           code={DEMO_SNIPPETS.PixelPlant}
           instructionClass={styles.demoInstructionEmbed}
           mainClass={styles.demoMainEmbed}
+          groupClass={styles.demoGroupEmbedGap}
         >
           <PixelPlant />
         </DemoWrapper>
