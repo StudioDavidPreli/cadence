@@ -29,6 +29,26 @@ Build the cheap Tier 1 tests that prove the thesis. Add Tier 2 signatures only w
 overshoot or wind-up is the whole point. Leave the long tail to one human pass. Do
 not build the exhaustive matrix.
 
+**Tier 2 and screenshot diffs: closed as abandoned, 2026-07-21 (David's call).**
+None were ever built, and none will be. The per-principle signature tables below
+are historical. The reasons, recorded so the closure outlives its context:
+
+- A Tier 2 signature verifies mechanism, never feel, and is flaky by nature: it
+  samples an animation mid-flight. What it proves, Tier 3 already judged.
+- Screenshot baselines multiply across four themes and every viewport, and canvas
+  surfaces render differently across machines, so the Rive-heavy pages would
+  manufacture false alarms as a matter of course. The adoption trigger was "if
+  drift ever bites," and it never bit.
+- Tier 1 (the persisted 51-test suite, the deploy gate) and Tier 3 (David's
+  recorded sweeps) covered the deploy risk and the perceptual judgment between
+  them: sufficient, and resource-responsible.
+
+One drift instance stands as evidence the tables below are historical, not
+maintained: row 5's signature asserts the dot lags the slide, and the 2026-07-20
+spring work deliberately put the dot and the slide on one shared transition. The
+persisted forced-colors row is not part of this closure; it stays open in the
+tracker's pre-launch queue.
+
 ---
 
 # System-wide Tier 1 (write once, covers everything)
