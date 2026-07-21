@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
-import { useNavState } from '../../context/NavigationContext'
+import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { SECTIONS } from '../../data/navigation'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
@@ -1432,8 +1432,10 @@ export function TokenLab() {
   )
   // Which Principles filter is active comes from NavigationContext (the nav
   // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
-  // The destination itself is read by DemoArea, not here.
-  const { principleFilter, section } = useNavState()
+  // The destination itself is read by DemoArea, not here. principleId carries the
+  // deep-link route's open principle; closePrinciple is the route-level dismiss.
+  const { principleFilter, principleId, section } = useNavState()
+  const { closePrinciple } = useNavActions()
   // NavItem demo selection — local to the Press & State category.
   const [activeNav, setActiveNav] = useState('Token Lab')
 
@@ -2013,7 +2015,11 @@ export function TokenLab() {
                 message="The Principles Library ran into an unexpected error. Reloading usually clears it."
               >
                 <Suspense fallback={<div className={styles.lazyFallback}>Loading the library…</div>}>
-                  <PrinciplesLibrary filter={principleFilter} />
+                  <PrinciplesLibrary
+                    filter={principleFilter}
+                    principleId={principleId}
+                    onCloseDeepLink={closePrinciple}
+                  />
                 </Suspense>
               </ErrorBoundary>
             }

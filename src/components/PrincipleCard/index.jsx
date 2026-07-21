@@ -1,45 +1,17 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, animate } from 'framer-motion'
-import { PrincipleAnimation } from '../PrincipleAnimation'
 import { PrincipleIcon } from '../PrincipleIcon'
-// Principle demos. Each lives in its own folder under src/principles/* with a
-// co-located CSS module. The card no longer holds any demo logic; it composes
-// the routed demo (getPrincipleComponent), the PrincipleAnimation, and the
-// QuoteBlock. See docs/principles/conventions.md.
-import { SquashAndStretch } from '../../principles/SquashAndStretch'
-import { Anticipation } from '../../principles/Anticipation'
-import { Staging } from '../../principles/Staging'
-import { StraightAhead } from '../../principles/StraightAhead'
-import { FollowThrough } from '../../principles/FollowThrough'
-import { SlowInSlowOut } from '../../principles/SlowInSlowOut'
-import { Arcs } from '../../principles/Arcs'
-import { SecondaryAction } from '../../principles/SecondaryAction'
-import { Timing } from '../../principles/Timing'
-import { Exaggeration } from '../../principles/Exaggeration'
-import { SolidDrawing } from '../../principles/SolidDrawing'
-import { Appeal } from '../../principles/Appeal'
-import { Systematization } from '../../principles/Systematization'
-import { HierarchyOfMotion } from '../../principles/HierarchyOfMotion'
-import { Economy } from '../../principles/Economy'
-import { TokenFidelity } from '../../principles/TokenFidelity'
-import { ReducedMotion } from '../../principles/ReducedMotion'
-import { SharedVocabulary } from '../../principles/SharedVocabulary'
-import { DemoMotionGate, DemoMotionControl } from '../DemoMotionGate'
+// The expanded card's inner content (× close, animation/UI crossfade, meta,
+// summary, toggle, QuoteBlock) lives in a shared presentational component so the
+// deep-link modal can render the exact same markup. The card keeps the state and
+// the scale/footprint machinery; it passes state in. See ExpandedPrincipleBody.
+import { ExpandedPrincipleBody } from './ExpandedPrincipleBody'
 // getExpandedFootprint is a pure grid-math function, extracted here so it can be
 // unit-tested on its own (footprint.test.js): the same reason parse.js and
 // springCurve.js are separate modules. Its edge-case reasoning and the Phase 2
 // hook comment live in footprint.js.
 import { getExpandedFootprint } from './footprint'
 import styles from './PrincipleCard.module.css'
-
-// P17 Reduced Motion is the one demo DemoMotionGate's token scope must not
-// wrap: its own Reduce toggle already governs its demo, and a provider above
-// it would break its raw-token read (useMotionTokens ignores the
-// respectReducedMotion option when a provider is in scope). The card's View
-// motion control still renders on P17 and still governs its Rive animation
-// layer; only the UI demo's tokens are exempt. See
-// docs/decisions/reduced-motion-2026-05-06.md (2026-07-17 addendum).
-const REDUCED_MOTION_PRINCIPLE_ID = 17
 
 // Hover animations only apply to pointer devices. Touch devices have no hover
 // state and exposing scale feedback there would be distracting.
@@ -51,112 +23,6 @@ const supportsHover =
 // cellWidth (the matching width target) is dynamic and arrives as a prop
 // from PrinciplesLibrary.
 const GRID_ROW_HEIGHT = 234
-
-// ─── getPrincipleComponent ────────────────────────────────────────────────────
-//
-// Routing table: maps a principle id to its demo component in src/principles/*.
-// Each demo is self-contained and reads the token system itself. The card only
-// supplies the two pieces of state it owns:
-//   - drawerOpen / setDrawerOpen → Anticipation (P02), whose drawer resets in
-//     lockstep with the card's collapse and Motion/UI toggle (see handleClose /
-//     handleStateToggle). This is the one demo with threaded state.
-//   - uiMode → Slow In & Slow Out (P06), which flashes the "Tokens" title the
-//     moment the UI (component) view becomes visible — the animation view is
-//     shown first on expand, so flashing on mount would point at the title while
-//     the user is looking at the Rive animation, not the token-driven demo.
-// Every other demo manages its own internal state, which resets naturally when
-// the demo unmounts on card collapse.
-
-function getPrincipleComponent(principleId, drawerOpen, setDrawerOpen, uiMode) {
-  switch (principleId) {
-    case 1:  return <SquashAndStretch />
-    case 2:  return <Anticipation drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
-    case 3:  return <Staging />
-    case 4:  return <StraightAhead />
-    case 5:  return <FollowThrough />
-    case 6:  return <SlowInSlowOut uiMode={uiMode} />
-    case 7:  return <Arcs />
-    case 8:  return <SecondaryAction />
-    case 9:  return <Timing />
-    case 10: return <Exaggeration />
-    case 11: return <SolidDrawing />
-    case 12: return <Appeal />
-    case 13: return <Systematization />
-    case 14: return <HierarchyOfMotion />
-    case 15: return <Economy />
-    case 16: return <TokenFidelity />
-    case 17: return <ReducedMotion />
-    case 18: return <SharedVocabulary />
-    default:
-      // Defensive fallback for a principleId outside 1-18. Unreachable today
-      // (all 18 have demos), kept so an out-of-range id degrades to a quiet
-      // message rather than a blank panel.
-      return (
-        <div className={styles.demoArea}>
-          <span className={styles.demoAreaText}>
-            No component demo for this principle.
-          </span>
-        </div>
-      )
-  }
-}
-
-// ─── QuoteBlock ───────────────────────────────────────────────────────────────
-//
-// Renders the quote, attribution, and token row below the expanded card's main
-// content area.
-//
-// quoteContent is stack-grided: both motion-state and ui-state versions render
-// at the same grid cell, opacity-crossfaded on uiMode change. This pins the
-// quoteContent height at max(motion, ui), so the quoteBlock does not jump
-// vertically when toggling and the expandedContent above retains its space.
-//
-// The inner crossfade does not need to be gated by isStable. The expandedWrapper
-// itself fades opacity on enter/exit, so during the card's open/close the
-// QuoteBlock's children inherit the wrapper's opacity ramp regardless of their
-// own animate prop value.
-//
-// tokenRow is plain — principle.tokens is invariant across motion and ui, so
-// the previous AnimatePresence wrapper did no work and is removed.
-
-function QuoteBlock({ principle, uiMode, tokens: motionTokens }) {
-  return (
-    <div className={styles.quoteBlock}>
-      <div className={styles.quoteStack}>
-        <motion.div
-          className={styles.quoteContent}
-          animate={{ opacity: uiMode ? 0 : 1 }}
-          transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
-          style={{ pointerEvents: uiMode ? 'none' : 'auto' }}
-          aria-hidden={uiMode}
-        >
-          <p className={styles.quoteText}>{principle.animationQuote}</p>
-          {principle.animationQuoteAttribution && (
-            <p className={styles.quoteAttribution}>
-              — {principle.animationQuoteAttribution}
-            </p>
-          )}
-        </motion.div>
-        <motion.div
-          className={styles.quoteContent}
-          animate={{ opacity: uiMode ? 1 : 0 }}
-          transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease.standard }}
-          style={{ pointerEvents: uiMode ? 'auto' : 'none' }}
-          aria-hidden={!uiMode}
-        >
-          <p className={styles.quoteText}>{principle.componentQuote}</p>
-          {principle.componentQuoteAttribution && (
-            <p className={styles.quoteAttribution}>
-              — {principle.componentQuoteAttribution}
-            </p>
-          )}
-        </motion.div>
-      </div>
-
-      <p className={styles.tokenRow}>{principle.tokens}</p>
-    </div>
-  )
-}
 
 // 2026-05-03 regression note: the card-to-card switch path was missed by the
 // 2026-05-01 explicit-scale fix. handleClose engages isClosing synchronously,
@@ -546,120 +412,18 @@ export function PrincipleCard({
             exit={{ opacity: 0 }}
             transition={{ duration: dur.slow, ease: tokens.ease.standard }}
           >
-            <div className={styles.expandedContent}>
-              {/* motion.button: whileTap spring is intentional — single-element
-                  micro-interaction isolated from the layout animation. */}
-              <motion.button
-                className={styles.closeButton}
-                onClick={handleClose}
-                whileTap={{ scale: tokens.scale.pressSubtle }}
-                transition={{ duration: dur.fast, ease: tokens.ease.overshoot }}
-              >
-                ×
-              </motion.button>
-
-              {/* Left half: animation and UI component as continuously mounted
-                  siblings. PrincipleAnimation stays mounted for the entire
-                  expanded lifetime of the card. The Rive instance initializes
-                  once on card expand and persists through uiMode toggles.
-
-                  Crossfade between the two states is driven by direct opacity
-                  animation on each sibling. pointerEvents prevents the invisible
-                  layer from intercepting clicks intended for the visible layer. */}
-              <div className={styles.animationHalf}>
-                <div className={styles.animationStateWrapper}>
-                  <motion.div
-                    className={styles.animationState}
-                    animate={{ opacity: uiMode ? 0 : 1 }}
-                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
-                    style={{ pointerEvents: uiMode ? 'none' : 'auto' }}
-                  >
-                    {/* Under OS reduce-motion the Rive layer holds still until
-                        the card's View motion control (below) is toggled on. */}
-                    <PrincipleAnimation
-                      principleId={principle.id}
-                      paused={prefersReducedMotion && !showDemoMotion}
-                    />
-                  </motion.div>
-                  <motion.div
-                    className={styles.animationState}
-                    animate={{ opacity: uiMode ? 1 : 0 }}
-                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
-                    style={{ pointerEvents: uiMode ? 'auto' : 'none' }}
-                  >
-                    {/* The same showDemoMotion boolean governs the UI demo's
-                        tokens through the gate. P17 is exempt from the token
-                        scope only (its own Reduce toggle owns its demo); the
-                        control below still governs its Rive layer. */}
-                    {principle.id === REDUCED_MOTION_PRINCIPLE_ID ? (
-                      getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen, uiMode)
-                    ) : (
-                      <DemoMotionGate on={showDemoMotion}>
-                        {getPrincipleComponent(principle.id, drawerOpen, setDrawerOpen, uiMode)}
-                      </DemoMotionGate>
-                    )}
-                  </motion.div>
-                </div>
-                {/* Below the crossfade wrapper, not inside a layer: the
-                    control must be reachable in BOTH views, not buried behind
-                    the Motion/UI switch. Renders only under OS reduce-motion,
-                    so the normal layout never carries it. */}
-                {prefersReducedMotion && (
-                  <DemoMotionControl on={showDemoMotion} onChange={setShowDemoMotion} />
-                )}
-              </div>
-
-              {/* Right half: meta, title, crossfading summary, toggle. */}
-              <div className={styles.contentHalf}>
-                <div className={styles.expandedMeta}>
-                  <span className={styles.expandedNumber}>
-                    {String(principle.id).padStart(2, '0')}
-                  </span>
-                  <span className={[
-                    styles.categoryBadge,
-                    principle.category === 'extended'
-                      ? styles.categoryExtended
-                      : styles.categoryClassic,
-                  ].join(' ')}>
-                    {principle.category === 'extended' ? 'Extended' : 'Classic'}
-                  </span>
-                </div>
-
-                <h2 className={styles.expandedTitle}>{principle.title}</h2>
-
-                {/* Stack-grid: both summaries render at the same grid cell,
-                    opacity-crossfaded on uiMode change. Pins height at the
-                    taller of the two states so the toggle below does not jump
-                    vertically when toggling. The expandedContent column is
-                    align-items: flex-start, so any contentHalf overflow falls
-                    downward (toward quoteBlock) rather than displacing the
-                    badge and title above. */}
-                <div className={styles.summaryStack}>
-                  <motion.p
-                    className={styles.expandedSummary}
-                    animate={{ opacity: uiMode ? 0 : 1 }}
-                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
-                    aria-hidden={uiMode}
-                  >
-                    {principle.summary}
-                  </motion.p>
-                  <motion.p
-                    className={styles.expandedSummary}
-                    animate={{ opacity: uiMode ? 1 : 0 }}
-                    transition={{ duration: dur.fast, ease: tokens.ease.enter }}
-                    aria-hidden={!uiMode}
-                  >
-                    {principle.componentSummary}
-                  </motion.p>
-                </div>
-
-                <button className={styles.stateToggle} onClick={handleStateToggle}>
-                  {uiMode ? 'Motion' : 'UI'}
-                </button>
-              </div>
-            </div>
-
-            <QuoteBlock principle={principle} uiMode={uiMode} tokens={tokens} />
+            <ExpandedPrincipleBody
+              principle={principle}
+              tokens={tokens}
+              prefersReducedMotion={prefersReducedMotion}
+              uiMode={uiMode}
+              onToggleState={handleStateToggle}
+              drawerOpen={drawerOpen}
+              setDrawerOpen={setDrawerOpen}
+              showDemoMotion={showDemoMotion}
+              setShowDemoMotion={setShowDemoMotion}
+              onClose={handleClose}
+            />
           </motion.div>
         )}
       </AnimatePresence>

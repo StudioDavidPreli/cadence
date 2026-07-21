@@ -125,6 +125,25 @@
   margin-top: 12px;
 }
 
+/* ── Deep-link modal body ─────────────────────────────────────────────────────
+   The deep-link modal renders the expanded card's own body (ExpandedPrincipleBody)
+   at the card's exact 372×480 dimensions: 2 columns × 180px + one 12px gap = 372,
+   2 rows × 234px + one 12px gap = 480 (see grid-architecture.md). Reproducing the
+   .expandedWrapper environment (a flex column that stacks .expandedContent above
+   .quoteBlock) here is what lets the shared body lay out identically to the in-grid
+   card. The Modal's `bare` panel supplies the frame, so this box carries no border
+   of its own. position: relative anchors the body's absolute × close, which the
+   card otherwise gets from .expandedWrapper. */
+.deepLinkBody {
+  display: flex;
+  flex-direction: column;
+  width: 372px;
+  height: 480px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
 /* ── Card grid ───────────────────────────────────────────────────────────────
    auto-fit + minmax(180px, 1fr): responsive columns with no JavaScript width
    math. The browser computes column count at every container width — 1 column

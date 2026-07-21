@@ -70,7 +70,19 @@ import styles from './Modal.module.css'
 // a Modal that auto-opens on mount must gate its open on the node existing —
 // otherwise it mounts viewport-fixed for a frame, then jumps into the column.
 // Full rationale: CLAUDE.md "Modal centering — viewport vs demo column".
-export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null }) {
+//
+// hideHeader drops the Modal's own header (the title text + ✕). The principle
+// deep-link modal sets it because its content is the expanded-card body, which
+// already carries the principle's title and its own × close; without this the
+// two would double up. title is still used for the panel's aria-label even when
+// the visible header is suppressed.
+//
+// bare shrink-wraps the panel to its child: it zeroes the default panel padding
+// and lifts the 420px width cap so a fixed-size body (the deep-link modal's
+// 372×480 card) sits flush inside the dialog frame. The class lives in
+// Modal.module.css so its cascade order over .panel is controlled. Off by
+// default, which keeps the standard dialog sizing.
+export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null, hideHeader = false, bare = false }) {
   const tokens = useMotionTokens()
   const panelRef = useRef(null)
   const anchored = scoped || portalTarget != null
@@ -150,6 +162,7 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
           className={[
             styles.panel,
             portalTarget ? styles.panelAnchored : scoped && styles.panelScoped,
+            bare && styles.panelBare,
           ].filter(Boolean).join(' ')}
           role="dialog"
           aria-modal="true"
@@ -164,16 +177,18 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
           transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
           onMouseDown={e => e.stopPropagation()}
         >
-          <div className={styles.header}>
-            <h2 className={styles.title}>{title}</h2>
-            <button
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Close dialog"
-            >
-              ✕
-            </button>
-          </div>
+          {!hideHeader && (
+            <div className={styles.header}>
+              <h2 className={styles.title}>{title}</h2>
+              <button
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close dialog"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           <div className={styles.content}>
             {children}

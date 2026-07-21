@@ -76,6 +76,18 @@
   box-shadow: none;
 }
 
+/* ── Bare mode ────────────────────────────────────────────────────────────────
+   Shrink-wrap the panel to a fixed-size child. The deep-link modal renders the
+   expanded principle card body at its own 372×480 dimensions and wants the panel
+   as a flush frame, not a padded container. Zero the padding, lift the 420px
+   cap, and let width follow the child. Placed after .panel so it wins the
+   cascade; the accent border, radius, and elevation carry over. */
+.panelBare {
+  padding: 0;
+  max-width: none;
+  width: auto;
+}
+
 /* ── Header ───────────────────────────────────────────────────────────────── */
 .header {
   display: flex;

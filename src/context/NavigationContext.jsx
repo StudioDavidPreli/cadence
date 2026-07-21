@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useContext, useMemo, useReducer, useRef } from 'react'
 import {
   SECTIONS,
   FILTERS,
@@ -21,6 +21,7 @@ import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 //   destination       categoryId | 'principles' | 'landing' | 'grid' | null  (what the tool region shows)
 //   expandedSection  'token-lab' | 'principles' | 'motion-tiles' | null  (single-open accordion)
 //   principleFilter  'all' | 'classic' | 'extended'
+//   principleId       number | null  (a deep-link modal is open over the grid; null otherwise)
 //
 // The demo area's rule: render the destination's content, else the hero. There
 // is no separate "hero visible" flag — the hero is the absence of a destination.
@@ -116,6 +117,14 @@ function navReducer(state, action) {
     case 'RETURN_HOME':
       return { ...LANDING }
 
+    // A deep-link principle modal was dismissed (× / backdrop / Escape). Clear
+    // the principleId; section, destination, and filter stay put, so the grid
+    // underneath is untouched. The paired closePrinciple action creator flags
+    // useHashSync to rewrite the hash with replaceState (no history push), so the
+    // back button does not reopen the modal we just closed.
+    case 'CLOSE_PRINCIPLE':
+      return { ...state, principleId: null }
+
     // Browser back button / manual URL edit, via useHashSync. The parsed route
     // is already a complete state object, so we adopt it wholesale.
     case 'SET_FROM_ROUTE':
@@ -133,6 +142,12 @@ export function NavigationProvider({ children }) {
     parseHash(window.location.hash),
   )
 
+  // One-shot signal to useHashSync that the next hash write is a deep-link modal
+  // close and should replaceState rather than push a history entry. Set by
+  // closePrinciple immediately before its dispatch; useHashSync clears it after
+  // the write it governs.
+  const replaceNextRef = useRef(false)
+
   // dispatch is stable, so these action creators are created once and the
   // actions context value never changes identity.
   const actions = useMemo(
@@ -145,12 +160,19 @@ export function NavigationProvider({ children }) {
       enterMotionTilesGrid: () =>
         dispatch({ type: 'SET_MOTION_TILES_VIEW', view: MOTION_TILES_GRID }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
+      // Flag the replaceState write, then clear the deep-link modal. Order
+      // matters: the ref must be true before the dispatch that triggers the
+      // state->hash effect.
+      closePrinciple: () => {
+        replaceNextRef.current = true
+        dispatch({ type: 'CLOSE_PRINCIPLE' })
+      },
     }),
     [],
   )
 
   // Mirror state into the URL hash and adopt back-button navigation.
-  useHashSync(state, dispatch)
+  useHashSync(state, dispatch, replaceNextRef)
 
   return (
     <NavActionsContext.Provider value={actions}>

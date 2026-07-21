@@ -391,10 +391,45 @@
   margin: 0;
 }
 
+/* The token pill sits on the left; the copy-link control holds the right. Baseline
+   alignment keeps the button's text on the same line as the token list; gap and
+   space-between separate them. A single row, so no height is added below the
+   QuoteBlock divider and the toggle/divider invariant above is untouched. */
 .tokenRow {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--color-text-muted);
   margin: 0;
   margin-top: 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* The token list keeps the row's original look and takes the remaining width,
+   wrapping within its share if long. */
+.tokenText {
+  min-width: 0;
+}
+
+/* Copy-link control. Chrome, borderless, mono to match the token row. It carries
+   no accent (accent means active/connected in this system, which a copy control
+   is not); it inverts to the primary text color on hover like the other chrome
+   buttons. nowrap so the label does not break mid-word as it swaps to "Copied". */
+.copyLink {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--feedback-ui-duration) var(--motion-ease-standard);
+}
+
+.copyLink:hover {
+  color: var(--color-text-primary);
 }
