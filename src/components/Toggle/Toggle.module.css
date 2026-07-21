@@ -6,8 +6,8 @@
 
 /* The track is the clickable button element.
    44px wide, 26px tall, 3px padding gives the thumb 18px of travel.
-   :active uses the --motion-scale-base CSS custom property so press feedback
-   responds to the scale.base slider in TokenLab without needing Framer Motion
+   :active uses the --motion-scale-press-base CSS custom property so press feedback
+   responds to the press base slider in TokenLab without needing Framer Motion
    on the button itself. */
 .track {
   display: flex;
@@ -26,7 +26,7 @@
 }
 
 .track:active {
-  transform: scale(var(--motion-scale-base, 0.95));
+  transform: scale(var(--motion-scale-press-base, 0.95));
 }
 
 /* Expressive mode: track color changes on state.

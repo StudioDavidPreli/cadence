@@ -247,7 +247,7 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
           <motion.button
             className={styles.nextButton}
             whileTap={{
-              scale: tokens.scale.base,
+              scale: tokens.scale.pressBase,
               transition: { duration: tokens.duration.fast, ease: tokens.ease.standard },
             }}
             onClick={advance}
@@ -290,7 +290,7 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
               <motion.button
                 className={styles.resetButton}
                 whileTap={{
-                  scale: tokens.scale.base,
+                  scale: tokens.scale.pressBase,
                   // ease.exit: the system is deliberately resetting to default —
                   // a purposeful return, not a casual tap. The quick-start curve
                   // signals decisiveness.

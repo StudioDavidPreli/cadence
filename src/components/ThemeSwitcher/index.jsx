@@ -29,7 +29,7 @@ export function ThemeSwitcher() {
           onClick={() => setTheme(t)}
           aria-label={`${THEME_LABELS[t] ?? t} theme`}
           whileTap={{
-            scale: tokens.scale.base,
+            scale: tokens.scale.pressBase,
             transition: { duration: tokens.duration.fast, ease: tokens.ease.standard },
           }}
         >

@@ -75,9 +75,9 @@ Motion tokens are defined as CSS Custom Properties and consumed by Framer Motion
   --motion-delay-long: 200ms;
 
   /* Scale */
-  --motion-scale-subtle: 0.98;
-  --motion-scale-base: 0.95;
-  --motion-scale-expressive: 0.9;
+  --motion-scale-press-subtle: 0.98;
+  --motion-scale-press-base: 0.95;
+  --motion-scale-press-expressive: 0.9;
 }
 ```
 

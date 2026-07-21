@@ -6,7 +6,7 @@ import styles from './Appeal.module.css'
 
 // P12 Appeal. 2x2 grid of compact Cards. The grid drifts continuously when
 // nothing is selected; selecting any card freezes the drift and dims the
-// unselected siblings (scale.subtle + opacity 0.55) — the "spotlight narrows"
+// unselected siblings (scale.pressSubtle + opacity 0.55), the "spotlight narrows"
 // composition. All four classic motion tokens read together: duration.slower
 // drives the drift cycle, duration.base drives the settle/dim/lift, ease.standard
 // smooths the neutral states, ease.overshoot marks selection. "All tokens in concert"

@@ -5,6 +5,13 @@ Source: Live Rive MCP inspection of the rebuilt file plus David's editor decisio
 
 # waterWilt — Token to VM Map
 
+> **Rename note, 2026-07-21.** This map names `scale.base` and `scale.expressive`,
+> kept below as the historical record of the build. Those tokens were renamed
+> `scale.pressBase` and `scale.pressExpressive` on 2026-07-21 (press/lift
+> legibility split); the live `scale.pressBase` → `sceneScale` bind is unchanged
+> in behavior. If you copy a token name from this map into live code, use the new
+> name. Record: `docs/decisions/scale-rename-2026-07-21.md`.
+
 This is the contract between the two halves of the Water & Wilt demo. David authors
 `public/rive/waterwiltreact.riv` against it; a later session builds the React driver
 against it. Neither side changes the interface without the other seeing it. Once

@@ -15,7 +15,7 @@ import styles from './Card.module.css'
 // regardless of mode.
 //
 // ── dimmed ────────────────────────────────────────────────────────────────────
-// When true and not selected, the Card scales down to scale.subtle and dims
+// When true and not selected, the Card scales down to scale.pressSubtle and dims
 // to opacity 0.55. Selected cards are never dimmed (selection wins). The
 // Appeal demo passes dimmed=true to all unselected siblings whenever any
 // card in the grid is selected, producing the "spotlight narrows" effect.
@@ -50,11 +50,11 @@ export function Card({
     : { duration: tokens.duration.base, ease: tokens.ease.overshoot }
 
   // Selection wins over dim. When neither: rest. When dimmed and not
-  // selected: shrink to scale.subtle and ramp opacity down.
+  // selected: shrink to scale.pressSubtle and ramp opacity down.
   const targetScale = isSelected
     ? tokens.scale.lift
     : dimmed
-      ? tokens.scale.subtle
+      ? tokens.scale.pressSubtle
       : 1
   const targetOpacity = !isSelected && dimmed ? 0.55 : 1
 

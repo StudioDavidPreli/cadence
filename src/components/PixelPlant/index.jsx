@@ -48,7 +48,7 @@
 //                   resolve in the same staggered order. During follow the lag
 //                   is extra smoothing; during the homecoming it is a real
 //                   per-plate start delay.
-//   scale.expressive  the AMPLITUDE. Max plate travel maps to (1 - the token):
+//   scale.pressExpressive  the AMPLITUDE. Max plate travel maps to (1 - the token):
 //                   the "largest departure from rest" slot drives the largest
 //                   fringe. The local strength slider left the panel.
 //
@@ -109,10 +109,10 @@ const PLATES = [
   { key: 'red', rate: 1 / 3, lag: 2 },
 ]
 
-// Maps the scale token's departure from rest into UV-offset space. scale.expressive
+// Maps the scale token's departure from rest into UV-offset space. scale.pressExpressive
 // defaults to 0.9, so (1 - 0.9) * 0.6 = 0.06, the lab's known-good default fringe.
 // This is a geometry gain, not a timing value; final feel is tuned by hand with
-// David by dragging scale.expressive against the live tool.
+// David by dragging scale.pressExpressive against the live tool.
 const AMPLITUDE_GAIN = 0.6
 
 // Explore mode allows near-zero tokens. Clamp the time constant and the
@@ -524,7 +524,7 @@ export function PixelPlant() {
       const ease = homeEaseRef.current
       const reduced = reducedRef.current
       const p = pointerRef.current
-      const amp = (1 - t.scale.expressive) * AMPLITUDE_GAIN
+      const amp = (1 - t.scale.pressExpressive) * AMPLITUDE_GAIN
 
       for (const plate of platesRef.current) {
         if (reduced) {

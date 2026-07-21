@@ -30,7 +30,7 @@ export const INITIAL_STATE = {
   duration: { fast: 100, base: 200, slow: 400, slower: 600 },
   easing:   { standard: 'standard', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
   delay:    { short: 50, medium: 100, long: 200 },
-  scale:    { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  scale:    { pressSubtle: 0.98, pressBase: 0.95, pressExpressive: 0.9, lift: 1.02 },
   // Physics spring: unitless numbers fed to Framer Motion as
   // { type: 'spring', ... }. Varies per preset like duration does, so it lives
   // in state and resolves per preset (not a fixed reference). Standard is a soft,
@@ -70,7 +70,7 @@ export const BUILT_IN_PRESETS = [
       // accelerate shapes; bending those would dilute the contrast Snappy is built on.
       easing:   { standard: 'overshoot', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 20, medium: 40, long: 80 },
-      scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
+      scale:    { pressSubtle: 0.97, pressBase: 0.93, pressExpressive: 0.87, lift: 1.04 },
       // Stiffer and lighter than Standard: it bounces harder and arrives faster.
       spring:   { stiffness: 600, damping: 22, mass: 1 },
       // Held at 1 like every preset: the scalar is not a personality axis.
@@ -89,7 +89,7 @@ export const BUILT_IN_PRESETS = [
       // dismissals don't drag.
       easing:   { standard: 'enter', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 100, medium: 200, long: 400 },
-      scale:    { subtle: 0.99, base: 0.97, expressive: 0.94, lift: 1.01 },
+      scale:    { pressSubtle: 0.99, pressBase: 0.97, pressExpressive: 0.94, lift: 1.01 },
       // Soft and heavy: low stiffness plus extra mass make a slow arrival with
       // almost no bounce.
       spring:   { stiffness: 180, damping: 26, mass: 1.2 },
@@ -201,6 +201,16 @@ function mapGroup(group, fn) {
 
 const bezierCss = arr => `cubic-bezier(${arr.join(', ')})`
 
+// Convert a camelCase token key to the kebab-case suffix its CSS custom property
+// uses. Single-word keys are unchanged (fast -> fast); the compound scale keys
+// need it (pressSubtle -> press-subtle), because the JS/state/JSON key stays
+// camelCase `pressSubtle` while the CSS property is `--motion-scale-press-subtle`.
+// This is the one seam between the two spellings; every dynamic `--motion-*`
+// write goes through it so the two can never drift.
+export function tokenKeyToCssSuffix(key) {
+  return key.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+
 // DTCG / W3C Design Tokens format: every leaf is a { $type, $value } pair.
 // This is the interchange shape Style Dictionary, Tokens Studio, and Figma
 // Variables consume. The draft spec has no motion-specific delay type, so
@@ -261,7 +271,7 @@ export function toCssVars(state) {
   // Each family becomes a run of `  --motion-<family>-<key>: <value>;` lines.
   // The families are separated by a blank line, matching motion.css's grouping.
   const block = (family, group, fmt) =>
-    Object.entries(group).map(([k, v]) => `  --motion-${family}-${k}: ${fmt(v)};`)
+    Object.entries(group).map(([k, v]) => `  --motion-${family}-${tokenKeyToCssSuffix(k)}: ${fmt(v)};`)
   const lines = [
     ...block('duration', t.duration, ms => `${ms}ms`),
     '',
@@ -362,7 +372,7 @@ export const EDITABLE_TOKEN_SCHEMA = {
   duration: ['fast', 'base', 'slow', 'slower'],
   easing:   ['standard', 'enter', 'exit', 'overshoot'],
   delay:    ['short', 'medium', 'long'],
-  scale:    ['subtle', 'base', 'expressive', 'lift'],
+  scale:    ['pressSubtle', 'pressBase', 'pressExpressive', 'lift'],
   spring:   ['stiffness', 'damping', 'mass'],
 }
 
@@ -376,6 +386,24 @@ export const EDITABLE_TOKEN_SCHEMA = {
 // `linear` alone stays fixed among the easing curves: it has no draggable
 // handles (corners only), so there is nothing to edit.
 export const FIXED_REFERENCE_PATHS = new Set(['easing.linear', 'delay.none'])
+
+// Old scale key names, mapped NEW -> OLD, for import compatibility after the
+// 2026-07-21 press/lift rename (scale.subtle/base/expressive became
+// pressSubtle/pressBase/pressExpressive; lift was unchanged). A file exported
+// before the rename carries the old keys. Easing solved this differently: a
+// curve canonicalizes by VALUE, so a renamed slot re-identifies itself with no
+// name alias. Scale values are bare numbers with no such canonicalization, so
+// without an explicit alias an old `scale.subtle` would land in collectForeign
+// (ignored) and the new `pressSubtle` would fill from Standard, silently
+// swapping the user's tuned value for a default. The alias reads the old value
+// into the new key and reports the rename instead (David's fork-2 call).
+const SCALE_KEY_ALIASES = { pressSubtle: 'subtle', pressBase: 'base', pressExpressive: 'expressive' }
+// Keyed by family so the buildState loop can look up aliases generically;
+// only scale has any (duration/delay are unchanged, so their entry is absent).
+const KEY_ALIASES = { scale: SCALE_KEY_ALIASES }
+// The old scale key names as a set, so collectForeign recognizes them as
+// renamed-not-foreign and stays quiet on a clean import of an old file.
+const RENAMED_SCALE_KEYS = new Set(Object.values(SCALE_KEY_ALIASES))
 
 function clampScalar(n, { min, max }) {
   return Math.max(min, Math.min(max, n))
@@ -457,14 +485,27 @@ function buildState(parsed, format) {
   const state = { duration: {}, easing: {}, delay: {}, scale: {}, spring: {} }
   const clamped = []
   const filled = []
+  const renamed = []
   const curvesOutOfRange = []
 
   for (const family of ['duration', 'delay', 'scale']) {
     const bounds = EXPLORE_BOUNDS[family]
     const group = getGroup(parsed, format, family)
+    const aliases = KEY_ALIASES[family]   // only scale has any; undefined otherwise
     for (const key of EDITABLE_TOKEN_SCHEMA[family]) {
       const path = `${family}.${key}`
-      const leaf = group?.[key]
+      let leaf = group?.[key]
+      // Rename compatibility (scale only): if the current key is absent but its
+      // old name is present, read the old value into the new key and record the
+      // rename, so a tuned value is not dropped and refilled from Standard.
+      if (leaf === undefined && aliases?.[key] !== undefined) {
+        const oldKey = aliases[key]
+        const oldLeaf = group?.[oldKey]
+        if (oldLeaf !== undefined) {
+          leaf = oldLeaf
+          renamed.push({ from: `${family}.${oldKey}`, to: path })
+        }
+      }
       if (leaf === undefined) {
         state[family][key] = INITIAL_STATE[family][key]
         filled.push({ path, to: INITIAL_STATE[family][key] })
@@ -538,7 +579,7 @@ function buildState(parsed, format) {
     state.scalar = value
   }
 
-  return { state, clamped, filled, curvesOutOfRange }
+  return { state, clamped, filled, renamed, curvesOutOfRange }
 }
 
 // Collect keys present in the file that the editor cannot hold, excluding the
@@ -560,7 +601,12 @@ function collectForeign(parsed, format) {
     if (group && typeof group === 'object') {
       for (const key of Object.keys(group)) {
         const path = `${family}.${key}`
-        if (known.includes(key) || FIXED_REFERENCE_PATHS.has(path)) continue
+        // Old scale key names are recognized-but-renamed (buildState aliases
+        // them into the new keys), not foreign, so suppress them here the way
+        // the fixed constants are suppressed: a clean import of an old file
+        // reports the rename, not noise.
+        const isRenamedScaleKey = family === 'scale' && RENAMED_SCALE_KEYS.has(key)
+        if (known.includes(key) || FIXED_REFERENCE_PATHS.has(path) || isRenamedScaleKey) continue
         foreign.push({ path })
       }
     }
@@ -588,12 +634,12 @@ export function importTokens(text) {
   }
   try {
     const format = detectFormat(parsed)
-    const { state, clamped, filled, curvesOutOfRange } = buildState(parsed, format)
+    const { state, clamped, filled, renamed, curvesOutOfRange } = buildState(parsed, format)
     const ignored = collectForeign(parsed, format)
     return {
       ok: true,
       state,
-      report: { format, total: TOTAL_TOKENS, clamped, filled, ignored, curvesOutOfRange },
+      report: { format, total: TOTAL_TOKENS, clamped, filled, renamed, ignored, curvesOutOfRange },
     }
   } catch (e) {
     if (e instanceof ImportError) return { ok: false, error: e.message }

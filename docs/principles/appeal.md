@@ -4,7 +4,7 @@ The quality that makes an audience want to watch. Charm, clarity, magnetism. In 
 
 ## UI demonstration
 
-A 2x2 grid of compact Cards with ASCII faces. The grid drifts continuously when nothing is selected (ambient y-axis oscillation with per-card phase offsets so the four never sync). Selecting any card freezes the drift, dims the unselected siblings (scale.subtle + opacity 0.55), and lifts the selected card (scale.lift). All tokens work together: `duration.slower` drives the drift cycle, `duration.base` drives the settle/dim/lift, `ease.standard` smooths the neutral states, `ease.overshoot` marks selection.
+A 2x2 grid of compact Cards with ASCII faces. The grid drifts continuously when nothing is selected (ambient y-axis oscillation with per-card phase offsets so the four never sync). Selecting any card freezes the drift, dims the unselected siblings (scale.pressSubtle + opacity 0.55), and lifts the selected card (scale.lift). All tokens work together: `duration.slower` drives the drift cycle, `duration.base` drives the settle/dim/lift, `ease.standard` smooths the neutral states, `ease.overshoot` marks selection.
 
 ## Animation
 

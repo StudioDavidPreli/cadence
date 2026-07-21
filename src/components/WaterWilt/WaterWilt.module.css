@@ -25,7 +25,7 @@
    the one clickable hole through the stage's none. The transforms live here,
    not on the Button: Framer Motion animates Button's own transform on press,
    and inline transforms replace, not compose. --ww-scene-scale is the
-   scale.base token (set inline by the component), so the button tracks the
+   scale.pressBase token (set inline by the component), so the button tracks the
    scene the same way the sceneScale VM bind scales the artwork; the origin
    sits at the wrapper's bottom center so the button shrinks toward its
    anchor point, like the art shrinks toward the planter. */

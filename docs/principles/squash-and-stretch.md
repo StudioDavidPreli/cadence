@@ -4,7 +4,7 @@ A rubber ball flattens against the floor and stretches as it climbs away. Its vo
 
 ## UI demonstration
 
-The expanded card renders the Button from Token Lab's Press & State demo, the same component the user has already met. One scale value does both jobs: the press compresses to `scale.base` on `ease.standard`, and the release rides `ease.overshoot` back, past rest before settling. The overshoot is the stretch. `duration.fast` keeps the whole exchange inside the window of a real click.
+The expanded card renders the Button from Token Lab's Press & State demo, the same component the user has already met. One scale value does both jobs: the press compresses to `scale.pressBase` on `ease.standard`, and the release rides `ease.overshoot` back, past rest before settling. The overshoot is the stretch. `duration.fast` keeps the whole exchange inside the window of a real click.
 
 ## Animation
 
@@ -16,4 +16,4 @@ The expanded card renders the Button from Token Lab's Press & State demo, the sa
 
 ## Tokens used
 
-`scale.base` (one travel, both directions), `duration.fast` (press feedback), `ease.standard` (the press), `ease.overshoot` (the release past rest).
+`scale.pressBase` (one travel, both directions), `duration.fast` (press feedback), `ease.standard` (the press), `ease.overshoot` (the release past rest).

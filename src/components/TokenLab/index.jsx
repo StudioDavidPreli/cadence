@@ -44,6 +44,7 @@ import {
   toDtcgJson,
   toFlatJson,
   toCssVars,
+  tokenKeyToCssSuffix,
   importTokens,
 } from '../../data/motionPresets'
 import styles from './TokenLab.module.css'
@@ -91,8 +92,8 @@ const Carousel = lazy(() =>
 // (tokens.<group>.<key>, or the matching --motion-* CSS variable). Objective and
 // greppable. ease.linear has no slider (corners only), so reads of it produce no
 // entry here. Two reads are wired but not exercised by the TokenLab demo itself —
-// Card's scale.subtle (its dimmed branch, used by the Appeal principle) and
-// Stepper's scale.base — and are listed because the component consumes them even
+// Card's scale.pressSubtle (its dimmed branch, used by the Appeal principle) and
+// Stepper's scale.pressBase — and are listed because the component consumes them even
 // though this demo never triggers that path.
 //
 // easing.overshoot became an editable slot (unlocked in Explore mode, 2026-07-08),
@@ -103,7 +104,7 @@ const Carousel = lazy(() =>
 //
 // Rebuilt 2026-06-20 against each component's actual reads in the Token Fidelity
 // audit. The prior table had drifted: NavItem was under easing.standard (it reads
-// enter/exit), Toggle under easing.standard + scale.base (it reads
+// enter/exit), Toggle under easing.standard + scale.pressBase (it reads
 // duration.fast + ease.overshoot), Card under duration.slow (it reads base),
 // and Notification Badge under easing.exit (it reads standard, not exit).
 // React Clock (2026-07-18, the Embeds category's Water & Wilt demo)
@@ -114,9 +115,9 @@ const Carousel = lazy(() =>
 // when rain and growth became simultaneous, and duration.base left when rain
 // moved to fast and the wilt to slow (both 2026-07-18, David's reviews).
 // ease.linear has no slider, so the rain scrub adds no easing row.
-// scale.expressive is NOT listed for React Clock: the planned plantScale bind
+// scale.pressExpressive is NOT listed for React Clock: the planned plantScale bind
 // was withdrawn (sceneScale covers composition scale, David's 2026-07-18 call),
-// so the demo reads scale.base (scene + button overlay + Button squash) and no
+// so the demo reads scale.pressBase (scene + button overlay + Button squash) and no
 // other scale token.
 //
 // Rive Clock (2026-07-20, the Embeds category's second canvas demo, the
@@ -124,7 +125,7 @@ const Carousel = lazy(() =>
 // (docs/briefings/pixelplant-token-map.md): duration.base is the follow time
 // constant and duration.slow the homecoming length (split on David's call, so
 // the two tune independently); ease.standard shapes the homecoming tween;
-// delay.short staggers the three colour plates; scale.expressive sets the
+// delay.short staggers the three colour plates; scale.pressExpressive sets the
 // aberration amplitude. It reads no other slot — the plate rate ratios and the
 // blocks/gap controls are geometry, not tokens, so they add no rows.
 const TOKEN_COMPONENT_MAP = {
@@ -139,10 +140,10 @@ const TOKEN_COMPONENT_MAP = {
   'delay.short':      ['Stepper', 'Rive Clock'],
   'delay.medium':     ['Stepper'],
   'delay.long':       ['Stepper', 'React Clock'],
-  'scale.subtle':     ['Card'],
-  'scale.base':       ['Button', 'Stepper', 'React Clock'],
-  'scale.expressive': ['Notification Badge', 'Rive Clock'],
-  'scale.lift':       ['Card', 'Carousel'],
+  'scale.pressSubtle':     ['Card'],
+  'scale.pressBase':       ['Button', 'Stepper', 'React Clock'],
+  'scale.pressExpressive': ['Notification Badge', 'Rive Clock'],
+  'scale.lift':            ['Card', 'Carousel'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
   // Toggle, Carousel, and Drawer consume it when their per-demo switch is flipped
   // to Spring. The switch is per-instance state the static map cannot read, so
@@ -211,10 +212,10 @@ function writeAllTokensToCss(state) {
   el.style.setProperty('--motion-delay-short',      `${state.delay.short}ms`)
   el.style.setProperty('--motion-delay-medium',     `${state.delay.medium}ms`)
   el.style.setProperty('--motion-delay-long',       `${state.delay.long}ms`)
-  el.style.setProperty('--motion-scale-subtle',     `${state.scale.subtle}`)
-  el.style.setProperty('--motion-scale-base',       `${state.scale.base}`)
-  el.style.setProperty('--motion-scale-expressive', `${state.scale.expressive}`)
-  el.style.setProperty('--motion-scale-lift',       `${state.scale.lift}`)
+  el.style.setProperty('--motion-scale-press-subtle',     `${state.scale.pressSubtle}`)
+  el.style.setProperty('--motion-scale-press-base',       `${state.scale.pressBase}`)
+  el.style.setProperty('--motion-scale-press-expressive', `${state.scale.pressExpressive}`)
+  el.style.setProperty('--motion-scale-lift',             `${state.scale.lift}`)
   // Spring params are unitless (no ms), written so a preset switch carries the
   // spring to any CSS-reading consumer and to keep this in step with the export.
   el.style.setProperty('--motion-spring-stiffness', `${state.spring.stiffness}`)
@@ -255,7 +256,9 @@ function syncToCss(action) {
       el.style.setProperty(`--motion-delay-${action.key}`, `${action.value}ms`)
       break
     case 'SET_SCALE':
-      el.style.setProperty(`--motion-scale-${action.key}`, `${action.value}`)
+      // action.key is camelCase (pressSubtle); the CSS property is kebab
+      // (--motion-scale-press-subtle), so bridge the two spellings here.
+      el.style.setProperty(`--motion-scale-${tokenKeyToCssSuffix(action.key)}`, `${action.value}`)
       break
     case 'SET_SPRING':
       // Spring params are unitless (no ms suffix), like scale.
@@ -294,10 +297,20 @@ const DELAY_CONFIG = {
   long:   { min: 0, max: 600, step: 25, unit: 'ms' },
 }
 const SCALE_CONFIG = {
-  subtle:     { min: 0.88, max: 1.00, step: 0.01, unit: '' },
-  base:       { min: 0.80, max: 1.00, step: 0.01, unit: '' },
-  expressive: { min: 0.70, max: 1.00, step: 0.01, unit: '' },
-  lift:       { min: 1.00, max: 1.10, step: 0.01, unit: '' },
+  pressSubtle:     { min: 0.88, max: 1.00, step: 0.01, unit: '' },
+  pressBase:       { min: 0.80, max: 1.00, step: 0.01, unit: '' },
+  pressExpressive: { min: 0.70, max: 1.00, step: 0.01, unit: '' },
+  lift:            { min: 1.00, max: 1.10, step: 0.01, unit: '' },
+}
+
+// Visible slider labels for the scale keys. The keys are camelCase compounds
+// (pressSubtle) so the "press" direction lives in the token name; the labels
+// space them out to read cleanly, lowercase to match the other sections' labels.
+const SCALE_LABELS = {
+  pressSubtle:     'press subtle',
+  pressBase:       'press base',
+  pressExpressive: 'press expressive',
+  lift:            'lift',
 }
 
 // Explore ranges — uniform across all tokens within each category.
@@ -320,14 +333,14 @@ const DELAY_CONFIG_EXPLORE = {
   long:   { min: 0, max: 2000, step: 10, unit: 'ms' },
 }
 // All four scale tokens share the same explore range, including lift (which has
-// min: 1.00 in constrained mode). A user setting scale.subtle to 1.15 is
+// min: 1.00 in constrained mode). A user setting scale.pressSubtle to 1.15 is
 // exploring what a component would look like if its subtle interaction used the
 // lift token's value instead — semantic reassignment, not a mistake.
 const SCALE_CONFIG_EXPLORE = {
-  subtle:     { min: 0.50, max: 1.20, step: 0.01, unit: '' },
-  base:       { min: 0.50, max: 1.20, step: 0.01, unit: '' },
-  expressive: { min: 0.50, max: 1.20, step: 0.01, unit: '' },
-  lift:       { min: 0.50, max: 1.20, step: 0.01, unit: '' },
+  pressSubtle:     { min: 0.50, max: 1.20, step: 0.01, unit: '' },
+  pressBase:       { min: 0.50, max: 1.20, step: 0.01, unit: '' },
+  pressExpressive: { min: 0.50, max: 1.20, step: 0.01, unit: '' },
+  lift:            { min: 0.50, max: 1.20, step: 0.01, unit: '' },
 }
 
 // Spring — unitless. Constrained ranges cover the band that produces usable UI
@@ -440,6 +453,27 @@ function migratePresetSpring(preset) {
 function migratePresetScalar(preset) {
   if (preset?.state == null || preset.state.scalar != null) return preset
   return { ...preset, state: { ...preset.state, scalar: INITIAL_STATE.scalar } }
+}
+
+// Rename a preset's state.scale keys after the press/lift rename (2026-07-21):
+// subtle/base/expressive became pressSubtle/pressBase/pressExpressive; lift was
+// unchanged. A preset saved under the old keys loads its tuned values into the
+// new keys so the reducer, writeAllTokensToCss, and stateToTokens never read
+// undefined. Only the three renamed keys are remapped; any other key (lift, or
+// a value already under the new name) passes through. A preset with no
+// state.scale is returned untouched. Mirrors the import-side alias in
+// motionPresets.js, applied here for the localStorage path.
+const SCALE_MIGRATION = { subtle: 'pressSubtle', base: 'pressBase', expressive: 'pressExpressive' }
+function migratePresetScale(preset) {
+  const scale = preset?.state?.scale
+  if (scale == null) return preset
+  const needsMigration = Object.keys(SCALE_MIGRATION).some(oldKey => oldKey in scale)
+  if (!needsMigration) return preset
+  const migrated = {}
+  for (const [key, value] of Object.entries(scale)) {
+    migrated[SCALE_MIGRATION[key] ?? key] = value
+  }
+  return { ...preset, state: { ...preset.state, scale: migrated } }
 }
 
 // Auto-generates a compact token summary for user preset tooltips.
@@ -738,7 +772,7 @@ function ImportReport({ result }) {
     return <p className={styles.importError}>{result.error}</p>
   }
 
-  const { format, total, clamped, filled, ignored, curvesOutOfRange } = result.report
+  const { format, total, clamped, filled, renamed, ignored, curvesOutOfRange } = result.report
   const loaded = total - filled.length
   const formatLabel = format === 'dtcg' ? 'DTCG' : 'flat'
 
@@ -748,6 +782,16 @@ function ImportReport({ result }) {
         Loaded {loaded} of {total} tokens from a {formatLabel} file
         {filled.length > 0 && `, filled ${filled.length} from defaults`}.
       </p>
+
+      {renamed.length > 0 && (
+        <ImportReportSection title="Renamed to current keys, values kept">
+          {renamed.map(r => (
+            <li key={r.to} className={styles.importRow2}>
+              <code>{r.from} → {r.to}</code>
+            </li>
+          ))}
+        </ImportReportSection>
+      )}
 
       {clamped.length > 0 && (
         <ImportReportSection title="Clamped to range">
@@ -805,12 +849,16 @@ function ImportReportSection({ title, children }) {
 }
 
 // ─── SliderRow ────────────────────────────────────────────────────────────────
-function SliderRow({ name, value, config, onChange, tokenKey }) {
+// `label` defaults to `name`, so most sections keep passing the bare key as the
+// visible label. Scale passes an explicit label (SCALE_LABELS) because its keys
+// are camelCase compounds (pressSubtle) that would read poorly raw; the key
+// still drives everything else (state, tokenKey, the active-token highlight).
+function SliderRow({ name, value, config, onChange, tokenKey, label = name }) {
   const setActiveToken = useSetActiveToken()
   return (
     <div className={styles.sliderRow}>
       <div className={styles.sliderLabel}>
-        <span className={styles.sliderName}>{name}</span>
+        <span className={styles.sliderName}>{label}</span>
         <span className={styles.sliderValue}>{value}{config.unit}</span>
       </div>
       <input
@@ -1410,7 +1458,7 @@ export function TokenLab() {
     try {
       const stored = JSON.parse(localStorage.getItem('cadence-presets') || '[]')
       if (Array.isArray(stored)) {
-        setUserPresets(stored.map(p => migratePresetScalar(migratePresetSpring(migratePresetEasing(p)))))
+        setUserPresets(stored.map(p => migratePresetScale(migratePresetScalar(migratePresetSpring(migratePresetEasing(p))))))
       }
     } catch { /* ignore corrupt storage */ }
   }, [])
@@ -1690,7 +1738,7 @@ export function TokenLab() {
             docs/briefings/pixelplant-token-map.md. */}
         <DemoWrapper
           componentName="Rive Clock"
-          instruction="Hover the pixels. Rive owns the motion; a React WebGL shader paints over it. The color plates chase your cursor on duration.base, glide home on duration.slow with ease.standard, stagger by delay.short, and travel as far as scale.expressive"
+          instruction="Hover the pixels. Rive owns the motion; a React WebGL shader paints over it. The color plates chase your cursor on duration.base, glide home on duration.slow with ease.standard, stagger by delay.short, and travel as far as scale.pressExpressive"
           code={DEMO_SNIPPETS.PixelPlant}
           instructionClass={styles.demoInstructionEmbed}
           mainClass={styles.demoMainEmbed}
@@ -1839,6 +1887,7 @@ export function TokenLab() {
           <SliderRow
             key={key}
             name={key}
+            label={SCALE_LABELS[key]}
             value={rawState.scale[key]}
             config={config}
             onChange={value => dispatch({ type: 'SET_SCALE', key, value })}

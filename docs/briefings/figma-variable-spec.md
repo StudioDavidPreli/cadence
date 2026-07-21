@@ -183,16 +183,17 @@ string variables.**
 
 ### Scale
 
-`[code]` `src/tokens/motion.css:43-46`. Unitless numbers. Shipped names are
-flat; the nested `scale.press.*` spelling in
-`docs/references/motion-presets-harmonized.md` is a deferred proposal, not
-code.
+`[code]` `src/tokens/motion.css`, the Scale block. Unitless numbers. The press
+keys were renamed 2026-07-21 to carry direction (press/lift legibility split);
+the names below are the shipped flat keys. The nested `scale.press.*` spelling in
+`docs/references/motion-presets-harmonized.md` was the proposal's record and is
+not the shipped form. Record: `docs/decisions/scale-rename-2026-07-21.md`.
 
 | Figma name | CSS name | value | role |
 |---|---|---|---|
-| `motion/scale/subtle` | `--motion-scale-subtle` | 0.98 | Press compression, density-heavy UI. |
-| `motion/scale/base` | `--motion-scale-base` | 0.95 | Press compression, standard interactive elements. |
-| `motion/scale/expressive` | `--motion-scale-expressive` | 0.9 | Press compression, hero elements and CTAs. |
+| `motion/scale/pressSubtle` | `--motion-scale-press-subtle` | 0.98 | Press compression, density-heavy UI. |
+| `motion/scale/pressBase` | `--motion-scale-press-base` | 0.95 | Press compression, standard interactive elements. |
+| `motion/scale/pressExpressive` | `--motion-scale-press-expressive` | 0.9 | Press compression, hero elements and CTAs. |
 | `motion/scale/lift` | `--motion-scale-lift` | 1.02 | Growth for persistent selected / elevated state. |
 
 ### Preset names

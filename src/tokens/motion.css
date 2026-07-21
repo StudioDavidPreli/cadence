@@ -44,16 +44,18 @@
   --motion-delay-long:   200ms;
 
   /* Scale
-     Compress tokens (below 1): how much an element shrinks on press.
-       Subtle: density-heavy UI, small targets.
-       Base: standard interactive elements (buttons, cards).
-       Expressive: hero elements, CTAs where physicality is a design goal.
+     Press tokens (below 1): how much an element shrinks on press. The "press"
+     prefix names the direction, so pressBase is the standard press, not a
+     neutral 1.0 (renamed 2026-07-21; see docs/decisions/scale-rename-2026-07-21.md).
+       Press subtle: density-heavy UI, small targets.
+       Press base: standard interactive elements (buttons, cards).
+       Press expressive: hero elements, CTAs where physicality is a design goal.
      Lift token (above 1): how much an element grows when selected or elevated.
-       Lift: persistent selected state — card chosen, item highlighted. */
-  --motion-scale-subtle:      0.98;
-  --motion-scale-base:        0.95;
-  --motion-scale-expressive:  0.9;
-  --motion-scale-lift:        1.02;
+       Lift: persistent selected state, card chosen, item highlighted. */
+  --motion-scale-press-subtle:      0.98;
+  --motion-scale-press-base:        0.95;
+  --motion-scale-press-expressive:  0.9;
+  --motion-scale-lift:              1.02;
 
   /* Spring (physics)
      A real spring, unlike ease-overshoot above. It is not time-based: it has

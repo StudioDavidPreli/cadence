@@ -23,7 +23,7 @@ const FALLBACKS = {
     overshoot:   [0.34, 1.56, 0.64, 1],
   },
   delay:   { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
-  scale:   { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  scale:   { pressSubtle: 0.98, pressBase: 0.95, pressExpressive: 0.9, lift: 1.02 },
   spring:  { stiffness: 170, damping: 20, mass: 1.5 },
 }
 
@@ -32,7 +32,7 @@ const FALLBACKS = {
 // Structure mirrors src/tokens/motion.css so the mapping is direct:
 //   --motion-duration-fast → tokens.duration.fast
 //   --motion-ease-standard → tokens.ease.standard
-//   --motion-scale-base    → tokens.scale.base
+//   --motion-scale-press-base → tokens.scale.pressBase
 //
 // Why a hook and not a utility function:
 // Token reading requires useEffect — it must run after the component mounts,
@@ -95,10 +95,10 @@ export function useMotionTokens({ respectReducedMotion = true } = {}) {
         long:   read('--motion-delay-long',   parseMs, FALLBACKS.delay.long),
       },
       scale: {
-        subtle:     read('--motion-scale-subtle',     parseUnitless, FALLBACKS.scale.subtle),
-        base:       read('--motion-scale-base',       parseUnitless, FALLBACKS.scale.base),
-        expressive: read('--motion-scale-expressive', parseUnitless, FALLBACKS.scale.expressive),
-        lift:       read('--motion-scale-lift',       parseUnitless, FALLBACKS.scale.lift),
+        pressSubtle:     read('--motion-scale-press-subtle',     parseUnitless, FALLBACKS.scale.pressSubtle),
+        pressBase:       read('--motion-scale-press-base',       parseUnitless, FALLBACKS.scale.pressBase),
+        pressExpressive: read('--motion-scale-press-expressive', parseUnitless, FALLBACKS.scale.pressExpressive),
+        lift:            read('--motion-scale-lift',             parseUnitless, FALLBACKS.scale.lift),
       },
       // Spring params are unitless, read like scale. Fed to Framer Motion as
       // { type: 'spring', stiffness, damping, mass }.

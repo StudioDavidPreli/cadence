@@ -25,7 +25,7 @@ export function Button({ children, className = '', motionMode = 'bezier', ...pro
     <motion.button
       className={`${styles.button} ${className}`}
       whileTap={{
-        scale: tokens.scale.base,
+        scale: tokens.scale.pressBase,
         transition: {
           duration: tokens.duration.fast,
           ease: tokens.ease.standard,

@@ -272,16 +272,18 @@ is not worth it right now, the fallback is to keep the flat names and just docum
 the two directions. Neither Material nor Carbon ships a scale token family, so there
 is no external standard to match here. This is internal legibility only.
 
-> **Naming resolved, 2026-07-16.** The rename itself stays deferred (see the
-> tracker's Future work), but its target format is settled and it is NOT the
-> nested spelling this doc's tables use: the serialization layer (`mapGroup`,
-> flat JSON, DTCG paths, `EDITABLE_TOKEN_SCHEMA`, `EXPLORE_BOUNDS`,
-> `collectForeign`) all assume `scale` is a flat map, so the rename would ship
-> as flat keys (`scale.pressSubtle`), not `scale.press.subtle`. Until it ships,
-> the shipped names remain `scale.subtle/base/expressive/lift`;
-> `motion-presets.md` is the mirror of the code and wins where the two
-> reference docs disagree. The nested spellings here are kept as the proposal's
-> record.
+> **Shipped, David, 2026-07-21.** The rename landed as the flat, straight
+> 1:1 mapping: `scale.subtle/base/expressive` became
+> `scale.pressSubtle/pressBase/pressExpressive`; `scale.lift` was unchanged.
+> CSS custom properties are kebab (`--motion-scale-press-subtle`); the JS /
+> state / JSON keys are camelCase (`pressSubtle`), bridged by
+> `tokenKeyToCssSuffix` at every dynamic `--motion-*` write. An old-named export
+> imports through a key alias that preserves the tuned value and reports the
+> rename (David's fork-2 call); saved presets migrate at Token Lab load through
+> `migratePresetScale`. `motion-presets.md` mirrors the shipped keys. The nested
+> spellings in this doc's tables (`scale.press.subtle`) are kept as the
+> proposal's record, not the shipped spelling. Record:
+> `docs/decisions/scale-rename-2026-07-21.md`.
 
 **4. Preset enter/exit pinning: kept it, against Carbon's model.** Documented above.
 I defended the current behavior rather than harmonizing to Carbon, because the

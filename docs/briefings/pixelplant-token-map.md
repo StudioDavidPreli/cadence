@@ -5,6 +5,11 @@ Source: David's slot decisions 2026-07-20 plus the promoted PixelPlantLab archit
 
 # pixelPlant — Token to Effect Map
 
+> **Rename note, 2026-07-21.** This doc names `scale.expressive`, kept below as
+> the historical record of the build. The token was renamed `scale.pressExpressive`
+> on 2026-07-21 (press/lift legibility split); if you copy a token name from this
+> map into live code, use the new name. Record: `docs/decisions/scale-rename-2026-07-21.md`.
+
 The map between Token Lab's live motion tokens and the chromatic-aberration shader
 that runs over the pixelPlant Rive machine. This is the Rive Clock counterpart to
 `waterwilt-token-vm-map.md`, and it records where the token boundary sits when the

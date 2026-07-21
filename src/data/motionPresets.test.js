@@ -124,6 +124,9 @@ describe('toDtcgJson', () => {
     expect(doc.motion.easing.standard).toEqual({ $type: 'cubicBezier', $value: EASING_CURVES.standard.fm })
     expect(doc.motion.delay.short).toEqual({ $type: 'duration', $value: '50ms' })
     expect(doc.motion.scale.lift).toEqual({ $type: 'number', $value: 1.02 })
+    // The renamed press keys keep their camelCase JSON spelling (the CSS-kebab
+    // conversion is CSS-output-only; see toCssVars below).
+    expect(doc.motion.scale.pressBase).toEqual({ $type: 'number', $value: 0.95 })
   })
 
   it('carries the non-editable constants into the document', () => {
@@ -157,6 +160,7 @@ describe('toFlatJson', () => {
     expect(doc.easing.standard).toBe('cubic-bezier(0.4, 0, 0.2, 1)')
     expect(doc.delay.short).toBe('50ms')
     expect(doc.scale.lift).toBe(1.02)
+    expect(doc.scale.pressBase).toBe(0.95)
   })
 
   it('serializes a custom bezier slot as a cubic-bezier() string', () => {
@@ -188,6 +192,9 @@ describe('toCssVars', () => {
     expect(css).toContain('--motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);')
     expect(css).toContain('--motion-delay-short: 50ms;')
     expect(css).toContain('--motion-scale-lift: 1.02;')
+    // The camelCase key pressBase becomes the kebab CSS property --motion-scale-press-base,
+    // matching motion.css. This guards the one seam between the two spellings.
+    expect(css).toContain('--motion-scale-press-base: 0.95;')
   })
 
   it('carries linear, the overshoot slot, and delay.none', () => {
@@ -265,6 +272,29 @@ describe('importTokens', () => {
     expect(res.state.scale).toEqual(INITIAL_STATE.scale)
     expect(res.report.filled).toContainEqual({ path: 'scale.lift', to: INITIAL_STATE.scale.lift })
     expect(res.report.filled).toContainEqual({ path: 'easing.enter', to: 'enter' })
+  })
+
+  it('aliases pre-rename scale keys to the new keys, keeping tuned values', () => {
+    // A file exported before the 2026-07-21 press/lift rename carries the old
+    // scale keys (subtle/base/expressive). Import reads their tuned values into
+    // the new keys and reports the rename, rather than dropping the values and
+    // refilling from Standard (David's fork-2 call). lift was not renamed.
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    // Non-default tuned values, so a silent refill-from-Standard would show.
+    doc.scale = { subtle: 0.91, base: 0.82, expressive: 0.73, lift: 1.06 }
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.scale).toEqual({
+      pressSubtle: 0.91, pressBase: 0.82, pressExpressive: 0.73, lift: 1.06,
+    })
+    expect(res.report.renamed).toEqual([
+      { from: 'scale.subtle', to: 'scale.pressSubtle' },
+      { from: 'scale.base', to: 'scale.pressBase' },
+      { from: 'scale.expressive', to: 'scale.pressExpressive' },
+    ])
+    // Old keys are recognized-as-renamed, not foreign; nothing filled from Standard.
+    expect(res.report.ignored).toEqual([])
+    expect(res.report.filled).toEqual([])
   })
 
   it('reports foreign keys but suppresses the expected constants', () => {

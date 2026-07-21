@@ -23,7 +23,7 @@ const TOKENS = {
     overshoot: [0.34, 1.56, 0.64, 1],
   },
   delay: { none: 0, short: 0.05, medium: 0.1, long: 0.2 },
-  scale: { subtle: 0.98, base: 0.95, expressive: 0.9, lift: 1.02 },
+  scale: { pressSubtle: 0.98, pressBase: 0.95, pressExpressive: 0.9, lift: 1.02 },
   spring: { stiffness: 170, damping: 20, mass: 1.5 },
 }
 
@@ -38,7 +38,7 @@ describe('resolveTokenDisplay', () => {
   })
 
   it('formats scale as a unitless number', () => {
-    expect(resolveTokenDisplay('scale.base', TOKENS)).toBe('0.95')
+    expect(resolveTokenDisplay('scale.pressBase', TOKENS)).toBe('0.95')
   })
 
   it('formats spring params as unitless numbers', () => {

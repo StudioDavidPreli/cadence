@@ -5,6 +5,12 @@ Source: The Water & Wilt build, one session, 2026-07-18 into 2026-07-19. Fifteen
 
 # Rive for React
 
+> **Rename note, 2026-07-21.** This reference names `scale.base`, kept as the
+> record of the Water & Wilt build. The token was renamed `scale.pressBase` on
+> 2026-07-21 (press/lift legibility split); the `tokens.scale.pressBase × 100`
+> bind is unchanged in behavior. Use the new name if you copy the pattern into
+> live code. Record: `docs/decisions/scale-rename-2026-07-21.md`.
+
 A plant lives in a canvas. A button lives in the DOM. Every duration, easing,
 and delay between them comes from Token Lab's live reducer, and nothing in the
 canvas knows what a token is. This document records how that works, how it was

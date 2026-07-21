@@ -37,10 +37,10 @@ for each.
 | `delay.short` | 50 | 20 | 100 |
 | `delay.medium` | 100 | 40 | 200 |
 | `delay.long` | 200 | 80 | 400 |
-| **Scale** (unitless) | | | |
-| `scale.subtle` | 0.98 | 0.97 | 0.99 |
-| `scale.base` | 0.95 | 0.93 | 0.97 |
-| `scale.expressive` | 0.90 | 0.87 | 0.94 |
+| **Scale** (unitless; press keys renamed 2026-07-21) | | | |
+| `scale.pressSubtle` | 0.98 | 0.97 | 0.99 |
+| `scale.pressBase` | 0.95 | 0.93 | 0.97 |
+| `scale.pressExpressive` | 0.90 | 0.87 | 0.94 |
 | `scale.lift` | 1.02 | 1.04 | 1.01 |
 
 ## Spring (physics)

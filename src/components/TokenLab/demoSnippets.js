@@ -60,7 +60,7 @@ const Button = `const tokens = useMotionTokens()
 // rest, Spring rides the real physics. The switch picks which.
 <motion.button
   whileTap={{
-    scale: tokens.scale.base,
+    scale: tokens.scale.pressBase,
     transition: {
       duration: tokens.duration.fast,
       ease: tokens.ease.standard,
@@ -166,8 +166,8 @@ const NotificationBadge = `const tokens = useMotionTokens()
 // breaking its own rule), holds, then settles.
 <motion.span
   key={count}
-  initial={{ scale: tokens.scale.expressive }}
-  animate={{ scale: [tokens.scale.expressive, 1.2, 1.2, 1] }}
+  initial={{ scale: tokens.scale.pressExpressive }}
+  animate={{ scale: [tokens.scale.pressExpressive, 1.2, 1.2, 1] }}
   transition={{
     duration: tokens.duration.slow,
     times: [0, 0.3, 0.6, 1],
@@ -329,7 +329,7 @@ const WILT = {
 // The scene group scales as one: a direct bind, written on
 // change, outside the frame loop. The file speaks Rive's
 // percent, the token stays a unitless multiplier.
-sceneScale.set(tokens.scale.base * 100)`
+sceneScale.set(tokens.scale.pressBase * 100)`
 
 const PixelPlant = `const tokens = useMotionTokens()
 
@@ -338,7 +338,7 @@ const PixelPlant = `const tokens = useMotionTokens()
 // plates over it. Rive owns the motion; the shader paints over
 // it. The plate rate ratios (blue 1, green 2/3, red 1/3) are
 // geometry; the tokens shape the chase.
-const amplitude = (1 - tokens.scale.expressive) * GAIN
+const amplitude = (1 - tokens.scale.pressExpressive) * GAIN
 
 for (const plate of plates) {
   if (pointer.inside) {

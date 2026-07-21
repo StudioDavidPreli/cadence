@@ -488,7 +488,7 @@ export function PrincipleCard({
         opacity: selectedId && !isExpanded ? 0.5 : 1,
       }}
       onClick={handleCardClick}
-      whileHover={isExpanded || !supportsHover ? undefined : { scale: tokens.scale.subtle }}
+      whileHover={isExpanded || !supportsHover ? undefined : { scale: tokens.scale.pressSubtle }}
       transition={{
         opacity: { duration: dur.base },
         duration: dur.fast,
@@ -552,7 +552,7 @@ export function PrincipleCard({
               <motion.button
                 className={styles.closeButton}
                 onClick={handleClose}
-                whileTap={{ scale: tokens.scale.subtle }}
+                whileTap={{ scale: tokens.scale.pressSubtle }}
                 transition={{ duration: dur.fast, ease: tokens.ease.overshoot }}
               >
                 ×

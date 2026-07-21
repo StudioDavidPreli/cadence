@@ -31,10 +31,10 @@ Defined in `src/tokens/motion.css`.
   --motion-delay-medium: 100ms;
   --motion-delay-long: 200ms;
 
-  /* Scale */
-  --motion-scale-subtle: 0.98;
-  --motion-scale-base: 0.95;
-  --motion-scale-expressive: 0.9;
+  /* Scale (press keys renamed 2026-07-21; see docs/decisions/scale-rename-2026-07-21.md) */
+  --motion-scale-press-subtle: 0.98;
+  --motion-scale-press-base: 0.95;
+  --motion-scale-press-expressive: 0.9;
   --motion-scale-lift: 1.02;
 
   /* Spring (physics) */
@@ -62,7 +62,7 @@ cannot run a JS spring. Added 2026-07-20;
 
 Not every token is a dial. The token set splits in two, and the split governs how Token Lab and the live code view behave.
 
-**Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the four easing slots (standard, enter, exit, overshoot), the three delays (short, medium, long), and the four scales (subtle, base, expressive, lift). Overshoot is the one editable slot whose control only surfaces in Explore mode: its Y > 1 handle needs the visualizer's extended vertical range, so Constrained mode hides its tab and leaves it at the default curve. `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
+**Editable tokens** have a control in the tool bar. Drag the slider, the value changes, the demos retime. These are the four durations, the four easing slots (standard, enter, exit, overshoot), the three delays (short, medium, long), and the four scales (pressSubtle, pressBase, pressExpressive, lift). Overshoot is the one editable slot whose control only surfaces in Explore mode: its Y > 1 handle needs the visualizer's extended vertical range, so Constrained mode hides its tab and leaves it at the default curve. `EDITABLE_TOKEN_SCHEMA` in `src/data/motionPresets.js` is the exact list and the single source of truth: the importer validates against it, and the code view reads it to decide what a slider can reach.
 
 The three spring params (`spring.stiffness`, `spring.damping`, `spring.mass`) are a fourth editable family, and the newest. Spring varies per preset like duration, so it cannot be a fixed reference (those are identical across every preset); it lives in state, resolves per preset, and round-trips through import. It has its own Spring control section with three sliders and a settle-curve visualizer (`SpringVisualizer`, drawing displacement over time from the three params). The sliders dispatch `SET_SPRING`, the same shape as `SET_SCALE`. Constrained ranges (`SPRING_CONFIG`) cover the band that produces usable UI springs; Explore ranges (`SPRING_CONFIG_EXPLORE`) match the `SPRING_BOUNDS` an import clamps to, so an imported value always lands on the track.
 

@@ -33,7 +33,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: 'The press compresses. The release returns. A button with no give reads as image, not interface.',
     componentQuoteAttribution: null,
-    tokens: 'scale.base · duration.fast · ease.standard · ease.overshoot',
+    tokens: 'scale.pressBase · duration.fast · ease.standard · ease.overshoot',
   },
   {
     id: 2, title: 'Anticipation', category: 'classic',
@@ -123,7 +123,7 @@ const PRINCIPLES = [
     animationQuoteAttribution: 'Frank Thomas & Ollie Johnston, The Illusion of Life',
     componentQuote: "The notification doesn't just appear. It overshoots, and that overshoot is the alert.",
     componentQuoteAttribution: null,
-    tokens: 'scale.expressive · ease.overshoot · duration.slow',
+    tokens: 'scale.pressExpressive · ease.overshoot · duration.slow',
   },
   {
     id: 11, title: 'Solid Drawing', category: 'classic',

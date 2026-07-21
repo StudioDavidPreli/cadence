@@ -118,7 +118,7 @@ export function WaterWilt() {
   // The driver knows every phase boundary because it owns the clock.
   const [watered, setWatered] = useState(false)
 
-  // The button rides scale.base with the scene (David's 2026-07-18 call: a
+  // The button rides scale.pressBase with the scene (David's 2026-07-18 call: a
   // fixed-size button over a scaling composition read as unwired). The token
   // reaches CSS as a custom property; the module CSS applies it on the
   // overlay wrapper, whose transform is separate from Button's own press
@@ -136,7 +136,7 @@ export function WaterWilt() {
     <WaterWiltRive watered={watered}>
       <div
         className={styles.buttonOverlay}
-        style={{ '--ww-scene-scale': tokens.scale.base }}
+        style={{ '--ww-scene-scale': tokens.scale.pressBase }}
       >
         <Button onClick={() => setWatered((w) => !w)}>
           {watered ? 'Dry time' : 'Water me'}
@@ -589,9 +589,9 @@ function WaterWiltRive({ watered, children }) {
   }, [rive, instance])
 
   // The one direct bind: a VM number written outside the frame loop, on
-  // change only (the tiles' cellSize pattern). scale.base → sceneScale, the
+  // change only (the tiles' cellSize pattern). scale.pressBase → sceneScale, the
   // whole composition through the scene group. (A separate plantScale bind
-  // for scale.expressive was planned and withdrawn 2026-07-18: sceneScale
+  // for scale.pressExpressive was planned and withdrawn 2026-07-18: sceneScale
   // covers it, David's call.) `instance` is a dep so a rebind re-applies to
   // the fresh handle; declared after bind sync, so the handle is current.
   useEffect(() => {
@@ -601,8 +601,8 @@ function WaterWiltRive({ watered, children }) {
     // converts at the boundary so the file stays idiomatic — writing the
     // token raw collapsed the scene to about 1% (found 2026-07-18, first
     // run against the authored property).
-    if (handle) handle.value = tokens.scale.base * 100
-  }, [instance, tokens.scale.base])
+    if (handle) handle.value = tokens.scale.pressBase * 100
+  }, [instance, tokens.scale.pressBase])
 
   // Artboard aspect from the loaded bounds (the ClawdLogoButton pattern), so
   // the canvas box matches the art with no letterboxing and no literal guess.
