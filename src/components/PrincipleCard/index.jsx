@@ -25,6 +25,11 @@ import { TokenFidelity } from '../../principles/TokenFidelity'
 import { ReducedMotion } from '../../principles/ReducedMotion'
 import { SharedVocabulary } from '../../principles/SharedVocabulary'
 import { DemoMotionGate, DemoMotionControl } from '../DemoMotionGate'
+// getExpandedFootprint is a pure grid-math function, extracted here so it can be
+// unit-tested on its own (footprint.test.js): the same reason parse.js and
+// springCurve.js are separate modules. Its edge-case reasoning and the Phase 2
+// hook comment live in footprint.js.
+import { getExpandedFootprint } from './footprint'
 import styles from './PrincipleCard.module.css'
 
 // P17 Reduced Motion is the one demo DemoMotionGate's token scope must not
@@ -46,46 +51,6 @@ const supportsHover =
 // cellWidth (the matching width target) is dynamic and arrives as a prop
 // from PrinciplesLibrary.
 const GRID_ROW_HEIGHT = 234
-
-// ─── getExpandedFootprint ─────────────────────────────────────────────────────
-//
-// Computes the grid-column, grid-row span, and matching transform-origin for
-// an expanded card.
-//
-// Bias rule (down-right): the expansion extends right and down from the card's
-// natural 1-indexed position. Edge cases:
-//   - Right edge (col === columnCount): extend left instead of right.
-//   - Bottom row (row === totalRows): extend up instead of down.
-//
-// transformOrigin matches the natural cell's corner within the expanded
-// footprint, so the close animation's scale shrinks toward the resting
-// collapsed position with no horizontal or vertical jump:
-//   - Interior:    "0% 0%"     (top-left)
-//   - Right edge:  "100% 0%"   (top-right)
-//   - Bottom row:  "0% 100%"   (bottom-left)
-//   - Bottom-right corner: "100% 100%"
-//
-// Phase 2 hook: this function receives index, columnCount, and totalCards.
-// It is the correct place to add neighborhood-relative logic when Phase 2
-// card deformation is implemented.
-
-function getExpandedFootprint(index, columnCount, totalCards) {
-  const row       = Math.floor(index / columnCount) + 1  // 1-indexed
-  const col       = (index % columnCount) + 1            // 1-indexed
-  const totalRows = Math.ceil(totalCards / columnCount)
-
-  const colStart = col === columnCount ? col - 1 : col
-  const rowStart = row === totalRows ? row - 1 : row
-
-  const transformOrigin =
-    `${col === columnCount ? '100%' : '0%'} ${row === totalRows ? '100%' : '0%'}`
-
-  return {
-    gridColumn: `${colStart} / span 2`,
-    gridRow:    `${rowStart} / span 2`,
-    transformOrigin,
-  }
-}
 
 // ─── getPrincipleComponent ────────────────────────────────────────────────────
 //

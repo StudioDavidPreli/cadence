@@ -83,3 +83,15 @@ Since the column track is now fixed at 180px (no flex), `cellWidth` resolves cle
 **Two-line clamp on .cardTitle.** `-webkit-line-clamp: 2` instead of `white-space: nowrap`. Multi-word titles can wrap to two lines at 180px width. Principles whose two-line title exceeds the card's available content height use the optional `gridTitle` field to render a shorter override in the collapsed grid card. See `docs/principles/conventions.md`.
 
 **Phase 2 hook.** Card deformation based on distance from the expanded card attaches at the PrincipleCard level. `getExpandedFootprint` already has the expanded card's index, row, and column. Neighborhood distance math slots in here. Phase 1 leaves this seam clean; Phase 2 does not require restructuring Phase 1.
+
+---
+
+## Footprint debt paid (2026-07-21)
+
+The `getExpandedFootprint` edge-case debt carried since the 2026-06-18 handoff is closed. Two moves.
+
+The function left PrincipleCard for a pure module, `src/components/PrincipleCard/footprint.js`, so it unit-tests without dragging React or Framer Motion along, the same discipline `parse.js` and `springCurve.js` follow. Its test table (`footprint.test.js`, 11 cases) pins every case the header comment names, interior through bottom-right corner, plus the degenerate sizes. The Phase 2 hook comment moved with the function; the seam is unchanged.
+
+The degenerate sizes are where the debt lived. At `columnCount === 1` the only column is also the right edge, so the old `col - 1` produced `colStart = 0` and returned `gridColumn: "0 / span 2"`. CSS grid lines are 1-indexed; line 0 does not exist. A single-row grid hit the same failure through `rowStart`. The fix degrades the span rather than clamping the start line: `span = min(2, available)` on each axis, and the down-right bias only applies where the span is 2. A 1-column grid gets a 1-wide footprint, a single-row grid a 1-tall one, and neither emits an invalid line. Clamping the start to 1 while keeping `span 2` was the other option and was rejected: it removes the invalid line but the span still overflows the single track, so the card bleeds past it. Degrading the span is the honest answer, the grid cannot hold a 2-span, so the footprint does not claim one.
+
+Production never reaches the degenerate case, re-verified this session: the `.grid { min-width: 420px }` floor above (border box, `box-sizing: border-box` globally) leaves 372px of content, exactly `2 × 180 + 12 gap`, so `auto-fit` lays down at least two tracks and the ResizeObserver never reports one column. The guard is real, but it is a CSS rule in a different file that does not know this function depends on it. The tests pin the behavior for the day that floor moves. The expand mechanism was confirmed on built output at every edge: a right-edge card extends left, a bottom-row card up, the corner both, no line 0 anywhere.

@@ -157,6 +157,53 @@ test.describe('reduced motion', () => {
   })
 })
 
+test.describe('forced colors (Windows High Contrast Mode)', () => {
+  // page.emulateMedia({ forcedColors: 'active' }), NOT test.use: the context
+  // option is unreliable in this suite for the same reason reducedMotion is
+  // (see the reduced-motion block above), so the emulation is applied before
+  // navigation. forced-colors erases box-shadow, so the two state cues that
+  // rebuild themselves as outlines are what these tests pin. The manual pass
+  // proved by hand that they survive (2026-07-16 checklist), but nothing
+  // stopped a refactor from dropping either @media (forced-colors: active)
+  // block. Assert outline-style and outline-width, never color: forced colors
+  // substitutes system colors the test cannot predict, and the mechanism (an
+  // outline exists where a box-shadow would have been erased) is the thing
+  // worth pinning.
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' })
+  })
+
+  test('the nav active-leaf marker rebuilds its cue as a solid 2px outline', async ({ page }) => {
+    await page.goto('/#/token-lab/press-state')
+    // The active category leaf carries .rowActive, whose selection marker is an
+    // inset box-shadow outside forced colors. forced-colors erases that; the
+    // @media block in NavColumn.module.css restores it as a Highlight outline.
+    // Deleting that block leaves the leaf with no outline at all, so both the
+    // style and the width assertions fail.
+    const activeLeaf = page.getByRole('button', { name: 'Press & State' })
+    await expect(activeLeaf).toHaveAttribute('aria-current', 'true')
+    await expect(activeLeaf).toHaveCSS('outline-style', 'solid')
+    await expect(activeLeaf).toHaveCSS('outline-width', '2px')
+  })
+
+  test('the Token Lab connection ring rebuilds its cue as a solid 2px outline when raised by keyboard', async ({ page }) => {
+    await page.goto('/#/token-lab/press-state')
+    // Raise the connection highlight the keyboard way: focusing a token slider
+    // sustains the highlight on the demo groups it drives (the keyboard-parity
+    // onFocus behavior). duration.base drives the Card demo, which renders on
+    // the Press & State page.
+    await page.getByRole('slider', { name: 'duration.base' }).focus()
+    const ring = page.locator('[class*="demoGroupHighlighted"] [class*="demoMain"]').first()
+    await expect(ring).toBeVisible()
+    // The 2px width is the discriminating assertion. The base rule already
+    // draws a 1px solid accent outline, so outline-style stays solid even if
+    // the @media block is removed; only the width proves the forced-colors
+    // block (which thickens it to 2px Highlight) actually ran.
+    await expect(ring).toHaveCSS('outline-style', 'solid')
+    await expect(ring).toHaveCSS('outline-width', '2px')
+  })
+})
+
 test('the mobile gate binds the homogenized hero file console-clean in HC-dark', async ({ browser }) => {
   // 2026-07-18: heromobile.riv was re-exported with the same four homogenized
   // theme instances as hero3.riv, and MobileGate dropped the old runtime

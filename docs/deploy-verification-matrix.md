@@ -128,10 +128,14 @@ tracker's pre-launch queue.
 - [x] **T1** `prefers-reduced-motion: reduce` triggers reduced-motion mode.
       **Done 2026-07-16: `e2e/themes.spec.js`, Modal fully appears and fully
       leaves under reduce.**
-- [ ] **T1** `forced-colors: active` (Windows HCM) does not break layout or strand
-      state that relied on background-color alone. *(Verified manually via
-      emulateMedia in the 2026-07-16 checklist session; not yet in the
-      persisted suite.)*
+- [x] **T1** `forced-colors: active` (Windows HCM) does not break layout or strand
+      state that relied on background-color alone.
+      **Done 2026-07-21: `e2e/themes.spec.js`, the forced-colors block. The two
+      state cues that lose their box-shadow under forced colors (the nav
+      active-leaf marker, the Token Lab connection ring) are asserted to rebuild
+      as solid 2px outlines; deleting either `@media (forced-colors: active)`
+      block fails the suite. Manually verified via emulateMedia in the
+      2026-07-16 checklist session before this landed.**
 - [ ] ~~**T1?**~~ `prefers-reduced-transparency: reduce` makes the Modal backdrop
       opaque. **Answered 2026-07-16: Playwright cannot emulate it; permanently
       Tier 3 (manual). David verified under the OS setting, Tier 3 sweep
