@@ -181,6 +181,15 @@ that cannot run a JS spring, and it is what the reduced-motion path can fall bac
 
 ## Companion mechanism — duration scalar
 
+> **Shipped, David, 2026-07-21.** `--motion-duration-scalar` landed as a single
+> editable, exportable token (effective = base × scalar), consumed only by the
+> distance-and-speed visualizer, which turned out to already exist as
+> `DurationVisualizer` in Token Lab's Duration section. The session made that
+> demo's hardcoded scaling a real token rather than building a second graphic.
+> No shipped component multiplies by it. The pattern carries no source
+> attribution (see the removed-attribution note below). Record:
+> `docs/decisions/duration-scalar-2026-07-21.md`.
+
 Not a preset value, but the natural home for your planned distance-and-speed
 visualizer. Both Material and Carbon insist duration should scale with distance
 travelled rather than stay fixed. Fixed tokens are the one place Cadence's model

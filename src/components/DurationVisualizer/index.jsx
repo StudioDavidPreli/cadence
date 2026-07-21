@@ -24,6 +24,17 @@ import styles from './DurationVisualizer.module.css'
 // MotionTokensProvider, so useMotionTokens() is unavailable here, and the
 // reducer already owns these numbers. Distance is local display state, the same
 // "a position, not an animation parameter" distinction ProgressBarDemo draws.
+//
+// The duration scalar (--motion-duration-scalar, 2026-07-21). This graphic is
+// the token's only consumer, so its scrub lives here rather than as a section
+// slider. The scalar is the literal, documented multiplier the harmonized doc
+// describes: effective duration = base * scalar, applied uniformly in BOTH
+// modes. It is not what steadies speed across distance — that is the
+// constant-velocity mode's distance-derived timing, which is unchanged. The two
+// read as complementary: the toggle is the distance lesson, the scalar is the
+// one dial that retimes the whole set without editing every duration token.
+// Reduced motion needs no branch: base * scalar flattens through the arithmetic
+// (and this graphic deliberately does not flatten anyway, see the dot below).
 
 // Three travel distances as fractions of the track. Abstract on purpose — the
 // lesson is about the ratio between distances, not any specific component.
@@ -44,7 +55,12 @@ const NEAR_FRACTION = DISTANCES[0].fraction
 // (fraction 1.0) lands inside the track rather than half-off its right edge.
 const DOT = 12
 
-export function DurationVisualizer({ durations }) {
+export function DurationVisualizer({
+  durations,
+  scalar = 1,
+  onScalarChange,
+  scalarConfig = { min: 0.5, max: 2, step: 0.05, unit: '×' },
+}) {
   const [selectedToken, setSelectedToken] = useState('base')
   // 'duration' = constant duration (the token). 'velocity' = constant velocity.
   const [mode, setMode] = useState('duration')
@@ -74,11 +90,14 @@ export function DurationVisualizer({ durations }) {
   const tokenMs = durations[selectedToken] ?? 0
   const T = tokenMs / 1000
 
-  // Time a dot at this fraction takes in the active mode.
-  //   constant duration: always T.
-  //   constant velocity: T scaled by fraction / NEAR_FRACTION.
+  // Time a dot at this fraction takes in the active mode, after the duration
+  // scalar. The scalar multiplies uniformly in both modes (effective = base ×
+  // scalar); the mode is what decides whether distance also factors in.
+  //   constant duration: always T × scalar.
+  //   constant velocity: T × scalar, then scaled by fraction / NEAR_FRACTION.
   function dotDuration(fraction) {
-    return mode === 'duration' ? T : (fraction / NEAR_FRACTION) * T
+    const scaled = T * scalar
+    return mode === 'duration' ? scaled : (fraction / NEAR_FRACTION) * scaled
   }
 
   return (
@@ -123,6 +142,29 @@ export function DurationVisualizer({ durations }) {
         >
           Constant velocity
         </button>
+      </div>
+
+      {/* Duration scalar scrub. Multiplies every dot's time (base × scalar).
+          Deliberately NOT wired to the active-token highlight (no setActiveToken
+          on pointer/focus): no demo in the DemoArea consumes the scalar, so
+          lighting the active token would false-flag every demo with the "Token
+          unused by present components" note. The scrub's effect is visible right
+          here in the strip, which is the point of keeping control and effect in
+          one place. */}
+      <div className={styles.scalarRow}>
+        <label className={styles.scalarLabel} htmlFor="duration-scalar">scalar</label>
+        <input
+          id="duration-scalar"
+          type="range"
+          className={styles.scalarSlider}
+          min={scalarConfig.min}
+          max={scalarConfig.max}
+          step={scalarConfig.step}
+          value={scalar}
+          onChange={e => onScalarChange?.(Number(e.target.value))}
+          aria-label="Duration scalar"
+        />
+        <span className={styles.scalarValue}>{scalar}{scalarConfig.unit}</span>
       </div>
 
       {/* Kinetic strip. Three tracks; the dot in each travels its fraction of

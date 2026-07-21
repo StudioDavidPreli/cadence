@@ -36,6 +36,15 @@ export const INITIAL_STATE = {
   // in state and resolves per preset (not a fixed reference). Standard is a soft,
   // weighted settle with a hint of overshoot (tuned by feel, David 2026-07-20).
   spring:   { stiffness: 170, damping: 20, mass: 1.5 },
+  // Duration scalar: a single unitless multiplier on top of the duration
+  // tokens (effective = base * scalar). Editable and round-tripping like the
+  // families above, but a LONE value, not a family of keys, so it is handled
+  // by dedicated branches rather than the family-map machinery. It is
+  // deliberately the same (1) across every preset: speed already lives in each
+  // preset's duration ladder, so the scalar is not a personality axis. Only
+  // DurationVisualizer consumes it (2026-07-21); see
+  // docs/decisions/duration-scalar-2026-07-21.md.
+  scalar:   1,
 }
 
 // ─── Built-in presets ─────────────────────────────────────────────────────────
@@ -64,6 +73,8 @@ export const BUILT_IN_PRESETS = [
       scale:    { subtle: 0.97, base: 0.93, expressive: 0.87, lift: 1.04 },
       // Stiffer and lighter than Standard: it bounces harder and arrives faster.
       spring:   { stiffness: 600, damping: 22, mass: 1 },
+      // Held at 1 like every preset: the scalar is not a personality axis.
+      scalar:   1,
     },
   },
   {
@@ -82,6 +93,8 @@ export const BUILT_IN_PRESETS = [
       // Soft and heavy: low stiffness plus extra mass make a slow arrival with
       // almost no bounce.
       spring:   { stiffness: 180, damping: 26, mass: 1.2 },
+      // Held at 1 like every preset: the scalar is not a personality axis.
+      scalar:   1,
     },
   },
 ]
@@ -125,6 +138,13 @@ export function stateToTokens(state) {
     // Spring params are unitless, so they pass straight through (no /1000 like
     // duration/delay). Framer Motion consumes them as { type: 'spring', ... }.
     spring: { ...state.spring },
+    // NOTE: state.scalar is deliberately NOT emitted here. stateToTokens feeds
+    // the MotionTokensProvider that drives the demo area, and nothing in the
+    // demo area (or anywhere under a provider) consumes the scalar: its sole
+    // consumer, DurationVisualizer, lives in the controls column and reads
+    // rawState.scalar directly as a prop. Keeping the scalar out of the runtime
+    // token object also keeps the code-view drift guard meaningful (schema u
+    // fixed = every demo-consumed token; see resolveToken.test.js).
   }
 }
 
@@ -164,6 +184,12 @@ export function stateToExport(state) {
     },
     scale: { ...state.scale },
     spring: { ...state.spring },
+    // The duration scalar is a lone unitless value, not a family. It rides the
+    // export as a top-level number so a Cadence file is complete and round-trips
+    // through importTokens. (Its CSS custom property is --motion-duration-scalar;
+    // the JSON path is the shorter `scalar`, a documented naming seam, the same
+    // kind of seam the easing/ease boundary already carries.)
+    scalar: state.scalar,
   }
 }
 
@@ -198,6 +224,9 @@ export function toDtcgJson(state) {
       delay:    mapGroup(t.delay, duration),
       scale:    mapGroup(t.scale, number),
       spring:   mapGroup(t.spring, number),
+      // The duration scalar is a single number leaf (not a group): one unitless
+      // multiplier, the same $type scale and spring already use.
+      scalar:   number(t.scalar),
     },
   }
   return JSON.stringify(doc, null, 2)
@@ -215,6 +244,8 @@ export function toFlatJson(state) {
     delay:    mapGroup(t.delay, ms => `${ms}ms`),
     scale:    { ...t.scale },
     spring:   { ...t.spring },
+    // Lone unitless multiplier, emitted as a bare top-level number.
+    scalar:   t.scalar,
   }
   return JSON.stringify(doc, null, 2)
 }
@@ -241,6 +272,12 @@ export function toCssVars(state) {
     ...block('scale', t.scale, n => n),
     '',
     ...block('spring', t.spring, n => n),
+    '',
+    // The duration scalar is a lone value, so it does not go through block()
+    // (which builds --motion-<family>-<key> names). Its custom property keeps
+    // the recorded --motion-duration-scalar spelling even though its JSON path
+    // is the shorter `scalar`.
+    `  --motion-duration-scalar: ${t.scalar};`,
   ]
   return `:root {\n${lines.join('\n')}\n}`
 }
@@ -288,6 +325,16 @@ export const SPRING_BOUNDS = {
   damping:   { min: 1,   max: 100  },
   mass:      { min: 0.1, max: 10   },
 }
+
+// The duration scalar's clamp range, and (like SPRING_BOUNDS) the explore-slider
+// range it must stay in lockstep with (SCALAR_CONFIG_EXPLORE in TokenLab/index.jsx).
+// A single range, not per-key: the scalar is one value. Import clamps a too-large
+// value to the nearest edge and reports it; a non-positive value is rejected as a
+// structural error before clamping (buildState), because a scalar of 0 freezes
+// every duration and a negative one inverts them, neither of which is a token a
+// clamp should quietly repair. The positive floor here (0.1) is the smallest
+// multiplier the slider offers; the reject gate below is what stops 0 and below.
+export const SCALAR_BOUNDS = { min: 0.1, max: 4 }
 
 // The editable token schema — the exact keys each family carries in rawState,
 // which is also the exact set the tool bar renders a control for. This is the
@@ -397,7 +444,7 @@ function detectFormat(parsed) {
     throw new ImportError('Unrecognized token file: expected a JSON object.')
   }
   if (parsed.motion && typeof parsed.motion === 'object') return 'dtcg'
-  if (EDITABLE_TOKEN_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale || parsed.spring)) {
+  if (EDITABLE_TOKEN_SCHEMA.duration && (parsed.duration || parsed.easing || parsed.delay || parsed.scale || parsed.spring || parsed.scalar !== undefined)) {
     return 'flat'
   }
   throw new ImportError('Unrecognized token file: expected a Cadence DTCG or flat export.')
@@ -472,6 +519,25 @@ function buildState(parsed, format) {
     state.spring[key] = value
   }
 
+  // The duration scalar is a lone value, so it is read by a dedicated branch
+  // rather than the family loops above. Missing fills from Standard; a value
+  // <= 0 (or non-finite) is rejected as a structural error, the same class as a
+  // spring param at zero or a cubic-bezier x out of range; an in-range-but-too-
+  // large value clamps to SCALAR_BOUNDS and reports like every other scalar.
+  const scalarLeaf = getGroup(parsed, format, 'scalar')
+  if (scalarLeaf === undefined) {
+    state.scalar = INITIAL_STATE.scalar
+    filled.push({ path: 'scalar', to: INITIAL_STATE.scalar })
+  } else {
+    const raw = readScalar(scalarLeaf, format, 'scalar')
+    if (raw <= 0) {
+      throw new ImportError('scalar: must be greater than 0.')
+    }
+    const value = clampScalar(raw, SCALAR_BOUNDS)
+    if (value !== raw) clamped.push({ path: 'scalar', from: raw, to: value })
+    state.scalar = value
+  }
+
   return { state, clamped, filled, curvesOutOfRange }
 }
 
@@ -482,6 +548,10 @@ function collectForeign(parsed, format) {
   const root = format === 'dtcg' ? parsed.motion : parsed
   const foreign = []
   for (const [family, group] of Object.entries(root || {})) {
+    // The duration scalar is a legitimate lone value the editor holds, but it is
+    // not a family in EDITABLE_TOKEN_SCHEMA, so suppress it here the way the
+    // fixed constants are suppressed below: a clean round trip must report nothing.
+    if (family === 'scalar') continue
     const known = EDITABLE_TOKEN_SCHEMA[family]
     if (!known) {
       foreign.push({ path: family })
@@ -498,13 +568,16 @@ function collectForeign(parsed, format) {
   return foreign
 }
 
-// Total editable tokens, for the report's summary line.
+// Total editable tokens, for the report's summary line. The + 1 is the duration
+// scalar: editable-class, but a lone value outside the family schema, so it is
+// counted here explicitly rather than by a schema length.
 const TOTAL_TOKENS =
   EDITABLE_TOKEN_SCHEMA.duration.length +
   EDITABLE_TOKEN_SCHEMA.easing.length +
   EDITABLE_TOKEN_SCHEMA.delay.length +
   EDITABLE_TOKEN_SCHEMA.scale.length +
-  EDITABLE_TOKEN_SCHEMA.spring.length
+  EDITABLE_TOKEN_SCHEMA.spring.length +
+  1
 
 export function importTokens(text) {
   let parsed

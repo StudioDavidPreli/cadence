@@ -41,6 +41,9 @@ Defined in `src/tokens/motion.css`.
   --motion-spring-stiffness: 400;
   --motion-spring-damping: 30;
   --motion-spring-mass: 1;
+
+  /* Duration scalar */
+  --motion-duration-scalar: 1;
 }
 ```
 
@@ -64,6 +67,8 @@ Not every token is a dial. The token set splits in two, and the split governs ho
 The three spring params (`spring.stiffness`, `spring.damping`, `spring.mass`) are a fourth editable family, and the newest. Spring varies per preset like duration, so it cannot be a fixed reference (those are identical across every preset); it lives in state, resolves per preset, and round-trips through import. It has its own Spring control section with three sliders and a settle-curve visualizer (`SpringVisualizer`, drawing displacement over time from the three params). The sliders dispatch `SET_SPRING`, the same shape as `SET_SCALE`. Constrained ranges (`SPRING_CONFIG`) cover the band that produces usable UI springs; Explore ranges (`SPRING_CONFIG_EXPLORE`) match the `SPRING_BOUNDS` an import clamps to, so an imported value always lands on the track.
 
 A spring can also stand in for `ease.overshoot` on the components that carry a `motionMode` prop (Button, Card, Toggle, Carousel, Drawer). The prop defaults to `'bezier'`, so nothing ships rewired; Token Lab's per-demo spring toggle (a single coil icon in the demo's label row, left of the `</>` button) passes `'spring'`, and it flips the demo's transition to `{ type: 'spring', ...tokens.spring }` in place. The Carousel harmonizes: its snap and its dot indicator share one transition object, so the dot springs when the snap does. The P5 Follow Through principle demo runs the Carousel on `motionMode="spring"` (a real spring is the truest follow-through), which made it the first spring consumer in a reduced-motion-respecting context: `reduceMotion()` now sets a `reducedMotion` flag on the flattened tokens, and a spring consumer reads it to fall back to an instant transition, since a spring has no duration to flatten. It is a comparison affordance, the imitation next to the physics on one component, not a change to the tool's own shipped motion.
+
+The duration scalar (`--motion-duration-scalar`, added 2026-07-21) is editable-class too, but it is not a family: it is one unitless number, a multiplier on top of the duration tokens (`effective = base × scalar`). It lives in `rawState.scalar` as a bare value, exports and imports like the families (a DTCG `number` leaf at `motion.scalar`, a flat top-level `scalar`, a `--motion-duration-scalar` CSS line), and clamps to `SCALAR_BOUNDS` with the same non-positive rejection spring uses (a scalar at or below zero freezes or inverts every duration). It carries one naming seam: the CSS property is `--motion-duration-scalar`, the JSON path is the shorter `scalar`. Two things it deliberately does NOT do. It is not in `EDITABLE_TOKEN_SCHEMA` or `stateToTokens`, because its only consumer, `DurationVisualizer`, reads `rawState.scalar` directly as a prop from the controls column (like `durations`), and no component under a provider reads it. Keeping it out of the runtime token object keeps the drift guard's invariant honest: schema ∪ fixed still equals every demo-consumed token, and the scalar is not one. And it does not key preset identity in `statesMatch`, joining spring and the overshoot slot as an editable extra that leaves the active-preset highlight alone when scrubbed. Full reasoning: `docs/decisions/duration-scalar-2026-07-21.md`.
 
 **Fixed reference tokens** are real tokens components use, but no control reaches them: `ease.linear` and `delay.none`. `stateToTokens` wires these to constants instead of editor state, and `FIXED_REFERENCE_PATHS` lists them as the exact complement of the editable schema.
 

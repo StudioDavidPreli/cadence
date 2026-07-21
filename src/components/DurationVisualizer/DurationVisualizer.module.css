@@ -114,6 +114,66 @@
   color: var(--color-text-base);
 }
 
+/* ── Duration scalar scrub ───────────────────────────────────────────────────
+   A single range input that multiplies every dot's time (effective = base ×
+   scalar). Laid out as one horizontal row (label · slider · value) so it reads
+   as one control, distinct from the section sliders above that stack their
+   label. The slider treatment mirrors .slider in TokenLab.module.css (CSS
+   Modules are scoped, so it is restated rather than shared). */
+.scalarRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scalarLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-base);
+}
+
+.scalarSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+/* Accent focus ring, same rationale as the token sliders: accent is the
+   "currently affecting the system" stroke, verified >=3:1 in all four themes,
+   which a focused scalar slider is. :focus-visible keeps it off mouse drags. */
+.scalarSlider:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.scalarSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-text-muted2);
+  cursor: pointer;
+  transition: transform var(--feedback-ui-duration);
+}
+
+.scalarSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.scalarValue {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+}
+
 /* ── Kinetic strip ──────────────────────────────────────────────────────────
    Three tracks. Each holds a dot that translates from the left edge to its
    fraction of the track width. */

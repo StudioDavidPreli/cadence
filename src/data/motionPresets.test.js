@@ -110,6 +110,11 @@ describe('stateToExport', () => {
     expect(stateToExport(INITIAL_STATE).spring).toEqual({ stiffness: 170, damping: 20, mass: 1.5 })
     expect(stateToExport(snappy).spring).toEqual({ stiffness: 600, damping: 22, mass: 1 })
   })
+
+  it('includes the duration scalar (1 in every built-in preset)', () => {
+    expect(stateToExport(INITIAL_STATE).scalar).toBe(1)
+    expect(stateToExport(snappy).scalar).toBe(1)
+  })
 })
 
 describe('toDtcgJson', () => {
@@ -136,6 +141,13 @@ describe('toDtcgJson', () => {
     expect(doc.motion.spring.damping).toEqual({ $type: 'number', $value: 20 })
     expect(doc.motion.spring.mass).toEqual({ $type: 'number', $value: 1.5 })
   })
+
+  it('serializes the duration scalar as a single number leaf under motion.scalar', () => {
+    // A lone unitless multiplier, not a group: one number leaf, same $type
+    // scale and spring use.
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    expect(doc.motion.scalar).toEqual({ $type: 'number', $value: 1 })
+  })
 })
 
 describe('toFlatJson', () => {
@@ -156,6 +168,11 @@ describe('toFlatJson', () => {
   it('emits spring params as bare numbers', () => {
     const doc = JSON.parse(toFlatJson(INITIAL_STATE))
     expect(doc.spring).toEqual({ stiffness: 170, damping: 20, mass: 1.5 })
+  })
+
+  it('emits the duration scalar as a bare top-level number', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    expect(doc.scalar).toBe(1)
   })
 })
 
@@ -190,6 +207,11 @@ describe('toCssVars', () => {
     expect(css).toContain('--motion-spring-stiffness: 170;')
     expect(css).toContain('--motion-spring-damping: 20;')
     expect(css).toContain('--motion-spring-mass: 1.5;')
+  })
+
+  it('emits the --motion-duration-scalar custom property', () => {
+    const css = toCssVars(INITIAL_STATE)
+    expect(css).toContain('--motion-duration-scalar: 1;')
   })
 })
 
@@ -329,5 +351,43 @@ describe('importTokens', () => {
     doc.spring.wobble = 3
     const res = importTokens(JSON.stringify(doc))
     expect(res.report.ignored).toContainEqual({ path: 'spring.wobble' })
+  })
+
+  it('round-trips the duration scalar and never reports it as foreign', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.scalar = 1.5
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.scalar).toBe(1.5)
+    // scalar is a legitimate lone token, suppressed from the foreign report.
+    expect(res.report.ignored).toEqual([])
+  })
+
+  it('clamps an out-of-range duration scalar to its bound and reports it', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.scalar = 10  // above the max of 4
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.scalar).toBe(4)
+    expect(res.report.clamped).toContainEqual({ path: 'scalar', from: 10, to: 4 })
+  })
+
+  it('rejects a non-positive duration scalar as a structural error', () => {
+    // A scalar of 0 freezes every duration and a negative one inverts them, so
+    // it is rejected (like a spring param at zero), not clamped.
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    doc.scalar = 0
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/greater than 0/)
+  })
+
+  it('fills a missing duration scalar from Standard and reports it', () => {
+    const doc = JSON.parse(toFlatJson(INITIAL_STATE))
+    delete doc.scalar
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.scalar).toBe(1)
+    expect(res.report.filled).toContainEqual({ path: 'scalar', to: 1 })
   })
 })

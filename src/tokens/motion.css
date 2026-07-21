@@ -10,6 +10,16 @@
   --motion-duration-slow:   400ms;
   --motion-duration-slower: 600ms;
 
+  /* Duration scalar
+     A single unitless multiplier on top of the duration tokens: effective
+     duration = base * scalar, read at runtime. The tokens stay the source of
+     truth; the scalar is a documented multiplier, not a distance hardcoded
+     into a component. Only the DurationVisualizer consumes it today
+     (visualizer-only: no shipped component multiplies its duration by this).
+     Reduced motion needs no branch here: base already flattens to ~0, so the
+     product base * scalar flattens through the arithmetic unchanged. */
+  --motion-duration-scalar: 1;
+
   /* Easing
      Controls how velocity changes over time.
      Linear: progress bars, continuous loops — no perceived acceleration.

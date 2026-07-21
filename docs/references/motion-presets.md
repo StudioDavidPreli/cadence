@@ -73,6 +73,20 @@ the P5 Follow Through principle runs it on the spring. The Drawer springs its
 entrance to a single target (its keyframe overshoot was faking a spring) while the
 exit keeps its keyframe anticipation.
 
+## Duration scalar
+
+Added 2026-07-21. A single unitless multiplier on top of the duration tokens,
+`--motion-duration-scalar`, effective duration = base × scalar, read at runtime.
+Every preset carries the same value, `1`: speed already lives in each preset's
+duration ladder, so the scalar is not a personality axis and does not vary. It is
+editable (its scrub lives inside `DurationVisualizer`, its only consumer) and
+round-trips through export and import as a lone value, `scalar`, outside the
+family machinery. Full reasoning: `docs/decisions/duration-scalar-2026-07-21.md`.
+
+| Token | Default | Snappy | Cinematic |
+|---|---|---|---|
+| `scalar` | 1 | 1 | 1 |
+
 ## Fixed constants
 
 Not editable through the tool. Identical across every preset, resolved in

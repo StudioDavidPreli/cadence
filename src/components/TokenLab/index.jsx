@@ -173,6 +173,10 @@ function reducer(state, action) {
       return { ...state, scale: { ...state.scale, [action.key]: action.value } }
     case 'SET_SPRING':
       return { ...state, spring: { ...state.spring, [action.key]: action.value } }
+    case 'SET_SCALAR':
+      // The scalar is a lone value, not a family of keys, so the action carries
+      // just a value (no key), unlike SET_DURATION / SET_SPRING.
+      return { ...state, scalar: action.value }
     case 'RESET_TO_DEFAULTS':
       return { ...INITIAL_STATE }
     case 'LOAD_PRESET':
@@ -216,6 +220,10 @@ function writeAllTokensToCss(state) {
   el.style.setProperty('--motion-spring-stiffness', `${state.spring.stiffness}`)
   el.style.setProperty('--motion-spring-damping',   `${state.spring.damping}`)
   el.style.setProperty('--motion-spring-mass',      `${state.spring.mass}`)
+  // Unitless like spring. Written so a preset switch / import carries the scalar
+  // to the CSS export and any future consumer; DurationVisualizer itself reads
+  // rawState.scalar, not this property.
+  el.style.setProperty('--motion-duration-scalar',  `${state.scalar}`)
 }
 
 // Triggers a client-side file download for a text payload. Builds a Blob, points
@@ -252,6 +260,10 @@ function syncToCss(action) {
     case 'SET_SPRING':
       // Spring params are unitless (no ms suffix), like scale.
       el.style.setProperty(`--motion-spring-${action.key}`, `${action.value}`)
+      break
+    case 'SET_SCALAR':
+      // Lone unitless value; the property name is fixed, not built from a key.
+      el.style.setProperty('--motion-duration-scalar', `${action.value}`)
       break
     case 'RESET_TO_DEFAULTS':
       writeAllTokensToCss(INITIAL_STATE)
@@ -334,6 +346,15 @@ const SPRING_CONFIG_EXPLORE = {
   mass:      { min: 0.1, max: 10,   step: 0.1, unit: '' },
 }
 
+// Duration scalar — a single unitless multiplier (effective duration = base ×
+// scalar), scrubbed inside DurationVisualizer rather than as a section slider.
+// Constrained covers a legible band around 1 (half speed to double); Explore
+// widens to SCALAR_BOUNDS (motionPresets.js) so an imported value always lands on
+// the track, the same lockstep SPRING_CONFIG_EXPLORE keeps with SPRING_BOUNDS.
+// Starting ranges; David tunes them by feel against the live strip.
+const SCALAR_CONFIG         = { min: 0.5, max: 2, step: 0.05, unit: '×' }
+const SCALAR_CONFIG_EXPLORE = { min: 0.1, max: 4, step: 0.05, unit: '×' }
+
 // ─── Preset helpers ───────────────────────────────────────────────────────────
 // Slot equality: a slot's value is either a string (preset key) or an array
 // (custom curve). Compare strings by identity, arrays element-by-element.
@@ -357,6 +378,11 @@ function statesMatch(a, b) {
   for (const k of ['subtle', 'base', 'expressive', 'lift']) {
     if (a.scale[k] !== b.scale[k]) return false
   }
+  // Deliberately NOT compared: spring, the overshoot easing slot, and the
+  // duration scalar. statesMatch keys preset identity off the primary tokens
+  // only; the Explore-gated / per-instance editable extras (spring since
+  // 2026-07-20, scalar since 2026-07-21) do not change which preset reads as
+  // active, so scrubbing one keeps the highlight, same as scrubbing spring.
   return true
 }
 
@@ -402,6 +428,18 @@ function migratePresetEasing(preset) {
 function migratePresetSpring(preset) {
   if (preset?.state == null || preset.state.spring != null) return preset
   return { ...preset, state: { ...preset.state, spring: { ...INITIAL_STATE.spring } } }
+}
+
+// Backfill state.scalar for presets saved before the duration scalar (2026-07-21).
+// A pre-scalar preset has no scalar key; default it to Standard's 1 so the reducer
+// and writeAllTokensToCss never read undefined. A separate pass, mirroring
+// migratePresetSpring, so it also covers a preset that migratePresetEasing returns
+// early (one with no easing at all). Uses != null so a legitimately-stored 0 would
+// be kept, but 0 never reaches storage: the import gate rejects it and the slider
+// floor is 0.1.
+function migratePresetScalar(preset) {
+  if (preset?.state == null || preset.state.scalar != null) return preset
+  return { ...preset, state: { ...preset.state, scalar: INITIAL_STATE.scalar } }
 }
 
 // Auto-generates a compact token summary for user preset tooltips.
@@ -1372,7 +1410,7 @@ export function TokenLab() {
     try {
       const stored = JSON.parse(localStorage.getItem('cadence-presets') || '[]')
       if (Array.isArray(stored)) {
-        setUserPresets(stored.map(p => migratePresetSpring(migratePresetEasing(p))))
+        setUserPresets(stored.map(p => migratePresetScalar(migratePresetSpring(migratePresetEasing(p)))))
       }
     } catch { /* ignore corrupt storage */ }
   }, [])
@@ -1739,8 +1777,16 @@ export function TokenLab() {
         ))}
         {/* Reads the live duration values straight from rawState — the controls
             column is outside MotionTokensProvider, so the visualizer takes the
-            numbers as a prop rather than through useMotionTokens(). */}
-        <DurationVisualizer durations={rawState.duration} />
+            numbers as a prop rather than through useMotionTokens(). The duration
+            scalar rides along the same way, with its scrub owned by the viz (see
+            DurationVisualizer): a lone editable token whose only consumer is this
+            graphic, so its slider lives with the effect it produces. */}
+        <DurationVisualizer
+          durations={rawState.duration}
+          scalar={rawState.scalar}
+          scalarConfig={exploreMode ? SCALAR_CONFIG_EXPLORE : SCALAR_CONFIG}
+          onScalarChange={value => dispatch({ type: 'SET_SCALAR', value })}
+        />
       </ControlSection>
 
       <ControlSection
