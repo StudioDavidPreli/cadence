@@ -116,13 +116,21 @@ mode dragging duration toward zero can never flatten it. The token-integrity gat
 holds it there. A clipboard write that fails in an insecure context is a silent
 no-op, the posture CodeBlock and the export Copy button already take.
 
-It carries no accent, since accent means active or connected in this system and a
-copy control is neither. It rests at `--color-text-muted`, which clears 4.5:1 on
-the card and panel surface in all four themes, and darkens to `--color-text-base`
-on hover, the theme's full-strength body text. It does not hover to
-`--color-text-primary`: that token is the text color for dark interactive surfaces,
-white in light and black in high-contrast dark, and on this static surface it would
-land white on white or black on black.
+It is styled as the theme switcher buttons are: a bordered pill, transparent at
+rest, that inverts to a solid surface on hover. That is the project's established
+chrome-button pattern, and its resting and hover pairings are the ones the contrast
+audit already verified in all four themes (`--color-text-muted` on the surface at
+rest, `--color-text-primary` on `--color-surface-hover` on hover, which is why the
+hover fills the background rather than only recoloring the text). It carries no
+accent, since accent means active or connected and a copy control is neither.
+
+The pill is taller than the mono line it shares the token row with, so the
+QuoteBlock grows. In the modal that costs nothing (the spotlight has room). In the
+in-grid card, whose 372×480 box runs tight for the longest summaries, the added
+height is reclaimed from the QuoteBlock's bottom padding (24px to 12px), which
+holds the divider in place and preserves the Motion/UI toggle's clearance above it.
+Verified on built output across all 18 principles: the tightest, Follow Through,
+keeps a positive gap.
 
 ## The slug table
 

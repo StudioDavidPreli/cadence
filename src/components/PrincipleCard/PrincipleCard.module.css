@@ -345,10 +345,18 @@
 
 /* ── Quote block ─────────────────────────────────────────────────────────────
    Sits below expandedContent as a natural-height sibling inside expandedWrapper.
-   Padding matches expandedContent's left/right (32px) for visual alignment. */
+   Padding matches expandedContent's left/right (32px) for visual alignment.
+
+   The bottom padding is 12px, down from the original 24px, to absorb the height
+   the copy-link pill adds to the token row. The pill (a bordered theme-style
+   button) is taller than the single mono line it shares the row with, so the
+   quoteBlock grows; reclaiming that height here keeps the block's overall height
+   unchanged, which holds the divider in place and preserves the content column's
+   margin above it (the toggle/divider invariant). Verified on built output: the
+   tightest principle (Follow Through, a 91-char summary) keeps a positive gap. */
 
 .quoteBlock {
-  padding: 20px 32px 24px 32px;
+  padding: 20px 32px 12px 32px;
   border-top: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
@@ -391,10 +399,9 @@
   margin: 0;
 }
 
-/* The token pill sits on the left; the copy-link control holds the right. Baseline
-   alignment keeps the button's text on the same line as the token list; gap and
-   space-between separate them. A single row, so no height is added below the
-   QuoteBlock divider and the toggle/divider invariant above is untouched. */
+/* The token list sits on the left; the copy-link control holds the right.
+   Center alignment seats the pill button against the token line; gap and
+   space-between separate them. */
 .tokenRow {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -402,7 +409,7 @@
   margin: 0;
   margin-top: 4px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
@@ -413,29 +420,33 @@
   min-width: 0;
 }
 
-/* Copy-link control. Chrome, borderless, mono to match the token row. It carries
-   no accent (accent means active/connected in this system, which a copy control
-   is not). Resting is --color-text-muted, which clears 4.5:1 on the card/panel
-   surface (--color-surface-raised) in all four themes; hover darkens to
-   --color-text-base, the theme's full-strength body text, so the control gains
-   contrast on hover in every theme. It does NOT hover to --color-text-primary:
-   that token is the text color for dark INTERACTIVE surfaces (white in light,
-   black in HC-dark) and would land white-on-white / black-on-black on this
-   static surface. nowrap so the label does not break mid-word as it swaps to
-   "Copied". */
+/* Copy-link control. Styled as the theme switcher buttons are: a bordered pill,
+   transparent by default, that inverts to a solid surface on hover. This is the
+   project's established chrome-button pattern, and the resting and hover pairings
+   are the ones the contrast audit already verified in all four themes
+   (--color-text-muted on the surface at rest, --color-text-primary on
+   --color-surface-hover on hover, which is why the hover fills the background
+   rather than only recoloring the text). No accent: accent means active or
+   connected, which a copy control is not. */
 .copyLink {
   flex-shrink: 0;
-  border: none;
-  background: none;
-  padding: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background-color: transparent;
   color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
-  transition: color var(--feedback-ui-duration) var(--motion-ease-standard);
+  transition: background-color var(--feedback-ui-duration) var(--motion-ease-standard),
+              border-color var(--feedback-ui-duration) var(--motion-ease-standard),
+              color var(--feedback-ui-duration) var(--motion-ease-standard);
 }
 
 .copyLink:hover {
-  color: var(--color-text-base);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
