@@ -29,6 +29,14 @@
   transform: scale(var(--motion-scale-press-base, 0.95));
 }
 
+/* Small variant — chrome-only (Token Lab's Explore toggle). Geometry must match
+   THUMB_TRAVEL.sm in index.jsx: 36×22 track, 3px pad (inherited), 16px thumb. */
+.trackSm {
+  width: 36px;
+  height: 22px;
+  border-radius: 11px;
+}
+
 /* Expressive mode: track color changes on state.
    Duration is set via inline style so it stays in sync with the token slider. */
 .trackExpressive {
@@ -71,6 +79,13 @@
   height: 18px;
   border-radius: 50%;
   background-color: var(--color-text-base);
+}
+
+/* Small-variant thumb (see .trackSm). 16px keeps the same 3px inset the md
+   thumb has inside its track. */
+.thumbSm {
+  width: 16px;
+  height: 16px;
 }
 
 /* ── High-contrast thumb overrides ─────────────────────────────────────────

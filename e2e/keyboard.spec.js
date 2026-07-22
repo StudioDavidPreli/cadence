@@ -7,6 +7,8 @@ import { readToken } from './helpers'
 test.describe('keyboard operability', () => {
   test('sliders have an accessible name, respond to arrows, and show a focus ring', async ({ page }) => {
     await page.goto('/#/token-lab')
+    // Duration starts collapsed (2026-07-21 section order); open it first.
+    await page.locator('button[class*="sectionHeader"]', { hasText: 'Duration' }).click()
     // getByRole with a name only resolves if the aria-label is present, so
     // this locator IS the accessible-name assertion (the 2026-07-16 fix).
     const slider = page.getByRole('slider', { name: 'duration.base' })

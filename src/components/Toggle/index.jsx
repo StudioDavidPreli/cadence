@@ -36,23 +36,30 @@ import styles from './Toggle.module.css'
 // DOM — it only moves. No FLIP, no ProjectionNode interference, no global scope.
 //
 // ── Track geometry ────────────────────────────────────────────────────────────
-// Track: 44px wide, 26px tall, 3px padding on all sides.
-// Thumb: 18px diameter.
-// Available travel: 44 - 18 - (2 × 3) = 20px. Subtract 2px for visual
-// centering (the thumb looks optically centered at 18px of travel).
-const THUMB_TRAVEL = 18
+// Two sizes. Travel = width - thumb - (2 × padding), minus 2px for optical
+// centering (the thumb looks centered a couple px short of the geometric end).
+// These numbers MUST match the CSS: .track/.thumb for md, .trackSm/.thumbSm for
+// sm (both in Toggle.module.css).
+//   md — 44×26 track, 3px pad, 18px thumb → 44-18-6-2 = 18  (the shipped size;
+//        every demonstrated Toggle uses it, so demos are unchanged by `sm`)
+//   sm — 36×22 track, 3px pad, 16px thumb → 36-16-6-2 = 12  (chrome-only: the
+//        Explore toggle in Token Lab's header, added so that one control could
+//        shrink without resizing any demo Toggle)
+const THUMB_TRAVEL = { md: 18, sm: 12 }
 
 // `on` is optional. When undefined, Toggle owns its own state via useState
 // (the original behavior used everywhere except the P13 Systematization demo).
 // When passed, parent owns state; click still fires onChange so the parent
 // can update. Mirrors the controlled/uncontrolled split in Card.
-export function Toggle({ label, mode = 'subtle', onChange, on: onProp, motionMode = 'bezier' }) {
+export function Toggle({ label, mode = 'subtle', onChange, on: onProp, motionMode = 'bezier', size = 'md' }) {
   const [internalOn, setInternalOn] = useState(false)
   const isControlled = onProp !== undefined
   const on = isControlled ? onProp : internalOn
   const tokens = useMotionTokens()
 
   const isExpressive = mode === 'expressive'
+  const isSmall = size === 'sm'
+  const travel = THUMB_TRAVEL[size]
 
   // The thumb slide. 'spring' rides the real physics spring instead of the
   // overshoot bezier; only Token Lab's per-demo switch passes it, so shipped
@@ -78,15 +85,15 @@ export function Toggle({ label, mode = 'subtle', onChange, on: onProp, motionMod
         role="switch"
         aria-checked={on}
         aria-label={label}
-        className={`${styles.track} ${isExpressive ? styles.trackExpressive : ''} ${on && isExpressive ? styles.trackOn : ''}`}
+        className={`${styles.track} ${isSmall ? styles.trackSm : ''} ${isExpressive ? styles.trackExpressive : ''} ${on && isExpressive ? styles.trackOn : ''}`}
         onClick={handleClick}
         // CSS transition duration mirrors the token so track color and thumb
         // slide stay in sync even when the token slider is adjusted.
         style={{ transitionDuration: `${tokens.duration.fast * 1000}ms` }}
       >
         <motion.span
-          className={styles.thumb}
-          animate={{ x: on ? THUMB_TRAVEL : 0 }}
+          className={`${styles.thumb} ${isSmall ? styles.thumbSm : ''}`}
+          animate={{ x: on ? travel : 0 }}
           transition={thumbTransition}
         />
       </button>

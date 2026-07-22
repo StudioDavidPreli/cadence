@@ -18,15 +18,13 @@
 }
 
 .title {
-  font-size: 12px;
-  font-weight: 500;
+  composes: type-label from global;
   color: var(--color-text-base);
 }
 
 .tokenValue {
-  font-size: 11px;
+  composes: type-value from global;
   color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ── Token selector ─────────────────────────────────────────────────────────
@@ -38,12 +36,11 @@
 }
 
 .tokenTab {
+  composes: type-button from global;
   padding: 6px 4px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -82,14 +79,15 @@
 }
 
 .modeOption {
+  composes: type-button from global;
   padding: 6px 8px;
   border: none;
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
+  /* Keep each label ("Constant duration" / "Constant velocity") on one line. */
+  white-space: nowrap;
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
@@ -114,6 +112,40 @@
   color: var(--color-text-base);
 }
 
+/* Positioning context for the drop-down tooltip. Separate from .modeToggle
+   because that element clips its own segment fills (overflow: hidden), which
+   would also clip a tooltip dropping below it. */
+.modeToggleWrap {
+  position: relative;
+}
+
+/* The mode description, dropping below the toggle on hover/focus. Chrome
+   tooltip: fixed --feedback-* timing, text-base on surface-raised (audited AA in
+   every theme), no accent. Absolute so it overlays the strip below rather than
+   shifting layout; a small downward slide reads as "dropping down". */
+.modeTip {
+  composes: type-microcopy from global;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-base);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity var(--feedback-ui-duration), transform var(--feedback-ui-duration);
+}
+
+.modeTipShown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ── Duration scalar scrub ───────────────────────────────────────────────────
    A single range input that multiplies every dot's time (effective = base ×
    scalar). Laid out as one horizontal row (label · slider · value) so it reads
@@ -127,15 +159,17 @@
 }
 
 .scalarLabel {
-  font-size: 12px;
-  font-weight: 500;
+  composes: type-label from global;
   color: var(--color-text-base);
 }
 
 .scalarSlider {
   -webkit-appearance: none;
   appearance: none;
-  flex: 1;
+  /* Shortened (David, 2026-07-21): a fixed short track, not flex:1, so the whole
+     scalar control stays compact on the footer row beside Replay. */
+  width: 80px;
+  flex: none;
   height: 4px;
   border-radius: 2px;
   background: var(--color-border);
@@ -167,9 +201,8 @@
 }
 
 .scalarValue {
-  font-size: 11px;
+  composes: type-value from global;
   color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
   min-width: 40px;
   text-align: right;
 }
@@ -196,13 +229,12 @@
 }
 
 .trackLabel {
-  font-size: 10px;
+  composes: type-value from global;
   color: var(--color-text-muted);
 }
 
 .trackTime {
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
+  composes: type-value from global;
   /* muted, not muted2: muted2 is #888 in light, 3.25:1 on the light bg —
      below the 4.5:1 text floor. Same trap TokenLabGuide documents. muted2
      stays correct for graphical uses (the slider thumb). */
@@ -229,7 +261,11 @@
 }
 
 /* ── Chart ──────────────────────────────────────────────────────────────────
-   Duration (Y) vs distance (X). */
+   Duration (Y) vs distance (X). Full width; the graph is centered by giving the
+   plot symmetric left/right margins inside the viewBox (PLOT.x0 / PLOT.x1 below),
+   not by insetting the SVG element. Insetting only centered the box while the
+   plot stayed drawn right-of-center (its old 12/4 margins), which read as
+   off-centre (David, 2026-07-21). */
 .chart {
   width: 100%;
   height: auto;
@@ -274,22 +310,21 @@
   font-family: inherit;
 }
 
-/* ── Caption + replay ───────────────────────────────────────────────────── */
-.caption {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--color-text-muted);
+/* ── Footer: scalar scrub + replay ───────────────────────────────────────────
+   Below the chart. Scalar control at the left, Replay pushed to the right. */
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .replayButton {
-  align-self: flex-start;
+  composes: type-button from global;
   padding: 5px 12px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;

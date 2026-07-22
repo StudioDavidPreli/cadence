@@ -114,10 +114,7 @@
 }
 
 .controlsTitle {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  composes: type-eyebrow from global;
   color: var(--color-text-muted);
 }
 
@@ -193,21 +190,15 @@
 
 /* ── Presets section ─────────────────────────────────────────────────────── */
 
-/* Always-visible, no collapse. Sits between the header and Duration section. */
-.presetsSection {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--color-border);
+/* Presets is a collapsible ControlSection now (David, 2026-07-21), so the header
+   and the section border/padding come from .sectionHeader / .sectionInner. This
+   is just the body: the preset chips row and the save area, stacked. The 8px gap
+   is tighter than .sectionInner's 14px because the chips and the save control
+   read as one cluster. */
+.presetsBody {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.presetsSectionLabel {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
 }
 
 .presetsList {
@@ -218,6 +209,7 @@
 
 /* Preset button — matches the easeButton visual style for consistency */
 .presetItem {
+  composes: type-button from global;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -225,8 +217,8 @@
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
+  /* font-family: inherit is load-bearing on form elements — buttons take a UA
+     font otherwise. The role supplies size/weight; family stays local. */
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -267,7 +259,7 @@
 /* Delete target on user presets. Hover pops a small --color-bg chip with amber
    text to signal destructive action. */
 .presetDelete {
-  font-size: 9px;
+  composes: type-glyph from global;
   color: var(--color-text-muted);
   line-height: 1;
   cursor: pointer;
@@ -296,24 +288,42 @@
 
 /* Save button — dashed border signals "potential action" without competing with
    the active preset pill. Appears only when state diverges from all presets. */
+/* Save preset — sits on the Import row (a flex item now, not a column block),
+   always present. Dashed "potential action" border is the resting identity. */
 .presetSaveButton {
-  align-self: flex-start;
+  composes: type-button from global;
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px dashed var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  overflow: hidden;
   transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
 /* Unified hover invert (see .presetItem:hover). The dashed "potential action"
    border stays the resting identity; hover reads as any other chrome button. */
 .presetSaveButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Active: the current token state has diverged from every preset, so there is
+   something worth naming. The dashed outline resolves into the loaded-preset
+   pill's filled look (solid border, surface fill, primary text) — the same
+   treatment .presetItemActive carries, so the row reads with one filled control
+   standing for "current state". Placed after the :hover rule so it and its own
+   :hover win by source order when both classes are present. */
+.presetSaveButtonActive {
+  border-style: solid;
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.presetSaveButtonActive:hover {
   background-color: var(--color-surface-hover);
   border-color: var(--color-surface-hover);
   color: var(--color-text-primary);
@@ -335,7 +345,10 @@
   border: 1px solid var(--color-border);
   background-color: var(--color-surface-raised);
   color: var(--color-text-base);
-  font-size: 11px;
+  /* The base chrome size, but at normal weight — this is a text field, not a
+     button, so it reads as content. Referenced from the scale directly rather
+     than composing type-button (which would carry the button's 500 weight). */
+  font-size: var(--type-size-base);
   font-family: inherit;
   outline: none;
   transition: border-color var(--feedback-ui-duration);
@@ -350,13 +363,12 @@
 }
 
 .presetSaveConfirm {
+  composes: type-button from global;
   padding: 5px 8px;
   border-radius: 5px;
   border: none;
   background-color: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
@@ -369,18 +381,17 @@
 }
 
 /* ── Token export ────────────────────────────────────────────────────────────
-   Sits at the foot of the presets section, in two stacked rows: the format
-   toggle spans the full column width on top, the Export / Copy actions sit on
-   the row beneath. Four segments plus both actions do not fit one 300px row
-   without the toggle clipping its last segment (FM), so the toggle gets the
-   whole width and the actions drop below it. */
+   The body of the Export ControlSection (its own section since 2026-07-21). Two
+   stacked rows: the format toggle spans the full column width on top, the
+   Export / Copy actions sit on the row beneath. Four segments plus both actions
+   do not fit one 300px row without the toggle clipping its last segment (FM), so
+   the toggle gets the whole width and the actions drop below it. The section
+   frame (border, padding) comes from .sectionInner now, so no separator here. */
 .exportRow {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
 }
 
 /* Segmented DTCG | Flat | CSS | FM toggle. One bordered shell spanning the full
@@ -394,13 +405,12 @@
 }
 
 .exportFormatOption {
+  composes: type-button from global;
   flex: 1;
   text-align: center;
   padding: 5px 8px;
   border: none;
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -492,14 +502,13 @@
 /* Export is the primary action: solid fill, filling the row. Copy is secondary:
    bordered, compact at the right. */
 .exportButton {
+  composes: type-button from global;
   flex: 1;
   padding: 5px 10px;
   border-radius: 5px;
   border: none;
   background-color: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   transition: background-color var(--feedback-ui-duration);
@@ -510,12 +519,11 @@
 }
 
 .exportCopyButton {
+  composes: type-button from global;
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -539,12 +547,11 @@
 }
 
 .importButton {
+  composes: type-button from global;
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px dashed var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -567,14 +574,14 @@
 }
 
 .importSummary {
+  composes: type-body from global;
   margin: 0;
-  font-size: 13px;
   color: var(--color-text-base);
 }
 
 .importError {
+  composes: type-body from global;
   margin: 0;
-  font-size: 13px;
   color: var(--color-text-base);
 }
 
@@ -585,10 +592,7 @@
 }
 
 .importSectionTitle {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  composes: type-eyebrow from global;
   color: var(--color-text-muted);
 }
 
@@ -602,16 +606,19 @@
 }
 
 .importRow2 {
+  composes: type-body from global;
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 12px;
   color: var(--color-text-base);
 }
 
 .importRow2 code {
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
+  /* The one place mono was hand-spelled (`ui-monospace, monospace`); now on the
+     project's --font-mono token like everywhere else. Sits a step below the
+     body prose it's inline with, at the base chrome size. */
+  font-family: var(--font-mono);
+  font-size: var(--type-size-base);
   color: var(--color-text-muted);
 }
 
@@ -630,16 +637,17 @@
    pointer-events: none prevents the tooltip from capturing mouse events that
    would immediately trigger handleLeave and hide the tooltip. */
 .tooltip {
+  composes: type-microcopy from global;
   position: fixed;
   background-color: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 8px 10px;
+  /* Explicit mono: the tip renders in a portal on document.body, and it shows
+     token-ish text, so the mono is intentional rather than inherited by luck. */
   font-family: var(--font-mono);
-  font-size: 11px;
   color: var(--color-text-base);
   max-width: 220px;
-  line-height: 1.5;
   white-space: normal;
   z-index: 9999;
   pointer-events: none;
@@ -650,6 +658,7 @@
 }
 
 .sectionHeader {
+  composes: type-eyebrow from global;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -658,11 +667,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
   font-family: inherit;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--color-text-muted);
   text-align: left;
 }
@@ -673,7 +678,7 @@
 }
 
 .chevron {
-  font-size: 10px;
+  composes: type-glyph from global;
   transition: transform var(--feedback-ui-duration);
   display: inline-block;
 }
@@ -709,15 +714,13 @@
 }
 
 .sliderName {
-  font-size: 12px;
+  composes: type-label from global;
   color: var(--color-text-base);
-  font-weight: 500;
 }
 
 .sliderValue {
-  font-size: 11px;
+  composes: type-value from global;
   color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
   min-width: 40px;
   text-align: right;
 }
@@ -779,12 +782,11 @@
 }
 
 .easingTab {
+  composes: type-button from global;
   padding: 6px 8px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -817,12 +819,11 @@
 }
 
 .easeButton {
+  composes: type-button from global;
   padding: 7px 10px;
   border-radius: 5px;
   border: 1px solid var(--color-border);
   background: none;
-  font-size: 11px;
-  font-weight: 500;
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -852,10 +853,8 @@
    is active. Centered to match the graph width. Tabular nums prevent layout
    shift as digits change during drag. */
 .curveValues {
-  font-size: 10px;
+  composes: type-value from global;
   color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
   text-align: center;
   padding-bottom: 4px;
 }

@@ -47,9 +47,15 @@
   opacity: 0.6;
 }
 
-/* The main Bézier curve — purple accent matches its role as the easing token */
+/* The main Bézier curve carries --color-accent, the theme's "currently affecting
+   the system" color (David, 2026-07-21). The curve being edited is exactly that,
+   and this matches the SpringVisualizer settle curve and the DurationVisualizer
+   active line, which already use accent. Graphical stroke, so the 3:1 UI bar
+   governs; accent clears it in every theme (dark 8.5, light 5.6, HC-light 6.1,
+   HC-dark 12.7 on --color-bg). The dragging control point (.controlPointActive)
+   is accent too, so curve and handle read as one active element. */
 .curve {
-  stroke: var(--color-accent2);
+  stroke: var(--color-accent);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;

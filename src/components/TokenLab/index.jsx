@@ -570,13 +570,6 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
   const [isSaving, setIsSaving] = useState(false)
   const [saveName, setSaveName]  = useState('')
   const fileInputRef = useRef(null)
-  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
-  // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
-  // serialize from the same stateToExport object, so the toggle only selects
-  // which stringifier runs at export time. Import handles dtcg/flat only; css and
-  // fm are export-only (a destination, not an interchange format).
-  const [exportFormat, setExportFormat] = useState('dtcg')
-  const [copied, setCopied] = useState(false)
   const activePresetId = getActivePresetId(rawState, allPresets)
   const chrome = useChromeTransition()
 
@@ -588,40 +581,6 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
     setIsSaving(false)
   }
 
-  // The current token state serialized in the selected format. Computed on
-  // demand (export and copy both call it) rather than held in state.
-  function exportText() {
-    if (exportFormat === 'dtcg') return toDtcgJson(rawState)
-    if (exportFormat === 'css')  return toCssVars(rawState)
-    if (exportFormat === 'fm')   return toFramerMotion(rawState)
-    return toFlatJson(rawState)
-  }
-
-  function handleExport() {
-    // DTCG files conventionally carry the .tokens.json extension; the flat
-    // shape is a plain .json; the css block is a .css; the Framer Motion module
-    // is a .js. Each carries the matching mime so the download opens as its own
-    // file type rather than plain text.
-    const file = {
-      dtcg: { name: 'cadence.tokens.json', mime: 'application/json' },
-      flat: { name: 'cadence-tokens.json', mime: 'application/json' },
-      css:  { name: 'cadence.tokens.css',  mime: 'text/css' },
-      fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
-    }[exportFormat]
-    downloadTextFile(file.name, exportText(), file.mime)
-  }
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(exportText())
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // clipboard API is unavailable in insecure contexts; the download button
-      // is the reliable path, so a failed copy is a silent no-op.
-    }
-  }
-
   function handleFileChange(e) {
     const file = e.target.files?.[0]
     // Reset the input so selecting the same file again still fires onChange.
@@ -630,10 +589,16 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
     file.text().then(text => onImport(importTokens(text)))
   }
 
-  return (
-    <div className={styles.presetsSection}>
-      <div className={styles.presetsSectionLabel}>Presets</div>
+  // Save preset is a disclosure toggle now: it stays on the Import row and
+  // opens/closes the name field below. Clearing the name on every toggle means
+  // opening always starts empty and closing discards a half-typed name.
+  function toggleSaving() {
+    setIsSaving(prev => !prev)
+    setSaveName('')
+  }
 
+  return (
+    <div className={styles.presetsBody}>
       <div className={styles.presetsList}>
         {allPresets.map(preset => (
           <HoverTip key={preset.id} text={preset.tooltip}>
@@ -677,24 +642,24 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
         >
           Import
         </button>
+        {/* Save preset — always present, on the Import row. Dashed while the
+            current state matches a preset (nothing new to save); when the state
+            has diverged it fills to the loaded-preset pill look, so exactly one
+            control on the row is ever filled: a loaded preset, or this save
+            affordance. Clicking toggles the name field below; clicking again
+            while it is open closes it. */}
+        <button
+          type="button"
+          className={`${styles.presetSaveButton} ${!activePresetId ? styles.presetSaveButtonActive : ''}`}
+          onClick={toggleSaving}
+          aria-expanded={isSaving}
+        >
+          Save preset
+        </button>
       </div>
 
-      {/* The save area is only visible when the current state diverges from all
-          known presets. This signals clearly that there is something worth naming. */}
+      {/* The name field opens below the row when Save preset is toggled on. */}
       <AnimatePresence initial={false}>
-        {!activePresetId && !isSaving && (
-          <motion.button
-            key="save-btn"
-            className={styles.presetSaveButton}
-            onClick={() => setIsSaving(true)}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={chrome.ui}
-          >
-            Save preset
-          </motion.button>
-        )}
         {isSaving && (
           <motion.div
             key="save-input"
@@ -721,66 +686,111 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  )
+}
 
-      {/* Export the live token state as a downloadable file. Two rows: the
-          format toggle spans the full toolbar width on top (its four segments
-          share the width equally), Export and Copy sit on the row beneath. The
-          single-row layout could not fit four segments plus both actions in the
-          300px controls column without clipping the last segment; stacking gives
-          the toggle the whole width and never clips. The format toggle picks the
-          serialization; Export downloads, Copy puts the same string on the
-          clipboard. */}
-      <div className={styles.exportRow}>
-        <div
-          className={styles.exportFormatToggle}
-          role="group"
-          aria-label="Export format"
+// ─── ExportSection ────────────────────────────────────────────────────────────
+// The token-export tools, split out of PresetsSection (2026-07-21) so they live
+// in their own collapsible Export section rather than riding under the presets.
+// Two stacked rows: the format toggle spans the full column width on top (its
+// four segments share the width equally), Export and Copy sit beneath. Four
+// segments plus both actions do not fit one 300px row without the FM segment
+// clipping, so the toggle gets the whole width and the actions drop below it.
+function ExportSection({ rawState }) {
+  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
+  // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
+  // serialize from the same stateToExport object, so the toggle only selects
+  // which stringifier runs at export time. Import handles dtcg/flat only; css and
+  // fm are export-only (a destination, not an interchange format).
+  const [exportFormat, setExportFormat] = useState('dtcg')
+  const [copied, setCopied] = useState(false)
+
+  // The current token state serialized in the selected format. Computed on
+  // demand (export and copy both call it) rather than held in state.
+  function exportText() {
+    if (exportFormat === 'dtcg') return toDtcgJson(rawState)
+    if (exportFormat === 'css')  return toCssVars(rawState)
+    if (exportFormat === 'fm')   return toFramerMotion(rawState)
+    return toFlatJson(rawState)
+  }
+
+  function handleExport() {
+    // DTCG files conventionally carry the .tokens.json extension; the flat
+    // shape is a plain .json; the css block is a .css; the Framer Motion module
+    // is a .js. Each carries the matching mime so the download opens as its own
+    // file type rather than plain text.
+    const file = {
+      dtcg: { name: 'cadence.tokens.json', mime: 'application/json' },
+      flat: { name: 'cadence-tokens.json', mime: 'application/json' },
+      css:  { name: 'cadence.tokens.css',  mime: 'text/css' },
+      fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
+    }[exportFormat]
+    downloadTextFile(file.name, exportText(), file.mime)
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(exportText())
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard API is unavailable in insecure contexts; the download button
+      // is the reliable path, so a failed copy is a silent no-op.
+    }
+  }
+
+  return (
+    <div className={styles.exportRow}>
+      <div
+        className={styles.exportFormatToggle}
+        role="group"
+        aria-label="Export format"
+      >
+        <button
+          type="button"
+          className={`${styles.exportFormatOption} ${exportFormat === 'dtcg' ? styles.exportFormatOptionActive : ''}`}
+          onClick={() => setExportFormat('dtcg')}
+          aria-pressed={exportFormat === 'dtcg'}
         >
-          <button
-            type="button"
-            className={`${styles.exportFormatOption} ${exportFormat === 'dtcg' ? styles.exportFormatOptionActive : ''}`}
-            onClick={() => setExportFormat('dtcg')}
-            aria-pressed={exportFormat === 'dtcg'}
-          >
-            DTCG
-          </button>
-          <button
-            type="button"
-            className={`${styles.exportFormatOption} ${exportFormat === 'flat' ? styles.exportFormatOptionActive : ''}`}
-            onClick={() => setExportFormat('flat')}
-            aria-pressed={exportFormat === 'flat'}
-          >
-            Flat
-          </button>
-          <button
-            type="button"
-            className={`${styles.exportFormatOption} ${exportFormat === 'css' ? styles.exportFormatOptionActive : ''}`}
-            onClick={() => setExportFormat('css')}
-            aria-pressed={exportFormat === 'css'}
-          >
-            CSS
-          </button>
-          {/* FM = a Framer Motion config module (cadence.motion.js). Export-only,
-              like CSS. */}
-          <button
-            type="button"
-            className={`${styles.exportFormatOption} ${exportFormat === 'fm' ? styles.exportFormatOptionActive : ''}`}
-            onClick={() => setExportFormat('fm')}
-            aria-pressed={exportFormat === 'fm'}
-          >
-            FM
-          </button>
-        </div>
-        {/* Row two: the download actions, beneath the full-width toggle. Export
-            fills the remaining width; Copy sits compact at its right. */}
-        <div className={styles.exportActions}>
-          <button type="button" className={styles.exportButton} onClick={handleExport}>
-            Export
-          </button>
-          <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
+          DTCG
+        </button>
+        <button
+          type="button"
+          className={`${styles.exportFormatOption} ${exportFormat === 'flat' ? styles.exportFormatOptionActive : ''}`}
+          onClick={() => setExportFormat('flat')}
+          aria-pressed={exportFormat === 'flat'}
+        >
+          Flat
+        </button>
+        <button
+          type="button"
+          className={`${styles.exportFormatOption} ${exportFormat === 'css' ? styles.exportFormatOptionActive : ''}`}
+          onClick={() => setExportFormat('css')}
+          aria-pressed={exportFormat === 'css'}
+        >
+          CSS
+        </button>
+        {/* FM = a Framer Motion config module (cadence.motion.js). Export-only,
+            like CSS. */}
+        <button
+          type="button"
+          className={`${styles.exportFormatOption} ${exportFormat === 'fm' ? styles.exportFormatOptionActive : ''}`}
+          onClick={() => setExportFormat('fm')}
+          aria-pressed={exportFormat === 'fm'}
+        >
+          FM
+        </button>
+      </div>
+      {/* Row two: the download actions, beneath the full-width toggle. Export
+          fills the remaining width; Copy sits compact at its right. */}
+      <div className={styles.exportActions}>
+        <button type="button" className={styles.exportButton} onClick={handleExport}>
+          Export
+        </button>
+        <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
       </div>
     </div>
   )
@@ -1427,8 +1437,12 @@ const DEMO_NAV_ITEMS = ['Overview', 'Token Lab', 'Principles']
 
 export function TokenLab() {
   const [rawState, rawDispatch] = useReducer(reducer, INITIAL_STATE)
+  // Default-open sections (David, 2026-07-21): Presets and Export bracket the
+  // token sections, both open so the two entry/exit points read at a glance;
+  // Easing opens with them. The four remaining token families (Spring, Scale,
+  // Delay, Duration) start collapsed so the column opens short.
   const [openSections, setOpenSections] = useState(
-    new Set(['duration', 'easing', 'scale', 'spring'])
+    new Set(['presets', 'easing', 'export'])
   )
   // Which Principles filter is active comes from NavigationContext (the nav
   // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
@@ -1819,21 +1833,111 @@ export function TokenLab() {
       <div className={styles.controlsHeader}>
         <ControlsTitle />
         <HoverTip text="Explore mode removes range limits. Toggle off to return to defaults.">
-          <Toggle mode="expressive" label="Explore" on={exploreMode} onChange={handleExploreToggle} />
+          <Toggle mode="expressive" size="sm" label="Explore" on={exploreMode} onChange={handleExploreToggle} />
         </HoverTip>
       </div>
 
-      {/* Presets — always visible, above the collapsible token sections.
-          Active preset is detected by value-comparing rawState against each
-          preset's stored state, so no "loaded preset" variable is needed. */}
-      <PresetsSection
-        rawState={rawState}
-        allPresets={allPresets}
-        onLoad={handleLoadPreset}
-        onDelete={handleDeletePreset}
-        onSave={handleSavePreset}
-        onImport={handleImport}
-      />
+      {/* Section order (David, 2026-07-21): Presets and Export bracket the token
+          families as the two entry/exit points of the bar; Easing leads the
+          families, then Spring, Scale, Delay, Duration. Presets, Easing, and
+          Export open by default (see openSections). Presets is now a collapsible
+          section like the rest — its active preset is detected by value-comparing
+          rawState against each preset's stored state, so no "loaded preset"
+          variable is needed. */}
+      <ControlSection
+        label="Presets"
+        isOpen={openSections.has('presets')}
+        onToggle={() => toggleSection('presets')}
+      >
+        <PresetsSection
+          rawState={rawState}
+          allPresets={allPresets}
+          onLoad={handleLoadPreset}
+          onDelete={handleDeletePreset}
+          onSave={handleSavePreset}
+          onImport={handleImport}
+        />
+      </ControlSection>
+
+      <ControlSection
+        label="Easing"
+        isOpen={openSections.has('easing')}
+        onToggle={() => toggleSection('easing')}
+      >
+        {/*
+          ── Shared Vocabulary ────────────────────────────────────────────
+          Named presets exist because design and engineering need a shared
+          language. "Use spring easing on the modal" is a complete, precise
+          instruction. "Use cubic-bezier(0.34, 1.56, 0.64, 1) on the modal"
+          is the same instruction, but opaque to anyone not holding a
+          reference sheet.
+
+          Production design systems (Material Design, Primer, Spectrum) all
+          name their easing curves for this reason. The names are vocabulary;
+          the bezier values are implementation details.
+
+          Dragging the control points above creates a custom curve — valid
+          for exploration, but a curve without a name can't be systematized.
+          If a custom curve is worth keeping, it should become a named token.
+        */}
+        <EasingSection rawState={rawState} dispatch={dispatch} exploreMode={exploreMode} />
+      </ControlSection>
+
+      <ControlSection
+        label="Spring"
+        isOpen={openSections.has('spring')}
+        onToggle={() => toggleSection('spring')}
+      >
+        {Object.entries(springConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.spring[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_SPRING', key, value })}
+            tokenKey={`spring.${key}`}
+          />
+        ))}
+        {/* Reads the live spring values straight from rawState — the controls
+            column is outside MotionTokensProvider, so the visualizer takes the
+            numbers as a prop, the same as DurationVisualizer. */}
+        <SpringVisualizer spring={rawState.spring} />
+      </ControlSection>
+
+      <ControlSection
+        label="Scale"
+        isOpen={openSections.has('scale')}
+        onToggle={() => toggleSection('scale')}
+      >
+        {Object.entries(scaleConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            label={SCALE_LABELS[key]}
+            value={rawState.scale[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_SCALE', key, value })}
+            tokenKey={`scale.${key}`}
+          />
+        ))}
+      </ControlSection>
+
+      <ControlSection
+        label="Delay"
+        isOpen={openSections.has('delay')}
+        onToggle={() => toggleSection('delay')}
+      >
+        {Object.entries(delayConfig).map(([key, config]) => (
+          <SliderRow
+            key={key}
+            name={key}
+            value={rawState.delay[key]}
+            config={config}
+            onChange={value => dispatch({ type: 'SET_DELAY', key, value })}
+            tokenKey={`delay.${key}`}
+          />
+        ))}
+      </ControlSection>
 
       <ControlSection
         label="Duration"
@@ -1864,84 +1968,14 @@ export function TokenLab() {
         />
       </ControlSection>
 
+      {/* Export tools — their own collapsible section (split from Presets,
+          2026-07-21), sitting at the foot of the bar as its exit point. */}
       <ControlSection
-        label="Easing"
-        isOpen={openSections.has('easing')}
-        onToggle={() => toggleSection('easing')}
+        label="Export"
+        isOpen={openSections.has('export')}
+        onToggle={() => toggleSection('export')}
       >
-        {/*
-          ── Shared Vocabulary ────────────────────────────────────────────
-          Named presets exist because design and engineering need a shared
-          language. "Use spring easing on the modal" is a complete, precise
-          instruction. "Use cubic-bezier(0.34, 1.56, 0.64, 1) on the modal"
-          is the same instruction, but opaque to anyone not holding a
-          reference sheet.
-
-          Production design systems (Material Design, Primer, Spectrum) all
-          name their easing curves for this reason. The names are vocabulary;
-          the bezier values are implementation details.
-
-          Dragging the control points above creates a custom curve — valid
-          for exploration, but a curve without a name can't be systematized.
-          If a custom curve is worth keeping, it should become a named token.
-        */}
-        <EasingSection rawState={rawState} dispatch={dispatch} exploreMode={exploreMode} />
-      </ControlSection>
-
-      <ControlSection
-        label="Delay"
-        isOpen={openSections.has('delay')}
-        onToggle={() => toggleSection('delay')}
-      >
-        {Object.entries(delayConfig).map(([key, config]) => (
-          <SliderRow
-            key={key}
-            name={key}
-            value={rawState.delay[key]}
-            config={config}
-            onChange={value => dispatch({ type: 'SET_DELAY', key, value })}
-            tokenKey={`delay.${key}`}
-          />
-        ))}
-      </ControlSection>
-
-      <ControlSection
-        label="Scale"
-        isOpen={openSections.has('scale')}
-        onToggle={() => toggleSection('scale')}
-      >
-        {Object.entries(scaleConfig).map(([key, config]) => (
-          <SliderRow
-            key={key}
-            name={key}
-            label={SCALE_LABELS[key]}
-            value={rawState.scale[key]}
-            config={config}
-            onChange={value => dispatch({ type: 'SET_SCALE', key, value })}
-            tokenKey={`scale.${key}`}
-          />
-        ))}
-      </ControlSection>
-
-      <ControlSection
-        label="Spring"
-        isOpen={openSections.has('spring')}
-        onToggle={() => toggleSection('spring')}
-      >
-        {Object.entries(springConfig).map(([key, config]) => (
-          <SliderRow
-            key={key}
-            name={key}
-            value={rawState.spring[key]}
-            config={config}
-            onChange={value => dispatch({ type: 'SET_SPRING', key, value })}
-            tokenKey={`spring.${key}`}
-          />
-        ))}
-        {/* Reads the live spring values straight from rawState — the controls
-            column is outside MotionTokensProvider, so the visualizer takes the
-            numbers as a prop, the same as DurationVisualizer. */}
-        <SpringVisualizer spring={rawState.spring} />
+        <ExportSection rawState={rawState} />
       </ControlSection>
     </>
   )

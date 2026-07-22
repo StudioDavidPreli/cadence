@@ -1,7 +1,15 @@
-import { useState, useRef, useLayoutEffect } from 'react'
+import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { EASING_CURVES } from '../../data/motionPresets'
 import styles from './DurationVisualizer.module.css'
+
+// Mode descriptions. Formerly a caption under the chart; now shown as a hover
+// tooltip that drops from the mode toggle (David, 2026-07-21), so the reading is
+// on-demand rather than always occupying a line.
+const MODE_TIPS = {
+  duration: 'Same duration. The far dot moves faster to arrive on time.',
+  velocity: 'Same speed. The far dot takes longer to cover more ground.',
+}
 
 // ─── DurationVisualizer ─────────────────────────────────────────────────────
 //
@@ -68,6 +76,15 @@ export function DurationVisualizer({
   // travel from the start. Same key-to-replay pattern Spinner uses.
   const [playKey, setPlayKey] = useState(0)
 
+  // Which mode button is hovered/focused, driving the drop-down tooltip.
+  // tipText holds the last hovered mode's text so it stays correct while the
+  // tooltip fades out (updated only when a mode is entered, never on clear).
+  const [hoveredMode, setHoveredMode] = useState(null)
+  const [tipText, setTipText] = useState(MODE_TIPS.duration)
+  useEffect(() => {
+    if (hoveredMode) setTipText(MODE_TIPS[hoveredMode])
+  }, [hoveredMode])
+
   // Travel distance in px for the far dot. Measured once (all three tracks share
   // a width) and kept current with a ResizeObserver. Animating transform x in px
   // is correct here: a percentage x in Framer Motion is relative to the dot's
@@ -103,7 +120,7 @@ export function DurationVisualizer({
   return (
     <div className={styles.visualizer}>
       <div className={styles.headerRow}>
-        <span className={styles.title}>Duration vs distance</span>
+        <span className={styles.title}>Duration vs Distance</span>
         <span className={styles.tokenValue}>
           {selectedToken} · {tokenMs}ms
         </span>
@@ -124,47 +141,44 @@ export function DurationVisualizer({
         ))}
       </div>
 
-      {/* Mode toggle — the dynamic-duration concept made into a switch. */}
-      <div className={styles.modeToggle} role="group" aria-label="Comparison mode">
-        <button
-          type="button"
-          className={`${styles.modeOption} ${mode === 'duration' ? styles.modeOptionActive : ''}`}
-          onClick={() => setMode('duration')}
-          aria-pressed={mode === 'duration'}
+      {/* Mode toggle — the dynamic-duration concept made into a switch. Each
+          option's explanation drops from the toggle as a hover/focus tooltip
+          (the wrap is the positioning context; the toggle itself clips its own
+          segment fills, so the tip lives outside it). */}
+      <div className={styles.modeToggleWrap}>
+        <div className={styles.modeToggle} role="group" aria-label="Comparison mode">
+          <button
+            type="button"
+            className={`${styles.modeOption} ${mode === 'duration' ? styles.modeOptionActive : ''}`}
+            onClick={() => setMode('duration')}
+            onMouseEnter={() => setHoveredMode('duration')}
+            onMouseLeave={() => setHoveredMode(null)}
+            onFocus={() => setHoveredMode('duration')}
+            onBlur={() => setHoveredMode(null)}
+            aria-pressed={mode === 'duration'}
+          >
+            Constant duration
+          </button>
+          <button
+            type="button"
+            className={`${styles.modeOption} ${mode === 'velocity' ? styles.modeOptionActive : ''}`}
+            onClick={() => setMode('velocity')}
+            onMouseEnter={() => setHoveredMode('velocity')}
+            onMouseLeave={() => setHoveredMode(null)}
+            onFocus={() => setHoveredMode('velocity')}
+            onBlur={() => setHoveredMode(null)}
+            aria-pressed={mode === 'velocity'}
+          >
+            Constant velocity
+          </button>
+        </div>
+        <div
+          className={`${styles.modeTip} ${hoveredMode ? styles.modeTipShown : ''}`}
+          role="tooltip"
+          aria-hidden={!hoveredMode}
         >
-          Constant duration
-        </button>
-        <button
-          type="button"
-          className={`${styles.modeOption} ${mode === 'velocity' ? styles.modeOptionActive : ''}`}
-          onClick={() => setMode('velocity')}
-          aria-pressed={mode === 'velocity'}
-        >
-          Constant velocity
-        </button>
-      </div>
-
-      {/* Duration scalar scrub. Multiplies every dot's time (base × scalar).
-          Deliberately NOT wired to the active-token highlight (no setActiveToken
-          on pointer/focus): no demo in the DemoArea consumes the scalar, so
-          lighting the active token would false-flag every demo with the "Token
-          unused by present components" note. The scrub's effect is visible right
-          here in the strip, which is the point of keeping control and effect in
-          one place. */}
-      <div className={styles.scalarRow}>
-        <label className={styles.scalarLabel} htmlFor="duration-scalar">scalar</label>
-        <input
-          id="duration-scalar"
-          type="range"
-          className={styles.scalarSlider}
-          min={scalarConfig.min}
-          max={scalarConfig.max}
-          step={scalarConfig.step}
-          value={scalar}
-          onChange={e => onScalarChange?.(Number(e.target.value))}
-          aria-label="Duration scalar"
-        />
-        <span className={styles.scalarValue}>{scalar}{scalarConfig.unit}</span>
+          {tipText}
+        </div>
       </div>
 
       {/* Kinetic strip. Three tracks; the dot in each travels its fraction of
@@ -202,19 +216,37 @@ export function DurationVisualizer({
 
       <DurationDistanceChart mode={mode} />
 
-      <p className={styles.caption}>
-        {mode === 'duration'
-          ? 'Same duration. The far dot moves faster to arrive on time.'
-          : 'Same speed. The far dot takes longer to cover more ground.'}
-      </p>
-
-      <button
-        type="button"
-        className={styles.replayButton}
-        onClick={() => setPlayKey(k => k + 1)}
-      >
-        Replay
-      </button>
+      {/* Footer: the duration scalar scrub at the left, Replay at the right,
+          sitting below the chart. The scalar multiplies every dot's time
+          (base × scalar). It is deliberately NOT wired to the active-token
+          highlight (no setActiveToken on pointer/focus): no demo in the DemoArea
+          consumes the scalar, so lighting the active token would false-flag every
+          demo with the "Token unused by present components" note. Its effect is
+          visible right here in the strip, so control and effect stay together. */}
+      <div className={styles.footerRow}>
+        <div className={styles.scalarRow}>
+          <label className={styles.scalarLabel} htmlFor="duration-scalar">scalar</label>
+          <input
+            id="duration-scalar"
+            type="range"
+            className={styles.scalarSlider}
+            min={scalarConfig.min}
+            max={scalarConfig.max}
+            step={scalarConfig.step}
+            value={scalar}
+            onChange={e => onScalarChange?.(Number(e.target.value))}
+            aria-label="Duration scalar"
+          />
+          <span className={styles.scalarValue}>{scalar}{scalarConfig.unit}</span>
+        </div>
+        <button
+          type="button"
+          className={styles.replayButton}
+          onClick={() => setPlayKey(k => k + 1)}
+        >
+          Replay
+        </button>
+      </div>
     </div>
   )
 }
@@ -242,7 +274,10 @@ export function DurationVisualizer({
 //
 //   tokenNorm(d)   = 0.25                (T / 4T)
 //   dynamicNorm(d) = d                   ((d / 0.25 · T) / 4T)
-const PLOT = { x0: 12, x1: 96, y0: 46, y1: 6 }
+// x0/x1 are symmetric within the 100-wide viewBox (10 left, 10 right) so the plot
+// sits centred in the SVG — the graph reads centred in the section without
+// insetting the element (David, 2026-07-21).
+const PLOT = { x0: 10, x1: 90, y0: 46, y1: 6 }
 
 // Map a distance fraction (0..1) and a normalized duration (0..1) into the SVG
 // plot box. Y is inverted so larger durations sit higher.

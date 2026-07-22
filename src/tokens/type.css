@@ -1,0 +1,94 @@
+/* ─── Chrome typography roles ─────────────────────────────────────────────────
+   The Token Lab tool bar grew one section at a time, and each addition styled its
+   own text locally: five font sizes (9/10/11/12/13px), the same letter-spacing and
+   uppercase transform re-typed per section, and not one value named in a shared
+   place. That is the exact failure the tool argues against — values that cannot be
+   named cannot be systematized. This file is the toolbar's own answer: one named
+   role per text job, defined once.
+
+   Sibling of color.css (NOT motion.css, which holds motion tokens only). Imported
+   once in main.jsx, so its classes are global.
+
+   Two rules keep these roles honest:
+
+   1. Roles carry TYPE ONLY — size, weight, tracking, case, line-height. They do
+      NOT set color. Color stays as the per-state declarations already in each
+      component module (a button is muted at rest, primary when filled), because
+      color here is state logic, not typography. Keeping color out means no role
+      introduces a new color pairing, so the contrast audit is untouched.
+
+   2. Roles do NOT set font-family. The app's font (IBM Plex Mono) comes from
+      `body`, and every non-form element inherits it. Form elements (button, input)
+      are the exception — the browser gives them their own UA font, so those keep an
+      explicit `font-family: inherit` locally. That one line is load-bearing, not
+      drift.
+
+   HOW A MODULE USES A ROLE — the `composes` mechanism (new to this project):
+   CSS Module class names are file-scoped, so a class defined in one .module.css
+   cannot be shared into another (DurationVisualizer already restates .slider for
+   exactly this reason). `composes: type-value from global` pulls one of these
+   global role classes INTO a scoped module class. The module keeps its own class
+   name and the JSX is unchanged; the composed role just supplies the type. Because
+   the size/weight/etc. now live here, the module files carry no bare font
+   declarations of their own. */
+
+:root {
+  /* One named size scale replaces the old 9/10/11/12/13px spread. */
+  --type-size-body:   13px;  /* modal reading text — the only real sentences */
+  --type-size-label:  12px;  /* control name */
+  --type-size-base:   11px;  /* value, button, microcopy, eyebrow, tooltip, input */
+  --type-size-glyph:  10px;  /* ✕, ▾, in-graph annotation */
+
+  --type-weight-strong: 600; /* eyebrow */
+  --type-weight-medium: 500; /* label, button */
+
+  --type-track-eyebrow: 0.06em;
+}
+
+/* Section / panel title. Uppercase, tracked, quiet. One eyebrow for the accordion
+   headers and the small panel/preset/import titles alike — the accordion headers
+   come down from 12px to join it (David's call, single-role economy over a
+   separate tap-hierarchy size). */
+.type-eyebrow {
+  font-size: var(--type-size-base);
+  font-weight: var(--type-weight-strong);
+  letter-spacing: var(--type-track-eyebrow);
+  text-transform: uppercase;
+}
+
+/* Control name — slider names, the graph titles, the scalar label. */
+.type-label {
+  font-size: var(--type-size-label);
+  font-weight: var(--type-weight-medium);
+}
+
+/* Numeric readout. Tabular so digits hold their column while a slider drags. */
+.type-value {
+  font-size: var(--type-size-base);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Any chrome button, segmented control, or tab. Color is per-state in the module. */
+.type-button {
+  font-size: var(--type-size-base);
+  font-weight: var(--type-weight-medium);
+}
+
+/* Caption / helper / tooltip prose. */
+.type-microcopy {
+  font-size: var(--type-size-base);
+  line-height: 1.5;
+}
+
+/* Micro glyphs (the ✕ and ▾) and the smallest in-graph annotations. */
+.type-glyph {
+  font-size: var(--type-size-glyph);
+}
+
+/* Modal reading text. */
+.type-body {
+  font-size: var(--type-size-body);
+}
+
+/* Note: the SVG axis labels (.axisLabel, 5px in SVG user units) are graphical, not
+   chrome text — left as-is, the same exemption the graph strokes carry. */

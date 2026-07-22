@@ -16,15 +16,13 @@
 }
 
 .title {
-  font-size: 12px;
-  font-weight: 500;
+  composes: type-label from global;
   color: var(--color-text-base);
 }
 
 .tokenValue {
-  font-size: 11px;
+  composes: type-value from global;
   color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ── Chart ──────────────────────────────────────────────────────────────────
@@ -66,9 +64,9 @@
 }
 
 .caption {
+  composes: type-microcopy from global;
   margin: 0;
-  font-size: 11px;
-  line-height: 1.4;
   color: var(--color-text-muted);
+  /* This caption carries live numbers; tabular keeps them from reflowing. */
   font-variant-numeric: tabular-nums;
 }

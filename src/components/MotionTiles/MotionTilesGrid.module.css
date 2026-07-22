@@ -36,7 +36,8 @@
 }
 
 /* ── Panel section ──────────────────────────────────────────────────────── */
-/* Matches .presetsSection: a labelled block with a bottom rule. */
+/* A labelled block with a bottom rule (the pattern Token Lab's control sections
+   use: an eyebrow title over content, divided by a border). */
 .section {
   padding: 10px 16px;
   border-bottom: 1px solid var(--color-border);

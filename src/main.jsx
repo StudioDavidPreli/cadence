@@ -5,6 +5,10 @@ import { createRoot } from 'react-dom/client'
 import './utils/riveWasm'
 import './tokens/motion.css'
 import './tokens/color.css'
+// Chrome typography roles (composed into the tool-bar module files via
+// `composes: type-* from global`). Global classes, so it loads as a plain
+// stylesheet alongside color.css rather than as a CSS module.
+import './tokens/type.css'
 import { ThemeProvider } from './context/ThemeContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App'

@@ -128,7 +128,7 @@ to see it. This section records the close. Session record:
 ## Accessibility floors
 
 - [x] 4.5:1 contrast on normal text, every theme (all four modes): verified 2026-07-16, built output via Playwright: computed-style sweep over four views x four themes. One failure found and fixed same day: DurationVisualizer .trackTime used muted2 (#888, 3.25:1 in light); now muted
-- [x] 3:1 on large text and UI components: verified 2026-07-16, built output via Playwright for focus rings and the accent-stroke uses exercised; full UI-component census not run
+- [x] 3:1 on large text and UI components: verified 2026-07-16, built output via Playwright for focus rings and the accent-stroke uses exercised; full UI-component census not run. Addendum 2026-07-21 (tool-bar type/layout session): the Easing curve moved from `--color-accent2` to `--color-accent`, a graphical stroke governed by the 3:1 bar; accent clears it in every theme by computed ratio (dark 8.5 / light 5.6 / HC-light 6.1 / HC-dark 12.7 on `--color-bg`). The tool-bar typography restyle is type-only (no color pairing changed), and the axe floors re-passed in all four themes on built output. See `docs/decisions/tokenlab-toolbar-type-2026-07-21.md`
 - [x] Reduced motion does not strand a user without feedback: verified 2026-07-16, built output via Playwright: dialog reaches full opacity and closes under reduce
 - [x] Focus never lost into a closed Modal or Drawer: verified 2026-07-16, built output via Playwright: focus trap cycles, Escape closes, focus lands on body after close (restore-to-trigger is a documented non-goal; soft follow-up)
 

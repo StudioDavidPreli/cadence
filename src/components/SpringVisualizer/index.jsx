@@ -55,7 +55,7 @@ export function SpringVisualizer({ spring }) {
   return (
     <div className={styles.visualizer}>
       <div className={styles.headerRow}>
-        <span className={styles.title}>Settle curve</span>
+        <span className={styles.title}>Settle Curve</span>
         <span className={styles.tokenValue}>ζ {zeta.toFixed(2)} · {regime}</span>
       </div>
 

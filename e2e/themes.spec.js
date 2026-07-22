@@ -188,6 +188,8 @@ test.describe('forced colors (Windows High Contrast Mode)', () => {
 
   test('the Token Lab connection ring rebuilds its cue as a solid 2px outline when raised by keyboard', async ({ page }) => {
     await page.goto('/#/token-lab/press-state')
+    // Duration starts collapsed (2026-07-21 section order); open it first.
+    await page.locator('button[class*="sectionHeader"]', { hasText: 'Duration' }).click()
     // Raise the connection highlight the keyboard way: focusing a token slider
     // sustains the highlight on the demo groups it drives (the keyboard-parity
     // onFocus behavior). duration.base drives the Card demo, which renders on

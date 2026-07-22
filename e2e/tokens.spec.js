@@ -8,6 +8,8 @@ import { readToken } from './helpers'
 test.describe('token propagation (the thesis)', () => {
   test('a duration slider edit rewrites the custom property and the live code view follows', async ({ page }) => {
     await page.goto('/#/token-lab/press-state')
+    // Duration starts collapsed (David's section order, 2026-07-21); open it.
+    await page.locator('button[class*="sectionHeader"]', { hasText: 'Duration' }).click()
     const slider = page.getByRole('slider', { name: 'duration.fast' })
     await expect(slider).toBeVisible()
 
@@ -27,6 +29,8 @@ test.describe('token propagation (the thesis)', () => {
 
   test('a spring slider edit rewrites the custom property and the live code view follows', async ({ page }) => {
     await page.goto('/#/token-lab/press-state')
+    // Spring starts collapsed (2026-07-21 section order); open it.
+    await page.locator('button[class*="sectionHeader"]', { hasText: 'Spring' }).click()
     const slider = page.getByRole('slider', { name: 'spring.stiffness' })
     await expect(slider).toBeVisible()
 
@@ -61,6 +65,8 @@ test.describe('token propagation (the thesis)', () => {
 
   test('Explore mode widens slider ranges; toggling off resets to Standard', async ({ page }) => {
     await page.goto('/#/token-lab')
+    // Duration starts collapsed (2026-07-21 section order); open it.
+    await page.locator('button[class*="sectionHeader"]', { hasText: 'Duration' }).click()
     const slider = page.getByRole('slider', { name: 'duration.fast' })
 
     // Constrained ranges are the semantic bounds (DURATION_CONFIG).
