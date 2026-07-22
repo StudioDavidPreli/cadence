@@ -1,6 +1,6 @@
 # Cadence: Case Study
 
-**Status: Draft, 2026-07-16.** Assembled from the project record in the Week 10 session. David's rewrite pass pending on What I Learned; every fact checked against the repo and the live site. **Updated 2026-07-20:** the physics-spring family and the Embeds canvas demos absorbed (sources: `decisions/physics-spring-2026-07-20.md`, `references/rive-for-react.md`); counts refreshed against the 2026-07-20 tree. **Updated 2026-07-21:** the pre-launch queue's landings absorbed (the scale rename, the duration scalar, the Framer Motion export, the deep-link modal, the toolbar type roles); counts refreshed against the 2026-07-21 tree.
+**Status: Draft, current as of 2026-07-21.** Every fact checked against the repo and the live site as of that date. Remaining before publication: David's rewrite pass on What I Learned, then the hiring-manager edit. Assembled 2026-07-16 in the Week 10 session; the physics-spring family and the Embeds canvas demos absorbed 2026-07-20 (sources: `decisions/physics-spring-2026-07-20.md`, `references/rive-for-react.md`); the pre-launch queue's landings absorbed 2026-07-21 (the scale rename, the duration scalar, the Framer Motion export, the deep-link modal, the toolbar type roles).
 
 ---
 
