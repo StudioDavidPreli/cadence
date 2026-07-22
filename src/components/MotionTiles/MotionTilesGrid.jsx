@@ -118,7 +118,7 @@ function makeTables(rows, cols) {
 const TABLE_ORDER = [
   ['sync', 'Sync'],
   ['ripple', 'Ripple'],
-  ['centerin', 'Center-in'],
+  ['centerin', 'Centroid'],
   ['diagonal', 'Diagonal'],
   ['rows', 'Rows'],
   ['columns', 'Columns'],

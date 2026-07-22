@@ -9,12 +9,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* safe center: center the column vertically when it fits, but fall back to
-     start-alignment when the content is taller than the track, so the top never
-     gets clipped above the scroll origin (the classic flex-centering + overflow
-     trap). */
-  justify-content: safe center;
-  padding: 48px;
+  /* start-aligned: the column hugs the top padding rather than centering in the
+     track, so the content sits up near the top instead of leaving a tall gap
+     above the logo. flex-start also never clips the top above the scroll origin
+     when the content is taller than the track (the flex-centering + overflow
+     trap that the earlier `safe center` guarded against). */
+  justify-content: flex-start;
+  padding: 28px 48px;
   background-color: var(--color-bg);
 }
 

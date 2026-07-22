@@ -111,7 +111,7 @@
 
 /* Stagger pills fill their grid cell (so all four columns read equal) and carry
    tighter horizontal padding than the free-flowing pills, so the longest label
-   ("Center-in") fits a quarter-width column without truncating. Text centered,
+   ("Centroid"/"Diagonal") fits a quarter-width column without truncating. Text centered,
    never wrapped. Color and border still come from .pill / .pillActive; this rule
    sits after them so its padding wins. */
 .staggerPill {
