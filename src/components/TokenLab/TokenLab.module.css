@@ -877,7 +877,13 @@
   padding: 32px 40px 32px 48px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  /* 50px, not 40px: each .demoMain plate bleeds 20px into the gap via its
+     padding/negative-margin apron (see .demoMain), so the literal space between
+     two plates is gap − 20 − 20. At 40px that was 0 and adjacent plates touched,
+     which pinned a highlighted plate's accent outline against its neighbour. 50px
+     leaves 10px of clear field between every plate so no highlight clips the next
+     component. */
+  gap: 50px;
 }
 
 /* Trigger button used in demo wrappers (e.g. DrawerDemo) where importing
@@ -983,9 +989,10 @@
      windows (David's placement call).
    - padding + equal negative margin carve a 20px apron around the content
      without moving it: the demos keep their exact pre-plate position.
-   - demoContent's 40px gap minus the two 20px aprons means consecutive
-     plates touch, so the demo column reads as one continuous clearing with
-     no stray slivers of pattern between groups.
+   - demoContent's 50px gap minus the two 20px aprons leaves 10px of clear
+     field between consecutive plates: enough that a highlighted plate's accent
+     outline never clips the neighbour, small enough that the column still reads
+     as one continuous clearing rather than separated cards.
    border-radius matches .demoGroupHighlighted so the highlight outline and
    the plate share corners; on the invisible fill it only softens how ticks
    are clipped at the corners. */
@@ -1109,16 +1116,15 @@
 }
 
 /* Extra separation before the second Embeds demo (Rive Clock, under React
-   Clock). demoContent's 40px gap minus the two 20px demoMain aprons makes
-   consecutive plates touch (0px), which is fine for idle plates but pins the two
-   embeds' highlight outlines against each other and runs the React Clock's
-   highlight into the Rive Clock title. A margin here adds to the flex gap and,
-   because it clears both aprons, becomes the literal gap between the two plates:
-   40px of breathing room so neither highlight clips the other or the title
-   below it. Only the second embed carries it; the first sits at the top of the
-   column with nothing above to clear. */
+   Clock). The column's default 10px inter-plate gap (see .demoContent) clears a
+   highlight outline but not the React Clock's highlight running into the Rive
+   Clock title below it, so this pair needs more room. A margin here adds to the
+   flex gap and, because it clears both aprons, becomes extra literal gap between
+   the two plates: 40px total of breathing room so neither highlight clips the
+   other or the title below it. Only the second embed carries it; the first sits
+   at the top of the column with nothing above to clear. */
 .demoGroupEmbedGap {
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 /* Wide carousel layout: the card grows to 560px (image left, text right), so
