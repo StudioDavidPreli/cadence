@@ -35,9 +35,10 @@ session must respect.
   two disagree, this one is current.
 - [Background system session handoff, 2026-07-23](./BACKGROUND_SYSTEM_SESSION_2026-07-23.md)
   **Start here to pick the background system up cold.** What was built, how it was mounted
-  in the nav behind `?bg=1`, every debugging step and what it cost, how production differs
-  from the archive labs, and the list of what is still unverified. Deploy and the reported
-  bugs are a separate session.
+  in the nav behind `?bg=1`, the four reported bugs and their fixes (6b), the clearance and
+  glass (6c), seeding (6d), the empty-cell grid (6e), and the reduced-motion fix (6f). Five
+  commits on `main`, none pushed. Section 8 is where a clean session starts: the visual pass,
+  Firefox/Safari for the glass, and the deploy — all that remains.
 - [Background system rulings](./background_system_rulings.md)
   David's rulings on the recon (2026-07-22), closing the concept phase: the split
   (bounded reveal demonstrates, infinite idle is chrome), mark color per theme (source

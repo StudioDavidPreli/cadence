@@ -1,9 +1,9 @@
 # Background System: Session Handoff, 2026-07-23
 
 **For:** a clean session picking this up cold
-**Status:** the whole generation and render chain is built and committed, mounted in the nav behind `?bg=1`, and **not deployed**. David reported four bugs; section 6b is what they were and what fixed them. The reduced-motion ruling, previously the one unverified item, is now verified and its bug fixed (rulings section 18): framer's `useReducedMotion` resolved a tick late and the reduced reveal window came from tick-late tokens, so under the preference the reveal could flash non-reduced timing and shipped instant instead of the ruled four-step stop-motion. Fixed with a synchronous `useMediaQuery` read and a token-independent reduced window; verified on built output with Playwright `emulateMedia`. Deploy is still its own session.
+**Status:** the whole generation and render chain is built and committed across **five commits on `main`, none pushed** (section 7), mounted in the nav behind `?bg=1`, and **not deployed**. This session: built and mounted the system, then fixed the four bugs David reported driving it (section 6b), the clearance/glass (6c), added per-visit seeding (6d), the empty-cell grid behind `?grid=1` (6e), and the reduced-motion bug (6f). Everything on the pile at the start of the session is now closed except the three things that genuinely need a human or a deploy: **the deployed build, the glass in Firefox/Safari, and every question of visual judgment.** Those are the next session.
 
-Read this first. Then `background_system_rulings.md` for what was decided and why (it is long; sections 14 to 16 are this session). `background_system_recon.md` only if you need the evidence behind a correction.
+Read this first. Then `background_system_rulings.md` for what was decided and why (it is long; sections 14 to 18 are this session). `background_system_recon.md` only if you need the evidence behind a correction.
 
 ---
 
@@ -23,7 +23,7 @@ Seven modules under `src/background/`, all pure, all unit-tested. One React comp
 
 Plus `src/background/marks/` (six placeholder marks and the authoring README) and `src/components/BackgroundArt/` (the renderer and its CSS module).
 
-**422 unit tests, 60 e2e, lint and build clean at commit time.**
+**424 unit tests, 60 e2e, lint and build clean at the last commit.** (`rng` gained tests and `choreography` grew to 35 across the session; the table above is the original slice.)
 
 ---
 
@@ -121,28 +121,29 @@ Three bugs were also caught by tests during the build rather than in the browser
 
 ---
 
-## 5. Known unverified, and leads for the bug session
+## 5. Known unverified, and leads for the next session
 
-David reports bugs but has not described them yet. **Get the symptoms first**; the list below is what I already know is unproven, not a diagnosis.
+**This section is now mostly closed.** It was written before the bug session; the strikethroughs are what got resolved. What remains is genuinely a human's or a deploy's to do.
 
-**Never verified at all:**
+**Still unverified, and the reason each needs the next session:**
 
-- **Reduced motion, with the preference actually on.** The last unverified ruling. `idleTimings` returning null and the four-step quantization are unit-tested and the CSS module has an `@media` block, but the real behaviour has never been exercised in a browser, on either surface. This is where I would look first if anything about motion is wrong.
-- **The deployed build.** Never deployed. The standing rule is that verification happens on built output; the build compiles and the e2e suite passes, but nobody has driven the flagged surface on a real deploy.
-- **Visual judgment.** I never saw this render. Every check was structural (attributes, computed styles, counts). Anything about how it *looks* is unassessed.
+- **The deployed build.** Never deployed. The standing rule is that verification happens on built output; the build compiles and the e2e suite passes, and the bug-session verifications ran `wrangler dev` on `dist/cadence`, but nobody has driven the flagged surface on a real deploy. Pushing `main` deploys (Workers Builds), so this and the deploy are one act.
+- **The glass in Firefox and Safari.** Masking a backdrop-filtered element is the combination most likely to drop the filter; ruling 4 names it as the risk and the fallback on record is stacked zones of decreasing blur (6c). Verified in Chromium only.
+- **Visual judgment, everywhere.** Every check this session was structural (attributes, computed styles, counts, contrast ratios) or driven through Playwright. Nobody has *looked* at it with design eyes: whether the grid mesh weight reads right at 8px, whether the density and clearance feel right, whether the glass tint is too heavy, whether the marks want replacing. This is the largest remaining item and it is entirely David's.
 
-**Suspects I would investigate first:**
+**Resolved this session (was in this list):**
 
-- **Regeneration on window resize.** `NavBackground` observes the nav with a `ResizeObserver` and sets `width`/`height` into state; the geometry memo depends on both. Dragging a window edge will regenerate the whole composition on every observed frame. Expect flicker or jank, and consider debouncing, quantizing the measured size, or regenerating only on a meaningful change.
-- **Scroll behaviour.** The layer is `position: sticky; height: 0` inside a scrolling column, sized to `clientHeight`. Correct in principle (the DemoField pattern) but never watched while actually scrolling a long accordion.
-- **StrictMode double-invocation against the reveal guard.** The guard is a `useRef` plus a `setTimeout`; effects run twice in development. It behaved correctly in the checks, but it is the kind of thing that differs between dev and prod.
+- ~~**Reduced motion.**~~ Verified and its bug fixed, 6f / rulings 18. Reveal is now instant under the preference, idle off, no non-reduced flash, both faces, on built output via Playwright `emulateMedia`.
+- ~~**Regeneration on window resize.**~~ Was the core of the flicker loop; fixed in 6b with a settle interval and same-value bailout on the `ResizeObserver`.
+- ~~**The glass on the expanded panel.**~~ Built, 6c. It wraps the whole accordion rather than the panel alone, for reasons recorded there.
+
+**Still worth an eye, not yet a proven problem:**
+
+- **Scroll behaviour.** The layer is `position: sticky; height: 0` inside a scrolling column, sized to `clientHeight - paddingTop`. The overflow loop that made this fragile is fixed (6b), but nobody has watched it while actually scrolling a long accordion on a real deploy.
+- **StrictMode double-invocation against the reveal guard.** The guard is a `useRef` plus a `setTimeout`; effects run twice in development. The bug-session recorder saw the reveal fire twice in dev (StrictMode), which is expected, but production is single. Confirm on the deploy.
 - **`import.meta.glob` in the Worker build.** `library.js` globs SVGs eagerly. It builds, but the Cloudflare plugin's environment has surprised this project before.
 
-**Ruled but unbuilt:**
-
-- ~~**The glass on the expanded panel.**~~ Built 2026-07-23, see 6c. It wraps the whole accordion rather than the panel alone, and the reason is recorded there.
-
-**Still unruled (open questions):** 2 (pixel arrival, pop vs scale-in, both wired), 6 (breathe coupling rate), 8 (cell size is a per-surface value and was never formally ruled; the component defaults to 8), 11 (roots), 12 (high-contrast preview). Walk item 3 (flow align) is also unruled and does not block anything.
+**Still unruled (open questions), none blocking:** 2 (pixel arrival, pop vs scale-in, both wired), 6 (breathe coupling rate), 8 (cell size is a per-surface value and was never formally ruled; the component defaults to 8), 11 (roots), 12 (high-contrast preview). Walk item 3 (flow align) is also unruled and does not block anything. These are judgment calls for the visual pass.
 
 ---
 
@@ -159,7 +160,7 @@ npm run dev
 Use those exact paths. `/raster-harness.html` at the root returns 200 but silently serves the app's `index.html` via the SPA fallback, which looks like the harness being broken. Restart Vite rather than reloading after adding files or imports, and add a `?v=2` if a page looks stale.
 
 ```bash
-npm test          # 422 unit tests
+npm test          # 424 unit tests
 npx playwright test   # 60 e2e on built output
 npm run lint
 ```
@@ -246,8 +247,55 @@ The seed was the fixed prop default (11). It is now drawn once per visit.
 
 ---
 
-## 7. Commit
+## 6e. The empty-cell grid, behind `?grid=1`, 2026-07-23
 
-Everything above is committed to `main` in one commit, **not pushed**. Pushing deploys (Workers Builds rides pushes to main), and David asked for deploy to be a separate session.
+David asked whether the pixel face could show the whole grid, empty cells included, in the button-outline colour so it is not distracting. Built as an opt-in. Full record: rulings section 17.
 
-`archive/` is gitignored, so the labs, the standalone route, `build-marks.cjs` and the 32-mark test library are **not in the commit**. They exist on this machine only.
+**One patterned rect, not per-cell rects.** The full lattice is ~2400 cells at 8px against ~400 inked, so per-cell empty rects would 6x the DOM for pure structure. It is a single `<rect>` filled with an SVG `<pattern>` tiling from the origin, which aligns to the same cell lattice the inked rects use. Static: no reveal, no breathe, present from the first frame with the ink arriving into it.
+
+**`--color-border`,** the subtle-outline role that grid lines genuinely are, quiet in light and dark (~1.3:1). That token is pure black/white in both HC themes, where a solid mesh would be a loud lattice, so **high contrast gets sparse dots at the intersections** instead of continuous lines (the DemoField HC-sparse philosophy). Grid top snaps to the first cell boundary at or below the collapsed baseline, so it never draws behind the always-visible headers; `crispEdges` keeps the lines from fuzzing.
+
+Pixel face only, gated on `?grid=1` alongside `?bg=1`, and an Empty-grid control on the standalone route. The grid code stays in the lazy chunk (`bg-grid` is absent from the main bundle). Verified in the nav: line mesh at `#2e2e2e` / `#e2e2e2`, dots at `#ffffff` / `#000000`, grid top 136 against ink at 160. **Not verified: whether the mesh weight reads right — that is a visual-pass question.**
+
+## 6f. The reduced-motion bug, 2026-07-23
+
+The one unverified ruling, reproduced with Playwright `emulateMedia` (the in-app browser pane cannot emulate the preference). Two linked defects. Full record: rulings section 18.
+
+**The race.** `BackgroundArt` read the preference through framer-motion's `useReducedMotion`, which resolves a tick after first render. On that first render it can report no-reduce even when the preference is on, so the reveal and idle briefly mount with full non-reduced timing before correcting: a flash of the motion the preference exists to suppress, timing-dependent and intermittent. Fixed by reading `useMediaQuery('(prefers-reduced-motion: reduce)')`, whose `useState` initializer reads `matchMedia` synchronously, so the first render already knows.
+
+**The window.** The reduced reveal window was `8 x delay.long` from `useMotionTokens`, and those tokens flatten to 0 in an effect, a tick late as well. So the window raced the flattening (1.6s on first render, 0 after). Fixed by taking the reduced window from a fixed `CHOREOGRAPHY.reducedWindow`, token-independent, so it is deterministic from the first frame.
+
+**Instant, David's call.** `reducedWindow` is set to **0**: under the preference the whole composition appears at once, each cell over the 0.01s reduced duration so transition events still fire. The gentler minimal-motion reading, overriding the handoff's four-step stop-motion. It is one constant away (`reducedWindow: 0.24`) if the call is revisited.
+
+Verified on built output, both faces: reduced reveal shows a single `0s` delay across every cell, cells only ever pass through the `0.01s` reduced pop (never a `0.2s` non-reduced frame), the idle renders zero groups, and with the preference off the idle runs as before. **Follow-up owed:** a permanent e2e test under `page.emulateMedia({ reducedMotion: 'reduce' })` — `test.use({ reducedMotion })` no-ops in this suite. Skipped because the surface is unshipped and flag-gated; add it when the flag comes off.
+
+---
+
+## 7. Commits
+
+**Five commits on `main`, none pushed.** Pushing deploys (Workers Builds rides pushes to `main`), and David asked for deploy to be its own session, so the whole session sits local and reviewable.
+
+```
+e08b5e2  feat(background): reduced-motion reveal is instant (reducedWindow 0)
+b3746b2  fix(background): reduced-motion reveal race and instant-instead-of-stop-motion
+f461e8f  feat(background): empty-cell grid behind ?grid=1, with a high-contrast branch
+cbea508  fix(background): collapsed-nav baseline, glass, overflow, seed and tuning params
+8698317  feat(background): glyph L-system background system, mounted in nav behind ?bg=1
+```
+
+`8698317` is the system and its mount. `cbea508` is the bug-session work (the flicker loop, the face-per-section, the seeding, the glass and clearance — 6b/6c/6d); it was split back out of the grid commit after `git add -A` swept it in, which is why its history is separate. `f461e8f` is the grid (6e). `b3746b2` and `e08b5e2` are the reduced-motion fix and the instant decision (6f).
+
+To deploy, push `main`. There is nothing to stage: the working tree is clean.
+
+`archive/` is gitignored, so the labs (`raster-harness.html`, `background-route.html`), `build-marks.cjs` and the 32-mark test library are **not in any commit**. They exist on this machine only; a clean checkout elsewhere will not have them, and the mark library that ships is the six in `src/background/marks/`.
+
+---
+
+## 8. Where a clean session starts
+
+1. **Look at it.** `npm run dev`, open `http://localhost:5173/?bg=1#/token-lab` above 1024px, add `&grid=1` for the grid, switch themes, switch tools. This is the visual pass nobody has done. The open questions in section 5 are the specific calls waiting on it.
+2. **Firefox and Safari,** for the glass (6c) — the one cross-engine risk on record.
+3. **Deploy** when David is ready: push `main`, then drive the flagged surface on the real deploy. That closes the last standing verification (section 5).
+4. Everything else — the still-unruled open questions, the seed-per-tool experiment (6d), the FM/grid follow-ups — is optional and downstream of the visual pass.
+
+Nothing is blocked. The system is complete, tested, and off by default; the remaining work is judgment and a push.
