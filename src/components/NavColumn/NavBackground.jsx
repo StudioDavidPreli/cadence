@@ -190,9 +190,41 @@ export function NavBackground({ navRef }) {
   // the palette on its initial value for anyone who switches away during load).
   const [palette, setPalette] = useState(null)
   useEffect(() => {
+    let retry = null
     const read = () => {
       const theme = document.documentElement.dataset.theme || 'dark'
       const highContrast = theme.startsWith('high-contrast')
+
+      // ── The token layer may not be applied yet, and WebKit is where that shows
+      //
+      // The observer above fixes reading one theme BEHIND. It does not fix
+      // reading before there is anything to read: measured in WebKit on built
+      // output, `data-theme` is already on the root while
+      // `document.styleSheets` is still empty, so every getPropertyValue
+      // returns ''. Nothing then corrects it, because the observer only fires
+      // on a data-theme mutation and the theme never changes again.
+      //
+      // The damage is silent and partial, which is why it survived Chromium and
+      // Firefox: authored colours still paint (they are carried on the stroke,
+      // not read from a token), so the artwork looks present. What goes missing
+      // is everything that IS a token — 74 of 585 cells shipped `fill=""` (the
+      // currentColor ink of ruling 2b) and the empty-cell grid vanished
+      // entirely, because `palette.grid` was falsy and the whole backdrop is
+      // gated on it.
+      //
+      // So: an empty read is not a palette, it is a not-yet. Bail and try again
+      // rather than publishing one. setTimeout rather than
+      // requestAnimationFrame for the reason recorded above — rAF does not run
+      // in a background tab, and a visitor who switches away during load would
+      // be left on the unresolved value forever, which is the bug this would be
+      // fixing.
+      const tokenInk = readToken('--color-text-base')
+      if (!tokenInk) {
+        clearTimeout(retry)
+        retry = setTimeout(read, 50)
+        return
+      }
+
       setPalette({
         theme,
         highContrast,
@@ -201,8 +233,9 @@ export function NavBackground({ navRef }) {
         // decorative use of the accent role: the artwork is the token system
         // drawing itself.
         blanket: highContrast ? readToken('--color-accent') : null,
-        // What an authored `currentColor` resolves to (ruling 2b).
-        tokenInk: readToken('--color-text-base'),
+        // What an authored `currentColor` resolves to (ruling 2b). Already
+        // read above, as the probe for whether the token layer exists at all.
+        tokenInk,
         ramp: RAMPS[theme] || RAMPS.dark,
         // The empty-cell grid ink. --color-border is the subtle-outline role,
         // which grid lines genuinely are. It is quiet in light and dark
@@ -214,7 +247,10 @@ export function NavBackground({ navRef }) {
     read()
     const observer = new MutationObserver(read)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(retry)
+      observer.disconnect()
+    }
   }, [])
 
   if (!surface || !palette || surface.width <= 0) return null
