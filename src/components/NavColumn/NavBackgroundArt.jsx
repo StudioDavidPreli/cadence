@@ -36,14 +36,38 @@ const VISIT_SEED = BACKGROUND_SEED_PARAM ?? hash32(String(Date.now()))
 // URL tuning overrides, mapped to BackgroundArt's prop names, each present only
 // when its param was. Anything absent is simply not passed, so the component's
 // own committed default stands. Built once at module scope like the seed.
+//
+// Spreading a conditional like this is the idiom for "pass this prop only if I
+// have a value": `false && {...}` spreads to nothing, so an absent param leaves
+// the key off the object entirely rather than passing `undefined`. That matters
+// because `undefined` would override a default in some prop patterns and does
+// not here, and leaving the key off is the version that is true either way.
 const TUNING = {
   ...(BACKGROUND_TUNING.budget != null && { budget: BACKGROUND_TUNING.budget }),
   ...(BACKGROUND_TUNING.scale != null && { stampScale: BACKGROUND_TUNING.scale }),
   ...(BACKGROUND_TUNING.cell != null && { cellSize: BACKGROUND_TUNING.cell }),
+  ...(BACKGROUND_TUNING.arrival != null && { cellReveal: BACKGROUND_TUNING.arrival }),
+  ...(BACKGROUND_TUNING.gridWeight != null && { gridWeight: BACKGROUND_TUNING.gridWeight }),
+  ...(BACKGROUND_TUNING.face != null && { face: BACKGROUND_TUNING.face }),
 }
 
 export default function NavBackgroundArt(props) {
+  // Roots are the one override that cannot be resolved at module scope: they
+  // arrive as fractions of the column and the column is only measured by the
+  // time this renders. Resolved here against the width the surface passed in,
+  // so the same URL means the same composition at any viewport width.
+  const roots = BACKGROUND_TUNING.roots
+    ? BACKGROUND_TUNING.roots.map((f) => f * props.width)
+    : undefined
+
   return (
-    <BackgroundArt {...props} library={MARK_LIBRARY} seed={VISIT_SEED} showGrid={BACKGROUND_GRID} {...TUNING} />
+    <BackgroundArt
+      {...props}
+      library={MARK_LIBRARY}
+      seed={VISIT_SEED}
+      showGrid={BACKGROUND_GRID}
+      {...(roots && { roots })}
+      {...TUNING}
+    />
   )
 }

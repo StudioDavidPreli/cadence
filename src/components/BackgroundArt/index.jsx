@@ -115,6 +115,11 @@ export function BackgroundArt({
   face = 'both',
   cellReveal = 'pop',
   showGrid = false,
+  // Mesh weight as a multiplier rather than a px value, so one number covers
+  // both grid treatments: the line face and the high-contrast dot face are
+  // different shapes and would otherwise need a knob each. 1 is the committed
+  // 1px line / 1.5px dot. Open for the visual pass (handoff 6e).
+  gridWeight = 1,
   className,
 }) {
   // useMediaQuery, NOT framer's useReducedMotion, and the difference is the fix
@@ -348,12 +353,19 @@ export function BackgroundArt({
       <defs>
         <pattern id={gridId} width={cellSize} height={cellSize} patternUnits="userSpaceOnUse">
           {highContrast ? (
-            <rect x="0" y="0" width="1.5" height="1.5" fill={palette.grid} shapeRendering="crispEdges" />
+            <rect
+              x="0"
+              y="0"
+              width={1.5 * gridWeight}
+              height={1.5 * gridWeight}
+              fill={palette.grid}
+              shapeRendering="crispEdges"
+            />
           ) : (
             <path
               d={`M0 0 H${cellSize} M0 0 V${cellSize}`}
               stroke={palette.grid}
-              strokeWidth="1"
+              strokeWidth={gridWeight}
               fill="none"
               shapeRendering="crispEdges"
             />
