@@ -1,7 +1,7 @@
 # Background System: Session Handoff, 2026-07-23
 
 **For:** a clean session picking this up cold
-**Status:** the whole generation and render chain is built and committed, mounted in the nav behind `?bg=1`, and **not deployed**. David reports bugs. Deploy and debugging are deliberately a separate session.
+**Status:** the whole generation and render chain is built and committed, mounted in the nav behind `?bg=1`, and **not deployed**. David reported four bugs; section 6b is what they were and what fixed them. Deploy is still its own session.
 
 Read this first. Then `background_system_rulings.md` for what was decided and why (it is long; sections 14 to 16 are this session). `background_system_recon.md` only if you need the evidence behind a correction.
 
@@ -55,7 +55,7 @@ The artwork layer paints at `z-index: -1`, which puts it behind the nav items wh
 
 **Above 1024px only.** The mount is inside the `!collapsed` branch. Below that the nav is a rail and drawer, not a column, and the artwork surface is defined as existing only above the breakpoint. With the flag on at 960px, nothing mounts and the chunk is never requested.
 
-**The baseline is the worst case, from measured rows.** Three section headers plus the largest section's leaves (Token Lab: Overview plus every category), multiplied by heights read from the live DOM. The collapsed accordion clips its rows with `overflow` rather than unmounting them, so a real header and a real row are always measurable. Resolves to `8 + 3x43 + 6x37 = 359px` and does not move when a section opens, so the artwork never reflows on expand.
+**The baseline is the worst case, from measured rows.** (Superseded 2026-07-23, see 6c: it is the collapsed nav now, and the glass covers what gets disclosed below it. Kept because the reasoning below is what the change had to answer for.) Three section headers plus the largest section's leaves (Token Lab: Overview plus every category), multiplied by heights read from the live DOM. The collapsed accordion clips its rows with `overflow` rather than unmounting them, so a real header and a real row are always measurable. Resolves to `8 + 3x43 + 6x37 = 359px` and does not move when a section opens, so the artwork never reflows on expand.
 
 **Clearance gates centers; ink has extent.** The density baseline is pushed down by the worst case a stamp can reach: half the normalized span along its diagonal (a rotated mark presents a corner, not an edge) at maximum scale, plus placement jitter. Without it, ink landed at y=334 against a 359 baseline, behind the last nav header.
 
@@ -140,7 +140,7 @@ David reports bugs but has not described them yet. **Get the symptoms first**; t
 
 **Ruled but unbuilt:**
 
-- **The glass on the expanded panel.** Section 4 of the rulings: a property of the expanded panel, riding the accordion's own `grid-template-rows` transition on `--feedback-nav-duration`, with a feathered base via `mask-image`. Nothing in `NavColumn` implements it. The feather technique was proven in the 220px lab and carries a Firefox caveat.
+- ~~**The glass on the expanded panel.**~~ Built 2026-07-23, see 6c. It wraps the whole accordion rather than the panel alone, and the reason is recorded there.
 
 **Still unruled (open questions):** 2 (pixel arrival, pop vs scale-in, both wired), 6 (breathe coupling rate), 8 (cell size is a per-surface value and was never formally ruled; the component defaults to 8), 11 (roots), 12 (high-contrast preview). Walk item 3 (flow align) is also unruled and does not block anything.
 
@@ -163,6 +163,86 @@ npm test          # 422 unit tests
 npx playwright test   # 60 e2e on built output
 npm run lint
 ```
+
+---
+
+## 6b. Bug session, 2026-07-23 (four reported, four fixed)
+
+David drove the flagged nav and reported constant flicker, both faces painting at once, no face change between tools, and scrollbars flashing in and out of the column. Three of the four were one loop.
+
+**The loop.** Measured on the dev server, the nav column alternated forever between two states 150ms apart:
+
+| | clientWidth | clientHeight | scrollWidth | scrollHeight | paths | rects |
+|---|---|---|---|---|---|---|
+| A | 219 | 678 | 219 | 678 | 861 | 362 |
+| B | 204 | 663 | 219 | 686 | 1221 | 395 |
+
+Read it as a cycle. The artwork sized itself to `clientHeight` and sits `padding-top` down the column, so its box ended 8px past the scrollport and the column always had 8px of scrollable overflow: a vertical scrollbar over an artwork that is pinned and does not move when you scroll it. That bar cost 15px of width. The next measurement regenerated the composition 15px narrower, but the previous SVG's width was still on the element, and `.svg { overflow: visible }` let ink and the idle sway groups spill past the box anyway, so now the column overflowed horizontally too. `overflow-y: auto` alone leaves `overflow-x` at `visible`, which the spec computes to `auto` when the other axis is not visible, so a horizontal bar was always available to take 15px of height. New height, new measurement, new composition, and the vertical overflow condition flips. Round again, forever, at ResizeObserver rate. Every lap redrew a different composition, which is the flicker, and raised and dropped both bars, which is the scrollbar flashing.
+
+Three edits, each closing one door:
+
+- `.svg` no longer declares `overflow: visible`. An inline `<svg>` clips to its viewport by default, which is what keeps the artwork inside the surface it was measured for. Marks clipped at the column edge are the correct trade; a background must never be able to size its own container.
+- `.nav` names both axes: `overflow-x: hidden`, `overflow-y: auto`. Nothing in the navigation can overflow sideways, so nothing should be able to raise a horizontal bar.
+- The measured height is now `clientHeight - paddingTop`, so the layer's box ends exactly at the bottom of the column and contributes no scrollable overflow. A sticky box contributes its unshifted position, so this holds however far the accordion is scrolled.
+
+  The first version of that line subtracted `paddingBottom` as well, and it cost 8px of reach for nothing: a scroll container's scrollable overflow area starts as its own **padding box**, so ink ending exactly at `clientHeight` ends inside a region the column already had. Only the top padding displaces the layer. Corrected the same session, after the measurement below showed an 8.2px strip of bare column under the artwork.
+
+Two guards on top, both aimed at the suspect in section 5: `measure` returns the previous state object when the numbers are unchanged, and the observer waits 120ms for the drag to settle before rebuilding. The settle interval is not a token. It times a measurement, not a motion.
+
+**The face.** `NavBackground` never passed one, so `BackgroundArt` ran its `face = 'both'` default and drew the composition twice, vector under pixel. `both` is a lab affordance for comparing the two renderings; it is not a state a surface should ever be in. The face now follows the active section, per the dialect split in the 2026-07-22 handoff: vector for Principles, pixel for Token Lab. Motion Tiles postdates that split and is mapped to pixel because the tool is a grid of cells, which is a reading rather than a ruling. Geometry does not depend on the face, so a section switch swaps the rendering and regenerates nothing.
+
+The switch is a hard swap. The reveal is one-shot and long spent by then, so the incoming face appears without animation, the same way a high-contrast composition does. Whether it wants a crossfade on `--feedback-nav-duration` is open, and the argument against is that a crossfade puts both faces on screen at once, which is the state David just asked to be rid of.
+
+**The bottom edge is a clip, and that is now the mechanism.** Density does not taper toward the bottom of the column: per 50px band the pixel face runs 31, 52, 49, 62, 59, 88, 42, with the heaviest band the one just above the edge. The vine grows from the baseline at y=359 down to y=1213, so at a 677px surface the field is still at full strength when it reaches the bottom and 14 rects (93 paths on the vector face) are cut by the viewport. Reaching the bottom by overdrawing and letting the SVG clip works, and it is free now that the SVG clips to its own viewport rather than spilling into the column's overflow. It is not free without bound: every mark generated below the surface is a DOM node that never paints, and the current overshoot is already about one cell row plus the mark reach.
+
+**Verified on built output** (`npm run build`, `wrangler dev` on `dist/cadence`), at 1440x900: the column holds one state, `scrollWidth` equals `clientWidth` and `scrollHeight` equals `clientHeight` (zero overflow on both axes), the artwork's bottom edge sits 0.2px off the column's, Token Lab shows 395 rects and no paths, Principles shows paths and no rects, and a theme change into high contrast repaints and reduces the composition (123 stamps to 76) without touching the column's size. 422 unit tests, 60 e2e, lint clean.
+
+## 6c. The clearance, and the glass that was missing, 2026-07-23
+
+David asked where the clearance actually was. Measured in nav-column coordinates, with the accordion transition disabled so each state is its settled layout:
+
+| state | last nav pixel | first ink | gap |
+|---|---|---|---|
+| Token Lab open | 357.5 | 368 | 10.5 |
+| Motion Tiles open | 209.5 | 368 | **158.5** |
+| Principles open | 209.5 | 374.3 | **164.8** |
+| all collapsed | 135.5 | 374.3 | **238.8** |
+
+The worst-case baseline was correct in exactly one state and drew itself to a nav that was not there in the other three.
+
+**A wrong turn, kept on the record.** The first answer was to make the baseline track the live nav, and it worked by the numbers (10.5 / 38.5 / 42.7 / 19.2) while breaking the half of ruling 4 that matters: *the background never reflows on expand*. The baseline is not only the clearance line, it is the ROOT line, because `growArmature` plants at `y = baseline`. A shorter nav does not uncover more of the same drawing, it grows a new one further up, so every disclosure became a full redraw of the field. David caught it as "the artwork is hard cutting its position on nav expand and collapse", along with the thing that would have prevented the whole detour: **the glass was never built.** Reverted the same session.
+
+**What shipped instead: the collapsed nav as a fixed baseline, plus the glass.** The line sits under the three headers, which are the only navigation always on screen, and it never moves. Rows disclosed below it are legible because the chrome now carries the glass. The two mechanisms do not know about each other, which is why neither reflows when the other changes.
+
+Measured on built output, all four states: first ink at 152 (pixel face) or 154.7 (vector), glass bottom riding the accordion at 385.5 / 237.5 / 163.5 (last row plus the feather padding), **698 of 698 marks identical across a toggle**, zero scrollable overflow on both axes.
+
+**The glass, and where it departs from ruling 4.** It wraps the accordion rather than sitting on the expanded panel. Under worst-case clearance the panel is the only chrome that can land on ink; under collapsed clearance a disclosure also pushes the section headers *below* it down onto artwork, so the glass has to cover the panel and everything after it. One element also leaves exactly one free bottom edge to feather, where per-panel glass would seam at every panel/header junction. Its height is the accordion's height, so the section transition carries it: no layer animates its own height, which was the part of the ruling that mattered. The feather is a fixed 28px rather than 22% of panel depth (a percentage of the whole stack would fade the last two headers, the one place the glass is load bearing), and `padding-bottom` equal to the feather holds the fade below the last row so no label ever sits in it.
+
+**The tint is set by WCAG, not by taste.** The nav's idle text is `--color-text-muted`, which clears AA on the bare column with little room: 5.77:1 dark, 5.27:1 light. Against the worst case the artwork can produce (a solid pixel-face cell at full `--color-text-base` directly under a label), the handoff's translucent 72% glass measures **2.65:1 dark and 2.89:1 light**, which is a fail rather than a judgement call. The minimum tint that holds muted text at 4.5:1 is 90% dark, 92.5% light, so the default is 93%: the blur is real and the artwork reads through the feathered edge, but the panel is nearly opaque where text sits. The same worst case against `--color-text-base` measures 6.46:1 and 8.77:1, so real 72% glass is available the moment the nav's idle text stops being muted. That changes how the navigation looks with the flag off too, so it is David's call and it is one line (`--glass-tint`).
+
+**High contrast runs the same glass** (David, 2026-07-23), and the contrast argument that constrains light and dark does not reach it. Both HC themes put every nav label at maximum separation, so against the worst case those themes can produce (a cell at full `--color-accent`, since HC repaints every mark) the same 72% tint measures **13.91:1 in HC-light and 11.69:1 in HC-dark**. The artwork is thinner there anyway: 0.6 of the budget, two tone levels instead of four. The first draft took HC opaque on the theory that a translucent panel is against the grain of flat maximum-separation fields; that was taste rather than measurement, and it was overruled. `forced-colors` still takes the panel to system colors and drops the filter, because that mode substitutes backgrounds and ignores the blur regardless.
+
+Choosing a category touches none of this.
+
+**Not yet checked:** the glass in Firefox and Safari. Masking a backdrop-filtered element is the combination most likely to drop the filter, ruling 4 names it as the risk, and the fallback on record is stacked zones of decreasing blur.
+
+**Still unverified after this session:** reduced motion with the preference on, the deployed build, and every question of visual judgment. Section 5's list stands otherwise.
+
+---
+
+## 6d. Seeding: once per visit, from the clock, 2026-07-23
+
+The seed was the fixed prop default (11). It is now drawn once per visit.
+
+**Why mount and nothing else.** `BackgroundArt` reveals once, on mount, and never again (ruling A, so a theme switch cannot re-reveal). A seed set at mount is choreographed by the arrival that already exists; a seed changed at any later moment, by a timer or a reroll button, is an unmotivated hard cut with no crossfade to soften it. So the seed is drawn at chunk load, which happens once when the background first mounts. No new mechanism, no new motion.
+
+**From the full timestamp, hashed.** `hash32(String(Date.now()))`: date and time, so a new plant every load rather than once a day, hashed to a clean 32-bit integer so consecutive loads do not hand the sampler neighbouring numbers. Verified on built output, two plain visits: `2902822263` then `2029805945`. Still deterministic in the sense that matters, the drawing is reproducible from its seed, and the seed is now discoverable so the drawing is reproducible from the visit.
+
+**Discoverable and pinnable.** The resolved seed is on the layer as `data-seed` and printed to the dev console (`seed <n> — pin with ?seed=<n>`). `?seed=<int>` overrides the visit seed with an exact value, which is ruling 4's reroll-as-lab-affordance and the way a committed seed would be chosen if the surface ever wants one specific plant forever. Verified: `?seed=42` gives `data-seed="42"`, reproducible across loads.
+
+**The lazy boundary held.** The `?seed=` value is parsed in `backgroundFlag.js` (eager, but a URL read with no `src/background` import) and only hashed in `NavBackgroundArt` (the lazy chunk, where `rng` is already loaded). Confirmed on the built bundles: the L-system axiom strings and the `currentColor` sentinel appear only in `NavBackgroundArt-*.js`, never in the main `index-*.js`.
+
+**Considered and not built:** a seed per tool rather than per visit, folded into the section-switch hard swap that already happens. One line, and worth trying against the per-visit seed once the per-visit version has been lived with. Not in this pass: the nav is persistent chrome, and chrome that redraws on every tool change may read as instability rather than identity.
 
 ---
 

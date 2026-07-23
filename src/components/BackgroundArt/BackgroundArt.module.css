@@ -49,9 +49,19 @@
   pointer-events: none;
 }
 
+/* NO `overflow: visible` HERE, and this is load-bearing.
+   An inline <svg> clips to its own viewport by default, which is what keeps the
+   artwork inside the surface it was measured for. Opening it up let two things
+   escape into the host's scrollable overflow: stamp ink, which hangs outward
+   from placement centers that sit right up against the edges, and the idle sway
+   groups, which translate a few pixels forever. In a scrolling host that reads
+   as a scrollbar the artwork raises and lowers by itself, and if the host is
+   measured by a ResizeObserver (the nav is) the scrollbar changes the measured
+   size, which regenerates the composition, which changes the overflow again.
+   A background must never be able to size its own container. Marks clipped at
+   the column edge are the correct trade. */
 .svg {
   display: block;
-  overflow: visible;
 }
 
 /* Cells hold the grid. No positional animation on the pixel face, ever: a

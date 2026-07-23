@@ -5,6 +5,14 @@
 .nav {
   border-right: 1px solid var(--color-border);
   background-color: var(--color-bg);
+  /* Both axes named on purpose. `overflow-y: auto` on its own leaves overflow-x
+     at `visible`, which the spec then computes to `auto` because the other axis
+     is not visible, so the column silently had a horizontal scrollbar
+     available. Nothing in the navigation can overflow sideways; only the
+     background artwork could, and a horizontal bar there costs 15px of
+     clientHeight, which the artwork's ResizeObserver reads as a resize. The
+     column scrolls vertically and never horizontally. */
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: 0;
   padding: 8px 0;
@@ -17,6 +25,106 @@
      `isolation: isolate` is the trigger that says what it is for and does
      nothing else. See docs/briefings/background_system_rulings.md 15a. */
   isolation: isolate;
+}
+
+/* ── The glass ────────────────────────────────────────────────────────────────
+   Ruled 2026-07-22 (handoff section 2, rulings section 4): the nav chrome sits
+   on glass so the background artwork can be planted directly under the collapsed
+   headers instead of being pushed out of the navigation's way. The clearance
+   line stops at the three headers and never moves; everything disclosed below it
+   is legible because this element blurs and tints what the artwork drew there.
+   The two mechanisms do not know about each other, which is why neither has to
+   reflow when the other changes.
+
+   HEIGHT IS NOT ANIMATED HERE. This wraps the accordion, so its height is the
+   accordion's height, and the section transition (grid-template-rows on .body,
+   --feedback-nav-duration) carries the glass with it. A glass layer animating
+   its own height as a separate element was the thing the ruling ruled out.
+
+   ONE ELEMENT RATHER THAN ONE PER PANEL, which is where this departs from the
+   ruling's letter. The ruling put the glass on the expanded panel, which is
+   correct when the clearance is the worst case and the only thing that can
+   land on ink is the panel itself. With the clearance at the collapsed nav, a
+   disclosure also pushes the section headers BELOW it down onto artwork, so the
+   glass has to cover the panel and everything after it. One element covering
+   the whole chrome stack also leaves exactly one free bottom edge to feather,
+   where per-panel glass would seam at every panel/header junction.
+
+   INERT WITH THE FLAG OFF. The tint is the column's own background, so over a
+   bare column it composites back to exactly --color-bg, and blurring a flat
+   field returns the same flat field. Nothing to see until there is artwork
+   behind it, which is what "collapsed nav runs bare" asks for.
+
+   TINT STRENGTH IS SET BY WCAG, NOT BY TASTE, and this is the one number here
+   worth arguing about. The nav's idle text is --color-text-muted, which clears
+   AA on the bare column with very little room: 5.77:1 in dark, 5.27:1 in light.
+   Put artwork behind it and the room is gone. Measured against the worst case
+   the artwork can produce (a solid pixel-face cell at full --color-text-base,
+   directly under a label), the minimum tint that keeps muted text at 4.5:1 is
+   90% in dark and 92.5% in light. The handoff's translucent ~9px glass at 72%
+   measures 2.65:1 and 2.89:1, which is a fail, not a judgement call.
+   93% is therefore the default: the blur is real and the artwork reads through
+   the feathered edge, but the panel is nearly opaque where text sits.
+
+   The alternative is on record and is one line: at --glass-tint: 72% the same
+   worst case measures 6.46:1 dark and 8.77:1 light against --color-text-base.
+   Real glass is available the moment the nav's idle text stops being muted.
+   That is a change to how the navigation looks with the flag off as well, so it
+   is David's call and not a thing to slip in under a background feature.
+
+   FEATHER: a fixed distance, not the ruling's 22% of panel depth. That
+   percentage was written for a glass element that was one panel tall. Against
+   the whole chrome stack it would start fading around 280px and leave the last
+   two headers sitting in the fade, which is the one place the glass is load
+   bearing. The same padding holds the fade off the text: the feather runs
+   through the padding, below the last row, so no label ever sits in it. */
+.glass {
+  --glass-feather: 28px;
+  /* TEMPORARY, 2026-07-23: 72% is the handoff's translucent glass, set for
+     David to look at with the nav text left as it is. It FAILS AA in that
+     combination (2.65:1 dark, 2.89:1 light for --color-text-muted over
+     worst-case ink). Either the text goes to --color-text-base or this goes
+     back to 93% before anything ships. See the note above. */
+  --glass-tint: 72%;
+  padding-bottom: var(--glass-feather);
+  background-color: color-mix(in srgb, var(--color-bg) var(--glass-tint), transparent);
+  -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
+  /* One gradient covers both the tint and the blur: the mask applies to this
+     element's own paint, and the backdrop-filter result is part of that paint.
+     No second scrim element. Firefox is the risk here (masking a
+     backdrop-filtered element is the combination most likely to drop the filter
+     outright); if it drops, the fallback on record is stacked zones of
+     decreasing blur. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--glass-feather)), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--glass-feather)), transparent 100%);
+}
+
+/* High contrast runs the same glass, and the contrast argument that constrains
+   it in light and dark does not apply here. Both HC themes put every nav label
+   at maximum separation (--color-text-muted resolves to the same value as
+   --color-text-base, 21:1 on the bare column), so against the worst case those
+   themes can produce (a cell at full --color-accent, since HC repaints every
+   mark to the accent) the same 72% tint measures 13.91:1 in HC-light and
+   11.69:1 in HC-dark. The artwork is also thinner there by design: 0.6 of the
+   budget and two tone levels instead of four.
+
+   First draft of this file took HC opaque on the theory that a translucent
+   panel is against the grain of flat maximum-separation fields. That was taste,
+   not measurement, and David overruled it 2026-07-23. */
+
+/* forced-colors substitutes system colors for backgrounds and ignores the
+   filter, so the tint would resolve to Canvas with artwork still legible
+   through it. Same treatment as high contrast. */
+@media (forced-colors: active) {
+  .glass {
+    background-color: Canvas;
+    color: CanvasText;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 /* ── Section header ───────────────────────────────────────────────────────── */

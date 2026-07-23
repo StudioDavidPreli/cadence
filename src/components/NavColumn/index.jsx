@@ -40,7 +40,16 @@ export function NavColumn({ collapsed, open, onToggle, onClose }) {
             that breakpoint. Renders as a direct child of <nav> because its layer
             depends on this element's stacking context (see the module CSS). */}
         {BACKGROUND_ENABLED && <NavBackground navRef={navRef} />}
-        <NavAccordion />
+        {/* The glass. It has no content of its own: it is the accordion, given
+            a backdrop-filter so that whatever the artwork drew underneath is
+            blurred and tinted back down to a legible surface. Its height is the
+            accordion's own height, so it grows and shrinks on the section
+            transition without animating anything itself (rulings 4). Inert when
+            the flag is off: over a flat column the tint resolves to the column's
+            own background and the blur has nothing to blur. */}
+        <div className={styles.glass}>
+          <NavAccordion />
+        </div>
       </nav>
     )
   }

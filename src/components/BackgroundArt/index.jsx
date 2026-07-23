@@ -246,6 +246,10 @@ export function BackgroundArt({
         host,
       )
     }
+    // Print the seed so a plant worth keeping can be read off and pinned with
+    // ?seed=<n>. Dev only, and once: the seed does not change after mount.
+    console.info(`[BackgroundArt] seed ${seed}. Pin with ?seed=${seed}`)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const revealedRef = useRef(false)
@@ -309,7 +313,7 @@ export function BackgroundArt({
   const showPixel = face === 'both' || face === 'pixel'
 
   return (
-    <div ref={layerRef} className={[styles.layer, className].filter(Boolean).join(' ')} aria-hidden="true">
+    <div ref={layerRef} className={[styles.layer, className].filter(Boolean).join(' ')} aria-hidden="true" data-seed={seed}>
       <svg className={styles.svg} width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         {showVector && groupBy(composition.stamps, (s) => s.y).map(([band, entries]) =>
           wrapIdle(band, entries.map(({ item, i }) => (
