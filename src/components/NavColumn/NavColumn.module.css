@@ -8,6 +8,15 @@
   overflow-y: auto;
   min-height: 0;
   padding: 8px 0;
+  /* Required by the background artwork, and inert without it.
+     BackgroundArt's layer paints at z-index -1 so it sits behind these nav
+     items while staying above this column's own background. That second half
+     only holds if this element is a stacking context: without one, a negative-z
+     child paints BEHIND the parent's background, and the opaque
+     background-color above hides the artwork completely with no other symptom.
+     `isolation: isolate` is the trigger that says what it is for and does
+     nothing else. See docs/briefings/background_system_rulings.md 15a. */
+  isolation: isolate;
 }
 
 /* ── Section header ───────────────────────────────────────────────────────── */

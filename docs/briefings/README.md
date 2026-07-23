@@ -25,6 +25,26 @@ session must respect.
   The interface contract for the Water & Wilt Token Lab demo (2026-07-18): token
   consumption table, progress channels, instance gating, driver obligations, and
   invariants. Both the .riv authoring and the React driver build against it.
+- [Background system handoff](./background-system-handoff-2026-07-22.md)
+  The planning-session concept for the glyph L-system background artwork (2026-07-22):
+  committed decisions, open questions, module boundaries. Written before recon.
+- [Background system recon](./background_system_recon.md)
+  Recon of the handoff above against the working tree and the labs in
+  `archive/backgroundSystem/` (2026-07-22): corrections, the chrome-vs-demonstration
+  ruling that gates the build, findings the handoff omits, proposed sequence. Where the
+  two disagree, this one is current.
+- [Background system session handoff, 2026-07-23](./BACKGROUND_SYSTEM_SESSION_2026-07-23.md)
+  **Start here to pick the background system up cold.** What was built, how it was mounted
+  in the nav behind `?bg=1`, every debugging step and what it cost, how production differs
+  from the archive labs, and the list of what is still unverified. Deploy and the reported
+  bugs are a separate session.
+- [Background system rulings](./background_system_rulings.md)
+  David's rulings on the recon (2026-07-22), closing the concept phase: the split
+  (bounded reveal demonstrates, infinite idle is chrome), mark color per theme (source
+  colors and 4-step shading in light and dark, theme accent and 2 steps in high
+  contrast, section 2a), dispositions on all twelve open questions, three amended
+  engineering specs, and five amendments raised against the rulings.
+  **Read this first** of the three.
 
 ## How to use
 

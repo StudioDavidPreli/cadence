@@ -90,6 +90,19 @@
      tool exists to let people experiment with. */
   --feedback-nav-duration: 360ms;
 
+  /* Background ambient idle period — the fourth fixed chrome value.
+     The background artwork's idle drift is INFINITE, so it is chrome and reads
+     a fixed constant; its one-shot reveal is bounded, so that half reads the
+     editable --motion-* tokens and demonstrates. That split is the whole
+     ruling (background_system_rulings.md section 1), and it is why the period
+     is here rather than in the artwork's own config object: a chrome timing
+     value belongs with the other chrome timing values, where the
+     token-integrity gate and the next reader can both see it.
+     Derived once from Standard, 8 x duration.slower = 8 x 600ms, and frozen:
+     it does not vary by preset, so the background keeps one temperament while
+     foreground motion changes personality. */
+  --feedback-background-idle-period: 4800ms;
+
   /* UI micro-feedback timing — the third fixed chrome value, same rationale as
      the flash and nav values above. Hover, focus, color/theme shifts, tooltips,
      and small inline reveals read this so a near-zero --motion-duration-* in

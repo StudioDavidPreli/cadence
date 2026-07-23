@@ -1,0 +1,146 @@
+/* ─── BackgroundArt ───────────────────────────────────────────────────────────
+   The artwork layer for a surface. Mirrors the DemoField wrapper pattern:
+   sticky with height 0, so the layer contributes nothing to layout but stays
+   pinned to the visible box while the content scrolls over it.
+
+   Timing here comes from two different places on purpose, which is the split
+   ruling expressed in CSS:
+
+     the reveal   animation-duration and animation-delay are set INLINE from JS,
+                  because they are derived from the editable --motion-* tokens
+                  and change when the user edits a token or switches preset.
+     the idle     also set inline, but from the fixed chrome constant
+                  --feedback-background-idle-period, which Explore mode cannot
+                  reach.
+
+   Neither carries a literal here. The token-integrity gate scans this file for
+   inline ms values and would fail the build on one; that is deliberate and this
+   comment is the note for whoever next wants to "just hardcode" a duration. */
+
+/* ── The host contract, and the one way this component disappears ─────────────
+   z-index: -1 is what puts the artwork BEHIND the host's in-flow content (nav
+   items, labels) while staying ABOVE the host's own background. Both halves of
+   that matter, and the second half has a precondition:
+
+     THE HOST MUST BE A STACKING CONTEXT.
+
+   If it is not, a negative-z child paints behind the host's background instead
+   of above it, and an opaque host background (every surface in this app sets
+   one) hides the artwork completely. The symptom is not a subtle one: nothing
+   renders at all, while the DOM is full of correct paths and rects.
+
+   `position: relative` alone does NOT create a stacking context. The host needs
+   `isolation: isolate`, or a z-index other than auto, or one of the other
+   triggers. `isolation: isolate` is the honest one, because it says what it is
+   for and has no other effect.
+
+   Why not simply drop the negative z-index: a sticky element with z-index auto
+   paints in the positioned-descendant step, which is ABOVE in-flow text, so the
+   artwork would cover the nav items instead of sitting behind them.
+
+   DemoField carries the same requirement and satisfies it by accident, because
+   DemoArea's crossfade layer already has an inline z-index. Nothing guarantees
+   the next host will. */
+.layer {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+/* Cells hold the grid. No positional animation on the pixel face, ever: a
+   sub-pixel offset reads as blur on pixel art, and Firefox does not composite
+   SVG child transforms cleanly. The default arrival is therefore a pure
+   opacity pop with no transform anywhere in the pixel face's lifetime. */
+@keyframes popIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* The alternative arrival, behind a prop. Reads slightly more organic and
+   costs the pixel face its transform-free property. */
+@keyframes stampIn {
+  from { opacity: 0; transform: scale(0.55); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Sway is split across two nested groups so the axes can run at different
+   periods and never resolve into a visible ellipse. Both pass through zero at
+   0% and 100%, which is what lets a delayed start begin without a jump. */
+@keyframes swayX {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(var(--amp-x)); }
+  75%  { transform: translateX(calc(var(--amp-x) * -1)); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes swayY {
+  0%   { transform: translateY(0); }
+  25%  { transform: translateY(var(--amp-y)); }
+  75%  { transform: translateY(calc(var(--amp-y) * -1)); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes breathe {
+  0%   { opacity: 1; }
+  50%  { opacity: var(--dim); }
+  100% { opacity: 1; }
+}
+
+.stamp,
+.cellPop {
+  animation-name: popIn;
+  animation-fill-mode: both;
+}
+
+.stamp {
+  animation-name: stampIn;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cellScale {
+  animation-name: stampIn;
+  animation-fill-mode: both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.swayX {
+  animation-name: swayX;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.swayY {
+  animation-name: swayY;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.breathe {
+  animation-name: breathe;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Reduced motion: the reveal survives as a stop-motion arrival (the component
+   quantizes it and shortens each step), but the idle is removed outright rather
+   than slowed. Infinite drift is the vestibular trigger, and a background idle
+   demonstrates nothing, so there is nothing to preserve. The component also
+   declines to render the sway groups at all under the preference; this rule is
+   the belt to that suspenders, for the case where the preference flips after
+   mount. */
+@media (prefers-reduced-motion: reduce) {
+  .swayX,
+  .swayY,
+  .breathe {
+    animation: none;
+  }
+}

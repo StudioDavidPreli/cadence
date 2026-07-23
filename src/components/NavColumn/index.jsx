@@ -1,5 +1,8 @@
+import { useRef } from 'react'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { RailDrawer } from '../RailDrawer'
+import { NavBackground } from './NavBackground'
+import { BACKGROUND_ENABLED } from './backgroundFlag'
 import {
   SECTIONS,
   CATEGORIES,
@@ -26,9 +29,17 @@ const PRINCIPLE_FILTERS = [
 ]
 
 export function NavColumn({ collapsed, open, onToggle, onClose }) {
+  const navRef = useRef(null)
+
   if (!collapsed) {
     return (
-      <nav className={styles.nav} aria-label="Tools and categories">
+      <nav ref={navRef} className={styles.nav} aria-label="Tools and categories">
+        {/* Background artwork, flagged off by default (?bg=1). Mounted only in
+            the inline column: below 1024px the nav is a rail and drawer, not a
+            column, and the artwork surface is defined as existing only above
+            that breakpoint. Renders as a direct child of <nav> because its layer
+            depends on this element's stacking context (see the module CSS). */}
+        {BACKGROUND_ENABLED && <NavBackground navRef={navRef} />}
         <NavAccordion />
       </nav>
     )
