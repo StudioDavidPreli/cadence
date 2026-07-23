@@ -1,7 +1,7 @@
 # Background System: Session Handoff, 2026-07-23
 
 **For:** a clean session picking this up cold
-**Status:** the whole generation and render chain is built and committed, mounted in the nav behind `?bg=1`, and **not deployed**. David reported four bugs; section 6b is what they were and what fixed them. Deploy is still its own session.
+**Status:** the whole generation and render chain is built and committed, mounted in the nav behind `?bg=1`, and **not deployed**. David reported four bugs; section 6b is what they were and what fixed them. The reduced-motion ruling, previously the one unverified item, is now verified and its bug fixed (rulings section 18): framer's `useReducedMotion` resolved a tick late and the reduced reveal window came from tick-late tokens, so under the preference the reveal could flash non-reduced timing and shipped instant instead of the ruled four-step stop-motion. Fixed with a synchronous `useMediaQuery` read and a token-independent reduced window; verified on built output with Playwright `emulateMedia`. Deploy is still its own session.
 
 Read this first. Then `background_system_rulings.md` for what was decided and why (it is long; sections 14 to 16 are this session). `background_system_recon.md` only if you need the evidence behind a correction.
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { backgroundIdlePeriodSeconds } from '../../utils/feedbackDuration'
 import { growArmature, RULESETS } from '../../background/lsystem'
@@ -117,7 +117,18 @@ export function BackgroundArt({
   showGrid = false,
   className,
 }) {
-  const prefersReduced = useReducedMotion()
+  // useMediaQuery, NOT framer's useReducedMotion, and the difference is the fix
+  // for a reduced-motion bug. framer's hook resolves its value a tick AFTER
+  // first render (documented in PrinciplesLibrary): on that first render it can
+  // report no-reduce even when the preference is on, so the reveal and the idle
+  // both mount with their full non-reduced timing and correct a frame later --
+  // a flash of exactly the motion the preference exists to suppress.
+  // useMediaQuery reads matchMedia synchronously in its useState initializer, so
+  // the very first render already knows the preference and nothing non-reduced
+  // is ever committed. (useMotionTokens still flattens a tick late, but the
+  // reduced reveal no longer derives its window from those tokens -- see
+  // revealTiming and CHOREOGRAPHY.reducedWindow -- so that tick no longer bites.)
+  const prefersReduced = useMediaQuery('(prefers-reduced-motion: reduce)')
   const tokens = useMotionTokens()
 
   // Geometry. Regenerates only on the inputs that change the drawing, which

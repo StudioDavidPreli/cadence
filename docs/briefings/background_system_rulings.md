@@ -751,3 +751,31 @@ The glass on the expanded panel is also unbuilt: ruled in section 4 (a property 
 `crispEdges` on the pattern content, so the lines do not antialias into fuzz (the wordmark lesson). The grid code stays entirely in the lazy chunk: `bg-grid` appears zero times in the main bundle.
 
 Controls: `?bg=1&grid=1` in the nav, and an Empty-grid select on the standalone route (`background-route.html`) for judging it in all four themes with both faces.
+
+---
+
+## 18. The reduced-motion bug: a first-render tick race
+
+**Found and fixed 2026-07-23**, reproduced with Playwright `emulateMedia({ reducedMotion })` since the browser pane cannot emulate it.
+
+**The defect, in two linked parts.**
+
+First, `BackgroundArt` read the preference through framer-motion's `useReducedMotion()`, which resolves its value a **tick after first render** (a behavior `PrinciplesLibrary` already documents). On that first render it can report no-reduce even when the preference is on, so the reveal and the idle both mount with their full non-reduced timing and correct a frame later. That is a flash of exactly the motion the preference exists to suppress. It is timing-dependent, which is why it did not always reproduce.
+
+Second, the reduced-motion reveal window was `8 x delay.long` read from `useMotionTokens`, and those tokens flatten to zero in an effect, a tick late as well. So the reduced window raced the flattening: the full non-reduced 1.6s on the first render, or 0 once flattened. The 0 case is why production shipped an **instant** reveal, never the four-step stop-motion the ruling specified and the `revealDelays` unit test checks. The test passed because it supplied its own window; production never did.
+
+**The fix.**
+
+- `BackgroundArt` now reads `useMediaQuery('(prefers-reduced-motion: reduce)')`, whose `useState` initializer reads `matchMedia` synchronously. The first render already knows the preference, so nothing non-reduced is ever committed. Non-reduced behavior is unchanged (the idle still runs; verified).
+- `revealTiming` takes the reduced-motion window from a fixed `CHOREOGRAPHY.reducedWindow` (0.24s), not from the tokens. Token-independent, so the flattening tick no longer bites, and the four-step stop-motion the ruling specified now actually ships: four discrete beats over 240ms.
+
+**Verified on built output**, both faces, under `emulateMedia` reduce:
+- reveal delays quantize to `0 / 0.06 / 0.12 / 0.18 / 0.24s` (the four steps), and a cell's animation only ever passes through the reduced `0.01s` pop, never a non-reduced `0.2s` duration. No flash.
+- the idle renders zero sway and zero breathe groups.
+- with the preference off, the idle runs as before (10 breathe groups, animating), so the hook swap did not regress the normal path.
+
+`useMotionTokens` still flattens a tick late, but it is now only consulted on the non-reduced path (where its first-render fallbacks already match the CSS), so the tick is harmless.
+
+**Open, David's call:** the reduced reveal is now a quick four-step stop-motion, honoring the ruling. If you would rather it be fully instant (a defensible minimal-motion choice, and arguably gentler), set `CHOREOGRAPHY.reducedWindow` to 0 and the quantization collapses to a single step. One line.
+
+**Follow-up owed:** a permanent e2e test under `page.emulateMedia({ reducedMotion: 'reduce' })` (`test.use({ reducedMotion })` no-ops in this suite). Skipped for now because the surface is unshipped and flag-gated; add it when the flag comes off.

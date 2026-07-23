@@ -62,6 +62,19 @@ export const CHOREOGRAPHY = {
   // transition events. The idle is not quantized, it is dropped entirely.
   reducedSteps: 4,
   reducedDuration: 0.01,
+  // The window the reduced-motion reveal spreads its four steps across. FIXED
+  // and token-independent, which is the fix for a real reduced-motion bug: the
+  // non-reduced window is 8 x delay.long, and under reduced motion those tokens
+  // flatten to 0 -- but useMotionTokens re-reads the CSS in an effect, a tick
+  // AFTER first render. So a reduced window derived from tokens was either the
+  // full non-reduced 1.6s on that first render (a flash of motion the
+  // preference exists to prevent) or 0 once flattened (an instant pop, not the
+  // quantized stop-motion the ruling specifies). A fixed value makes the
+  // reduced reveal deterministic from the first frame and independent of when
+  // the tokens settle. Four beats over 240ms: discrete stop-motion, quick.
+  // Set to 0 for an instant appearance instead; the quantization then collapses
+  // to a single step, which is a legitimate minimal-motion choice.
+  reducedWindow: 0.24,
 }
 
 // ── Grouping ──────────────────────────────────────────────────────────────────
@@ -116,7 +129,12 @@ export function revealDelays(count, {
 // The reveal's timing, assembled from motion tokens. This is the demonstration
 // half: every value here is a read or a formula over the editable token scale.
 export function revealTiming(tokens, { reducedMotion = false } = {}) {
-  const windowSeconds = CHOREOGRAPHY.revealWindowMultiple * (tokens?.delay?.long ?? 0)
+  // Under reduced motion the window is the fixed reducedWindow, NOT a formula
+  // over delay.long: the tokens flatten a tick late, so a token-derived reduced
+  // window races the flattening. See CHOREOGRAPHY.reducedWindow.
+  const windowSeconds = reducedMotion
+    ? CHOREOGRAPHY.reducedWindow
+    : CHOREOGRAPHY.revealWindowMultiple * (tokens?.delay?.long ?? 0)
   return {
     windowSeconds,
     // Stamp and cell fade, and the armature's path draw when a grammar shows it.

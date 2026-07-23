@@ -136,6 +136,31 @@ describe('revealTiming', () => {
     expect(t.stampDuration).not.toBe(0)
   })
 
+  it('takes the reduced-motion window from the fixed constant, not the tokens', () => {
+    // The bug this fixes: under reduced motion useMotionTokens flattens
+    // delay.long to 0 a tick after first render, so a token-derived window
+    // raced the flattening (1.6s on first render, 0 after). The reduced window
+    // is now token-independent, so it is the same whether the tokens are the
+    // full preset or already flattened.
+    const flat = revealTiming(flattened, { reducedMotion: true })
+    const full = revealTiming(tokens, { reducedMotion: true })
+    expect(flat.windowSeconds).toBe(CHOREOGRAPHY.reducedWindow)
+    expect(full.windowSeconds).toBe(CHOREOGRAPHY.reducedWindow)
+    // and it is NOT 8 x delay.long from either token set
+    expect(full.windowSeconds).not.toBeCloseTo(8 * tokens.delay.long)
+  })
+
+  it('spreads the reduced reveal into the ruled number of discrete steps', () => {
+    // Production now matches the ruling and the revealDelays test: a quick
+    // four-step stop-motion, not the instant single pop the token-derived
+    // window used to collapse to.
+    const t = revealTiming(tokens, { reducedMotion: true })
+    const delays = revealDelays(40, { windowSeconds: t.windowSeconds, reducedMotion: true })
+    const distinct = [...new Set(delays)]
+    expect(distinct.length).toBe(CHOREOGRAPHY.reducedSteps + 1)
+    expect(Math.max(...delays)).toBeCloseTo(CHOREOGRAPHY.reducedWindow)
+  })
+
   it('survives missing token families rather than emitting NaN', () => {
     // A NaN duration reaching Framer Motion throws. Same defensive posture as
     // parseTokenValue.
