@@ -82,6 +82,34 @@ function cellFill(cell, buckets, palette) {
   return shade(inkFromKey(cell.color, palette), 0.35 + 0.65 * level)
 }
 
+// ── One <path> per ink per stamp, not one per subpath ─────────────────────────
+//
+// A stroke here is a SUBPATH, and the vector face used to emit an element for
+// each one. That was fine for a library of line drawings, where a mark is a
+// handful of strokes. It stops being fine for a pixel-authored library: a mark
+// built from ~90 rects is ~90 subpaths, so a 120-stamp composition drew 10,683
+// path elements in a nav column that is on screen for the whole session.
+//
+// Nothing about the drawing requires that. SVG path data takes any number of
+// `M ... L ...` runs in one `d`, so every subpath sharing an ink can be one
+// element. Same picture, same strokes, same ink, two orders of magnitude fewer
+// nodes. Grouping by ink rather than concatenating everything is what keeps it
+// the same picture: a multi-colour mark still gets one element per colour.
+//
+// Insertion order is preserved (Map keeps it), so the ink that was drawn first
+// is still painted first.
+function pathDataByInk(strokes, palette) {
+  const byInk = new Map()
+  for (const stroke of strokes) {
+    if (stroke.pts.length < 2) continue
+    const ink = inkFromKey(inkKeyOf(stroke), palette)
+    const run = 'M ' + stroke.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L ')
+    const prev = byInk.get(ink)
+    byInk.set(ink, prev ? prev + ' ' + run : run)
+  }
+  return [...byInk.entries()]
+}
+
 function shade(color, factor) {
   const hex = color.startsWith('#') ? color.slice(1) : null
   if (!hex) return color
@@ -391,12 +419,12 @@ export function BackgroundArt({
         {showVector && groupBy(composition.stamps, (s) => s.y).map(([band, entries]) =>
           wrapIdle(band, entries.map(({ item, i }) => (
             <g key={`s${i}`} className={revealing ? styles.stamp : undefined} style={arrival(stampDelays[i])}>
-              {item.strokes.map((stroke, k) => (
+              {pathDataByInk(item.strokes, palette).map(([ink, d], k) => (
                 <path
                   key={k}
-                  d={'M ' + stroke.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L ')}
+                  d={d}
                   fill="none"
-                  stroke={inkFromKey(inkKeyOf(stroke), palette)}
+                  stroke={ink}
                   strokeWidth="1.3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
