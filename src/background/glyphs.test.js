@@ -6,6 +6,8 @@ import {
   parseMarkSvg,
   buildMark,
   buildLibrary,
+  parseTransform,
+  applyMatrix,
   GLYPHS,
 } from './glyphs'
 
@@ -438,5 +440,133 @@ describe('buildLibrary', () => {
     expect(lib[0].strokes[0]).toHaveProperty('pts')
     expect(lib[0].strokes[0].pts[0]).toHaveProperty('x')
     expect(lib[0].strokes[0].pts[0]).toHaveProperty('y')
+  })
+})
+
+describe('parseTransform', () => {
+  it('is the identity for an absent or empty transform', () => {
+    expect(parseTransform(undefined).matrix).toEqual([1, 0, 0, 1, 0, 0])
+    expect(parseTransform('').matrix).toEqual([1, 0, 0, 1, 0, 0])
+  })
+
+  it('reads translate with one argument as an x shift only', () => {
+    const p = applyMatrix(parseTransform('translate(10)').matrix, 1, 1)
+    expect(p).toEqual({ x: 11, y: 1 })
+  })
+
+  it('reads translate with both separators', () => {
+    for (const raw of ['translate(60 60)', 'translate(60,60)']) {
+      expect(applyMatrix(parseTransform(raw).matrix, -27, -43)).toEqual({ x: 33, y: 17 })
+    }
+  })
+
+  it('reads scale with one argument as uniform', () => {
+    expect(applyMatrix(parseTransform('scale(2)').matrix, 3, 4)).toEqual({ x: 6, y: 8 })
+  })
+
+  it('rotates about a named centre', () => {
+    const p = applyMatrix(parseTransform('rotate(90 10 10)').matrix, 10, 20)
+    expect(near(p.x, 0, 1e-9)).toBe(true)
+    expect(near(p.y, 10, 1e-9)).toBe(true)
+  })
+
+  // Left to right: the leftmost function is the outermost, so translate applies
+  // to the already-scaled point rather than being scaled by it.
+  it('composes a list in SVG order', () => {
+    expect(applyMatrix(parseTransform('translate(10 0) scale(2)').matrix, 3, 0).x).toBe(16)
+    expect(applyMatrix(parseTransform('scale(2) translate(10 0)').matrix, 3, 0).x).toBe(26)
+  })
+
+  it('names what it could not apply rather than dropping it silently', () => {
+    const { matrix, unsupported } = parseTransform('skewX(20) translate(5 0)')
+    expect(unsupported).toEqual(['skewX'])
+    expect(applyMatrix(matrix, 0, 0)).toEqual({ x: 5, y: 0 })
+  })
+})
+
+describe('parseMarkSvg: rects and transforms', () => {
+  it('converts a rect to a closed path instead of skipping it', () => {
+    const svg = '<svg viewBox="0 0 198 198"><rect x="132" y="11" width="11" height="22" fill="#232323"/></svg>'
+    const { mark, warnings } = parseMarkSvg(svg, 'r')
+    expect(mark.paths).toHaveLength(1)
+    expect(mark.paths[0].d).toBe('M132 11H143V33H132Z')
+    expect(mark.paths[0].color).toBe('#232323')
+    expect(warnings.join(' ')).not.toMatch(/skipped/)
+  })
+
+  // The regression this exists for: a pixel-authored library is all rects, so
+  // the old parser dropped whole marks rather than degrading them.
+  it('no longer drops a mark that is made only of rects', () => {
+    const svg = '<svg viewBox="0 0 22 11"><rect width="11" height="11" fill="#111"/>'
+      + '<rect x="11" width="11" height="11" fill="#222"/></svg>'
+    const { mark } = parseMarkSvg(svg, 'pixel')
+    expect(mark).not.toBeNull()
+    expect(mark.paths).toHaveLength(2)
+  })
+
+  it('takes a rect fill from a class rule like any other shape', () => {
+    const svg = '<svg viewBox="0 0 84 84"><defs><style>.cls-3{fill:#dcdbde;}</style></defs>'
+      + '<rect class="cls-3" width="11" height="11"/></svg>'
+    expect(parseMarkSvg(svg, 'c').mark.paths[0].color).toBe('#dcdbde')
+  })
+
+  it('ignores a zero-area rect', () => {
+    const svg = '<svg viewBox="0 0 84 84"><rect width="0" height="11" fill="#111"/></svg>'
+    expect(parseMarkSvg(svg, 'z').mark).toBeNull()
+  })
+
+  it('warns that a rounded rect converted square', () => {
+    const svg = '<svg viewBox="0 0 84 84"><rect width="11" height="11" rx="2" fill="#111"/></svg>'
+    expect(parseMarkSvg(svg, 'round').warnings.join(' ')).toMatch(/rounded rect/)
+  })
+
+  it('keeps paths and rects in document order', () => {
+    const svg = '<svg viewBox="0 0 84 84"><rect width="4" height="4" fill="#a"/>'
+      + '<path d="M0,0 L1,1" fill="#b"/><rect x="8" width="4" height="4" fill="#c"/></svg>'
+    expect(parseMarkSvg(svg, 'order').mark.paths.map((p) => p.color)).toEqual(['#a', '#b', '#c'])
+  })
+
+  it('carries a path transform onto the def', () => {
+    const svg = '<svg viewBox="0 0 120 120"><path transform="translate(60 60)" d="M-10,-10 L10,10" fill="#111"/></svg>'
+    expect(parseMarkSvg(svg, 't').mark.paths[0].transform).toEqual([1, 0, 0, 1, 60, 60])
+  })
+
+  it('leaves transform off a def that had none', () => {
+    const svg = '<svg viewBox="0 0 120 120"><path d="M0,0 L10,10" fill="#111"/></svg>'
+    expect(parseMarkSvg(svg, 'n').mark.paths[0]).not.toHaveProperty('transform')
+  })
+
+  it('still counts the shapes it genuinely cannot represent', () => {
+    const svg = '<svg viewBox="0 0 84 84"><circle r="4" fill="#111"/><path d="M0,0 L1,1" fill="#111"/></svg>'
+    expect(parseMarkSvg(svg, 'circ').warnings.join(' ')).toMatch(/1 non-path shape\(s\) skipped \(circle\)/)
+  })
+})
+
+describe('buildMark: transformed geometry', () => {
+  // The bug in one assertion. Origin-centred ink pushed into place with
+  // translate(60 60) sits at the centre of a 0 0 120 120 viewBox; ignoring the
+  // transform put it half a mark up and to the left.
+  it('applies the transform before centring on the viewBox', () => {
+    const def = {
+      name: 'centred',
+      viewBox: '0 0 120 120',
+      paths: [{ d: 'M-6,-6 L6,6', color: '#111', transform: [1, 0, 0, 1, 60, 60] }],
+    }
+    const pts = buildMark(def).strokes[0].pts
+    const scale = GLYPHS.span / 120
+    expect(near(pts[0].x, -6 * scale)).toBe(true)
+    expect(near(pts[0].y, -6 * scale)).toBe(true)
+    expect(near(pts[pts.length - 1].x, 6 * scale)).toBe(true)
+  })
+
+  it('leaves an untransformed path where it was', () => {
+    const def = {
+      name: 'plain',
+      viewBox: '0 0 120 120',
+      paths: [{ d: 'M54,54 L66,66', color: '#111' }],
+    }
+    const pts = buildMark(def).strokes[0].pts
+    const scale = GLYPHS.span / 120
+    expect(near(pts[0].x, -6 * scale)).toBe(true)
   })
 })

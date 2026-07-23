@@ -378,6 +378,105 @@ export function resolvePaint(tag, rules = {}) {
   }
 }
 
+// ── `transform` on a path ─────────────────────────────────────────────────────
+//
+// The flattener works in the path's own coordinate system and knew nothing about
+// transforms, which was fine while every mark authored its ink at absolute
+// coordinates. It stops being fine the moment a library centres its geometry on
+// the origin and pushes it into place with `translate(60 60)`: the ink is then
+// half a mark up and to the left of where the author put it, on every mark in
+// the file, and the composition still looks plausible enough not to announce it.
+//
+// So the transform is parsed here and applied in buildMark, before the viewBox
+// centring. Four functions, which is the whole of what SVG's transform-list
+// grammar offers short of skew: translate, scale, rotate, matrix. Anything else
+// is named in a warning rather than silently dropped, because a mark that lands
+// in the wrong place is exactly the failure this is fixing.
+//
+// The matrix is the usual SVG 2x3, [a b c d e f], applied as
+//   x' = a*x + c*y + e
+//   y' = b*x + d*y + f
+const IDENTITY = [1, 0, 0, 1, 0, 0]
+
+function multiply(m, n) {
+  return [
+    m[0] * n[0] + m[2] * n[1],
+    m[1] * n[0] + m[3] * n[1],
+    m[0] * n[2] + m[2] * n[3],
+    m[1] * n[2] + m[3] * n[3],
+    m[0] * n[4] + m[2] * n[5] + m[4],
+    m[1] * n[4] + m[3] * n[5] + m[5],
+  ]
+}
+
+export function applyMatrix(m, x, y) {
+  return { x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] }
+}
+
+// A transform-list string -> { matrix, unsupported: [names] }.
+//
+// Functions compose left to right, which is SVG's order: the leftmost is the
+// outermost, so it multiplies on the left of everything after it.
+export function parseTransform(raw) {
+  const unsupported = []
+  let matrix = IDENTITY
+  if (!raw) return { matrix, unsupported }
+
+  for (const fn of String(raw).matchAll(/([a-zA-Z]+)\s*\(([^)]*)\)/g)) {
+    const name = fn[1]
+    const args = fn[2].trim().split(/[\s,]+/).map(Number).filter(Number.isFinite)
+    let next
+    if (name === 'translate') {
+      next = [1, 0, 0, 1, args[0] || 0, args.length > 1 ? args[1] : 0]
+    } else if (name === 'scale') {
+      const sx = args.length ? args[0] : 1
+      next = [sx, 0, 0, args.length > 1 ? args[1] : sx, 0, 0]
+    } else if (name === 'rotate') {
+      const rad = ((args[0] || 0) * Math.PI) / 180
+      const cos = Math.cos(rad)
+      const sin = Math.sin(rad)
+      const rotation = [cos, sin, -sin, cos, 0, 0]
+      // rotate(a cx cy) is translate(cx cy) rotate(a) translate(-cx -cy).
+      next = args.length > 2
+        ? multiply(multiply([1, 0, 0, 1, args[1], args[2]], rotation), [1, 0, 0, 1, -args[1], -args[2]])
+        : rotation
+    } else if (name === 'matrix' && args.length === 6) {
+      next = args
+    } else {
+      unsupported.push(name)
+      continue
+    }
+    matrix = multiply(matrix, next)
+  }
+  return { matrix, unsupported }
+}
+
+// ── `<rect>` as geometry, not as a skipped shape ──────────────────────────────
+//
+// The parser used to count every non-path shape and warn. That is the right
+// default for a shape it cannot represent, and the wrong one for a rectangle,
+// which is four line segments and converts exactly. It matters because a
+// pixel-authored library is made of nothing else: measured on the Token Lab
+// library, 1550 rects against 12 paths, and 15 of its 17 marks had no path at
+// all, so they were not degraded by the old behaviour, they were dropped
+// (`no paths, skipped`) and the library silently shrank to two marks.
+//
+// Rounded corners are not converted. rx/ry would need arcs and no library here
+// uses them, so a rounded rect converts as a sharp one and says so.
+function rectToPath(attrs) {
+  const num = (name) => {
+    const m = attrs.match(new RegExp(`\\s${name}="([^"]*)"`))
+    const v = m ? Number.parseFloat(m[1]) : 0
+    return Number.isFinite(v) ? v : 0
+  }
+  const w = num('width')
+  const h = num('height')
+  if (!(w > 0 && h > 0)) return null
+  const x = num('x')
+  const y = num('y')
+  return `M${x} ${y}H${x + w}V${y + h}H${x}Z`
+}
+
 // An SVG file's text -> { name, viewBox, paths: [{ d, color, tokenBound }] }.
 //
 // Returns `warnings` rather than throwing, and rather than failing silently.
@@ -391,15 +490,36 @@ export function parseMarkSvg(text, name) {
 
   const rules = styleRules(text)
   const paths = []
-  for (const tag of text.matchAll(/<path\b([^>]*)>/g)) {
-    const d = (tag[1].match(/\sd="([^"]*)"/) || [])[1]
+  const unsupportedTransforms = new Set()
+  let roundedRects = 0
+
+  // One pass over both shape kinds rather than two, so the collected order is
+  // document order. Draw order is not decorative here: the pixel face resolves a
+  // cell's ink by which stroke crosses it furthest, and document order is the
+  // tie-break the browser would apply to the same art.
+  for (const tag of text.matchAll(/<(path|rect)\b([^>]*)>/g)) {
+    const [, kind, attrs] = tag
+    const d = kind === 'rect' ? rectToPath(attrs) : (attrs.match(/\sd="([^"]*)"/) || [])[1]
     if (!d) continue
-    const paint = resolvePaint(tag[1], rules)
-    if (!paint.color && !paint.tokenBound) warnings.push(`${name}: a path has no resolvable paint`)
-    paths.push({ d, ...paint })
+    if (kind === 'rect' && /\sr[xy]="/.test(attrs)) roundedRects += 1
+
+    const transformRaw = (attrs.match(/\stransform="([^"]*)"/) || [])[1]
+    const { matrix, unsupported } = parseTransform(transformRaw)
+    unsupported.forEach((fn) => unsupportedTransforms.add(fn))
+
+    const paint = resolvePaint(attrs, rules)
+    if (!paint.color && !paint.tokenBound) warnings.push(`${name}: a ${kind} has no resolvable paint`)
+    paths.push({ d, ...paint, ...(transformRaw && { transform: matrix }) })
   }
 
-  const others = [...text.matchAll(/<(circle|rect|line|polyline|polygon|ellipse)\b/g)].map((m) => m[1])
+  if (roundedRects) {
+    warnings.push(`${name}: ${roundedRects} rounded rect(s) converted with sharp corners (rx/ry ignored)`)
+  }
+  if (unsupportedTransforms.size) {
+    warnings.push(`${name}: unsupported transform function(s) ignored (${[...unsupportedTransforms].join(', ')})`)
+  }
+
+  const others = [...text.matchAll(/<(circle|line|polyline|polygon|ellipse)\b/g)].map((m) => m[1])
   if (others.length) {
     warnings.push(`${name}: ${others.length} non-path shape(s) skipped (${[...new Set(others)].join(', ')})`)
   }
@@ -430,11 +550,19 @@ export function buildMark(def, { span = GLYPHS.span, tolerance = GLYPHS.toleranc
 
   const strokes = []
   for (const path of def.paths || []) {
+    // The path's own transform first, then the viewBox centring. That order is
+    // the only correct one: a transform is authored in the file's user space, so
+    // it has to land the ink where the author put it BEFORE anything measures
+    // where that is relative to the viewBox centre.
+    const m = path.transform
     for (const subpath of flattenPath(parsePathData(path.d), { tolerance })) {
       strokes.push({
         color: path.color ?? null,
         tokenBound: !!path.tokenBound,
-        pts: subpath.map(([x, y]) => ({ x: (x - cx) * scale, y: (y - cy) * scale })),
+        pts: subpath.map(([x, y]) => {
+          const p = m ? applyMatrix(m, x, y) : { x, y }
+          return { x: (p.x - cx) * scale, y: (p.y - cy) * scale }
+        }),
       })
     }
   }
