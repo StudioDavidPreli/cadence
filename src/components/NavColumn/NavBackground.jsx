@@ -204,6 +204,11 @@ export function NavBackground({ navRef }) {
         // What an authored `currentColor` resolves to (ruling 2b).
         tokenInk: readToken('--color-text-base'),
         ramp: RAMPS[theme] || RAMPS.dark,
+        // The empty-cell grid ink. --color-border is the subtle-outline role,
+        // which grid lines genuinely are. It is quiet in light and dark
+        // (~1.3:1) and pure black/white in high contrast, which is why the
+        // renderer draws a sparse dotted grid there instead of a solid mesh.
+        grid: readToken('--color-border'),
       })
     }
     read()

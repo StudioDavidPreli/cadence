@@ -1,7 +1,7 @@
 import { BackgroundArt } from '../BackgroundArt'
 import { MARK_LIBRARY } from '../../background/library'
 import { hash32 } from '../../background/rng'
-import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING } from './backgroundFlag'
+import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING, BACKGROUND_GRID } from './backgroundFlag'
 
 // The lazy chunk's contents. Everything the background system needs is imported
 // HERE rather than in NavBackground, so the flag-off path pulls none of it into
@@ -43,5 +43,7 @@ const TUNING = {
 }
 
 export default function NavBackgroundArt(props) {
-  return <BackgroundArt {...props} library={MARK_LIBRARY} seed={VISIT_SEED} {...TUNING} />
+  return (
+    <BackgroundArt {...props} library={MARK_LIBRARY} seed={VISIT_SEED} showGrid={BACKGROUND_GRID} {...TUNING} />
+  )
 }

@@ -731,3 +731,23 @@ Both faces follow the binding in light and dark, and the high-contrast blanket c
 Reduced motion has never been exercised with the preference actually on, in the nav or on the standalone route. The unit tests cover `idleTimings` returning null and the four-step quantization, and the CSS module carries an `@media` block, but the real behaviour is unconfirmed. It is the last unverified ruling.
 
 The glass on the expanded panel is also unbuilt: ruled in section 4 (a property of the expanded panel, riding the accordion's own `grid-template-rows` transition, with the feathered base from the 2026-07-22 exchange), but nothing in `NavColumn` implements it yet.
+
+---
+
+## 17. The empty-cell grid, behind `?grid=1`
+
+**Built 2026-07-23, David's call.** In pixel mode, the full cell lattice is drawn behind the ink so the grid the marks snap to is visible rather than implied. It makes the systematization the pixel face argues for legible: you can see the substrate.
+
+**One patterned rect, not per-cell rects.** The lattice is ~2400 cells at 8px against ~400 inked, so per-cell empty rects would 6x the DOM for pure structure. It is a single `<rect>` filled with an SVG `<pattern>` tiling from the SVG origin, which aligns to the same cell lattice the inked rects use (both at multiples of `cellSize` from 0). O(1) nodes.
+
+**Static.** No reveal, no breathe. Present from the first frame; the ink arrives into it. That is the grid-hold rule taken to its end, and it reads as the grid being the substrate rather than a competing animation.
+
+**Token.** `--color-border`, the subtle-outline role, which grid lines genuinely are (no accent-style never-decorative rule to trip). Quiet in light and dark, ~1.3:1.
+
+**The high-contrast branch.** `--color-border` is pure black/white in both HC themes, so a solid mesh would be a loud lattice. HC gets sparse dots at the intersections instead of continuous lines, the same philosophy as DemoField's HC sparse mode. Verified: dark/light render a mesh path at `#2e2e2e`/`#e2e2e2`, both HC themes render a 1.5px dot at `#ffffff`/`#000000`. If even the dots read as noise, suppressing the HC grid entirely is a one-line change.
+
+**Placement.** Pixel face only (`face` pixel or both), gated on `?grid=1` alongside `?bg=1`. The grid top snaps to the first cell boundary at or below the protected baseline (`Math.ceil(baseline / cellSize) * cellSize`), so it never draws behind the three always-visible collapsed headers. Verified in the nav: grid top 136 (the bottom of the collapsed headers), ink top 160, so the empty substrate shows through the clearance gap before ink begins. Disclosed accordion rows sit over the grid exactly as they sit over the ink, made legible by the glass.
+
+`crispEdges` on the pattern content, so the lines do not antialias into fuzz (the wordmark lesson). The grid code stays entirely in the lazy chunk: `bg-grid` appears zero times in the main bundle.
+
+Controls: `?bg=1&grid=1` in the nav, and an Empty-grid select on the standalone route (`background-route.html`) for judging it in all four themes with both faces.

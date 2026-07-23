@@ -26,6 +26,14 @@ const PARAMS =
 
 export const BACKGROUND_ENABLED = PARAMS?.has('bg') ?? false
 
+// The empty-cell grid: the pixel face's substrate, drawn as a full cell lattice
+// in --color-border so the systematization the marks snap to is visible rather
+// than implied. Off by default and its own flag, so the artwork can be judged
+// with and without it.
+//
+//   ?grid=1   with ?bg=1, e.g. ?bg=1&grid=1
+export const BACKGROUND_GRID = PARAMS?.has('grid') ?? false
+
 // Read a numeric query param, or null when absent or unparseable. `parse` is
 // Number.parseInt or Number.parseFloat.
 function numParam(name, parse) {

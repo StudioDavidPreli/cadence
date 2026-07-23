@@ -114,6 +114,7 @@ export function BackgroundArt({
   palette,
   face = 'both',
   cellReveal = 'pop',
+  showGrid = false,
   className,
 }) {
   const prefersReduced = useReducedMotion()
@@ -312,9 +313,58 @@ export function BackgroundArt({
   const showVector = face === 'both' || face === 'vector'
   const showPixel = face === 'both' || face === 'pixel'
 
+  // ── The empty-cell grid ───────────────────────────────────────────────────
+  //
+  // The pixel face's substrate, drawn as ONE patterned rect rather than a rect
+  // per empty cell: the full lattice is ~2400 cells at 8px against ~400 inked,
+  // so per-cell would 6x the DOM for pure background structure. A pattern tiling
+  // from the SVG origin aligns to the same cell lattice the inked rects use
+  // (both at multiples of cellSize from 0), so nothing seams.
+  //
+  // Static: no reveal, no breathe. It is present from the first frame and the
+  // ink arrives into it, which is the grid-hold rule taken to its conclusion.
+  //
+  // Two treatments. Light and dark get a line mesh at --color-border, which is
+  // genuinely quiet there (~1.3:1). High contrast has no quiet gray, so
+  // --color-border is pure black/white and a solid mesh would be a loud
+  // lattice; it gets sparse dots at the intersections instead, the same
+  // philosophy as DemoField's high-contrast sparse mode. Judge whether even the
+  // dots are too much; suppressing the HC grid entirely is a one-line change.
+  const gridTop = cellSize > 0 ? Math.ceil(baseline / cellSize) * cellSize : baseline
+  const gridId = `bg-grid-${seed}-${cellSize}-${highContrast ? 'hc' : 'std'}`
+  const gridBackdrop = showPixel && showGrid && palette?.grid ? (
+    <>
+      <defs>
+        <pattern id={gridId} width={cellSize} height={cellSize} patternUnits="userSpaceOnUse">
+          {highContrast ? (
+            <rect x="0" y="0" width="1.5" height="1.5" fill={palette.grid} shapeRendering="crispEdges" />
+          ) : (
+            <path
+              d={`M0 0 H${cellSize} M0 0 V${cellSize}`}
+              stroke={palette.grid}
+              strokeWidth="1"
+              fill="none"
+              shapeRendering="crispEdges"
+            />
+          )}
+        </pattern>
+      </defs>
+      <rect
+        x="0"
+        y={gridTop}
+        width={width}
+        height={Math.max(0, height - gridTop)}
+        fill={`url(#${gridId})`}
+      />
+    </>
+  ) : null
+
   return (
     <div ref={layerRef} className={[styles.layer, className].filter(Boolean).join(' ')} aria-hidden="true" data-seed={seed}>
       <svg className={styles.svg} width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        {/* Backmost: the grid substrate paints before both faces so all ink
+            lands on top of it. */}
+        {gridBackdrop}
         {showVector && groupBy(composition.stamps, (s) => s.y).map(([band, entries]) =>
           wrapIdle(band, entries.map(({ item, i }) => (
             <g key={`s${i}`} className={revealing ? styles.stamp : undefined} style={arrival(stampDelays[i])}>
