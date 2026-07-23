@@ -44,10 +44,18 @@ const readToken = (name) =>
 // 'both' is deliberately absent. It is a lab affordance for comparing the two
 // renderings side by side; on a real surface it draws the same composition
 // twice, once over the other.
+// EXPERIMENT, 2026-07-23: every tool draws the vector face.
+//
+// The face used to carry the difference between the tools, because there was one
+// library and two ways to render it. There are three libraries now, one per
+// tool, so the marks themselves carry it and the face no longer has to. The
+// pixel face is still built, still tested and still reachable with `?face=pixel`
+// (backgroundFlag), which is the version of this that can be reverted in a line
+// if the drawing turns out to want it back.
 const SECTION_FACE = {
-  [SECTIONS.TOKEN_LAB]: 'pixel',
+  [SECTIONS.TOKEN_LAB]: 'vector',
   [SECTIONS.PRINCIPLES]: 'vector',
-  [SECTIONS.MOTION_TILES]: 'pixel',
+  [SECTIONS.MOTION_TILES]: 'vector',
 }
 
 // Read the column's own geometry: the top padding, and the line below which the
@@ -264,6 +272,9 @@ export function NavBackground({ navRef }) {
         palette={palette}
         highContrast={palette.highContrast}
         face={face}
+        // The lazy chunk maps this to a library. Passed as the section rather
+        // than as the library itself so nothing up here has to import one.
+        section={section}
       />
     </Suspense>
   )

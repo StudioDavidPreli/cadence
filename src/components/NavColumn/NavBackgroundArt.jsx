@@ -1,6 +1,7 @@
 import { BackgroundArt } from '../BackgroundArt'
-import { MARK_LIBRARY } from '../../background/library'
+import { MARK_LIBRARIES } from '../../background/library'
 import { hash32 } from '../../background/rng'
+import { SECTIONS } from '../../data/navigation'
 import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING, BACKGROUND_GRID } from './backgroundFlag'
 
 // The lazy chunk's contents. Everything the background system needs is imported
@@ -51,7 +52,27 @@ const TUNING = {
   ...(BACKGROUND_TUNING.face != null && { face: BACKGROUND_TUNING.face }),
 }
 
+// ── Which library each tool draws from ────────────────────────────────────────
+//
+// One library per tool, and the mapping lives HERE rather than in NavBackground
+// for the same reason every heavy import does: NavBackground is in the eager
+// bundle, so a `MARK_LIBRARIES` import up there would put all three libraries in
+// the main chunk with the flag off, which is the one property the lazy split
+// exists to keep.
+//
+// `null` is the landing/hero, where no section is open. It draws the Token Lab
+// library, which is David's call: the landing is the Token Lab's front door and
+// the two should not change marks under you when you open the first section.
+const SECTION_LIBRARY = {
+  [SECTIONS.TOKEN_LAB]: 'tokenLab',
+  [SECTIONS.PRINCIPLES]: 'principles',
+  [SECTIONS.MOTION_TILES]: 'motionTiles',
+}
+const LANDING_LIBRARY = 'tokenLab'
+
 export default function NavBackgroundArt(props) {
+  const library = MARK_LIBRARIES[SECTION_LIBRARY[props.section] || LANDING_LIBRARY]
+
   // Roots are the one override that cannot be resolved at module scope: they
   // arrive as fractions of the column and the column is only measured by the
   // time this renders. Resolved here against the width the surface passed in,
@@ -63,7 +84,7 @@ export default function NavBackgroundArt(props) {
   return (
     <BackgroundArt
       {...props}
-      library={MARK_LIBRARY}
+      library={library}
       seed={VISIT_SEED}
       showGrid={BACKGROUND_GRID}
       {...(roots && { roots })}
