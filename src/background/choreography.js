@@ -62,19 +62,24 @@ export const CHOREOGRAPHY = {
   // transition events. The idle is not quantized, it is dropped entirely.
   reducedSteps: 4,
   reducedDuration: 0.01,
-  // The window the reduced-motion reveal spreads its four steps across. FIXED
-  // and token-independent, which is the fix for a real reduced-motion bug: the
+  // The window the reduced-motion reveal spreads its steps across. FIXED and
+  // token-independent, which is the fix for a real reduced-motion bug: the
   // non-reduced window is 8 x delay.long, and under reduced motion those tokens
   // flatten to 0 -- but useMotionTokens re-reads the CSS in an effect, a tick
   // AFTER first render. So a reduced window derived from tokens was either the
   // full non-reduced 1.6s on that first render (a flash of motion the
-  // preference exists to prevent) or 0 once flattened (an instant pop, not the
-  // quantized stop-motion the ruling specifies). A fixed value makes the
-  // reduced reveal deterministic from the first frame and independent of when
-  // the tokens settle. Four beats over 240ms: discrete stop-motion, quick.
-  // Set to 0 for an instant appearance instead; the quantization then collapses
-  // to a single step, which is a legitimate minimal-motion choice.
-  reducedWindow: 0.24,
+  // preference exists to prevent) or 0 once flattened. A fixed value makes the
+  // reduced reveal deterministic from the first frame, independent of when the
+  // tokens settle.
+  //
+  // 0 = instant appearance (David's call, 2026-07-23): with a zero window every
+  // step lands at the same instant, so the quantization collapses to a single
+  // pop and the whole composition arrives at once, each cell over the 0.01s
+  // reduced duration (which keeps transition events firing). This overrides the
+  // ruling's four-step stop-motion in favour of the gentler minimal-motion
+  // reading for someone who has asked for less motion. Set to a small positive
+  // value (0.24 gives four beats over 240ms) to restore the stop-motion.
+  reducedWindow: 0,
 }
 
 // ── Grouping ──────────────────────────────────────────────────────────────────

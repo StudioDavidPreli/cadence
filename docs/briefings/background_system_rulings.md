@@ -776,6 +776,6 @@ Second, the reduced-motion reveal window was `8 x delay.long` read from `useMoti
 
 `useMotionTokens` still flattens a tick late, but it is now only consulted on the non-reduced path (where its first-render fallbacks already match the CSS), so the tick is harmless.
 
-**Open, David's call:** the reduced reveal is now a quick four-step stop-motion, honoring the ruling. If you would rather it be fully instant (a defensible minimal-motion choice, and arguably gentler), set `CHOREOGRAPHY.reducedWindow` to 0 and the quantization collapses to a single step. One line.
+**Ruled, David 2026-07-23: instant.** `CHOREOGRAPHY.reducedWindow` is set to 0. Under the preference the whole composition arrives at once, each cell over the 0.01s reduced duration (so transition events still fire). This overrides the handoff's four-step stop-motion in favour of the gentler minimal-motion reading: someone who has asked for less motion gets none, not a staggered arrival. Verified on built output: the reduced reveal shows a single `0s` delay across every cell, the idle renders zero groups, and the non-reduced idle is unaffected. The stop-motion is one constant away (`reducedWindow: 0.24`) if the call is ever revisited.
 
 **Follow-up owed:** a permanent e2e test under `page.emulateMedia({ reducedMotion: 'reduce' })` (`test.use({ reducedMotion })` no-ops in this suite). Skipped for now because the surface is unshipped and flag-gated; add it when the flag comes off.

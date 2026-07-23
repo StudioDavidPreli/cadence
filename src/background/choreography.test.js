@@ -150,15 +150,19 @@ describe('revealTiming', () => {
     expect(full.windowSeconds).not.toBeCloseTo(8 * tokens.delay.long)
   })
 
-  it('spreads the reduced reveal into the ruled number of discrete steps', () => {
-    // Production now matches the ruling and the revealDelays test: a quick
-    // four-step stop-motion, not the instant single pop the token-derived
-    // window used to collapse to.
+  it('reveals the reduced composition instantly (reducedWindow is 0, David 2026-07-23)', () => {
+    // The reduced reveal is instant: every cell arrives at once over the 0.01s
+    // reduced duration (which keeps transition events firing). This is the
+    // minimal-motion override of the ruling's four-step stop-motion. Setting
+    // CHOREOGRAPHY.reducedWindow to a positive value restores the stop-motion,
+    // and the assertion below tracks the constant rather than hardcoding 0 so
+    // the test documents the relationship instead of pinning one choice.
+    expect(CHOREOGRAPHY.reducedWindow).toBe(0)
     const t = revealTiming(tokens, { reducedMotion: true })
+    expect(t.windowSeconds).toBe(0)
     const delays = revealDelays(40, { windowSeconds: t.windowSeconds, reducedMotion: true })
-    const distinct = [...new Set(delays)]
-    expect(distinct.length).toBe(CHOREOGRAPHY.reducedSteps + 1)
-    expect(Math.max(...delays)).toBeCloseTo(CHOREOGRAPHY.reducedWindow)
+    expect(new Set(delays).size).toBe(1)
+    expect(Math.max(...delays)).toBe(0)
   })
 
   it('survives missing token families rather than emitting NaN', () => {
