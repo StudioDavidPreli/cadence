@@ -96,18 +96,32 @@ function cellFill(cell, buckets, palette) {
 // nodes. Grouping by ink rather than concatenating everything is what keeps it
 // the same picture: a multi-colour mark still gets one element per colour.
 //
-// Insertion order is preserved (Map keeps it), so the ink that was drawn first
-// is still painted first.
+// CONSECUTIVE runs of one ink, not all subpaths of one ink. The difference is
+// paint order, and it is the difference between a compression and an edit.
+// Collecting every same-ink subpath into one element would move ink A's later
+// subpaths in front of ink B's earlier ones, which changes which colour is on
+// top wherever two strokes overlap. Merging only while the ink stays the same
+// preserves document order exactly, so the picture is the one the file
+// describes.
+//
+// It is not free. Measured on the Token Lab library at seed 4242: 2,546
+// elements against 546 for the unordered version, still well down from the
+// 10,683 this replaced. The gap is the price of not reordering paint, and it is
+// worth paying on art whose overlaps have not been audited.
+//
+// Under the high-contrast blanket every stroke resolves to one ink, so the two
+// forms are identical there and a stamp collapses to a single element.
 function pathDataByInk(strokes, palette) {
-  const byInk = new Map()
+  const runs = []
   for (const stroke of strokes) {
     if (stroke.pts.length < 2) continue
     const ink = inkFromKey(inkKeyOf(stroke), palette)
-    const run = 'M ' + stroke.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L ')
-    const prev = byInk.get(ink)
-    byInk.set(ink, prev ? prev + ' ' + run : run)
+    const d = 'M ' + stroke.pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L ')
+    const last = runs[runs.length - 1]
+    if (last && last[0] === ink) last[1] += ' ' + d
+    else runs.push([ink, d])
   }
-  return [...byInk.entries()]
+  return runs
 }
 
 function shade(color, factor) {
