@@ -1,6 +1,10 @@
+import { useCallback, useMemo, useState } from 'react'
 import { BackgroundArt } from '../BackgroundArt'
-import { MARK_LIBRARIES } from '../../background/library'
+import { BackgroundLab } from '../BackgroundLab'
+import { MARK_LIBRARIES, MARK_PALETTES, MARK_SHAPES, CANONICAL_COLORWAY } from '../../background/library'
 import { hash32 } from '../../background/rng'
+import { CHOREOGRAPHY } from '../../background/choreography'
+import { useMotionPresetEpoch } from '../../context/MotionPresetContext'
 import { SECTIONS } from '../../data/navigation'
 import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING, BACKGROUND_GRID } from './backgroundFlag'
 
@@ -70,8 +74,46 @@ const SECTION_LIBRARY = {
 }
 const LANDING_LIBRARY = 'tokenLab'
 
+// ── Colorways: which authored file set each theme draws ───────────────────────
+//
+// Every library is authored four times, once per theme. The geometry is shared
+// and loaded once; only the paint differs, and it arrives as a Map from the
+// canonical ink to this theme's. The reasoning for that split, and the ruling it
+// protects, are in library.js.
+//
+// This map is the whole theme policy now. What used to live here was a runtime
+// ink transform: a mode, a theme to fire it in, and a set of rat inks to scope
+// it to, all of it compensating for art that existed in one polarity. Four
+// authored colorways answer that question at the source, so the policy reduces
+// to a lookup and the transform survives only as a lab knob (see ink.js).
+const THEME_COLORWAY = {
+  light: 'lightMode',
+  dark: 'darkMode',
+  'high-contrast-light': 'contrastLight',
+  'high-contrast-dark': 'contrastDark',
+}
+
 export default function NavBackgroundArt(props) {
-  const library = MARK_LIBRARIES[SECTION_LIBRARY[props.section] || LANDING_LIBRARY]
+  // The one line by which the Token Lab tool bar reaches the background. It
+  // moves on a preset load or a reset and on nothing else, so a slider drag
+  // still changes nothing here. BackgroundArt turns each change into a fresh
+  // token read and one replayed reveal.
+  const revealKey = useMotionPresetEpoch()
+
+  const libraryKey = SECTION_LIBRARY[props.section] || LANDING_LIBRARY
+  const library = MARK_LIBRARIES[libraryKey]
+
+  // The theme's authored colorway. Falls back to the canonical one for an
+  // unknown theme name, which paints the art as drawn rather than as nothing.
+  const colorway = THEME_COLORWAY[props.palette?.theme] || CANONICAL_COLORWAY
+  const markPalette = MARK_PALETTES[libraryKey]?.[colorway] ?? null
+  const shapes = MARK_SHAPES[libraryKey]?.[colorway] ?? null
+
+  // No automatic transform any more: the colorways carry the theme. `?ink=` and
+  // the lab's dropdown still reach it, which is what makes it an exploration
+  // knob rather than a policy. It now applies on top of the authored colorway
+  // rather than instead of it, so `?ink=invert` in light inverts the LIGHT art.
+  const inkTransform = BACKGROUND_TUNING.ink ?? 'authored'
 
   // Roots are the one override that cannot be resolved at module scope: they
   // arrive as fractions of the column and the column is only measured by the
@@ -81,14 +123,82 @@ export default function NavBackgroundArt(props) {
     ? BACKGROUND_TUNING.roots.map((f) => f * props.width)
     : undefined
 
+  // ── Lab state ───────────────────────────────────────────────────────────────
+  //
+  // Owned HERE, one level above BackgroundArt, because the panel and the artwork
+  // are siblings that have to agree: the panel writes a value, the artwork reads
+  // it. This is the lowest node that sees both.
+  //
+  // Seeded from the committed defaults and the URL, so opening the lab changes
+  // nothing on screen: it starts at whatever the page was already drawing, and
+  // every knob is a departure from that rather than a fresh starting point.
+  // David's settled values (2026-07-27), so the lab opens where he left off and
+  // every knob is a departure from the drawing he chose rather than from a
+  // neutral one. `inkNormalize` and `strokeWidth` apply to the TRACED face only:
+  // the native face fills authored shapes and has no stroke to weight.
+  const [lab, setLab] = useState(() => ({
+    inkTransform,
+    inkOverrides: {},
+    inkNormalize: 1,
+    strokeWidth: 1.3,
+    minSpacing: 30,
+    budget: BACKGROUND_TUNING.budget ?? 40,
+    stampScale: BACKGROUND_TUNING.scale ?? 0.45,
+    face: BACKGROUND_TUNING.face ?? 'vector',
+    idleAmplitude: CHOREOGRAPHY.idleAmplitude,
+    driftMin: CHOREOGRAPHY.driftPeriodClamp[0],
+    driftMax: CHOREOGRAPHY.driftPeriodClamp[1],
+  }))
+  const [stats, setStats] = useState(null)
+
+  // useCallback because this is a dependency of the effect in BackgroundArt that
+  // reports the counts. A fresh function identity every render would re-run that
+  // effect every render, and the setState inside it would loop.
+  // A fresh array every render would re-run the idle memo every render, and the
+  // memo is what holds the sway steady. Rebuilt only when a bound actually moves.
+  const driftPeriodClamp = useMemo(
+    () => [lab.driftMin, Math.max(lab.driftMin, lab.driftMax)],
+    [lab.driftMin, lab.driftMax],
+  )
+
+  const handleStats = useCallback((next) => setStats(next), [])
+
   return (
-    <BackgroundArt
-      {...props}
-      library={library}
-      seed={VISIT_SEED}
-      showGrid={BACKGROUND_GRID}
-      {...(roots && { roots })}
-      {...TUNING}
-    />
+    <>
+      <BackgroundArt
+        {...props}
+        library={library}
+        seed={VISIT_SEED}
+        showGrid={BACKGROUND_GRID}
+        {...(roots && { roots })}
+        {...TUNING}
+        // Lab values come LAST so they win over TUNING and over the committed
+        // defaults. Until a knob is touched they hold those same values, so the
+        // override is invisible.
+        inkTransform={lab.inkTransform}
+        markPalette={markPalette}
+        shapes={shapes}
+        inkOverrides={lab.inkOverrides}
+        inkNormalize={lab.inkNormalize}
+        strokeWidth={lab.strokeWidth}
+        minSpacing={lab.minSpacing}
+        budget={lab.budget}
+        stampScale={lab.stampScale}
+        face={lab.face}
+        revealKey={revealKey}
+        idleAmplitude={lab.idleAmplitude}
+        driftPeriodClamp={driftPeriodClamp}
+        onStats={handleStats}
+      />
+      <BackgroundLab
+        library={library}
+        libraryKey={libraryKey}
+        colorway={colorway}
+        markPalette={markPalette}
+        state={lab}
+        onChange={setLab}
+        stats={stats}
+      />
+    </>
   )
 }

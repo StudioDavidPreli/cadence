@@ -14,6 +14,7 @@ import { SpringVisualizer } from '../SpringVisualizer'
 import { MotionTilesSection } from '../MotionTiles/MotionTilesSection'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { NavColumn } from '../NavColumn'
+import { MotionPresetEpochProvider } from '../../context/MotionPresetContext'
 import { DemoArea } from '../DemoArea'
 import { useDemoOverlay } from '../DemoArea/overlayContext'
 import { CodeBlock } from '../CodeBlock'
@@ -1437,6 +1438,12 @@ const DEMO_NAV_ITEMS = ['Overview', 'Token Lab', 'Principles']
 
 export function TokenLab() {
   const [rawState, rawDispatch] = useReducer(reducer, INITIAL_STATE)
+
+  // Bumped by the dispatch wrapper below on LOAD_PRESET and RESET_TO_DEFAULTS
+  // only, and read by the nav background so it can re-reveal on a deliberate
+  // preset change without re-timing on every slider frame. See
+  // MotionPresetContext for why it is a counter rather than a preset name.
+  const [presetEpoch, setPresetEpoch] = useState(0)
   // Default-open sections (David, 2026-07-21): Presets and Export bracket the
   // token sections, both open so the two entry/exit points read at a glance;
   // Easing opens with them. The four remaining token families (Spring, Scale,
@@ -1532,9 +1539,16 @@ export function TokenLab() {
   const scaleConfig    = exploreMode ? SCALE_CONFIG_EXPLORE    : SCALE_CONFIG
   const springConfig   = exploreMode ? SPRING_CONFIG_EXPLORE   : SPRING_CONFIG
 
+  // The epoch moves only for the two actions that rewrite every token at once.
+  // A slider drag goes through SET_DURATION and friends and leaves it alone,
+  // which is what keeps the background from re-timing on every frame. See
+  // MotionPresetContext.
   function dispatch(action) {
     syncToCss(action)
     rawDispatch(action)
+    if (action.type === 'LOAD_PRESET' || action.type === 'RESET_TO_DEFAULTS') {
+      setPresetEpoch((n) => n + 1)
+    }
   }
 
   function toggleSection(key) {
@@ -1981,6 +1995,7 @@ export function TokenLab() {
   )
 
   return (
+    <MotionPresetEpochProvider value={presetEpoch}>
     <ActiveTokenProvider>
     <TitlePulseProvider>
     <div className={`${styles.tokenLab} ${controlsRailed ? styles.controlsRailed : ''}`}>
@@ -2076,5 +2091,6 @@ export function TokenLab() {
     </div>
     </TitlePulseProvider>
     </ActiveTokenProvider>
+    </MotionPresetEpochProvider>
   )
 }

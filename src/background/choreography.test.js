@@ -6,6 +6,8 @@ import {
   idleTimings,
   idleStartSeconds,
   CHOREOGRAPHY,
+  driftPeriodSeconds,
+  maxSwayReach,
 } from './choreography'
 
 // Standard preset, as useMotionTokens would hand it over (seconds).
@@ -213,12 +215,38 @@ describe('idleTimings', () => {
     for (const t of idleTimings(base)) expect(t.durationX).not.toBe(t.durationY)
   })
 
-  it('keeps amplitudes small and around the frozen constant', () => {
+  it('keeps amplitudes inside the variance band around the constant', () => {
     const amps = idleTimings(base).flatMap((t) => [t.ampX, t.ampY])
     for (const a of amps) {
       expect(a).toBeGreaterThan(CHOREOGRAPHY.idleAmplitude * CHOREOGRAPHY.amplitudeVariance[0] - 1e-9)
       expect(a).toBeLessThan(CHOREOGRAPHY.idleAmplitude * CHOREOGRAPHY.amplitudeVariance[1] + 1e-9)
-      expect(a).toBeLessThan(5)     // a background drifts, it does not travel
+    }
+  })
+
+  // The judgement that used to be an absolute `< 5`, written when the constant
+  // was 3. The number moved with the constant on 2026-07-27, so the bound is
+  // stated against the mark size it has to stay under instead: a stamp is ~44px
+  // drawn, and drift that approaches a third of that stops reading as a
+  // background and starts reading as something crawling. This is a look ceiling,
+  // deliberately generous, and it is here to catch an accidental order of
+  // magnitude rather than to referee taste.
+  it('drifts rather than travels', () => {
+    const amps = idleTimings(base).flatMap((t) => [t.ampX, t.ampY])
+    for (const a of amps) expect(a).toBeLessThan(15)
+  })
+
+  it('scales every amplitude with the caller\'s value', () => {
+    const quiet = idleTimings({ ...base, amplitude: 2 }).flatMap((t) => [t.ampX, t.ampY])
+    const loud = idleTimings({ ...base, amplitude: 20 }).flatMap((t) => [t.ampX, t.ampY])
+    for (let i = 0; i < quiet.length; i++) expect(loud[i] / quiet[i]).toBeCloseTo(10)
+  })
+
+  // Zero is a real setting, not a bug: the lab's slider reaches it and it should
+  // hold the field still without disabling the idle machinery.
+  it('accepts a zero amplitude as stillness', () => {
+    for (const t of idleTimings({ ...base, amplitude: 0 })) {
+      expect(t.ampX).toBe(0)
+      expect(t.ampY).toBe(0)
     }
   })
 
@@ -273,5 +301,92 @@ describe('idleStartSeconds', () => {
   it('never returns a negative start', () => {
     expect(idleStartSeconds({ windowSeconds: 0, stampDuration: 0 })).toBeGreaterThanOrEqual(0)
     expect(idleStartSeconds({})).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('maxSwayReach', () => {
+  // The number the baseline clearance has to include. It exists so the sway
+  // amplitude and the space reserved above the nav labels cannot drift apart:
+  // a stamp placed legally at the baseline still moves after placement.
+  it('is the widest the variance can stretch the amplitude', () => {
+    expect(maxSwayReach(10)).toBeCloseTo(10 * CHOREOGRAPHY.amplitudeVariance[1])
+  })
+
+  it('defaults to the shipped amplitude', () => {
+    expect(maxSwayReach()).toBeCloseTo(CHOREOGRAPHY.idleAmplitude * CHOREOGRAPHY.amplitudeVariance[1])
+  })
+
+  it('covers every amplitude idleTimings can produce', () => {
+    for (const amplitude of [0, 3, 8, 24]) {
+      const amps = idleTimings({ periodSeconds: 4.8, seed: 7, amplitude })
+        .flatMap((t) => [t.ampX, t.ampY])
+      for (const a of amps) expect(a).toBeLessThanOrEqual(maxSwayReach(amplitude) + 1e-9)
+    }
+  })
+})
+
+describe('driftPeriodSeconds', () => {
+  const base = 4.8
+  const at = (slower, opts) => driftPeriodSeconds({ duration: { slower } }, { basePeriod: base, ...opts })
+
+  // Standard's own duration.slower is the reference, so it maps to the chrome
+  // constant exactly. The constant keeps its job as the anchor.
+  it('maps the reference duration onto the base period unchanged', () => {
+    expect(at(CHOREOGRAPHY.driftReferenceSlower)).toBeCloseTo(base)
+  })
+
+  it('runs faster for a shorter duration and slower for a longer one', () => {
+    expect(at(0.35)).toBeLessThan(base)     // Snappy
+    expect(at(1.4)).toBeGreaterThan(base)   // Cinematic
+  })
+
+  // Both values chosen to land INSIDE the clamp. 0.3s would map to 2.4s and hit
+  // the 2.5s floor, which is the clamp working rather than the scaling failing;
+  // the floor is tested on its own below.
+  it('scales in proportion inside the clamp', () => {
+    expect(at(1.2)).toBeCloseTo(base * 2)
+    expect(at(0.45)).toBeCloseTo(base * 0.75)
+  })
+
+  // The safety property, and the reason this is allowed to read a token at all.
+  // Explore mode's range is 50-2000ms; nothing in or beyond it may reach below
+  // the floor.
+  it('never returns less than the floor, whatever the token says', () => {
+    const [floor] = CHOREOGRAPHY.driftPeriodClamp
+    for (const slower of [0.05, 0.01, 0.001, 1e-9]) {
+      expect(at(slower)).toBeGreaterThanOrEqual(floor)
+    }
+  })
+
+  it('never returns more than the ceiling', () => {
+    const [, ceiling] = CHOREOGRAPHY.driftPeriodClamp
+    for (const slower of [2, 10, 1000]) expect(at(slower)).toBeLessThanOrEqual(ceiling)
+  })
+
+  it('honours a caller-supplied clamp', () => {
+    expect(at(0.05, { clamp: [1, 3] })).toBe(1)
+    expect(at(50, { clamp: [1, 3] })).toBe(3)
+  })
+
+  // No token to read is not an error: the chrome constant stands on its own,
+  // which is what the idle did before any of this.
+  it('falls back to the base period when there is nothing to read', () => {
+    expect(driftPeriodSeconds(undefined, { basePeriod: base })).toBe(base)
+    expect(driftPeriodSeconds({}, { basePeriod: base })).toBe(base)
+    expect(driftPeriodSeconds({ duration: { slower: 0 } }, { basePeriod: base })).toBe(base)
+  })
+
+  it('returns zero when there is no base period, so the idle stays off', () => {
+    expect(driftPeriodSeconds({ duration: { slower: 1 } }, { basePeriod: 0 })).toBe(0)
+  })
+
+  // The three shipped presets, end to end. This is the assertion that would have
+  // caught the first attempt: it fails if any two presets drift at the same rate.
+  it('separates the three built-in presets', () => {
+    const snappy = at(0.35)
+    const standard = at(0.6)
+    const cinematic = at(1.4)
+    expect(new Set([snappy, standard, cinematic]).size).toBe(3)
+    expect(cinematic / snappy).toBeGreaterThan(2)
   })
 })

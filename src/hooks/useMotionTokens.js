@@ -54,7 +54,25 @@ const FALLBACKS = {
 // has already decided whether to apply reduceMotion via its own
 // respectReducedMotion prop. This keeps the responsibility in one place and
 // avoids double-flattening.
-export function useMotionTokens({ respectReducedMotion = true } = {}) {
+// ── readKey: asking for a fresh read ──────────────────────────────────────────
+//
+// The CSS read below happens once and never repeats, which is correct for almost
+// every caller: a component inside TokenLab's demo column gets live values from
+// the context instead, and a component outside it wants the values as they were
+// when it mounted.
+//
+// The background is the exception, and it is the exception for a reason worth
+// naming rather than special-casing. It reveals ONCE on mount, so its token read
+// happens seconds before the user can reach a slider, and by the time a preset
+// changes the read is long stale. It cannot subscribe to the context either:
+// that would make it re-time on every drag frame, which is exactly what the
+// mount-only reveal rule exists to prevent.
+//
+// So it asks for a re-read explicitly, by passing a value that changes only when
+// something discrete has happened. `readKey` goes in the effect's dependency
+// list and does nothing else. Absent, it is `undefined` forever and this hook
+// behaves exactly as it did.
+export function useMotionTokens({ respectReducedMotion = true, readKey } = {}) {
   const override = useContext(MotionTokensContext)
   const prefersReduced = useReducedMotion()
 
@@ -108,10 +126,12 @@ export function useMotionTokens({ respectReducedMotion = true } = {}) {
         mass:      read('--motion-spring-mass',      parseUnitless, FALLBACKS.spring.mass),
       },
     })
-  }, [override])
+  }, [override, readKey])
   // override in the dependency array: if TokenLab mounts and provides a context,
   // this effect re-runs but immediately returns (the guard above). If override
   // disappears (TokenLab unmounts), the effect re-runs and re-reads from CSS.
+  // readKey alongside it: a caller that wants a fresh read changes it, and the
+  // same effect runs again against whatever is now on :root. See the note above.
 
   // Provider in scope: trust it. The provider already applied (or skipped)
   // reduceMotion based on its own respectReducedMotion prop.

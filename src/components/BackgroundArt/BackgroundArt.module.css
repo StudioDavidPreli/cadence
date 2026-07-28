@@ -9,9 +9,13 @@
      the reveal   animation-duration and animation-delay are set INLINE from JS,
                   because they are derived from the editable --motion-* tokens
                   and change when the user edits a token or switches preset.
-     the idle     also set inline, but from the fixed chrome constant
-                  --feedback-background-idle-period, which Explore mode cannot
-                  reach.
+     the idle     also set inline. Its period is derived from
+                  --motion-duration-slower and CLAMPED, with
+                  --feedback-background-idle-period as the anchor Standard maps
+                  to; the floor is what keeps an infinite animation out of strobe
+                  range whatever Explore mode does. See driftPeriodSeconds in
+                  choreography.js. Its timing function is the plain ease-in-out
+                  declared below.
 
    Neither carries a literal here. The token-integrity gate scans this file for
    inline ms values and would fail the build on one; that is deliberate and this
@@ -82,7 +86,8 @@
 
 /* Sway is split across two nested groups so the axes can run at different
    periods and never resolve into a visible ellipse. Both pass through zero at
-   0% and 100%, which is what lets a delayed start begin without a jump. */
+   0% and 100%, which is what lets a delayed start begin without a jump.
+ */
 @keyframes swayX {
   0%   { transform: translateX(0); }
   25%  { transform: translateX(var(--amp-x)); }
@@ -154,3 +159,19 @@
     animation: none;
   }
 }
+
+/* ── The native face and `transform` ────────────────────────────────────────
+   The native face places each stamp with a `transform` ATTRIBUTE, and a
+   presentation attribute is the weakest thing in the cascade: any CSS
+   `transform` declaration replaces it outright, and an animated one certainly
+   does. So `.stamp` above must never land on a placed element.
+
+   It does not have to. The native face wraps each stamp in a group that owns
+   the placement and animates the `<use>` inside it, which has no transform
+   attribute to lose. `.stamp` is therefore shared by both faces unchanged.
+
+   Two alternatives were built and compared before that structure was chosen:
+   animating the individual `scale` property, which composes with the attribute
+   instead of replacing it and keeps one element per stamp; and opacity-only,
+   which never declares a transform at all. Both worked. Nesting won because it
+   asks nothing of the browser and matches the traced face exactly. */

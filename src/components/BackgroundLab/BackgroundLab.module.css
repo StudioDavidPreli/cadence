@@ -1,0 +1,300 @@
+/* ─── BackgroundLab ───────────────────────────────────────────────────────────
+   A lab surface, not shipped chrome, but it follows the same rules the rest of
+   the app follows because there is no reason for it not to: colour comes from
+   tokens, and the one transition reads --feedback-ui-duration rather than a
+   literal. The token-integrity gate scans this directory and would fail the
+   build on an inline ms value.
+
+   Every rule that sets a background-color also sets color explicitly. That is
+   the contrast requirement in CLAUDE.md, and a lab panel that inherits text
+   colour from a themed page is exactly where it silently breaks. */
+
+.root {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ── Collapsed handle ─────────────────────────────────────────────────────── */
+.handle {
+  background: var(--color-bg2);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  transition: border-color var(--feedback-ui-duration) ease;
+}
+
+.handle:hover {
+  border-color: var(--color-accent);
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────────── */
+.panel {
+  width: 320px;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg2);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-base);
+}
+
+.title {
+  font-weight: 600;
+}
+
+.meta {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: var(--color-text-base);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  padding: 7px 4px;
+  cursor: pointer;
+  font: inherit;
+  text-transform: lowercase;
+  transition:
+    color var(--feedback-ui-duration) ease,
+    border-color var(--feedback-ui-duration) ease;
+}
+
+.tab[data-active] {
+  color: var(--color-text-base);
+  border-bottom-color: var(--color-accent);
+}
+
+.body {
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Controls ─────────────────────────────────────────────────────────────── */
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.controlHead {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+}
+
+.controlValue {
+  color: var(--color-text-base);
+  font-variant-numeric: tabular-nums;
+}
+
+.control input[type='range'] {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+.control select {
+  background: var(--color-bg);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  font: inherit;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reset,
+.rowReset {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--color-text-base);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+/* ── Ink list ─────────────────────────────────────────────────────────────── */
+.inkList,
+.markList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inkRow {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 7px;
+}
+
+/* A native colour input, deliberately. It is the one control the browser
+   already does well, it costs no code, and a lab is exactly where a
+   platform affordance beats a bespoke one. */
+.swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+}
+
+.swatchBound {
+  width: 20px;
+  height: 20px;
+  border: 1px dashed var(--color-border);
+  border-radius: 3px;
+  background: var(--color-text-base);
+}
+
+.inkName {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}
+
+.inkShare {
+  color: var(--color-text-base);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+
+.inkNote {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  min-width: 34px;
+  text-align: right;
+}
+
+/* ── Stats ────────────────────────────────────────────────────────────────── */
+.stats {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+}
+
+.stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats dt {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  text-transform: lowercase;
+}
+
+.stats dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Mark density list ────────────────────────────────────────────────────── */
+.markRow {
+  display: grid;
+  grid-template-columns: 1fr 46px 40px 26px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.markName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.markRow[data-outlier] .markName,
+.markRow[data-outlier] .markRatio {
+  color: var(--color-accent);
+}
+
+.markBar {
+  display: block;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.markBar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-text-muted);
+}
+
+.markRow[data-outlier] .markBar > span {
+  background: var(--color-accent);
+}
+
+.markRatio,
+.markSub {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.markSub {
+  color: var(--color-text-muted);
+}

@@ -57,7 +57,7 @@ function enumParam(name, allowed) {
 }
 
 // The tuning overrides, same lab-affordance spirit as ?seed=. Each is null when
-// absent, and BackgroundArt's own committed default (budget 120, scale 0.21,
+// absent, and BackgroundArt's own committed default (budget 60, scale 0.34,
 // cell 8, pop arrival, roots at 0.29/0.71, 1px mesh) stands. They exist so a
 // variant can be looked at by URL rather than by editing a constant and
 // rebuilding, which is what the visual pass needs: one open question per knob.
@@ -74,6 +74,11 @@ function enumParam(name, allowed) {
 //   ?face=vector|pixel|both  overrides the per-section face, so either
 //                     rendering can be seen in any tool. `both` is a lab state
 //                     only: it draws the composition twice, one over the other.
+//   ?ink=authored|invert|lightness  overrides the per-theme ink transform, which
+//                     is otherwise applied only to the Token Lab library on the
+//                     dark theme. `authored` forces the drawn hex everywhere,
+//                     which is how the two are compared side by side. Reasoning
+//                     and the measurements behind it: src/background/ink.js.
 //
 // e.g. ?bg=1&budget=60&scale=0.34&cell=12&arrival=scale
 export const BACKGROUND_TUNING = {
@@ -82,7 +87,8 @@ export const BACKGROUND_TUNING = {
   cell: numParam('cell', Number.parseInt),
   arrival: enumParam('arrival', ['pop', 'scale']),
   gridWeight: numParam('gridw', Number.parseFloat),
-  face: enumParam('face', ['vector', 'pixel', 'both']),
+  face: enumParam('face', ['vector', 'pixel', 'both', 'native']),
+  ink: enumParam('ink', ['authored', 'invert', 'lightness']),
   // Fractions, not pixels: the column width is not known here and the whole
   // point of the knob is that a value stays meaningful across viewport widths.
   // Anything unparseable drops the whole list rather than half of it.

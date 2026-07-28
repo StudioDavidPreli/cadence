@@ -76,6 +76,11 @@ export function samplePlacements(cells, {
   scaleVariance = COMPOSE.scaleVariance,
   alignFlow = true,
   cellSize,
+  // Minimum distance in world px between two stamp centers. 0 keeps the old
+  // behaviour exactly, which is why it is the default: the weighted sampler
+  // decides WHERE stamps want to go, and this only decides how close two of
+  // them may end up. See the rejection pass below.
+  minSpacing = 0,
 }) {
   const placements = []
   if (!cells.length || !(budget > 0) || !(markCount > 0)) {
@@ -136,9 +141,45 @@ export function samplePlacements(cells, {
   // runs, or the reveal would restagger on every regeneration.
   placements.sort((a, b) => a.y - b.y || a.iy - b.iy || a.ix - b.ix || a.k - b.k)
 
+  // ── Overlap rejection ───────────────────────────────────────────────────────
+  //
+  // The weighted sampler above is free to put several stamps in one cell, which
+  // is what preserves clustering and is deliberate (see the Bernoulli comment).
+  // What it cannot see is that two stamps from NEIGHBOURING cells can land on
+  // top of each other after jitter, and at a large stampScale that reads as one
+  // illegible smear rather than two marks.
+  //
+  // A greedy pass rather than a smarter Poisson-disk sampler, for two reasons.
+  // It runs AFTER the total sort, so it is fully deterministic: the same seed
+  // keeps the same stamps and drops the same ones, which the reveal depends on.
+  // And it subtracts from the composition without redistributing, so raising
+  // the spacing thins the field instead of rearranging it, which is the
+  // behaviour that makes the knob legible while you drag it.
+  //
+  // O(n^2) against the accepted set. At a budget in the low hundreds that is a
+  // few thousand comparisons on one regeneration, and the memo means it does
+  // not run again until the composition inputs change.
+  let kept = placements
+  let rejected = 0
+  if (minSpacing > 0) {
+    const min2 = minSpacing * minSpacing
+    const accepted = []
+    for (const p of placements) {
+      let clash = false
+      for (const q of accepted) {
+        const dx = p.x - q.x
+        const dy = p.y - q.y
+        if (dx * dx + dy * dy < min2) { clash = true; break }
+      }
+      if (clash) rejected++
+      else accepted.push(p)
+    }
+    kept = accepted
+  }
+
   return {
-    placements,
-    stats: { budget: placements.length, cells: cells.length, occupied },
+    placements: kept,
+    stats: { budget: kept.length, cells: cells.length, occupied, rejected },
   }
 }
 

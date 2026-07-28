@@ -31,6 +31,52 @@ function field(rows, { cols = 8, cell = 14, weightAt = () => 1 } = {}) {
 const base = { seed: 11, budget: 120, markCount: 6, scale: 0.21, cellSize: 14 }
 const key = (p) => `${p.ix},${p.iy},${p.k}`
 
+describe('samplePlacements minSpacing', () => {
+  const spread = { ...base, budget: 200 }
+
+  it('is inert at 0, which is the committed behaviour', () => {
+    const off = samplePlacements(field(30), spread).placements
+    const zero = samplePlacements(field(30), { ...spread, minSpacing: 0 }).placements
+    expect(zero).toEqual(off)
+  })
+
+  it('leaves no two accepted centers closer than the spacing', () => {
+    const { placements } = samplePlacements(field(30), { ...spread, minSpacing: 20 })
+    for (let i = 0; i < placements.length; i++) {
+      for (let j = i + 1; j < placements.length; j++) {
+        const d = Math.hypot(placements[i].x - placements[j].x, placements[i].y - placements[j].y)
+        expect(d).toBeGreaterThanOrEqual(20)
+      }
+    }
+  })
+
+  it('thins rather than rearranges: every survivor was in the unspaced set', () => {
+    const off = new Set(samplePlacements(field(30), spread).placements.map(key))
+    const on = samplePlacements(field(30), { ...spread, minSpacing: 20 }).placements
+    for (const p of on) expect(off.has(key(p))).toBe(true)
+  })
+
+  it('reports what it dropped', () => {
+    const off = samplePlacements(field(30), spread).placements.length
+    const { placements, stats } = samplePlacements(field(30), { ...spread, minSpacing: 20 })
+    expect(stats.rejected).toBe(off - placements.length)
+    expect(stats.budget).toBe(placements.length)
+  })
+
+  it('is deterministic, so the reveal cannot restagger between runs', () => {
+    const a = samplePlacements(field(30), { ...spread, minSpacing: 25 }).placements
+    const b = samplePlacements(field(30), { ...spread, minSpacing: 25 }).placements
+    expect(a.map(key)).toEqual(b.map(key))
+  })
+
+  it('drops more as the spacing grows', () => {
+    const counts = [0, 15, 30, 60].map(
+      (minSpacing) => samplePlacements(field(30), { ...spread, minSpacing }).placements.length,
+    )
+    for (let i = 1; i < counts.length; i++) expect(counts[i]).toBeLessThanOrEqual(counts[i - 1])
+  })
+})
+
 describe('samplePlacements', () => {
   it('returns nothing for an empty field', () => {
     const { placements, stats } = samplePlacements([], base)

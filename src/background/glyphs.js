@@ -346,32 +346,88 @@ function styleRules(text) {
   return map
 }
 
-// Resolve a tag's paint in the order the browser would: inline style, then
-// presentation attribute, then a class rule. Stroke wins over fill when both
-// are present, because a stroked mark's ink is its stroke; the fill fallback is
-// what lets a fill-authored library (all of testSVGS) work under the silhouette
-// ruling, where fills enter the pipeline as outlines.
-export function resolvePaint(tag, rules = {}) {
+// What one tag declares for a property: inline style, then presentation
+// attribute, then a class rule. Nothing above the tag itself.
+function declaredValue(tag, rules, prop) {
   const attr = (name) => {
     const m = tag.match(new RegExp(`\\s${name}="([^"]*)"`))
     return m ? m[1] : undefined
   }
-  const classes = (attr('class') || '').split(/\s+/).filter(Boolean)
   const inline = {}
   for (const part of (attr('style') || '').split(';')) {
     const [k, v] = part.split(':')
     if (k && v) inline[k.trim()] = v.trim()
   }
+  if (inline[prop]) return inline[prop]
+  const a = attr(prop)
+  if (a) return a
+  for (const c of (attr('class') || '').split(/\s+/).filter(Boolean)) {
+    if (rules[c] && rules[c][prop]) return rules[c][prop]
+  }
+  return undefined
+}
+
+// Resolve a tag's paint in the order the browser would: inline style, then
+// presentation attribute, then a class rule. Stroke wins over fill when both
+// are present, because a stroked mark's ink is its stroke; the fill fallback is
+// what lets a fill-authored library (all of testSVGS) work under the silhouette
+// ruling, where fills enter the pipeline as outlines.
+//
+// `ancestors` is the open element chain, NEAREST FIRST, and it is what makes a
+// group fill reach the shapes inside it. `fill` and `stroke` are inherited
+// properties in SVG, so a file may declare its ink once on a wrapper and leave
+// every shape bare:
+//
+//   <g fill="#282828"><rect .../><rect .../></g>
+//
+// Reading the shape tag alone returns no paint for those rects. They are not
+// dropped when that happens, which is what made the gap expensive: a stroke with
+// no ink key resolves to the theme's own ink at paint time, so a whole library
+// can silently repaint itself as --color-text-base and still draw. Measured on
+// the Token Lab library the day the pixel exports landed, 62.9% of total stroke
+// length resolved to nothing and only the rats' palette reached the census.
+//
+// Per PROPERTY, not per resolved paint. The chain is walked for `stroke` and for
+// `fill` separately, and only then does stroke-over-fill apply. Resolving the
+// pair at each level instead would let a group's fill lose to a shape's own
+// `fill="none"` in the wrong order, and would make an ancestor's stroke outrank
+// a child's explicit fill.
+//
+// `fill="none"` on the shape still means none. It is a declared value, so it
+// wins the walk and then fails the none test, which is the behaviour the format
+// asks for: none is a choice, absence is a question for the parent.
+// ── An undeclared fill is black, not a gap ────────────────────────────────────
+//
+// SVG's initial value for `fill` is black, so a `<path d="..."/>` with no paint
+// anywhere up its chain is a BLACK path, and every renderer draws it that way.
+// This used to return no paint for that case, which mattered on real art:
+// exporters legitimately omit `fill` when a shape is black, and
+// `tokenLab/contrastLight` does exactly that for 69 paths of runner3 and 67 of
+// runner4. Those came through unpainted and fell back to --color-text-base at
+// paint time, which is a coincidence away from correct and not the same thing.
+//
+// `fill="none"` is still nothing. That is a declaration, and the difference
+// between "no fill" and "fill: none" is the whole reason the walk tracks
+// declared values rather than resolved ones.
+const DEFAULT_FILL = '#000000'
+
+export function resolvePaint(tag, rules = {}, ancestors = []) {
   const lookup = (prop) => {
-    if (inline[prop]) return inline[prop]
-    const a = attr(prop)
-    if (a) return a
-    for (const c of classes) if (rules[c] && rules[c][prop]) return rules[c][prop]
+    for (const el of [tag, ...ancestors]) {
+      const value = declaredValue(el, rules, prop)
+      if (value) return value
+    }
     return undefined
   }
   const stroke = lookup('stroke')
   const fill = lookup('fill')
-  const paint = stroke && stroke !== 'none' ? stroke : fill && fill !== 'none' ? fill : null
+
+  let paint
+  if (stroke && stroke !== 'none') paint = stroke
+  else if (fill && fill !== 'none') paint = fill
+  else if (fill === undefined) paint = DEFAULT_FILL  // nothing declared: SVG says black
+  else paint = null                                  // fill="none" with no stroke: paints nothing
+
   return {
     color: paint === 'currentColor' ? null : paint,
     tokenBound: paint === 'currentColor',
@@ -457,9 +513,13 @@ export function parseTransform(raw) {
 // default for a shape it cannot represent, and the wrong one for a rectangle,
 // which is four line segments and converts exactly. It matters because a
 // pixel-authored library is made of nothing else: measured on the Token Lab
-// library, 1550 rects against 12 paths, and 15 of its 17 marks had no path at
-// all, so they were not degraded by the old behaviour, they were dropped
-// (`no paths, skipped`) and the library silently shrank to two marks.
+// library as it stands, 1311 rects against zero paths, and not one of its 13
+// marks carries a `<path>` at all, so under the old behaviour they were not
+// degraded, they were dropped (`no paths, skipped`) and the library was empty.
+//
+// The 2026-07-27 re-cut moved it further this way, not less. The marks were
+// mixed rect-and-path exports at 1550 rects against 12 paths, and are now one
+// rect per pixel throughout, every mark on an 11px box.
 //
 // Rounded corners are not converted. rx/ry would need arcs and no library here
 // uses them, so a rounded rect converts as a sharp one and says so.
@@ -497,8 +557,41 @@ export function parseMarkSvg(text, name) {
   // document order. Draw order is not decorative here: the pixel face resolves a
   // cell's ink by which stroke crosses it furthest, and document order is the
   // tie-break the browser would apply to the same art.
-  for (const tag of text.matchAll(/<(path|rect)\b([^>]*)>/g)) {
-    const [, kind, attrs] = tag
+  //
+  // The pass carries an OPEN ELEMENT STACK rather than matching shapes alone,
+  // because two of the things a shape needs are routinely declared above it:
+  // its paint (see resolvePaint) and its placement. A stack costs one push and
+  // one pop per group and answers both, where a flat shape match can answer
+  // neither. `<svg>` seeds the stack because it is an element like any other and
+  // may carry a document-wide `fill`.
+  //
+  // The regex reads an opening tag, a closing tag, and a self-closing tag with
+  // the same match, which is what keeps `<g/>` from unbalancing the stack. It is
+  // not an XML parser and does not try to be: it holds for the export shapes
+  // this library is authored in, and anything it cannot represent still leaves a
+  // warning rather than a silent hole.
+  // Every frame holds the tag's ATTRIBUTE text, never the tag itself, so the
+  // root and a group are the same kind of thing to resolvePaint.
+  const stack = []
+  const svgAttrs = (text.match(/<svg\b([^>]*)>/) || [])[1]
+  if (svgAttrs) stack.push({ tag: svgAttrs, matrix: null })
+
+  for (const tag of text.matchAll(/<(\/?)(svg|g|path|rect)\b([^>]*?)(\/?)>/g)) {
+    const [, closing, kind, attrs, selfClosing] = tag
+
+    if (kind === 'svg') continue // seeded above; never pushed or popped again
+
+    if (kind === 'g') {
+      if (closing) stack.pop()
+      else if (!selfClosing) {
+        const raw = (attrs.match(/\stransform="([^"]*)"/) || [])[1]
+        const { matrix, unsupported } = parseTransform(raw)
+        unsupported.forEach((fn) => unsupportedTransforms.add(fn))
+        stack.push({ tag: attrs, matrix: raw ? matrix : null })
+      }
+      continue
+    }
+
     const d = kind === 'rect' ? rectToPath(attrs) : (attrs.match(/\sd="([^"]*)"/) || [])[1]
     if (!d) continue
     if (kind === 'rect' && /\sr[xy]="/.test(attrs)) roundedRects += 1
@@ -507,9 +600,24 @@ export function parseMarkSvg(text, name) {
     const { matrix, unsupported } = parseTransform(transformRaw)
     unsupported.forEach((fn) => unsupportedTransforms.add(fn))
 
-    const paint = resolvePaint(attrs, rules)
+    // Ancestor transforms compose OUTERMOST FIRST, then the shape's own last,
+    // which is the same left-to-right order parseTransform uses within a single
+    // attribute and for the same reason: the outer transform applies to the
+    // coordinate system the inner one is expressed in. A group transform was
+    // previously dropped without a word, which is the failure the path-transform
+    // section above exists to prevent, one level up.
+    let composed = null
+    for (const frame of stack) {
+      if (!frame.matrix) continue
+      composed = composed ? multiply(composed, frame.matrix) : frame.matrix
+    }
+    if (transformRaw) composed = composed ? multiply(composed, matrix) : matrix
+
+    // Nearest first, so the shape's own declaration outranks its parent's.
+    const ancestors = stack.map((frame) => frame.tag).reverse()
+    const paint = resolvePaint(attrs, rules, ancestors)
     if (!paint.color && !paint.tokenBound) warnings.push(`${name}: a ${kind} has no resolvable paint`)
-    paths.push({ d, ...paint, ...(transformRaw && { transform: matrix }) })
+    paths.push({ d, ...paint, ...(composed && { transform: composed }) })
   }
 
   if (roundedRects) {
