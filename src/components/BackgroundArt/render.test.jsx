@@ -1,17 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { BackgroundArt } from './index'
-import { MARK_LIBRARIES, MARK_PALETTES, MARK_SHAPES } from '../../background/library'
+import { loadColorway, MARK_LIBRARY_KEYS } from '../../background/library'
 
 // ─── Does it render at all ────────────────────────────────────────────────────
 //
 // This file exists because of a bug it would have caught. `nativeDefs` is a
 // const that evaluates during render and referenced `symbolPrefix`, which was
-// declared sixty lines further down, so every native-face render threw
-// `Cannot access 'symbolPrefix' before initialization` and hit the error
-// boundary. Lint did not see it, the unit suite did not see it, and the build
-// did not see it, because nothing in the project had ever rendered this
-// component.
+// declared sixty lines further down, so every render threw `Cannot access
+// 'symbolPrefix' before initialization` and hit the error boundary. Lint did not
+// see it, the unit suite did not see it, and the build did not see it, because
+// nothing in the project had ever rendered this component.
 //
 // Server rendering rather than a DOM harness, which is what makes it free: the
 // project has no jsdom and no testing-library, and does not need them for this.
@@ -49,12 +48,18 @@ afterAll(() => {
   globalThis.document = realDocument
 })
 
-const palette = {
-  tokenInk: '#e1e1e1',
-  ramp: ['#3a3a3a', '#5c5c5c', '#8a8a8a', '#c4c4c4'],
-  grid: '#2a2a2a',
-  blanket: null,
-  theme: 'dark',
+// Two fields, which is the whole palette since the traced and pixel faces went.
+// The tone ramp, the grid ink and the high-contrast blanket all belonged to them.
+const palette = { tokenInk: '#e1e1e1', theme: 'dark' }
+
+// The real assets, loaded once. Same argument as library.test.js: a fixture
+// would prove the renderer works and prove nothing about the art it is handed.
+const SHAPES = {}
+for (const key of MARK_LIBRARY_KEYS) {
+  SHAPES[key] = {
+    darkMode: await loadColorway(key, 'darkMode'),
+    lightMode: await loadColorway(key, 'lightMode'),
+  }
 }
 
 const render = (props) =>
@@ -65,57 +70,39 @@ const render = (props) =>
       baseline={260}
       seed={4242}
       palette={palette}
+      libraryKey="tokenLab"
+      shapes={SHAPES.tokenLab.darkMode}
+      markCount={SHAPES.tokenLab.darkMode.length}
       {...props}
     />,
   )
 
-const LIBRARIES = Object.keys(MARK_LIBRARIES)
-const FACES = ['vector', 'native', 'pixel', 'both']
-
 describe('BackgroundArt renders', () => {
-  it.each(FACES)('in the %s face without throwing', (face) => {
-    expect(() =>
-      render({
-        face,
-        library: MARK_LIBRARIES.tokenLab,
-        shapes: MARK_SHAPES.tokenLab.darkMode,
-        markPalette: MARK_PALETTES.tokenLab.darkMode,
-      }),
-    ).not.toThrow()
-  })
-
-  it.each(LIBRARIES)('for the %s library in every face', (key) => {
-    for (const face of FACES) {
+  it.each(MARK_LIBRARY_KEYS)('the %s library without throwing', (key) => {
+    for (const colorway of ['darkMode', 'lightMode']) {
       expect(() =>
         render({
-          face,
-          library: MARK_LIBRARIES[key],
-          shapes: MARK_SHAPES[key].lightMode,
-          markPalette: MARK_PALETTES[key].lightMode,
+          libraryKey: key,
+          shapes: SHAPES[key][colorway],
+          markCount: SHAPES[key][colorway].length,
         }),
       ).not.toThrow()
     }
   })
 
-  it('draws stamps in the vector face', () => {
-    const html = render({ face: 'vector', library: MARK_LIBRARIES.tokenLab })
-    expect(html).toMatch(/<path/)
-    expect(html).toMatch(/stroke=/)
+  it('draws stamps', () => {
+    const html = render({})
+    expect(html).toMatch(/<use/)
+    expect(html).toMatch(/<defs>/)
   })
 
-  // The bug this whole trio of arrivals exists to fix: placement lives in a
+  // The bug the arrival structure exists to fix: placement lives in a
   // `transform` attribute, and a CSS-animated `transform` replaces it outright.
   // Markup assertions cannot see a cascade, so the rule is structural instead:
   // an element carrying a transform ATTRIBUTE may not also carry a class whose
   // animation declares `transform`. `.stamp` is that class.
   it('never animates transform on a placed element', () => {
-    const html = render({
-      face: 'native',
-      library: MARK_LIBRARIES.tokenLab,
-      shapes: MARK_SHAPES.tokenLab.darkMode,
-      markPalette: MARK_PALETTES.tokenLab.darkMode,
-    })
-    // Every opening tag that declares a transform attribute, with its classes.
+    const html = render({})
     for (const [tag] of html.matchAll(/<(?:use|g)\b[^>]*transform="[^"]*"[^>]*>/g)) {
       const cls = tag.match(/class="([^"]*)"/)?.[1] ?? ''
       expect(cls, `a placed element carries ${cls}`).not.toMatch(/(^|\s)stamp(\s|$)/)
@@ -123,35 +110,40 @@ describe('BackgroundArt renders', () => {
     expect(html).toMatch(/<use/)
   })
 
-  // The native face's two halves have to agree about the id, and they are
-  // written sixty lines apart. A `<use>` pointing at nothing renders silently as
-  // an empty document, which is precisely the failure that is invisible by eye.
-  it('points every native use at a group that exists', () => {
-    const html = render({
-      face: 'native',
-      library: MARK_LIBRARIES.tokenLab,
-      shapes: MARK_SHAPES.tokenLab.darkMode,
-      markPalette: MARK_PALETTES.tokenLab.darkMode,
-    })
+  // The two halves of the face have to agree about the id, and they are written
+  // sixty lines apart. A `<use>` pointing at nothing renders silently as an empty
+  // document, which is precisely the failure that is invisible by eye.
+  it('points every use at a group that exists', () => {
+    const html = render({})
     const defined = new Set([...html.matchAll(/<g id="([^"]+)"/g)].map((m) => m[1]))
     const referenced = [...html.matchAll(/<use[^>]+href="#([^"]+)"/g)].map((m) => m[1])
 
-    expect(defined.size).toBe(MARK_SHAPES.tokenLab.darkMode.length)
+    expect(defined.size).toBe(SHAPES.tokenLab.darkMode.length)
     expect(referenced.length).toBeGreaterThan(0)
     expect(referenced.filter((id) => !defined.has(id))).toEqual([])
   })
 
-  it('fills in the native face and strokes in neither', () => {
-    const html = render({
-      face: 'native',
-      library: MARK_LIBRARIES.tokenLab,
-      shapes: MARK_SHAPES.tokenLab.darkMode,
-      markPalette: MARK_PALETTES.tokenLab.darkMode,
-    })
-    // The authored colorway reaches the document as a real fill, and nothing in
-    // this face is stroked: that is the whole difference from the traced one.
+  it('fills and never strokes', () => {
+    const html = render({})
+    // The authored colorway reaches the document as a real fill, and nothing is
+    // stroked. That was the whole difference from the traced face, and it is now
+    // simply what the renderer does.
     expect(html).toMatch(/fill="#/)
     expect(html).not.toMatch(/stroke-width=/)
+    expect(html).not.toMatch(/stroke="/)
+  })
+
+  // A theme switch must repaint without moving anything. The `<use href>` ids
+  // carry the seed and not the theme for exactly this reason: same placements,
+  // same references, different fills in the defs.
+  it('keeps every placement when the colorway changes', () => {
+    const placements = (html) =>
+      [...html.matchAll(/<g transform="([^"]+)"/g)].map((m) => m[1])
+    const dark = render({ shapes: SHAPES.tokenLab.darkMode })
+    const light = render({ shapes: SHAPES.tokenLab.lightMode })
+
+    expect(placements(light)).toEqual(placements(dark))
+    expect(light).not.toBe(dark)
   })
 
   // The reveal replay. A CSS animation does not restart just because its class
@@ -160,34 +152,17 @@ describe('BackgroundArt renders', () => {
   // every other respect.
   it('rekeys its stamps when revealKey changes', () => {
     const keysOf = (html) => [...html.matchAll(/<use[^>]+href="#([^"]+)"/g)].map((m) => m[1])
-    const first = render({
-      face: 'native',
-      revealKey: 0,
-      library: MARK_LIBRARIES.tokenLab,
-      shapes: MARK_SHAPES.tokenLab.darkMode,
-    })
     // Same composition either way: revealKey must not disturb the geometry, only
     // replay the arrival over it.
-    const second = render({
-      face: 'native',
-      revealKey: 3,
-      library: MARK_LIBRARIES.tokenLab,
-      shapes: MARK_SHAPES.tokenLab.darkMode,
-    })
-    expect(keysOf(second)).toEqual(keysOf(first))
-    expect(second).toMatch(/<use/)
+    expect(keysOf(render({ revealKey: 3 }))).toEqual(keysOf(render({ revealKey: 0 })))
+  })
+
+  it('renders nothing rather than throwing before the colorway has landed', () => {
+    expect(() => render({ shapes: null, markCount: 0 })).not.toThrow()
+    expect(render({ shapes: null, markCount: 0 })).toBe('')
   })
 
   it('survives an empty library rather than throwing', () => {
-    expect(() => render({ face: 'native', library: [], shapes: [] })).not.toThrow()
-    expect(() => render({ face: 'vector', library: [] })).not.toThrow()
-  })
-
-  // A native render with no shapes handed to it is a wiring mistake, not a
-  // crash: the caller resolved a colorway the library does not have.
-  it('renders nothing rather than breaking when native has no shapes', () => {
-    expect(() =>
-      render({ face: 'native', library: MARK_LIBRARIES.tokenLab, shapes: null }),
-    ).not.toThrow()
+    expect(() => render({ shapes: [], markCount: 0 })).not.toThrow()
   })
 })

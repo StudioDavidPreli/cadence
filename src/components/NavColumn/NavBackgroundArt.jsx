@@ -1,20 +1,23 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BackgroundArt } from '../BackgroundArt'
-import { BackgroundLab } from '../BackgroundLab'
-import { MARK_LIBRARIES, MARK_PALETTES, MARK_SHAPES, CANONICAL_COLORWAY } from '../../background/library'
+import { loadColorway, cachedColorway, CANONICAL_COLORWAY } from '../../background/library'
 import { hash32 } from '../../background/rng'
-import { CHOREOGRAPHY } from '../../background/choreography'
 import { useMotionPresetEpoch } from '../../context/MotionPresetContext'
 import { SECTIONS } from '../../data/navigation'
-import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING, BACKGROUND_GRID } from './backgroundFlag'
+import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING } from './backgroundFlag'
 
 // The lazy chunk's contents. Everything the background system needs is imported
 // HERE rather than in NavBackground, so the flag-off path pulls none of it into
-// the main bundle: not the mark library, not the L-system, not the flattener.
+// the main bundle: not the mark loader, not the L-system, not the sampler.
 //
 // Splitting the boundary this way (a thin flagged wrapper that dynamically
 // imports a module holding the real imports) is the same shape the Motion Tiles
 // grid uses for its own chunk.
+//
+// The MARKS are a second boundary below this one. They are the bulk of the
+// weight and only one folder is ever drawn, so library.js fetches them per
+// (library, colorway) rather than shipping all twelve in this chunk. See the
+// note there.
 
 // ── The seed, resolved once per visit ─────────────────────────────────────────
 //
@@ -38,31 +41,39 @@ import { BACKGROUND_SEED_PARAM, BACKGROUND_TUNING, BACKGROUND_GRID } from './bac
 // first point in the chain where rng is allowed to load.
 const VISIT_SEED = BACKGROUND_SEED_PARAM ?? hash32(String(Date.now()))
 
+// ── The settled composition ───────────────────────────────────────────────────
+//
+// David's values, 2026-07-27, promoted from the tuning lab's seed state when the
+// lab was deleted. They were adjustable while the art was still moving and the
+// art has stopped moving.
+//
+// The URL knobs below still reach `budget` and `stampScale`, which is the
+// version of the lab worth keeping: a value you can already name, passed without
+// a rebuild. The knobs that only fed the deleted faces (cell size, arrival,
+// grid, face, ink mode) went with them.
+const COMPOSITION = {
+  budget: 40,
+  stampScale: 0.45,
+  minSpacing: 30,
+}
+
 // URL tuning overrides, mapped to BackgroundArt's prop names, each present only
-// when its param was. Anything absent is simply not passed, so the component's
-// own committed default stands. Built once at module scope like the seed.
+// when its param was. Anything absent is simply not passed, so the constant
+// above stands. Built once at module scope like the seed.
 //
 // Spreading a conditional like this is the idiom for "pass this prop only if I
 // have a value": `false && {...}` spreads to nothing, so an absent param leaves
-// the key off the object entirely rather than passing `undefined`. That matters
-// because `undefined` would override a default in some prop patterns and does
-// not here, and leaving the key off is the version that is true either way.
+// the key off the object entirely rather than passing `undefined`.
 const TUNING = {
   ...(BACKGROUND_TUNING.budget != null && { budget: BACKGROUND_TUNING.budget }),
   ...(BACKGROUND_TUNING.scale != null && { stampScale: BACKGROUND_TUNING.scale }),
-  ...(BACKGROUND_TUNING.cell != null && { cellSize: BACKGROUND_TUNING.cell }),
-  ...(BACKGROUND_TUNING.arrival != null && { cellReveal: BACKGROUND_TUNING.arrival }),
-  ...(BACKGROUND_TUNING.gridWeight != null && { gridWeight: BACKGROUND_TUNING.gridWeight }),
-  ...(BACKGROUND_TUNING.face != null && { face: BACKGROUND_TUNING.face }),
 }
 
 // ── Which library each tool draws from ────────────────────────────────────────
 //
 // One library per tool, and the mapping lives HERE rather than in NavBackground
 // for the same reason every heavy import does: NavBackground is in the eager
-// bundle, so a `MARK_LIBRARIES` import up there would put all three libraries in
-// the main chunk with the flag off, which is the one property the lazy split
-// exists to keep.
+// bundle.
 //
 // `null` is the landing/hero, where no section is open. It draws the Token Lab
 // library, which is David's call: the landing is the Token Lab's front door and
@@ -76,21 +87,58 @@ const LANDING_LIBRARY = 'tokenLab'
 
 // ── Colorways: which authored file set each theme draws ───────────────────────
 //
-// Every library is authored four times, once per theme. The geometry is shared
-// and loaded once; only the paint differs, and it arrives as a Map from the
-// canonical ink to this theme's. The reasoning for that split, and the ruling it
-// protects, are in library.js.
-//
-// This map is the whole theme policy now. What used to live here was a runtime
-// ink transform: a mode, a theme to fire it in, and a set of rat inks to scope
-// it to, all of it compensating for art that existed in one polarity. Four
-// authored colorways answer that question at the source, so the policy reduces
-// to a lookup and the transform survives only as a lab knob (see ink.js).
+// Every library is authored four times, once per theme. This map is the whole
+// theme policy: no runtime ink transform, no high-contrast blanket, no palette.
+// The file says what colour it is because the theme has its own file.
 const THEME_COLORWAY = {
   light: 'lightMode',
   dark: 'darkMode',
   'high-contrast-light': 'contrastLight',
   'high-contrast-dark': 'contrastDark',
+}
+
+// ── Holding the old drawing while the new one is in flight ────────────────────
+//
+// A colorway is a fetch now, so there is a gap between asking for one and having
+// it. What fills that gap is the whole behavioural question, and the answer is
+// that nothing does: the state is NOT cleared when the key changes, so the
+// previous colorway stays on screen until the next one has parsed and then the
+// swap happens in a single render.
+//
+// Clearing first would be a flash of empty column on every theme switch, which
+// is worse than the thing lazy loading was fixing. The first load is the one
+// case with nothing to hold, and there the column is simply bare for a moment,
+// which is what it looked like before the artwork existed.
+//
+// The cache is checked synchronously in the initializer as well as in the
+// effect, so a theme switched away from and back to repaints without a frame of
+// the wrong colourway.
+function useColorwayShapes(libraryKey, colorway) {
+  const [shapes, setShapes] = useState(() => cachedColorway(libraryKey, colorway))
+
+  useEffect(() => {
+    const cached = cachedColorway(libraryKey, colorway)
+    if (cached) {
+      setShapes(cached)
+      return
+    }
+    // `cancelled` rather than an AbortController: the work being raced is a
+    // module fetch and a parse, neither of which is abortable, and the only
+    // thing that must not happen is a late resolve writing a stale colorway
+    // over a newer one. A flag read at resolve time is exactly that guard.
+    let cancelled = false
+    loadColorway(libraryKey, colorway)
+      .then((next) => { if (!cancelled) setShapes(next) })
+      .catch((error) => {
+        // The artwork is decorative and the column works without it, so a
+        // failed fetch leaves the previous drawing up and says why, rather than
+        // taking the nav down with it.
+        console.error('[NavBackgroundArt] colorway failed to load', error)
+      })
+    return () => { cancelled = true }
+  }, [libraryKey, colorway])
+
+  return shapes
 }
 
 export default function NavBackgroundArt(props) {
@@ -101,19 +149,11 @@ export default function NavBackgroundArt(props) {
   const revealKey = useMotionPresetEpoch()
 
   const libraryKey = SECTION_LIBRARY[props.section] || LANDING_LIBRARY
-  const library = MARK_LIBRARIES[libraryKey]
 
-  // The theme's authored colorway. Falls back to the canonical one for an
-  // unknown theme name, which paints the art as drawn rather than as nothing.
+  // Falls back to the canonical colorway for an unknown theme name, which paints
+  // the art as drawn rather than as nothing.
   const colorway = THEME_COLORWAY[props.palette?.theme] || CANONICAL_COLORWAY
-  const markPalette = MARK_PALETTES[libraryKey]?.[colorway] ?? null
-  const shapes = MARK_SHAPES[libraryKey]?.[colorway] ?? null
-
-  // No automatic transform any more: the colorways carry the theme. `?ink=` and
-  // the lab's dropdown still reach it, which is what makes it an exploration
-  // knob rather than a policy. It now applies on top of the authored colorway
-  // rather than instead of it, so `?ink=invert` in light inverts the LIGHT art.
-  const inkTransform = BACKGROUND_TUNING.ink ?? 'authored'
+  const shapes = useColorwayShapes(libraryKey, colorway)
 
   // Roots are the one override that cannot be resolved at module scope: they
   // arrive as fractions of the column and the column is only measured by the
@@ -123,82 +163,21 @@ export default function NavBackgroundArt(props) {
     ? BACKGROUND_TUNING.roots.map((f) => f * props.width)
     : undefined
 
-  // ── Lab state ───────────────────────────────────────────────────────────────
-  //
-  // Owned HERE, one level above BackgroundArt, because the panel and the artwork
-  // are siblings that have to agree: the panel writes a value, the artwork reads
-  // it. This is the lowest node that sees both.
-  //
-  // Seeded from the committed defaults and the URL, so opening the lab changes
-  // nothing on screen: it starts at whatever the page was already drawing, and
-  // every knob is a departure from that rather than a fresh starting point.
-  // David's settled values (2026-07-27), so the lab opens where he left off and
-  // every knob is a departure from the drawing he chose rather than from a
-  // neutral one. `inkNormalize` and `strokeWidth` apply to the TRACED face only:
-  // the native face fills authored shapes and has no stroke to weight.
-  const [lab, setLab] = useState(() => ({
-    inkTransform,
-    inkOverrides: {},
-    inkNormalize: 1,
-    strokeWidth: 1.3,
-    minSpacing: 30,
-    budget: BACKGROUND_TUNING.budget ?? 40,
-    stampScale: BACKGROUND_TUNING.scale ?? 0.45,
-    face: BACKGROUND_TUNING.face ?? 'vector',
-    idleAmplitude: CHOREOGRAPHY.idleAmplitude,
-    driftMin: CHOREOGRAPHY.driftPeriodClamp[0],
-    driftMax: CHOREOGRAPHY.driftPeriodClamp[1],
-  }))
-  const [stats, setStats] = useState(null)
-
-  // useCallback because this is a dependency of the effect in BackgroundArt that
-  // reports the counts. A fresh function identity every render would re-run that
-  // effect every render, and the setState inside it would loop.
-  // A fresh array every render would re-run the idle memo every render, and the
-  // memo is what holds the sway steady. Rebuilt only when a bound actually moves.
-  const driftPeriodClamp = useMemo(
-    () => [lab.driftMin, Math.max(lab.driftMin, lab.driftMax)],
-    [lab.driftMin, lab.driftMax],
-  )
-
-  const handleStats = useCallback((next) => setStats(next), [])
-
   return (
-    <>
-      <BackgroundArt
-        {...props}
-        library={library}
-        seed={VISIT_SEED}
-        showGrid={BACKGROUND_GRID}
-        {...(roots && { roots })}
-        {...TUNING}
-        // Lab values come LAST so they win over TUNING and over the committed
-        // defaults. Until a knob is touched they hold those same values, so the
-        // override is invisible.
-        inkTransform={lab.inkTransform}
-        markPalette={markPalette}
-        shapes={shapes}
-        inkOverrides={lab.inkOverrides}
-        inkNormalize={lab.inkNormalize}
-        strokeWidth={lab.strokeWidth}
-        minSpacing={lab.minSpacing}
-        budget={lab.budget}
-        stampScale={lab.stampScale}
-        face={lab.face}
-        revealKey={revealKey}
-        idleAmplitude={lab.idleAmplitude}
-        driftPeriodClamp={driftPeriodClamp}
-        onStats={handleStats}
-      />
-      <BackgroundLab
-        library={library}
-        libraryKey={libraryKey}
-        colorway={colorway}
-        markPalette={markPalette}
-        state={lab}
-        onChange={setLab}
-        stats={stats}
-      />
-    </>
+    <BackgroundArt
+      {...props}
+      libraryKey={libraryKey}
+      shapes={shapes}
+      // From the shapes actually held rather than from a table, so the count and
+      // the art can never disagree mid-swap. A theme switch does not change it
+      // (the colorways are parity-checked to equal length), so it does not
+      // regenerate the composition; a section switch does, which is correct.
+      markCount={shapes?.length ?? 0}
+      seed={VISIT_SEED}
+      {...(roots && { roots })}
+      {...COMPOSITION}
+      {...TUNING}
+      revealKey={revealKey}
+    />
   )
 }

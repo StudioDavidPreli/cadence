@@ -55,22 +55,33 @@
    field returns the same flat field. Nothing to see until there is artwork
    behind it, which is what "collapsed nav runs bare" asks for.
 
-   TINT STRENGTH IS SET BY WCAG, NOT BY TASTE, and this is the one number here
-   worth arguing about. The nav's idle text is --color-text-muted, which clears
-   AA on the bare column with very little room: 5.77:1 in dark, 5.27:1 in light.
-   Put artwork behind it and the room is gone. Measured against the worst case
-   the artwork can produce (a solid pixel-face cell at full --color-text-base,
-   directly under a label), the minimum tint that keeps muted text at 4.5:1 is
-   90% in dark and 92.5% in light. The handoff's translucent ~9px glass at 72%
-   measures 2.65:1 and 2.89:1, which is a fail, not a judgement call.
-   93% is therefore the default: the blur is real and the artwork reads through
-   the feathered edge, but the panel is nearly opaque where text sits.
+   TINT STRENGTH IS SET BY WCAG, NOT BY TASTE, and it was set the other way
+   round in the end: the tint stayed and the text moved.
 
-   The alternative is on record and is one line: at --glass-tint: 72% the same
-   worst case measures 6.46:1 dark and 8.77:1 light against --color-text-base.
-   Real glass is available the moment the nav's idle text stops being muted.
-   That is a change to how the navigation looks with the flag off as well, so it
-   is David's call and not a thing to slip in under a background feature.
+   The nav's idle text used to be --color-text-muted, which clears AA on the bare
+   column with very little room (5.77:1 dark, 5.27:1 light) and has none left
+   once artwork is behind it. Re-measured 2026-07-28 against the shipped native
+   face, over every authored ink in all three libraries rather than against the
+   deleted pixel face's worst case, muted through this glass is 2.50:1 in dark
+   and 2.86:1 in light. A fail, not a judgement call.
+
+   Two ways out, both one line. Take the tint to 93%, which passes (4.91:1 and
+   4.58:1) and makes the panel nearly opaque where text sits, so the artwork only
+   really reads through the feathered edge. Or move the text. David chose the
+   text, 2026-07-28: real glass was the point of building it.
+
+   So idle labels are --color-text-nav, a role that exists for this and is set by
+   what is behind it rather than by where it sits in the hierarchy. It measures
+   4.76:1 dark and 4.85:1 light through this glass over worst-case ink, and
+   10.4:1 / 8.9:1 on the bare column. It is deliberately NOT --color-text-base,
+   which would pass with room to spare and would also collapse idle into hover
+   and active, both of which are already text-base. The gap is narrower than it
+   was (1.28:1 apart in dark, against about 2.4:1 before) and it is the widest
+   gap the glass leaves: nothing below #c3c3c3 in dark or above #484848 in light
+   clears 4.5:1 through it.
+
+   Full derivation, the per-theme ink tables and the passing bands:
+   docs/decisions/background-finalization-2026-07-28.md
 
    FEATHER: a fixed distance, not the ruling's 22% of panel depth. That
    percentage was written for a glass element that was one panel tall. Against
@@ -80,11 +91,6 @@
    through the padding, below the last row, so no label ever sits in it. */
 .glass {
   --glass-feather: 28px;
-  /* TEMPORARY, 2026-07-23: 72% is the handoff's translucent glass, set for
-     David to look at with the nav text left as it is. It FAILS AA in that
-     combination (2.65:1 dark, 2.89:1 light for --color-text-muted over
-     worst-case ink). Either the text goes to --color-text-base or this goes
-     back to 93% before anything ships. See the note above. */
   --glass-tint: 72%;
   padding-bottom: var(--glass-feather);
   background-color: color-mix(in srgb, var(--color-bg) var(--glass-tint), transparent);
@@ -102,12 +108,18 @@
 
 /* High contrast runs the same glass, and the contrast argument that constrains
    it in light and dark does not apply here. Both HC themes put every nav label
-   at maximum separation (--color-text-muted resolves to the same value as
-   --color-text-base, 21:1 on the bare column), so against the worst case those
-   themes can produce (a cell at full --color-accent, since HC repaints every
-   mark to the accent) the same 72% tint measures 13.91:1 in HC-light and
-   11.69:1 in HC-dark. The artwork is also thinner there by design: 0.6 of the
-   budget and two tone levels instead of four.
+   at maximum separation (--color-text-nav resolves to the same value as
+   --color-text-base, 21:1 on the bare column), so against the worst ink the
+   contrast colorways draw, the same 72% tint measures 10.5:1 in HC-light and
+   9.2:1 in HC-dark.
+
+   Re-measured 2026-07-28, and the earlier numbers here (13.91:1 and 11.69:1)
+   were right about the conclusion and wrong about the reason. They rested on two
+   mechanisms that no longer exist: a runtime blanket repainting every mark to
+   --color-accent, and a 0.6 budget multiplier thinning the HC field. The
+   authored contrastDark and contrastLight colorways replaced the first and made
+   the second unnecessary, so HC now draws the same density as every other theme
+   in inks the art chose. It still passes, by a wider margin than light or dark.
 
    First draft of this file took HC opaque on the theory that a translucent
    panel is against the grain of flat maximum-separation fields. That was taste,
@@ -143,7 +155,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-text-nav);
   transition: color var(--feedback-nav-duration) ease;
 }
 
@@ -210,7 +222,7 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--color-text-nav);
   transition: color var(--feedback-nav-duration) ease,
               background-color var(--feedback-nav-duration) ease;
 }

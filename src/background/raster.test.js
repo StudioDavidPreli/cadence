@@ -1,14 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  axial,
-  bucketOf,
-  smoothstep,
-  walkSegment,
-  densityMap,
-  aggregate,
-  AGGREGATION,
-  DEGENERATE_EPSILON,
-} from './raster'
+import { axial, smoothstep, walkSegment, densityMap } from './raster'
 
 // Collect every visit a walk makes, so the traversal's behavior can be asserted
 // directly rather than through a consumer.
@@ -21,10 +12,6 @@ function collect(p0, p1, cell) {
 }
 
 const totalLength = (visits) => visits.reduce((sum, v) => sum + v.length, 0)
-
-// A horizontal stroke from (x0,y) to (x1,y), as aggregate() wants it.
-const hLine = (x0, x1, y, color = null) => ({ pts: [{ x: x0, y }, { x: x1, y }], color })
-const vLine = (y0, y1, x, color = null) => ({ pts: [{ x, y: y0 }, { x, y: y1 }], color })
 
 describe('axial', () => {
   it('folds an angle into [0, PI)', () => {
@@ -45,41 +32,6 @@ describe('axial', () => {
     for (const a of [-0.1, -Math.PI, -2 * Math.PI, -7]) {
       expect(axial(a)).toBeGreaterThanOrEqual(0)
       expect(axial(a)).toBeLessThan(Math.PI)
-    }
-  })
-})
-
-describe('bucketOf', () => {
-  it('places the band centers', () => {
-    // Four bands, centers at 0, 45, 90 and 135 degrees.
-    expect(bucketOf(0, 4)).toBe(0)
-    expect(bucketOf(Math.PI / 4, 4)).toBe(1)
-    expect(bucketOf(Math.PI / 2, 4)).toBe(2)
-    expect(bucketOf((3 * Math.PI) / 4, 4)).toBe(3)
-  })
-
-  it('breaks an exact boundary tie toward the higher band', () => {
-    // This is the ruling. Dividing PI by 8 and by 4 are exact in binary
-    // floating point, so PI/8 over PI/4 is exactly 0.5 and the assertion is
-    // about Math.round's behavior rather than about luck.
-    expect((Math.PI / 8) / (Math.PI / 4)).toBe(0.5)
-    expect(bucketOf(Math.PI / 8, 4)).toBe(1)
-    expect(bucketOf((3 * Math.PI) / 8, 4)).toBe(2)
-    expect(bucketOf(Math.PI / 4, 2)).toBe(1)
-  })
-
-  it('folds the top edge back to zero, because orientation is axial', () => {
-    expect(bucketOf(Math.PI, 4)).toBe(0)
-    expect(bucketOf(Math.PI, 2)).toBe(0)
-  })
-
-  it('never returns a band outside the range', () => {
-    for (const buckets of [2, 4]) {
-      for (let t = 0; t < Math.PI; t += Math.PI / 64) {
-        const b = bucketOf(t, buckets)
-        expect(b).toBeGreaterThanOrEqual(0)
-        expect(b).toBeLessThan(buckets)
-      }
     }
   })
 })
@@ -247,150 +199,3 @@ describe('densityMap', () => {
   })
 })
 
-describe('aggregate', () => {
-  const opts = { cell: 10, width: 200, height: 200 }
-
-  it('drops cells below the presence threshold', () => {
-    // A stub of ink 1px long in a 10px cell: 0.1 x cell, under the 0.2 bar.
-    const { cells } = aggregate([hLine(2, 3, 5)], opts)
-    expect(cells).toHaveLength(0)
-  })
-
-  it('keeps a cell once crossing length clears the threshold', () => {
-    const { cells } = aggregate([hLine(2, 8, 5)], opts)   // 6px = 0.6 x cell
-    expect(cells).toHaveLength(1)
-  })
-
-  it('measures length, not coverage, so stroke width is irrelevant', () => {
-    // Nothing in the input carries a width, which is the point: presence is a
-    // property of the path, so a hairline registers exactly like a heavy line.
-    const thin = aggregate([hLine(0, 200, 5)], opts)
-    expect(thin.cells.length).toBe(20)
-  })
-
-  it('puts horizontal ink in bucket 0', () => {
-    const { cells } = aggregate([hLine(0, 200, 5)], opts)
-    expect(cells.every((c) => c.level === 0)).toBe(true)
-  })
-
-  it('puts vertical ink in the middle bucket', () => {
-    // theta = PI/2, bucket width PI/4, so level 2 of 4.
-    const { cells } = aggregate([vLine(0, 200, 5)], opts)
-    expect(cells.every((c) => c.level === 2)).toBe(true)
-  })
-
-  it('inverts the tone map', () => {
-    const { cells } = aggregate([hLine(0, 200, 5)], opts)
-    expect(cells.every((c) => c.tone === AGGREGATION.buckets - 1 - c.level)).toBe(true)
-    const straight = aggregate([hLine(0, 200, 5)], { ...opts, invert: false })
-    expect(straight.cells.every((c) => c.tone === c.level)).toBe(true)
-  })
-
-  it('is deterministic on a knife-edge boundary angle', () => {
-    // The tie-break itself is asserted on bucketOf, where an exact boundary is
-    // representable. Through the accumulator it is not: the mean comes back
-    // from atan2 a rounding error either side of PI/8, so the only property
-    // worth asserting at this level is that the answer never wobbles.
-    const a = Math.PI / 8
-    const stroke = { pts: [{ x: 0, y: 0 }, { x: 100 * Math.cos(a), y: 100 * Math.sin(a) }], color: null }
-    const first = aggregate([stroke], opts).cells
-    expect(first.length).toBeGreaterThan(0)
-    for (let i = 0; i < 5; i++) {
-      expect(aggregate([stroke], opts).cells).toEqual(first)
-    }
-    expect(first.every((c) => c.level === 0 || c.level === 1)).toBe(true)
-  })
-
-  it('cancels perpendicular crossings and flags them degenerate', () => {
-    // The arithmetic recon finding F2 was built on, pinned here so nobody
-    // "fixes" it later: a horizontal crossing adds (+l, 0) to the double-angle
-    // accumulator and a vertical one adds (-l, 0). Equal amounts of each leave
-    // no resultant, so the orientation is an artifact, not a reading.
-    const strokes = [hLine(0, 10, 5), vLine(0, 10, 5)]
-    const box = { ...opts, width: 10, height: 10 }
-    const { cells, stats } = aggregate(strokes, box)
-    expect(cells).toHaveLength(1)
-    expect(stats.degenerate).toBe(1)
-    // The tone is NOT zero. sin(PI) evaluates to ~1.2e-16 rather than 0, so a
-    // perfectly balanced cell resolves to wherever that residue points. It is
-    // repeatable, which is all that is required, but it is noise and not a
-    // reading of the ink. That is the whole reason the flag exists.
-    expect(aggregate(strokes, box).cells).toEqual(cells)
-  })
-
-  it('does not flag parallel crossings as degenerate', () => {
-    const { stats } = aggregate([hLine(0, 10, 3), hLine(0, 10, 7)], {
-      ...opts, width: 10, height: 10,
-    })
-    expect(stats.degenerate).toBe(0)
-  })
-
-  it('gives the cell to the longest-crossing color', () => {
-    const { cells } = aggregate(
-      [hLine(0, 9, 5, '#aaaaaa'), hLine(0, 3, 5, '#bbbbbb')],
-      { ...opts, width: 10, height: 10 },
-    )
-    expect(cells).toHaveLength(1)
-    expect(cells[0].color).toBe('#aaaaaa')
-  })
-
-  it('resolves color per stroke, so one mark can carry two inks', () => {
-    const { cells } = aggregate(
-      [hLine(0, 10, 5, '#aaaaaa'), hLine(100, 110, 5, '#bbbbbb')],
-      opts,
-    )
-    const inks = new Set(cells.map((c) => c.color))
-    expect(inks).toEqual(new Set(['#aaaaaa', '#bbbbbb']))
-  })
-
-  it('leaves color null when no stroke carries one', () => {
-    const { cells } = aggregate([hLine(0, 10, 5)], { ...opts, width: 10, height: 10 })
-    expect(cells[0].color).toBeNull()
-  })
-
-  it('runs the high-contrast variant on two buckets with no second code path', () => {
-    const buckets = AGGREGATION.bucketsHighContrast
-    const h = aggregate([hLine(0, 200, 5)], { ...opts, buckets })
-    const v = aggregate([vLine(0, 200, 5)], { ...opts, buckets })
-    expect(h.cells.every((c) => c.level === 0 && c.tone === 1)).toBe(true)
-    // theta = PI/2 with bucket width PI/2 rounds to 1, folded by the modulo.
-    expect(v.cells.every((c) => c.tone === 0)).toBe(true)
-    expect(h.cells.concat(v.cells).every((c) => c.tone < buckets)).toBe(true)
-  })
-
-  it('clips to the surface bounds', () => {
-    const { cells } = aggregate([hLine(-100, 300, 5)], opts)
-    expect(cells.every((c) => c.ix >= 0 && c.ix * 10 < 200)).toBe(true)
-  })
-
-  it('reports no truncation for well-formed input', () => {
-    const { stats } = aggregate([hLine(0, 200, 5), vLine(0, 200, 5)], opts)
-    expect(stats.truncated).toBe(0)
-    expect(stats.inked).toBeGreaterThan(0)
-  })
-
-  it('is deterministic: identical input gives identical output', () => {
-    // The claim the whole system rests on. No rng and no time in this file, so
-    // this is a structural guarantee rather than a sampled one.
-    const strokes = [hLine(3, 187, 41, '#aaaaaa'), vLine(11, 190, 63, '#bbbbbb')]
-    const a = aggregate(strokes, opts)
-    const b = aggregate(strokes, opts)
-    expect(a.cells).toEqual(b.cells)
-    expect(a.stats).toEqual(b.stats)
-  })
-
-  it('is order-independent in the ink, not just repeatable', () => {
-    // Two strokes crossing the same cells must aggregate the same regardless of
-    // which was walked first, or the composition would depend on draw order.
-    const s1 = hLine(0, 200, 45, '#aaaaaa')
-    const s2 = vLine(0, 200, 85, '#bbbbbb')
-    const forward = aggregate([s1, s2], opts).cells
-    const reverse = aggregate([s2, s1], opts).cells
-    expect(forward).toEqual(reverse)
-  })
-
-  it('exposes the degeneracy epsilon it measures against', () => {
-    expect(DEGENERATE_EPSILON).toBeGreaterThan(0)
-    expect(DEGENERATE_EPSILON).toBeLessThan(1)
-  })
-})

@@ -132,6 +132,14 @@ body {
      require 4.5:1; the old value failed that combination. */
   --color-text-muted:     #909090;  /* secondary text, descriptions */
   --color-text-muted2:    #aaaaaa;  /* tertiary — captions, slider thumbs */
+  /* Idle nav label. The one text role set by what is BEHIND it rather than by
+     where it sits in the hierarchy: the nav column is the only surface with
+     artwork under it, seen through a 72% glass panel, and muted (#909090)
+     measures 2.50:1 through that glass against the worst ink the marks can put
+     there. This clears 4.76:1 there and 11.0:1 on the bare column, and stays far
+     enough from --color-text-base for the hover to still read. Derivation and
+     the per-theme numbers: docs/decisions/background-finalization-2026-07-28.md */
+  --color-text-nav:       #c8c8c8;  /* idle nav label, over the glass */
 
   /* Accents — dark theme versions are the base brand values */
   --color-accent:         #76c17d;  /* green — connection, success, active state */
@@ -213,6 +221,9 @@ body {
      (#ebebeb), which is the Card hover background. */
   --color-text-muted:     #666666;
   --color-text-muted2:    #888888;
+  /* See the dark theme's note. Muted (#666666) measures 2.86:1 through the
+     glass over worst-case ink; this clears 4.85:1 there and 8.9:1 bare. */
+  --color-text-nav:       #444444;  /* idle nav label, over the glass */
 
   /* Purple accent, darkened for contrast on light backgrounds. Hue-faithful to
      the dark theme's lavender (#b9b0ff), which is too light to read on white. */
@@ -285,6 +296,10 @@ body {
   --color-text-base:      #000000;
   --color-text-muted:     #000000;  /* no grays in high-contrast */
   --color-text-muted2:    #000000;
+  /* No gray here either, and none needed: black through the 72% glass over the
+     worst ink the contrastLight colorway draws still measures 10.5:1. The HC
+     themes were never the ones at risk. */
+  --color-text-nav:       #000000;
 
   /* accent and accent2 are AA (6.1:1), not AAA. Both are used as UI / SVG
      strokes (graphical, 3:1 threshold), so AA is sufficient. A golden amber
@@ -363,6 +378,8 @@ body {
   --color-text-base:      #ffffff;
   --color-text-muted:     #ffffff;  /* no grays in high-contrast */
   --color-text-muted2:    #ffffff;
+  /* 9.2:1 through the glass over the worst ink contrastDark draws. */
+  --color-text-nav:       #ffffff;
 
   /* Bright accents, AAA-verified against #000000. accent2 clears AAA here (the
      light-theme HC variant could only reach AA on white); it is still used only

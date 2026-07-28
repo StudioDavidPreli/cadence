@@ -15,48 +15,13 @@ import { SECTIONS } from '../../data/navigation'
 
 const NavBackgroundArt = lazy(() => import('./NavBackgroundArt'))
 
-// The tone ramp is the one thing not read from a token: it is a decorative
-// gradient with no role in the colour system, and giving it four per-theme
-// tokens would put taxonomy colour into the token layer for no benefit. It is
-// only reached by cells whose strokes carried no ink at all.
-const RAMPS = {
-  light: ['#d8d8d8', '#b4b4b4', '#8a8a8a', '#5c5c5c'],
-  dark: ['#3a3a3a', '#5c5c5c', '#8a8a8a', '#c4c4c4'],
-  'high-contrast-light': ['#c2a878', '#855a0d'],
-  'high-contrast-dark': ['#5a6f8c', '#aaccf6'],
-}
-
 const readToken = (name) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 
-// ── Which face each section wears ─────────────────────────────────────────────
-//
-// The two faces are one composition rendered two ways, and which way is a
-// property of the tool you are in, not of the artwork: the vector face for the
-// Principles dialect, the pixel face for the Token Lab dialect (handoff
-// 2026-07-22, section 1). The nav column is shared by all three tools, so the
-// face follows the active section rather than being fixed at the mount.
-//
-// Motion Tiles is the one this mapping was never given: it postdates the
-// dialect split. Pixel, because the tool itself is a grid of cells, but that is
-// a reading rather than a ruling, and David's call to overturn.
-//
-// 'both' is deliberately absent. It is a lab affordance for comparing the two
-// renderings side by side; on a real surface it draws the same composition
-// twice, once over the other.
-// EXPERIMENT, 2026-07-23: every tool draws the vector face.
-//
-// The face used to carry the difference between the tools, because there was one
-// library and two ways to render it. There are three libraries now, one per
-// tool, so the marks themselves carry it and the face no longer has to. The
-// pixel face is still built, still tested and still reachable with `?face=pixel`
-// (backgroundFlag), which is the version of this that can be reverted in a line
-// if the drawing turns out to want it back.
-const SECTION_FACE = {
-  [SECTIONS.TOKEN_LAB]: 'vector',
-  [SECTIONS.PRINCIPLES]: 'vector',
-  [SECTIONS.MOTION_TILES]: 'vector',
-}
+// There is no face mapping any more. It used to say which of two renderings each
+// tool wore, because there was one library and two ways to draw it. There are
+// three libraries now, one per tool, so the marks carry the difference and the
+// deleted faces carried nothing. See BackgroundArt.
 
 // Read the column's own geometry: the top padding, and the line below which the
 // artwork is allowed to grow.
@@ -88,12 +53,9 @@ const RESIZE_SETTLE_MS = 120
 export function NavBackground({ navRef }) {
   const [surface, setSurface] = useState(null)
 
-  // The face is the only thing here that tracks navigation state. It changes
-  // nothing about the composition: geometry does not depend on it, so a
-  // section switch swaps which rendering of the same drawing is on screen and
-  // regenerates nothing.
+  // The section picks which library is drawn. The lazy chunk maps it; nothing
+  // up here imports a mark.
   const { section } = useNavState()
-  const face = SECTION_FACE[section] || 'vector'
 
   // Measure the column and derive the protected baseline.
   //
@@ -201,7 +163,6 @@ export function NavBackground({ navRef }) {
     let retry = null
     const read = () => {
       const theme = document.documentElement.dataset.theme || 'dark'
-      const highContrast = theme.startsWith('high-contrast')
 
       // ── The token layer may not be applied yet, and WebKit is where that shows
       //
@@ -233,24 +194,13 @@ export function NavBackground({ navRef }) {
         return
       }
 
-      setPalette({
-        theme,
-        highContrast,
-        // High contrast repaints every mark to the accent. Amendment E ruled
-        // that reading --color-accent here is legitimate rather than a
-        // decorative use of the accent role: the artwork is the token system
-        // drawing itself.
-        blanket: highContrast ? readToken('--color-accent') : null,
-        // What an authored `currentColor` resolves to (ruling 2b). Already
-        // read above, as the probe for whether the token layer exists at all.
-        tokenInk,
-        ramp: RAMPS[theme] || RAMPS.dark,
-        // The empty-cell grid ink. --color-border is the subtle-outline role,
-        // which grid lines genuinely are. It is quiet in light and dark
-        // (~1.3:1) and pure black/white in high contrast, which is why the
-        // renderer draws a sparse dotted grid there instead of a solid mesh.
-        grid: readToken('--color-border'),
-      })
+      // Two fields, and that is the whole palette now. The tone ramp, the grid
+      // ink and the high-contrast accent blanket all belonged to the deleted
+      // faces: the authored colorways say what colour a mark is, so nothing here
+      // has to decide it. `theme` picks the colorway, `tokenInk` resolves an
+      // authored `currentColor` (ruling 2b) and is already read above as the
+      // probe for whether the token layer exists at all.
+      setPalette({ theme, tokenInk })
     }
     read()
     const observer = new MutationObserver(read)
@@ -270,8 +220,6 @@ export function NavBackground({ navRef }) {
         height={surface.height}
         baseline={surface.baseline}
         palette={palette}
-        highContrast={palette.highContrast}
-        face={face}
         // The lazy chunk maps this to a library. Passed as the section rather
         // than as the library itself so nothing up here has to import one.
         section={section}

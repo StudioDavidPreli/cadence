@@ -34,7 +34,7 @@ export function NavColumn({ collapsed, open, onToggle, onClose }) {
   if (!collapsed) {
     return (
       <nav ref={navRef} className={styles.nav} aria-label="Tools and categories">
-        {/* Background artwork, flagged off by default (?bg=1). Mounted only in
+        {/* Background artwork, on since 2026-07-28 (?bg=0 opts out). Mounted only in
             the inline column: below 1024px the nav is a rail and drawer, not a
             column, and the artwork surface is defined as existing only above
             that breakpoint. Renders as a direct child of <nav> because its layer

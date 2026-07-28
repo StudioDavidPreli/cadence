@@ -1,7 +1,27 @@
 # Handoff: folding the background into the live site
 
 **Date: 2026-07-27**
-**Status: the system runs behind `?bg=1` and has never shipped. This is what standing between it and the flag coming off.**
+**Status: SUPERSEDED 2026-07-28. Every question below was answered, and two of the numbers in it are wrong. See `background-finalization-2026-07-28.md`.**
+
+> Kept as written, because what it got wrong is worth keeping. Three corrections
+> before you read it:
+>
+> **Section 3 is wrong by six and a half times.** The chunk measured 495.71 kB
+> gzipped, not 76 kB. That figure predated the native face, which is what made
+> the non-canonical colorways expensive. It is 12.75 kB on the landing page now.
+>
+> **Section 4's mobile item resolves by design.** The rail is real, at 1024px,
+> and `NavBackground` mounts only in `NavColumn`'s non-collapsed branch, so the
+> artwork is never inside the drawer. Below 720px `MobileGate` returns above
+> `NavigationProvider` and nothing navigational mounts at all.
+>
+> **Section 4's glass item was already measured, in the CSS, and failing.** The
+> answer was to move the text rather than the tint.
+>
+> Section 1 resolved to native only. Section 2 went with the traced face. Section
+> 5's lab is deleted; its `console.info` was confirmed dev-only.
+
+**Original status: the system runs behind `?bg=1` and has never shipped. This is what standing between it and the flag coming off.**
 
 Nothing here is a bug. The system draws correctly in all four themes on all three
 libraries. What follows is the set of decisions that were deferred while the art

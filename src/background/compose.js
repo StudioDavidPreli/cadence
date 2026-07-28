@@ -183,57 +183,11 @@ export function samplePlacements(cells, {
   }
 }
 
-// ── Stamp transform ───────────────────────────────────────────────────────────
-
-// Local mark space -> world space. Rotate, scale, translate, in that order.
+// ── What used to be below this line ───────────────────────────────────────────
 //
-// Owned arithmetic rather than an SVG transform attribute, because both faces
-// need the resulting POINTS: the vector face draws them and the pixel face
-// rasterizes them. A transform attribute would only move the vector face's
-// paint and leave the aggregation reading unrotated geometry, which is exactly
-// the kind of drift the single-resolution-point discipline exists to prevent.
-export function transformPoint(point, placement) {
-  const c = Math.cos(placement.rotation)
-  const s = Math.sin(placement.rotation)
-  const k = placement.scale
-  return {
-    x: placement.x + k * (point.x * c - point.y * s),
-    y: placement.y + k * (point.x * s + point.y * c),
-  }
-}
-
-// ── Display list ──────────────────────────────────────────────────────────────
-
-// Placements plus a library -> the display list both renderers consume.
-//
-// `library` is [{ strokes: [{ pts, color, tokenBound }] }] in local mark space,
-// centered on the mark's attachment point. Per-stroke color rides through
-// untouched: resolving it to a theme value is the renderer's job and has to
-// happen once, ahead of aggregation, for both faces (amendment 2a).
-export function composeStamps(placements, library) {
-  const stamps = []
-  let strokeCount = 0
-  for (const placement of placements) {
-    const mark = library[placement.markIndex]
-    if (!mark) continue
-    const strokes = mark.strokes.map((stroke) => {
-      strokeCount++
-      return {
-        color: stroke.color,
-        tokenBound: !!stroke.tokenBound,
-        pts: stroke.pts.map((p) => transformPoint(p, placement)),
-      }
-    })
-    stamps.push({ ...placement, strokes })
-  }
-  return { stamps, stats: { stamps: stamps.length, strokes: strokeCount } }
-}
-
-// Flatten a display list to the stroke array raster.aggregate expects. Kept
-// here rather than in the renderer so both faces are fed from one function and
-// cannot disagree about what the composition contains.
-export function strokesOf(stamps) {
-  const out = []
-  for (const stamp of stamps) for (const stroke of stamp.strokes) out.push(stroke)
-  return out
-}
+// `transformPoint`, `composeStamps` and `strokesOf` turned placements into a
+// display list of world-space stroke POLYLINES, because both deleted faces
+// needed the resulting points: the traced face drew them and the pixel face
+// rasterized them. The native face needs neither. It places an authored shape
+// with an SVG transform and lets the browser do that arithmetic, so a placement
+// is the whole display list. Deleted 2026-07-28; see BackgroundArt.
