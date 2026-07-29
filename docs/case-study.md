@@ -9,7 +9,7 @@
 Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior across real UI components, using the classic 12 principles of animation, extended with 6 of my own, as a curriculum for designers learning how motion works at the system level.
 
 **Role:** Solo. Design, architecture, development, documentation.
-**Timeline:** Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 278 commits as of July 28.
+**Timeline:** Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 268 commits as of July 28.
 **Stack:** React, Framer Motion, CSS Custom Properties, Rive, Vite.
 **Live:** [cadence.davidpreli.com](https://cadence.davidpreli.com)
 
