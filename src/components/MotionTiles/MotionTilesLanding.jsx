@@ -6,7 +6,7 @@ import styles from './MotionTilesLanding.module.css'
 // The Motion Tiles landing: the intro that gates the heavy webgl2 grid behind an
 // explicit Enter. It imports nothing from @rive-app/react-webgl2 statically, so
 // it stays in the main bundle and the runtime does not parse until the grid
-// mounts. Copy written against docs/voice/voice-analysis.md (register-shifted for
+// mounts. Copy written against archive/voice/voice-analysis.md (register-shifted for
 // portfolio prose: present tense, physical first, the last line does the work).
 export function MotionTilesLanding({ onEnter }) {
   // Prefetch the lazy grid chunk while the user reads the landing. The same

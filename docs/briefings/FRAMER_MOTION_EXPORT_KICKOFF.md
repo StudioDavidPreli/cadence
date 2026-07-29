@@ -45,7 +45,7 @@ Start in plan mode.
 - No hardcoded animation values in components. The stringifier reads state; the components stay untouched.
 - Main is production: `npm run test:e2e` before every push; verify on built output in a browser that the button downloads the artifact and the file's values match the live token state (edit a token, re-export, diff).
 - Stage files individually; never `git add -A`. Commit directly to main; match the log's message style.
-- Before writing any prose (including the emitted file's header comment and the button label), read `docs/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
+- Before writing any prose (including the emitted file's header comment and the button label), read `archive/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

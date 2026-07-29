@@ -63,7 +63,7 @@ Walk these surfaces and account for each in the plan; how many activate depends 
 - Main is production: `npm run test:e2e` before every push, and verify the changed surfaces on built output in a browser, not just the dev server.
 - David runs the dev server and does his own visual checks; do not drive browser automation to confirm UI feel. The scalar's feel (how far the scrub range goes, what the travels look like) is his to tune against the live tool.
 - Stage files individually; never `git add -A`. Commit directly to main; read `git log --oneline` first and match the message style.
-- Before writing any prose, read `docs/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
+- Before writing any prose, read `archive/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

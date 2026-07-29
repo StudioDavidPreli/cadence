@@ -53,7 +53,7 @@ Two things get David's eyes before code; both are copy-adjacent, neither reopens
 - Main is production: `npm run test:e2e` before every push; verify on built output in a browser: a cold load of a deep URL (the lazy chunk must resolve first, then the overlay, then the modal, in that order with no jump), close, back-button, an invalid slug, and the copy control end to end.
 - David does his own visual checks of feel; your built-output pass is for mechanism.
 - Stage files individually; never `git add -A`. Commit directly to main; match the log's message style.
-- Before writing any prose (labels, confirmation copy, decision record), read `docs/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
+- Before writing any prose (labels, confirmation copy, decision record), read `archive/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

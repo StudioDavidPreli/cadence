@@ -87,7 +87,7 @@ Either way, the family ships with at least one real consumer or it is a token wi
 - David runs the dev server himself and does his own visual checks; do not drive browser automation to confirm UI feel.
 - The working tree may contain an uncommitted pixel-plant experiment (`src/App.jsx` gate changes, `src/components/IngredientGrid/`, `public/riveTiles/ingredients_v2.riv` and `testSequence/`, `public/rive/pixelplant.riv`, `public/bugs/`). Leave all of it alone. Stage files individually; never `git add -A`.
 - Commit directly to main, no feature branch. Commit messages follow the repo's existing style (read `git log --oneline` first).
-- Before writing any prose (docs, comments beyond code, decision records), read `docs/voice/voice-analysis.md`. Hard rule from CLAUDE.md that applies to everything you write here: no em-dashes, anywhere, in any form.
+- Before writing any prose (docs, comments beyond code, decision records), read `archive/voice/voice-analysis.md`. Hard rule from CLAUDE.md that applies to everything you write here: no em-dashes, anywhere, in any form.
 
 ## Definition of done
 

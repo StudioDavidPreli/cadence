@@ -36,11 +36,18 @@ __pycache__/
 # Local-only files kept on disk but out of git: the vendored emil-design-eng skill
 # (and its lockfile). Not build inputs: Cloudflare deploys the static build (dist/)
 # plus the Worker (worker/index.js, per wrangler.jsonc), and none of these files are
-# part of either. CLAUDE.md is deliberately NOT here — it is tracked now, after being
-# lost once while gitignored (recovered from git history 2026-07-15).
+# part of either.
 /skills-lock.json
 .claude/skills/
 .agents/skills/
+
+# Untracked 2026-07-21 for the repo-public prep (David's call): the instructions
+# file and the tracker are working files, not site function, and they carry
+# personal material. HISTORY NOTE: CLAUDE.md was lost once while gitignored and
+# recovered from git (2026-07-15). The safety net now is dated backup copies in
+# archive/savedinstructions/; refresh them whenever either file changes shape.
+CLAUDE.md
+/tracker/
 
 # wrangler files
 .wrangler

@@ -25,7 +25,7 @@ Four steps, run in order, most sessions:
 
 - **Design verdicts.** Anything only eyes can close, David closes. The Motion Tiles Tier 3 sweep (preset feel, per-tile reads, optical sizes) was his, run against the live grid, verdicts recorded in the tracker. Claude Code does not sign off on how motion feels.
 - **Architecture calls.** Claude proposes, explains, and pushes back; David decides. The two-channel token dispatch, the layoutId removals, and the mobile gate all went through that gate.
-- **The prose.** Drafts are written against `docs/voice/voice-analysis.md`; the final pass is David's. The case study's What I Learned rewrite is his by design.
+- **The prose.** Drafts are written against `archive/voice/voice-analysis.md`; the final pass is David's. The case study's What I Learned rewrite is his by design.
 - **Git.** Solo project, direct commits to main, David's call on when.
 
 ## What Claude Code carries

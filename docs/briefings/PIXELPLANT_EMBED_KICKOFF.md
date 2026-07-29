@@ -93,7 +93,7 @@ The demo renders in the `'embeds'` entry of the demo map in `src/components/Toke
 - David runs the dev server himself and does his own visual checks; do not drive browser automation to confirm UI feel.
 - The working tree carries uncommitted experiment files (`src/App.jsx` gate block, `src/components/IngredientGrid/`, `public/bugs/`, `public/riveTiles/ingredients_v2.riv` and `testSequence/`). This session promotes ONLY the pixelPlant thread; stage files individually, never `git add -A`.
 - Commit directly to main, no feature branch. Read `git log --oneline` first and match the message style.
-- Before writing any prose (docs, decision records, UI copy), read `docs/voice/voice-analysis.md` in full. No em-dashes, anywhere, in any form.
+- Before writing any prose (docs, decision records, UI copy), read `archive/voice/voice-analysis.md` in full. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

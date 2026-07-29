@@ -7,7 +7,7 @@ State 2 UI) and a token list.
 Quotes are either:
 - Direct attributed quotes from published sources
 - Unattributed, written in David Preli's voice per 
-  docs/voice/voice-analysis.md
+  archive/voice/voice-analysis.md
 
 Do not add attributions to unattributed quotes. They 
 stand as editorial voice of the tool itself.
@@ -312,4 +312,4 @@ stand as editorial voice of the tool itself.
   quote (principle 17): direct quote from A List 
   Apart article on motion sensitivity.
 - All unattributed quotes: written in David Preli's 
-  voice per docs/voice/voice-analysis.md.
+  voice per archive/voice/voice-analysis.md.

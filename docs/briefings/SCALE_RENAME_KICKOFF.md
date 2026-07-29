@@ -57,7 +57,7 @@ Grep the repo for every old key and old CSS property spelling; the list below is
 - No hardcoded animation values in components; the rename changes names, never values or behavior. If a diff changes a value, something went wrong.
 - Main is production: `npm run test:e2e` before every push; verify the renamed reads on built output in a browser (the minifier rule), including one press demo, the WaterWilt scene scale, and an export/import round trip.
 - Stage files individually; never `git add -A`. Commit directly to main; match the log's message style.
-- Before writing any prose, read `docs/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
+- Before writing any prose, read `archive/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

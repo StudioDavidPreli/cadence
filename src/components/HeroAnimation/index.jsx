@@ -72,7 +72,7 @@ export function HeroAnimation() {
 
       {/* Short description beneath the artwork: states the tool's purpose, then
           tells a first-time visitor where to begin. This copy is canonical in
-          docs/voice/voice-analysis.md, "Landing hero copy" — edit it there too. */}
+          archive/voice/voice-analysis.md, "Landing hero copy" — edit it there too. */}
       <div className={styles.description}>
         <p className={styles.descPurpose}>
           Motion designers know how something should move. Cadence shows how that

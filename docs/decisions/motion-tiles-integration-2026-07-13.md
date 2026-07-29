@@ -95,7 +95,7 @@ Note: the earlier plan lifted the token reducer into a `TokenStateProvider` to s
 
 **Step 2. Add the Motion Tiles section shell.** New `src/components/MotionTiles/` folder. Rename `IngredientV8Grid` to `MotionTilesGrid` and make it the `React.lazy` chunk. Add `MotionTilesLanding` (eager) and `MotionTilesSection` (landing plus Suspense-wrapped grid). Extract `MotionTilesTitle` into its own module. Add `SECTIONS.MOTION_TILES`, the `#/motion-tiles` and `#/motion-tiles/grid` routes, and the third nav header. Render `MotionTilesSection` as the right region when the section is active. Wire the title swap in the shell header. Verify the runtime does not load until Enter.
 
-**Step 3. Retire the gate and update docs.** Delete the `?v8grid` branch in `App.jsx`. Update CLAUDE.md's two-tools framing, the docs index, and the tracker. Any new UI copy passes the voice rules in `docs/voice/voice-analysis.md`.
+**Step 3. Retire the gate and update docs.** Delete the `?v8grid` branch in `App.jsx`. Update CLAUDE.md's two-tools framing, the docs index, and the tracker. Any new UI copy passes the voice rules in `archive/voice/voice-analysis.md`.
 
 ## Nav column placement: closed
 
@@ -120,7 +120,7 @@ The nav is currently the middle column: tool bar, then `NavColumn`, then right r
 - `CLAUDE.md`: the two-interactive-tools framing becomes three; the References index gains this doc and the Motion Tiles component note.
 - `tracker/TRACKER.md`: close the integration thread on the Token Lab Ingredient System section, add the Motion Tiles tool status.
 - `docs/decisions/navigation-architecture-2026-06-17.md`: cross-reference this doc as the third-tool extension.
-- Any Motion Tiles landing copy: written against `docs/voice/voice-analysis.md`.
+- Any Motion Tiles landing copy: written against `archive/voice/voice-analysis.md`.
 
 ---
 

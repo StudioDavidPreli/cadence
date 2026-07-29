@@ -54,7 +54,7 @@ Then close the loop in the records, the suite convention being that every automa
 - Main is production: `npm run test:e2e` before every push. Item 1 changes component code, so verify the card expand on built output in a browser (every edge position: a right-edge card, a bottom-row card, the corner), not just the dev server.
 - David does his own visual checks of feel; your built-output pass is for mechanism (the expand lands where the footprint says), not judgment.
 - Stage files individually; never `git add -A`. Commit directly to main; read `git log --oneline` first and match the message style.
-- Before writing any prose, read `docs/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
+- Before writing any prose, read `archive/voice/voice-analysis.md`. No em-dashes, anywhere, in any form.
 
 ## Definition of done
 

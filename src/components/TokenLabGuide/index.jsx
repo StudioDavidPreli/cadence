@@ -4,7 +4,7 @@
 // plus an FAQ. No token reads, no animation state of its own. The DemoArea
 // crossfade carries it in from the hero, so this component renders content only.
 //
-// Copy is drafted against docs/voice/voice-analysis.md (register-shifting
+// Copy is drafted against archive/voice/voice-analysis.md (register-shifting
 // section). Em-dash count: zero.
 
 import { TokenLabTitle } from './TokenLabTitle'
