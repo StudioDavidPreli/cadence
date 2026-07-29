@@ -112,7 +112,7 @@ restructures and pixelMirror2:**
 
 **Only unknown left: G1 for the live case.** The static and sequence tests never
 touch a Rive canvas, so they sidestep the readback wall. The next step is the G1
-probe (see `../briefings/G1_PROBE_HANDOFF.md`): swap the texture source from SVG
+probe (see `archive/docs/briefings/motionTiles/G1_PROBE_HANDOFF.md`, outside git since 2026-07-28): swap the texture source from SVG
 frames to `rive.canvas` and see whether it reads or blanks. That result picks the
 path: reads reliably -> build on the high-level runtime; blanks -> State A
 (recommended, it keeps the driver).
@@ -215,7 +215,7 @@ applied — or the blend is accepted as part of the look.
 - **Open decision (unchanged):** deployment-time look (post-process) vs
   asset-intrinsic look (PathEffect/PixelMirror). Post-process is now the leading
   approach: the shader works, and the alternative is restructuring 34 artboards.
-- **Next action:** the G1 probe, `../briefings/G1_PROBE_HANDOFF.md`. Sample the
+- **Next action:** the G1 probe, `archive/docs/briefings/motionTiles/G1_PROBE_HANDOFF.md`. Sample the
   live `rive.canvas` cross-context; the reliability of that read picks the build
   path (high-level runtime if it reads, State A / `webgl2-advanced` if it blanks).
 

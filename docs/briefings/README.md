@@ -12,43 +12,35 @@ Briefings are written after a problem is identified but before it is solved. The
 current architecture state, what has been tried, active symptoms, and constraints the next
 session must respect.
 
+**2026-07-28 split:** the working briefings (session kickoffs, closeouts, handoffs, recon
+documents, and the whole `motionTiles/` set) moved to `archive/docs/briefings/`, which is on
+disk but outside git. What stays here is the small set still cited from shipping code or from
+tracked docs: interface contracts and rulings that code comments point at. If a file named in
+an older document is missing from this folder, look in the archive path first.
+
 ## Index
 
+- [Background system rulings](./background_system_rulings.md)
+  David's rulings closing the background concept phase (2026-07-22): the split between
+  bounded reveal (demonstration) and infinite idle (chrome), mark color per theme,
+  dispositions on all twelve open questions, three amended engineering specs. Cited from
+  `choreography.js`, `raster.js`, `BackgroundArt`, `NavColumn.module.css`, and `motion.css`.
+  The recon and handoff documents it rules on are in the archive.
 - [PrincipleCard expand/collapse animation](./principle-card-briefing.md)
-  Current symptoms and constraints for the PrincipleCard close animation. Read before
-  proposing any changes to the expand/collapse machinery.
-- [waterWilt React wiring](./waterwilt-react-wiring.md)
-  Full inspection of `public/rive/waterwiltreact.riv` (2026-07-18): view model surface,
-  state machine logic, listener behavior, and the gaps the wiring session plans around.
-  Read before writing the component.
+  Symptoms and constraints for the PrincipleCard close animation. Read before proposing
+  any changes to the expand/collapse machinery. Cited from `PrincipleCard/index.jsx`.
 - [waterWilt token to VM map](./waterwilt-token-vm-map.md)
   The interface contract for the Water & Wilt Token Lab demo (2026-07-18): token
   consumption table, progress channels, instance gating, driver obligations, and
-  invariants. Both the .riv authoring and the React driver build against it.
-- [Background system handoff](./background-system-handoff-2026-07-22.md)
-  The planning-session concept for the glyph L-system background artwork (2026-07-22):
-  committed decisions, open questions, module boundaries. Written before recon.
-- [Background system recon](./background_system_recon.md)
-  Recon of the handoff above against the working tree and the labs in
-  `archive/backgroundSystem/` (2026-07-22): corrections, the chrome-vs-demonstration
-  ruling that gates the build, findings the handoff omits, proposed sequence. Where the
-  two disagree, this one is current.
-- [Background system, next-session kickoff](./BACKGROUND_SYSTEM_NEXT_SESSION_KICKOFF.md)
-  **Paste-ready prompt to open the next background-system session.** Sets the posture (visual
-  pass + Firefox/Safari + deploy, not a build session), the three tasks in order, how to run
-  it, and the environment traps. Points at the handoff below for detail.
-- [Background system session handoff, 2026-07-23](./BACKGROUND_SYSTEM_SESSION_2026-07-23.md)
-  **The detail behind the kickoff.** What was built, how it was mounted in the nav behind
-  `?bg=1`, the four reported bugs and their fixes (6b), the clearance and glass (6c), seeding
-  (6d), the empty-cell grid (6e), and the reduced-motion fix (6f). Five commits on `main`,
-  none pushed. Section 8 is where a clean session starts.
-- [Background system rulings](./background_system_rulings.md)
-  David's rulings on the recon (2026-07-22), closing the concept phase: the split
-  (bounded reveal demonstrates, infinite idle is chrome), mark color per theme (source
-  colors and 4-step shading in light and dark, theme accent and 2 steps in high
-  contrast, section 2a), dispositions on all twelve open questions, three amended
-  engineering specs, and five amendments raised against the rulings.
-  **Read this first** of the three.
+  invariants. Both the .riv authoring and the React driver build against it. The
+  wiring inspection that preceded it (`waterwilt-react-wiring.md`) is in the archive.
+- [pixelPlant token map](./pixelplant-token-map.md)
+  The interface contract for the PixelPlant Token Lab demo: which tokens drive which
+  view model inputs. Cited from `PixelPlant/index.jsx` and `TokenLab/index.jsx`.
+- [Hygiene pair kickoff](./HYGIENE_PAIR_KICKOFF.md)
+  Kickoff for the footprint and forced-colors hygiene session, kept because
+  `docs/decisions/footprint-and-forced-colors-2026-07-21.md` cites it as the record
+  of what that session was asked to do.
 
 ## How to use
 

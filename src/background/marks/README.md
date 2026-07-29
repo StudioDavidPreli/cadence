@@ -54,8 +54,10 @@ quiet, so the low end is fine and the high end is loud.
 
 Anything near white dies on the light background. Anything near black dies on the
 dark one: `#232323` measures **1.17:1** on dark, which is invisible. That is why
-`mark-30.svg` is authored `currentColor` here while it carries `#232323` in the
-archive copy. If a mark wants to read as text-weight ink, declare
+`mark-30.svg` (one of the six original test marks, moved to
+`archive/src/background/marks/` 2026-07-28 — nothing loads them, the colorway
+dirs below are the live set) was authored `currentColor` while its earlier
+archive copy carries `#232323`. If a mark wants to read as text-weight ink, declare
 `currentColor` and let it flip with the theme rather than picking a dark hex.
 
 Mid-luminance colours survive both. Check a new ink against both backgrounds

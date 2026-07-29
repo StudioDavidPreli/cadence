@@ -24,7 +24,7 @@
    The extruded artwork sits within the 0 0 976 208 viewBox, so there is nothing
    to clip; overflow: visible is kept for parity with .themedMark.
 
-   48.2px measured from titleMock.png (public/titleSVGS/): the target glyph reads
+   48.2px measured from titleMock.png (archive/public/titleSVGS/, outside git): the target glyph reads
    ~26px CSS tall, and title2's ink fills only 112 of the 208 viewBox units in
    height, so the element height is 26 x 208/112 ~ 48.2. (Up from 36.3px, which
    suited the old outline art that filled its viewBox nearly edge to edge; the

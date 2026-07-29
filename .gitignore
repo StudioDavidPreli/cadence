@@ -8,9 +8,6 @@ dist/
 # "wrangler files" block below. GH_TOKEN lives in the Workers dashboard as a
 # secret; GH_REPO is a plaintext var in wrangler.jsonc.
 
-# Local references (not for repo)
-docs/references/animation-principles/
-
 # Playwright MCP capture artifacts (per-session, not for repo)
 .playwright-mcp/
 
@@ -18,12 +15,10 @@ docs/references/animation-principles/
 .DS_Store
 docs/.DS_Store
 
-# Working artifacts — backed up externally, not needed for the app to build or run
-componentSummary-drafts.txt
-docs/browser-project/
-docs/cover-letter-reference.md
-docs/recordings/current-2026-05-04/
-docs/recordings/breakpointLayout.jpg
+# Working artifacts guard: the loose working files that used to be listed here
+# (drafts, recordings, local references) moved into archive/ 2026-07-28, which
+# the /archive/ rule below already covers. The mp4 rule stays as a guard against
+# new screen captures landing in the tree.
 *.mp4
 
 # Python bytecode cache

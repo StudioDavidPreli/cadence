@@ -89,7 +89,7 @@ The reconnaissance step is what saved the session. Six paragraphs of scoped edit
 
 ## Phase 2 capture — 2026-05-04
 
-Captured before/after screenshots at library widths 620, 700, 900, 1400 for principle 18 (Shared Vocabulary, summary swap) and principle 2 (Anticipation, QuoteBlock swap). Output: `docs/recordings/phase2-2026-05-04/` with `log.json` for raw measurements.
+Captured before/after screenshots at library widths 620, 700, 900, 1400 for principle 18 (Shared Vocabulary, summary swap) and principle 2 (Anticipation, QuoteBlock swap). Output: `archive/docs/recordings/phase2-2026-05-04/` (moved out of the tracked tree 2026-07-28, on disk outside git) with `log.json` for raw measurements.
 
 ### Tooling note
 

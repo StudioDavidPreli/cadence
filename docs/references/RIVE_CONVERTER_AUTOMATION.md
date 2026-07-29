@@ -10,7 +10,7 @@ effect rollout. This document answers what this session could answer and marks
 the rest open.
 
 **Why several answers are "open."** The project pivoted to the 36-file / React-clock
-architecture (see `../briefings/INGREDIENT_GRID_CASCADE_CLOSEOUT.md`), which makes
+architecture (see `archive/docs/briefings/motionTiles/INGREDIENT_GRID_CASCADE_CLOSEOUT.md`, outside git since 2026-07-28), which makes
 converter editing unnecessary for the shipped grid. The investigation stopped once
 that fork resolved, so the converter object itself was never dissected. These
 answers matter only to a future effort that revisits in-Rive per-shape offset.

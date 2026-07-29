@@ -287,7 +287,7 @@ discrete steps. The DOM button flattens like every other DOM component.
 
 ## Related documents
 
-- `docs/briefings/waterwilt-react-wiring.md`: full file inspection, 2026-07-18,
+- `archive/docs/briefings/waterwilt-react-wiring.md` (outside git since 2026-07-28): full file inspection, 2026-07-18,
   partially superseded by the same-day rework this contract describes.
 - `docs/decisions/motion-tiles-integration-2026-07-13.md`: the director pattern.
 - `docs/decisions/chrome-timing-and-token-integrity-2026-06-23.md`: the gate the
