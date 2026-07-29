@@ -15,7 +15,7 @@ Cadence demonstrates the relationship between design tokens and motion through t
 ### Token Lab
 A live editor for motion design tokens: duration, easing, delay, scale. Adjusting token values updates components across the UI in real time. The relationship between token and behavior is visible and immediate. A Constrained / Explore toggle switches each control between semantically bounded ranges and the full range, so the editor teaches correct token usage without locking the user out of experimentation.
 
-Token sets export as a downloadable file in three formats: W3C Design Tokens (DTCG), flat JSON, and a drop-in CSS `:root` block. The DTCG and flat files import back into the tool, with a report listing any value clamped, filled, or ignored. That is the bridge from a tuned token set to the artifact an engineer's pipeline consumes.
+Token sets export as a downloadable file in four formats: W3C Design Tokens (DTCG), flat JSON, a drop-in CSS `:root` block, and a ready-to-use Framer Motion module with the spring as a native `{ type: 'spring' }` config. The DTCG and flat files import back into the tool, with a report listing any value clamped, filled, or ignored. That is the bridge from a tuned token set to the artifact an engineer's pipeline consumes.
 
 ### Principles Library
 Animation principles, each demonstrated through a real UI component. Each principle is interactive, isolated, and driven by the token system. The classic 12 principles of animation:
@@ -96,27 +96,28 @@ Motion tokens are defined as CSS Custom Properties and consumed by Framer Motion
 
 ```
 cadence/
-├── CLAUDE.md
 ├── README.md
 ├── docs/
 │   ├── case-study.md
 │   ├── token-architecture.md
 │   ├── principles/
-│   │   ├── 01-squash-and-stretch.md
 │   │   └── [one file per principle]
 │   └── decisions/
 │       └── [architecture decision records]
-├── tracker/
-│   └── TRACKER.md
+├── e2e/
+│   └── [Playwright suite, run against built output]
+├── worker/
+│   └── index.js
 └── src/
     ├── tokens/
     │   └── motion.css
+    ├── background/
     ├── components/
     │   ├── TokenLab/
+    │   ├── PrinciplesLibrary/
     │   ├── MotionTiles/
-    │   └── shared/
+    │   └── [one folder per component]
     └── principles/
-        ├── SquashAndStretch/
         └── [one folder per principle]
 ```
 
