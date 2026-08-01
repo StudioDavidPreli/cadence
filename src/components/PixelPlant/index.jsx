@@ -224,7 +224,7 @@ function compileShader(gl, type, src, onError) {
 // writing colors into that instance, never rebinding (a rebind resets the state
 // machine or fires a phantom click; see the theme-binding header). No key, so it
 // also never remounts on a theme change.
-function PlantRive({ theme, onCanvas, onAspect, onReady }) {
+function PlantRive({ theme, onCanvas, onAspect, onReady, growOnLoad = false }) {
   const { rive, RiveComponent } = useRive({
     src: RIV_SRC,
     artboard: ARTBOARD,
@@ -291,6 +291,20 @@ function PlantRive({ theme, onCanvas, onAspect, onReady }) {
       rive.bindViewModelInstance(bound)
       boundInstanceRef.current = bound
       rive.play(STATE_MACHINE)
+      // growOnLoad: write the VM's `grow` boolean once, the same
+      // write-a-state-property mechanism the theme-rebind bug proved the
+      // machine responds to (the reason rebinding is banned here, used on
+      // purpose). `grow` specifically, not `waterMeBoole`: the water boolean
+      // bakes TRUE in every instance, so re-writing true is a no-op the
+      // machine never sees; `grow` bakes false and flipping it runs the
+      // growth. Half a second after play so the machine has settled into its
+      // idle before the write lands.
+      if (growOnLoad) {
+        setTimeout(() => {
+          const g = bound.boolean('grow')
+          if (g) g.value = true
+        }, 500)
+      }
       onReady(true)
       return
     }
@@ -360,9 +374,18 @@ function StateToggle({ label, value, onLabel, offLabel, onToggle }) {
 // (status and error lines stay, because a blank failed canvas explains
 // nothing). pointerOverrideRef: a parent-owned {x, y, inside} ref that
 // replaces the internal pointer state, so the embed's ghost-pointer driver
-// can play the human through the same contract the human uses. The shipped
-// Token Lab demo passes neither and is unchanged.
-export function PixelPlant({ chromeless = false, pointerOverrideRef = null }) {
+// can play the human through the same contract the human uses.
+// initialCells / initialGap seed the mosaic controls (the embed has no
+// sliders to set them with). growOnLoad writes the VM's `grow` boolean once
+// at mount so the embed opens into the grown plant instead of the bare pot.
+// The shipped Token Lab demo passes none of these and is unchanged.
+export function PixelPlant({
+  chromeless = false,
+  pointerOverrideRef = null,
+  initialCells = 42,
+  initialGap = 0.07,
+  growOnLoad = false,
+}) {
   const { theme } = useTheme()
 
   // TokenLab wraps the demo area in a MotionTokensProvider with
@@ -425,8 +448,8 @@ export function PixelPlant({ chromeless = false, pointerOverrideRef = null }) {
 
   const [aspect, setAspect] = useState(null) // artboard w/h, drives the stage box
   const [ready, setReady] = useState(false)
-  const [cells, setCells] = useState(42) // cells across the mosaic
-  const [gap, setGap] = useState(0.07) // fraction of a cell given to the gutter
+  const [cells, setCells] = useState(initialCells) // cells across the mosaic
+  const [gap, setGap] = useState(initialGap) // fraction of a cell given to the gutter
   const [snap, setSnap] = useState(false) // false = smooth misregistration, true = chunky
   const [maskGaps, setMaskGaps] = useState(true) // true = clean gutters, false = fringe bleed
   const [error, setError] = useState('')
@@ -644,6 +667,7 @@ export function PixelPlant({ chromeless = false, pointerOverrideRef = null }) {
             onCanvas={handleCanvas}
             onAspect={handleAspect}
             onReady={handleReady}
+            growOnLoad={growOnLoad}
           />
         </div>
         <canvas

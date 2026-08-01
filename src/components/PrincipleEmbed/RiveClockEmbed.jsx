@@ -153,7 +153,17 @@ export function RiveClockEmbed() {
           resumeAtRef.current = performance.now() + RESUME_DELAY_MS
         }}
       >
-        <PixelPlant chromeless pointerOverrideRef={pointerRef} />
+        {/* 140 cells with no gutter (David's embed spec, 2026-08-01): a fine
+            mosaic that reads as texture at embed size. growOnLoad opens the
+            scene on the grown plant; the iframe is lazy, so the brief growth
+            plays as the reader scrolls it into view. */}
+        <PixelPlant
+          chromeless
+          pointerOverrideRef={pointerRef}
+          initialCells={140}
+          initialGap={0}
+          growOnLoad
+        />
         <img
           ref={ghostRef}
           src={pointerUrl}
