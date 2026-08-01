@@ -1,0 +1,13 @@
+# Captures and media outputs live beside the rig but never enter git: they are
+# heavy binaries, and deploys auto-ride pushes to main. The rig code IS tracked.
+*.mov
+*.mp4
+*.webm
+*.webp
+*.svg
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.aep
+*.riv

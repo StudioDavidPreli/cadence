@@ -110,6 +110,10 @@ export function ExpandedPrincipleBody({
   showDemoMotion,
   setShowDemoMotion,
   onClose,
+  // The third frame (the case-study principle embed) has nothing to close:
+  // it is the whole document inside an iframe. It hides the × instead of
+  // passing a dead onClose, so the button never renders unreachable.
+  hideClose = false,
 }) {
   // Drop the body's own transition durations to 0 under prefers-reduced-motion,
   // the same shape PrincipleCard uses for its card-level animations. Computed
@@ -126,15 +130,17 @@ export function ExpandedPrincipleBody({
       <div className={styles.expandedContent}>
         {/* motion.button: whileTap spring is intentional — single-element
             micro-interaction isolated from the layout animation. */}
-        <motion.button
-          className={styles.closeButton}
-          onClick={onClose}
-          whileTap={{ scale: tokens.scale.pressSubtle }}
-          transition={{ duration: dur.fast, ease: tokens.ease.overshoot }}
-          aria-label="Close"
-        >
-          ×
-        </motion.button>
+        {!hideClose && (
+          <motion.button
+            className={styles.closeButton}
+            onClick={onClose}
+            whileTap={{ scale: tokens.scale.pressSubtle }}
+            transition={{ duration: dur.fast, ease: tokens.ease.overshoot }}
+            aria-label="Close"
+          >
+            ×
+          </motion.button>
+        )}
 
         {/* Left half: animation and UI component as continuously mounted
             siblings. PrincipleAnimation stays mounted for the entire expanded

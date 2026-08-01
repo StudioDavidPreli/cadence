@@ -356,7 +356,13 @@ function StateToggle({ label, value, onLabel, offLabel, onToggle }) {
   )
 }
 
-export function PixelPlant() {
+// chromeless: stage only, no control column — the case-study embed surface
+// (status and error lines stay, because a blank failed canvas explains
+// nothing). pointerOverrideRef: a parent-owned {x, y, inside} ref that
+// replaces the internal pointer state, so the embed's ghost-pointer driver
+// can play the human through the same contract the human uses. The shipped
+// Token Lab demo passes neither and is unchanged.
+export function PixelPlant({ chromeless = false, pointerOverrideRef = null }) {
   const { theme } = useTheme()
 
   // TokenLab wraps the demo area in a MotionTokensProvider with
@@ -400,7 +406,14 @@ export function PixelPlant() {
   // true while the pointer is over the stage (plates follow), false once it
   // leaves (plates run the homecoming tween). x/y are normalized to the stage
   // box with centre at 0,0.
-  const pointerRef = useRef({ x: 0, y: 0, inside: false })
+  //
+  // When a pointerOverrideRef is supplied, that object IS the pointer state:
+  // the stage handlers below write to it on real pointer events, and the
+  // embed's ghost driver writes to it between them. One object, last writer
+  // wins, and the frame loop cannot tell a ghost from a person — which is the
+  // point.
+  const internalPointerRef = useRef({ x: 0, y: 0, inside: false })
+  const pointerRef = pointerOverrideRef ?? internalPointerRef
 
   // Per-plate offset + homecoming state, the object the frame loop mutates.
   // `off` is the plate's current UV offset; `home` is null while following and
@@ -648,6 +661,14 @@ export function PixelPlant() {
           mirror its easing-tab look — same classes, mirrored into this module —
           without SliderRow's active-token coupling, which is meaningless for a
           non-token control. */}
+      {chromeless ? (
+        (error || !ready) && (
+          <div className={styles.controls}>
+            {error ? <p className={styles.status}>WebGL error: {error}</p> : null}
+            {!ready ? <p className={styles.status}>Loading the plant…</p> : null}
+          </div>
+        )
+      ) : (
       <div className={styles.controls}>
         {error ? <p className={styles.status}>WebGL error: {error}</p> : null}
         {!ready ? <p className={styles.status}>Loading the plant…</p> : null}
@@ -706,6 +727,7 @@ export function PixelPlant() {
           onToggle={() => setMaskGaps((m) => !m)}
         />
       </div>
+      )}
     </div>
   )
 }

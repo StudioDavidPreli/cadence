@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadence: Case Study</title>
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<h1><img src="media/title2-dark.svg" alt="Cadence" width="480" /></h1>
+<h2>Case Study</h2>
+<p><!-- V01: overview video slot. The 60-90s walkthrough lands here; until it exists, the
+     site's OG card image holds the slot so the page composes. Swap image for video on delivery. --><br />
+<img src="https://cadence.davidpreli.com/favIcon/og-image.png" width="1200" height="630" alt="Cadence: the motion system explorer" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" /></p>
+<p>Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior in real UI components, through the classic 12 principles of animation and six design-engineering extensions. It is built as a curriculum for designers learning how motion works at the system level.</p>
+<p><strong>Role:</strong> Solo. Design, architecture, development, documentation.<br />
+<strong>Timeline:</strong> Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 268 commits as of July 28.<br />
+<strong>Stack:</strong> React, Framer Motion, CSS Custom Properties, Rive, Vite.<br />
+<strong>Live:</strong> <a href="https://cadence.davidpreli.com">cadence.davidpreli.com</a></p>
+<p><!-- V12: stat row. Values current as of 2026-07-28 (commit count moves; refresh on republish). --><br />
+<div style="display: flex; gap: 40px; flex-wrap: wrap; margin: 24px 0 8px 0; font-family: 'IBM Plex Mono', ui-monospace, monospace;">
+  <div>
+    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">13</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">WEEKS TO PRODUCTION</div>
+  </div>
+  <div>
+    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">268</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">COMMITS</div>
+  </div>
+  <div>
+    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">39</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">CUSTOM COMPONENTS</div>
+  </div>
+  <div>
+    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">578</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">TESTS</div>
+  </div>
+</div></p>
+<hr />
+<h2>The Problem</h2>
+<p>Motion in design systems is underdocumented. A design system will specify every color to the hex digit and every spacing step to the pixel, then describe its motion in a paragraph: two duration values, an easing curve named "standard," and a sentence asking for restraint.</p>
+<p>I spent eight years on the other side of that paragraph. A motion designer tunes timing in After Effects until it reads right, exports a spec, and hands it across a wall. What comes back rarely moves the way the spec did, and there is no shared surface where both sides can watch a value become a behavior. The relationship between a token and its perceptual result is invisible unless someone builds the thing that makes it visible.</p>
+<p><figure style="margin: 0 0 16px 0;">
+  <img src="media/v02.gif" width="720" height="405" loading="lazy" alt="The duration.fast slider ramps itself from 50ms to 350ms while a button is pressed repeatedly; every press retimes with the slider." style="max-width: 100%; height: auto; display: block;" />
+  <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">The sentence below, running. The slider ramps 50 to 350; the presses are live.</figcaption>
+</figure><br />
+Cadence is that thing. Drag <code>duration.fast</code> from 50ms to 350ms and watch a button's press change character in the same second. The argument underneath: the freedom motion designers have in After Effects is not lost when motion enters a design system. It is organized, named, and made legible, and the organizing is a skill motion designers already have.</p>
+<hr />
+<h2>Goals</h2>
+<ol>
+<li>Build a tool that makes the token-to-behavior relationship visible and interactive</li>
+<li>Apply the classic 12 principles of animation, plus 6 design-engineering extensions, to real UI components, not abstract shapes</li>
+<li>Develop React and design systems fluency through a project with genuine utility</li>
+<li>Produce a portfolio artifact that demonstrates design engineering thinking</li>
+</ol>
+<hr />
+<h2>The Chapters</h2>
+<ol>
+<li><strong><a href="token-system.html">The Token System</a>:</strong> five token families, the two-channel dispatch, and the bezier that spent three months claiming to be a spring</li>
+<li><strong><a href="principles.html">The Principles</a>:</strong> eighteen cards, the classic twelve plus six extensions, each demonstrated on a real component, with build notes for all eighteen</li>
+<li><strong><a href="fields-and-canvases.html">Fields and Canvases</a>:</strong> fifty tiles on one clock, tokens crossing into WebGL, and a generative background that listens to the presets</li>
+<li><strong><a href="key-decisions.html">Key Decisions</a>:</strong> why <code>layoutId</code> left the codebase, why the grid took five tries, and the bug that existed only in production</li>
+<li><strong><a href="built-and-learned.html">What I Built, What I Learned</a>:</strong> the shipped surface, the numbers, and what the build changed about the builder</li>
+</ol>
+<hr />
+<h2>Going Deeper</h2>
+<p>Four companion documents, each a different cut of the same project:</p>
+<ul>
+<li><strong><a href="../cadence-overview.md">The Plain Overview</a>:</strong> what Cadence does, in plain language, no engineering required</li>
+<li><strong><a href="../cadence-two-lexicons.md">Two Lexicons</a>:</strong> the technical paper, organized as a translation table between motion design and design engineering</li>
+<li><strong><a href="../working-with-claude.md">Working with Claude</a>:</strong> how the human-AI collaboration ran, and which methods earned their keep</li>
+<li><strong><a href="../cadence-what-this-demonstrates.md">What This Demonstrates</a>:</strong> the direct version, for hiring managers</li>
+</ul>
+<hr />
+<ul>
+<li><strong>Live tool:</strong> <a href="https://cadence.davidpreli.com">cadence.davidpreli.com</a></li>
+<li><strong>GitHub:</strong> <a href="https://github.com/StudioDavidPreli/cadence">github.com/StudioDavidPreli/cadence</a></li>
+<li><strong>Portfolio:</strong> <a href="https://davidpreli.com">davidpreli.com</a></li>
+</ul>
+  </main>
+</body>
+</html>

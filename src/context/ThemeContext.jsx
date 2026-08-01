@@ -63,6 +63,26 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }) {
   )
 }
 
+// ─── StaticThemeProvider ──────────────────────────────────────────────────────
+// A fixed-theme provider for surfaces that must NOT touch the visitor's saved
+// theme. ThemeProvider persists to localStorage on mount, which is correct for
+// the app (the choice should survive a reload) and wrong for the principle
+// embed: the embed is an iframe on the same origin, so writing its forced
+// theme would overwrite what the visitor chose on the main site. This provider
+// writes the DOM attribute (color.css needs it) and nothing else; setTheme is
+// a no-op because a fixed-theme surface has no switcher.
+export function StaticThemeProvider({ children, theme }) {
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme: () => {}, themes: THEMES }}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
 // useTheme is the consumer hook. Components import this instead of importing
 // ThemeContext directly — it's a cleaner API and the right place to add guards.
 export function useTheme() {
