@@ -46,7 +46,7 @@ Motion in design systems is underdocumented. A design system will specify every 
 I spent eight years on the other side of that paragraph. A motion designer tunes timing in After Effects until it reads right, exports a spec, and hands it across a wall. What comes back rarely moves the way the spec did, and there is no shared surface where both sides can watch a value become a behavior. The relationship between a token and its perceptual result is invisible unless someone builds the thing that makes it visible.
 
 <figure style="margin: 0 0 16px 0;">
-  <img src="hosted/media/v02.gif" width="720" height="405" loading="lazy" alt="The duration.fast slider ramps itself from 50ms to 350ms while a button is pressed repeatedly; every press retimes with the slider." style="max-width: 100%; height: auto; display: block;" />
+  <img src="hosted/media/v02.gif" width="720" height="420" loading="lazy" alt="The duration.fast slider ramps itself from 50ms to 350ms while a button is pressed repeatedly; every press retimes with the slider." style="max-width: 100%; height: auto; display: block;" />
   <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">The sentence below, running. The slider ramps 50 to 350; the presses are live.</figcaption>
 </figure>
 Cadence is that thing. Drag `duration.fast` from 50ms to 350ms and watch a button's press change character in the same second. The argument underneath: the freedom motion designers have in After Effects is not lost when motion enters a design system. It is organized, named, and made legible, and the organizing is a skill motion designers already have.
