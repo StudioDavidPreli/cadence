@@ -3,9 +3,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  /* Padding is 9/19 rather than the 10/20 it reads as, because the border below
+     adds 1px per side. box-sizing: border-box does not absorb that — this button
+     has no declared width or height, so its box is content + padding + border
+     either way. Dropping the padding by exactly the border width holds the outer
+     size where it was across all ten surfaces that render this Button. */
+  padding: 9px 19px;
   border-radius: 6px;
-  border: none;
+  /* Resting stroke (2026-08-03). Without it the button had no edge at all in the
+     dark theme: the fill is --color-surface #1e1e1e sitting on the demo plate's
+     --color-surface-raised #1a1a1a, a four-point step, 1.05:1. border2 is the
+     house treatment for a filled chrome button on a raised surface — the same
+     stroke .demoTrigger and Card already carry in this column. It resolves to
+     #3d3d3d in dark (1.60:1 against the plate), #cccccc in light, and to the
+     button's own fill color in both high-contrast themes, where it disappears
+     and changes nothing. 1.60:1 is below the project's 3:1 UI-component bar and
+     that gap is deliberate, David's call: see the 2026-08-03 section of
+     docs/decisions/contrast-audit-2026-04-16.md. */
+  border: 1px solid var(--color-border2);
   cursor: pointer;
 
   /* Typography */
@@ -61,4 +76,24 @@
   background-color: var(--color-surface-press);
   color: var(--color-text-primary);
   outline-color: transparent;
+}
+
+/* Keyboard focus (2026-08-03). This button had no :focus-visible rule at all,
+   and the transparent outline placeholder above suppressed the browser's own
+   ring, so a keyboard user got no focus indication in any theme. Accent is the
+   3:1-verified stroke the rest of the app focuses with (EnterGridButton,
+   PixelPlant, the sliders); measured against the plate the ring sits on, it
+   clears the bar in every theme — dark 8.0:1, light 6.1:1, HC-light 6.1:1,
+   HC-dark 12.7:1. Only outline-color is needed; the base rule already declares
+   the width, style and offset.
+
+   The selector is doubled on purpose. The HC hover rule above is
+   :root[data-theme^="high-contrast"] .button:hover, which outranks a bare
+   .button:focus-visible — so in a high-contrast theme a button that was both
+   focused and hovered would lose its ring to the hover treatment. The second
+   selector matches that specificity and, coming later, wins. Placing the whole
+   rule after :active does the same job for a held keyboard press. */
+.button:focus-visible,
+:root[data-theme^="high-contrast"] .button:focus-visible {
+  outline-color: var(--color-accent);
 }
