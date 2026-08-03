@@ -144,7 +144,15 @@ export function DurationVisualizer({
       {/* Mode toggle — the dynamic-duration concept made into a switch. Each
           option's explanation drops from the toggle as a hover/focus tooltip
           (the wrap is the positioning context; the toggle itself clips its own
-          segment fills, so the tip lives outside it). */}
+          segment fills, so the tip lives outside it).
+
+          The labels abbreviate to "Const." because the segment cannot hold the
+          word. The controls column is a fixed 300px, which leaves each segment
+          about 116px of text box; "Constant duration" is 17 characters of IBM
+          Plex Mono at 11px (0.6em advance) = ~112px, so the text ran to within
+          2px of the divider and clipped outright whenever a scrollbar took the
+          width. aria-label carries the full phrase, so the abbreviation is
+          visual only — a screen reader still hears "Constant duration". */}
       <div className={styles.modeToggleWrap}>
         <div className={styles.modeToggle} role="group" aria-label="Comparison mode">
           <button
@@ -156,8 +164,9 @@ export function DurationVisualizer({
             onFocus={() => setHoveredMode('duration')}
             onBlur={() => setHoveredMode(null)}
             aria-pressed={mode === 'duration'}
+            aria-label="Constant duration"
           >
-            Constant duration
+            Const. duration
           </button>
           <button
             type="button"
@@ -168,8 +177,9 @@ export function DurationVisualizer({
             onFocus={() => setHoveredMode('velocity')}
             onBlur={() => setHoveredMode(null)}
             aria-pressed={mode === 'velocity'}
+            aria-label="Constant velocity"
           >
-            Constant velocity
+            Const. velocity
           </button>
         </div>
         <div

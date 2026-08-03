@@ -86,8 +86,18 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  /* Keep each label ("Constant duration" / "Constant velocity") on one line. */
+  /* Keep each label ("Const. duration" / "Const. velocity") on one line. */
   white-space: nowrap;
+  /* text-align is the UA button default, declared here for the same reason
+     .exportFormatOption declares it: this toggle's centering is a layout
+     decision, not something to inherit from the user agent.
+     min-width: 0 is the load-bearing one. A grid item defaults to
+     min-width: auto, so a nowrap label wider than its track pushes the track
+     past 1fr — the two segments stop being equal halves and the second one
+     gets clipped by .modeToggle's overflow: hidden. With the floor at 0 the
+     tracks are always a true 50/50 split, whatever the label costs. */
+  text-align: center;
+  min-width: 0;
   transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
 }
 
