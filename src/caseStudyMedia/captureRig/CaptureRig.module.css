@@ -106,6 +106,16 @@
   transform-origin: top center;
 }
 
+/* ── principle trigger scenes (V01 material) ────────────────────────────────
+   The demo lays out at the expanded card's demo width, then scales for the
+   camera. Same transform reasoning as .compareStage: the components keep
+   their shipped geometry and the browser rasterizes them crisp. */
+.principleStage {
+  width: 340px;
+  transform: scale(1.5);
+  transform-origin: top center;
+}
+
 /* The wrong-scene-name error surface. Operator-facing only. */
 .unknown {
   padding: 24px;

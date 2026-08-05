@@ -42,5 +42,11 @@ then open `/?capture=problem-loop`.
   cycle (2s holds). Theme defaults dark; `&theme=` overrides (any scene
   accepts it).
 
+- **`hierarchy-of-motion`** / **`solid-drawing`** (V01 material): one
+  expanded-card principle demo each at 1.5x, dark theme, with a remote
+  trigger toggle at the top of the screen that forwards a real click into
+  the demo (the demos stay self-contained; the rig clicks what a finger
+  would). Space runs a 2.5s auto-cycle. Captured individually.
+
 (V09 became a live embed instead of a capture: `?embed=rive-clock` on the app
 itself, see `src/components/PrincipleEmbed/`.)

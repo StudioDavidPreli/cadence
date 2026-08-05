@@ -2,8 +2,20 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ProblemLoopScene } from './ProblemLoopScene'
 import { SpringVsOvershootScene } from './SpringVsOvershootScene'
+import { PrincipleTriggerScene } from './PrincipleTriggerScene'
+import { HierarchyOfMotion } from '../../principles/HierarchyOfMotion'
+import { SolidDrawing } from '../../principles/SolidDrawing'
 import { THEMES } from '../../context/ThemeContext'
 import rigStyles from './CaptureRig.module.css'
+
+// V01 demo-video scenes: one expanded-card principle demo each, remote
+// trigger out of frame. Captured individually (David's spec, 2026-08-05).
+const HierarchyOfMotionScene = () => (
+  <PrincipleTriggerScene sceneName="hierarchy-of-motion" demo={HierarchyOfMotion} />
+)
+const SolidDrawingScene = () => (
+  <PrincipleTriggerScene sceneName="solid-drawing" demo={SolidDrawing} />
+)
 
 // ─── Capture rig entry ────────────────────────────────────────────────────────
 // Mounted by main.jsx instead of the app when the build carries VITE_CAPTURE=1
@@ -16,6 +28,8 @@ import rigStyles from './CaptureRig.module.css'
 const SCENES = {
   'problem-loop': { component: ProblemLoopScene, theme: 'high-contrast-dark' },
   'spring-vs-overshoot': { component: SpringVsOvershootScene, theme: 'dark' },
+  'hierarchy-of-motion': { component: HierarchyOfMotionScene, theme: 'dark' },
+  'solid-drawing': { component: SolidDrawingScene, theme: 'dark' },
 }
 
 function UnknownScene({ requested }) {
