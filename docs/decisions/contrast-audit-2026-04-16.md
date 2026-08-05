@@ -262,3 +262,87 @@ decoupled from the accent role entirely. The chips read their own
 Every chip carries a constant 1px border (transparent where unused) so the
 outline and filled variants share exact geometry. Verified on built output
 2026-07-16: computed styles per theme match the spec in all four themes.
+
+## Addendum 2026-08-03: the button's own edge, a pairing the table never held
+
+David flagged the Token Lab Press & State demo in dark: the "Press me" and
+"Action" buttons read as floating text with no button under it.
+
+He was right, and the audit above is why it survived. Rows 6 and 7 test the
+*label on the fill*, `text-primary` on `surface` and `surface-hover`, and both
+pass at 12.7:1. Nothing in the table tests the fill against the surface behind
+it. Every row is a text-on-background pairing. A filled control's own boundary
+never entered the grid, so a control that is invisible while its label is
+perfect scores clean twice.
+
+Measured: the shared Button fills `--color-surface` `#1e1e1e` and sits on the
+demo plate's `--color-surface-raised` `#1a1a1a`. Four points apart, **1.05:1**.
+There is no edge. `color.css` had already named the threshold in its own comment
+on `surface-raised`: an eight-point step "was imperceptible," eighteen points is
+"legible as a distinct layer." Four points is not close.
+
+Dark is the only theme affected. Light is `#1a1a1a` on `#ffffff`, HC-light
+`#000000` on `#ffffff`, HC-dark `#ffffff` on `#000000`. All three are inverse
+pairs and need nothing.
+
+The axe pass in `e2e/a11y.spec.js` scans this exact view (`press-state demos`)
+across all four themes on built output and does not flag it. axe's
+`non-text-contrast` rule does not evaluate a filled control's fill against its
+backdrop. Worth knowing where the automated floor stops.
+
+### Fix
+
+`.button` takes a resting `border: 1px solid var(--color-border2)`, the same
+stroke `.demoTrigger` and `Card` already carry in this column, plus a padding
+drop of `10px 20px` to `9px 19px` so the outer box is unchanged across the ten
+surfaces that render this Button.
+
+| theme | border2 | vs plate | vs the button's own fill |
+|---|---|---|---|
+| dark | `#3d3d3d` | 1.60:1 on `#1a1a1a` | 1.53:1 on `#1e1e1e` |
+| light | `#cccccc` | 1.61:1 on `#ffffff` | 10.8:1 on `#1a1a1a` |
+| HC-light | `#000000` | 21:1 on `#ffffff` | equals the fill, invisible |
+| HC-dark | `#ffffff` | 21:1 on `#000000` | equals the fill, invisible |
+
+Light gains a pale hairline between a near-black button and white paper. That is
+the same pairing `.demoTrigger` has been shipping, so it is consistent rather
+than new. Both HC themes are untouched: border2 resolves to the fill color
+there, and the hover ring keeps doing the work it has done since 2026-07-18.
+
+### The gap, and that it is a decision
+
+1.60:1 does not meet the 3:1 UI-component bar in CLAUDE.md. David's call,
+2026-08-03, on consistency grounds, and recorded here so it stays a decision:
+
+- No existing token reaches 3:1 on this plate. `--color-border` is 1.28:1,
+  `--color-border2` is 1.60:1. Clearing 3:1 against `#1a1a1a` needs roughly
+  `#656565` or lighter, which means a new token.
+- That token would make the Button read heavier than the `Card` directly beneath
+  it in the same demo, and heavier than every other filled chrome button in the
+  app, until the token spread everywhere. A correct button in a column of
+  under-strength neighbors is a worse system than a consistent one.
+- The control is identified by its 12.7:1 label, not by its edge. The stroke is
+  restoring a visible boundary, not carrying the button's identity.
+
+If a `--color-border-strong` is ever introduced, this is the row it should land
+on first.
+
+### Same pass: the missing focus ring
+
+Found while reading the file. `.button` had no `:focus-visible` rule at all, and
+its `outline: 2px solid transparent` placeholder suppressed the browser default,
+so keyboard focus was invisible on the shared Button in every theme. It now
+takes the accent ring the rest of the app focuses with, on `outline-color` alone
+since the base rule already declares width, style and offset. Accent clears 3:1
+on every theme's plate: dark 8.0:1, light 6.1:1, HC-light 6.1:1, HC-dark 12.7:1.
+(Those are measured against `surface-raised`, where the ring actually sits at its
+2px offset. Rows 8 and 9 of the table above predate the 2026-06-22 accent
+re-hue, so their figures no longer describe the current token.)
+
+Every ratio in this addendum was read off computed styles on built output,
+2026-08-03, cycling all four themes.
+
+The selector is written twice, `.button:focus-visible` and
+`:root[data-theme^="high-contrast"] .button:focus-visible`. The HC hover rule
+outranks the bare form, so without the second selector a focused *and* hovered
+button in high contrast would drop its ring back to the hover treatment.
