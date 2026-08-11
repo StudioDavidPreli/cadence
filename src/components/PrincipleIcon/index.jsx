@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { useRive, useViewModel, useViewModelInstance } from '@rive-app/react-webgl2'
 import { useTheme } from '../../context/ThemeContext'
 import { useHCContrastColors } from '../../hooks/useHCContrastColors'
+import { useRiveAccentColor } from '../../hooks/useRiveAccentColor'
 import { useRiveSupersampling } from '../../hooks/useRiveSupersampling'
 import styles from './PrincipleIcon.module.css'
 
@@ -179,6 +180,13 @@ function RiveIcon({ src, stateMachine, theme, className, paused }) {
 
   // high-contrast-dark flips the shared 'Contrast' instance's stroke/fill.
   useHCContrastColors(instance, theme)
+
+  // Any icon authored with a colorPropertyOutline takes the theme's
+  // --color-accent on it. Called for every principle: the seventeen icons
+  // without that property have nothing for instance.color() to return and the
+  // hook no-ops, so the .riv decides whether it has an outline, not a table
+  // here. Solid Drawing (11) is the first file that does.
+  useRiveAccentColor(instance, theme)
 
   return (
     <div
