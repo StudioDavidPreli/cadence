@@ -62,6 +62,11 @@ export default {
       }
       return handleBugReport(request, env);
     }
+    // Response headers on pages (the frame-ancestors policy for the principle
+    // embed) do NOT live here: wrangler.jsonc scopes run_worker_first to
+    // /api/*, so the asset layer answers every page request before this worker
+    // runs. They live in public/_headers, which the Workers asset server
+    // applies itself. (David's spec, 2026-07-31.)
     return env.ASSETS.fetch(request);
   },
 };

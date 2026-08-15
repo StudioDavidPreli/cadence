@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fields and Canvases · Cadence Case Study</title>
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<h1>Fields and Canvases</h1>
+<p><a href="index.html">Cadence: Case Study</a> · Chapter 3</p>
+<hr />
+<h2>Motion Tiles: One Vocabulary at Scale</h2>
+<p><figure style="margin: 0 0 16px 0;">
+  <img src="media/v03sr.gif" width="720" height="720" loading="lazy" alt="A preset change crossing the Motion Tiles grid as a staggered wave; every tile retimes together." style="max-width: 100%; height: auto; display: block;" />
+  <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">A preset change crossing the grid; the stagger carries it as a wave.</figcaption>
+</figure><br />
+The third tool answers the question the first two raise: what happens when a motion vocabulary has to cover a field instead of a button? Motion Tiles is a pooled mosaic of over fifty Rive tiles sharing one clock. Change a preset and every tile recolors and retimes together. Drag the stagger and the change crosses the grid in a wave.</p>
+<p>The presets are the same three personalities Token Lab carries, Snappy, Standard, Cinematic, spoken in a different dialect. A button press wants a duration and a bezier. An ambient field wants a period, an envelope, a spread. The two control suites stay separate on purpose: the user works one tool bar at a time, and the values were tuned to their contexts (a field that slows the way Cinematic slows a button would put the room to sleep). What the system shares across motion classes is the names; what it scopes per class is the interpretation. A vocabulary is only usable if you also decide where it ends.</p>
+<p>The architecture is the argument made physical. The tiles carry no clocks of their own: one React <code>requestAnimationFrame</code> loop computes each tile's phase-offset progress from a weight table and writes it into that tile's Rive view model every frame. Speed, easing, and stagger are consumed in React, not in the assets, which is exactly the token-to-behavior relationship from Token Lab operating on fifty canvases at once. The section is landing-gated so its WebGL2 grid loads only when entered, and the per-tile Rive bindings were built with Claude Code driving the Rive editor over MCP, a workflow the landing page walks through.</p>
+<h2>Embeds: Tokens Across the Canvas Boundary</h2>
+<p>Token Lab's component demos read tokens into Framer Motion props, which is the easy case: everything speaks CSS. The Embeds category runs the same tokens into canvases that have never heard of CSS, and the two demos split the ownership of time between them.</p>
+<p><!-- V09: live Rive Clock embed (?embed=rive-clock&theme=dark). Canvas only; a ghost pointer
+     tours the quadrants and yields to a real pointer. Ships with the next push to main.
+     David's fallback SVG sits behind the iframe as its background. --><br />
+<figure style="float: right; width: 340px; margin: 0 0 16px 24px;">
+  <iframe src="https://cadence.davidpreli.com/?embed=rive-clock&theme=dark" width="340" height="425" loading="lazy" title="Rive Clock, live from Cadence" style="border: 0; display: block; background: url(media/riveClockFallback.svg) center / contain no-repeat;"></iframe>
+  <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">Live: the Rive Clock. The color plates chase a cursor on token timing; when nobody is there, a ghost takes the tour. Reach in and it yields. A click waters the plant.</figcaption>
+</figure><br />
+React Clock is a Rive animation triggered by a DOM button. The file holds poses; React holds time. Every animation in the <code>.riv</code> is a linear timeline scrubbed by a view-model number from 0 to 1, and a <code>requestAnimationFrame</code> driver integrates the live tokens into eased progress each frame: rain rides <code>duration.fast</code>, growth <code>duration.slower</code> on <code>ease.enter</code>, flowers arrive on <code>slow</code> and <code>standard</code> after <code>delay.long</code>. No duration, speed, or easing property exists inside the file at all, so a slider drag mid-growth bends the plant's pace on the very next frame. The Rive authoring and the React driver were built on opposite sides of a wall neither tool can see over, against a committed contract document naming every property, its type, and who writes it; when the two sides disagreed about what a number meant, the contract, not the code, was where the argument settled.</p>
+<p>Rive Clock inverts the ownership. The animation is an interactive state machine that keeps its own clock (click it and it waters), rendered invisible; a WebGL shader stacked on top paints the pixelated copy the user actually sees, split into three color plates that chase the cursor. The tokens drive the chase: <code>duration.base</code> is the follow time constant, <code>duration.slow</code> the homecoming when the pointer leaves, <code>ease.standard</code> its curve, <code>delay.short</code> the per-plate stagger, <code>scale.pressExpressive</code> the aberration amplitude. Block size and gap stay spatial controls with no token behind them, because Token Fidelity keeps time-domain tokens on time-domain jobs. One demo where React owns the clock, one where the file does, and the same token set reaches into both.</p>
+<div style="clear: both;"></div>
+<h2>The Background: A Generative Field on the Token Clock</h2>
+<p><figure style="margin: 0 0 16px 0;">
+  <img src="media/V10_backgroundSystem.webp" width="720" height="405" loading="lazy" alt="The nav background field in two themes: identical mark placements, different paint." style="max-width: 100%; height: auto; display: block;" />
+  <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">Two themes, one field. The placements hold still; only the paint changes.</figcaption>
+</figure><br />
+The nav column carries an ambient background: a field of small hand-authored animal marks, six rats and four runners per library, placed by a generative composition, swaying on a slow two-sine wander, revealed as a section opens. Each of the three sections has its own mark library (hand-drawn for the Principles, pixel exports for Token Lab and Motion Tiles), and each library is authored in four colorways, one per theme, so the art is themed at the source instead of recolored at runtime.</p>
+<p>Two architecture rules shape it. First, a theme switch must never regenerate the field: geometry and placement hold still while only the paint changes, and the shipped build was verified holding every placement byte-identical across a switch. Second, the unit of loading is a folder: one library, chosen by the open section, in one colorway, chosen by the theme. Before that rule, all twelve colorway folders shipped eagerly and the background chunk weighed 495.71 kB gzipped, two and a half times the entire app; after it, the landing page fetches 12.75 kB. The parity check that guards the twelve folders against drifting apart moved out of the runtime and into the test suite, because the day an export goes out of step the build should fail, not a console line appear in a browser nobody has open.</p>
+<p>The rendering is a stamp, not a stroke. The first face flattened every shape to a polyline and outlined it with a 1.3px pen, which reads as drawing on hand-drawn line work and as mud on pixel art, where the pen was 82% as wide as the cells it outlined. The shipped face places each authored mark in <code>&lt;defs&gt;</code> once and stamps it with a <code>&lt;use&gt;</code> per placement: no flattening, no outlining, no runtime color resolution, because the theme's own file already says what color everything is. The argument for it is that the drawing comes out right.</p>
+<p>And the tokens reach it, on the tokens' own terms. The idle drift's period scales with <code>duration.slower</code> under a clamp of 2.5 to 12 seconds: Snappy wanders at 2.8s, Standard at 4.8s (exactly the old fixed chrome constant), Cinematic at 11.2s, and Explore's extremes land on the clamp instead of a strobe. Loading a preset or resetting to defaults replays the reveal through a counter named <code>revealKey</code>; a slider drag never does. Named, deliberate acts reach the background, and noise does not. The field also cost the nav its old label color: measured against every ink the face actually draws, the idle labels moved to a new role, <code>--color-text-nav</code>, the one text color in the system chosen by what sits behind it rather than by where it sits in the hierarchy.</p>
+<hr />
+<p><a href="principles.html">← The Principles</a> · <a href="key-decisions.html">Key Decisions →</a></p>
+  </main>
+</body>
+</html>

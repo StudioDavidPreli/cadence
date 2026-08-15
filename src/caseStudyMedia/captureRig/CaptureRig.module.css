@@ -1,0 +1,123 @@
+/* Capture rig chrome. Colors come from the theme tokens so the stage matches
+   whatever theme the rig forces (HC-dark for V02); nothing here is meant to
+   be seen in a final clip except the scene itself. */
+
+.stage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text-base);
+}
+
+/* The operator strip. Sits above the crop line; recordings frame below it. */
+.hint {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  user-select: none;
+}
+
+.scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+}
+
+/* Matches the tool bar's control width closely enough that the row reads at
+   its shipped proportions. */
+.sliderBox {
+  width: 320px;
+}
+
+/* The ramp owns the slider; a stray click mid-take must not fight it. The
+   input stays a real range element (thumb, track, theme styling) but takes
+   no pointer input. */
+.rampSlider {
+  pointer-events: none;
+}
+
+/* ── spring-vs-overshoot (V04) ──────────────────────────────────────────────── */
+
+/* The remote trigger. Lives directly under the operator strip, far above the
+   demonstration, so the recording crop never contains the pointer that
+   drives it. */
+.triggerRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.compareRow {
+  display: flex;
+  gap: 96px;
+}
+
+.compareCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The curve graphics ride the tool's own components, above the toggles they
+   explain. The box height is fixed and shared so the two toggles land on the
+   same baseline; the widths differ because the bezier editor is a tall
+   portrait (the overshoot handle's headroom) and the settle plot is a wide
+   landscape — each width is chosen so its natural height fits the box. */
+.compareCurve {
+  height: 280px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.curveBezier {
+  width: 175px;
+}
+
+.curveSpring {
+  width: 280px;
+}
+
+.compareTitle {
+  font-size: 13px;
+  color: var(--color-text-base);
+}
+
+.compareSub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* Magnified for the camera; scale is a transform, so the components render
+   at their shipped geometry and the browser rasterizes them crisp at 2x. */
+.compareStage {
+  margin-top: 24px;
+  transform: scale(var(--compare-scale, 2));
+  transform-origin: top center;
+}
+
+/* ── principle trigger scenes (V01 material) ────────────────────────────────
+   The demo lays out at the expanded card's demo width, then scales for the
+   camera. Same transform reasoning as .compareStage: the components keep
+   their shipped geometry and the browser rasterizes them crisp. */
+.principleStage {
+  width: 340px;
+  transform: scale(1.5);
+  transform-origin: top center;
+}
+
+/* The wrong-scene-name error surface. Operator-facing only. */
+.unknown {
+  padding: 24px;
+  font-family: monospace;
+}
