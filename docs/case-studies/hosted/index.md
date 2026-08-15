@@ -2,9 +2,11 @@
 
 ## Case Study
 
-<!-- V01: overview video slot. The 60-90s walkthrough lands here; until it exists, the
-     site's OG card image holds the slot so the page composes. Swap image for video on delivery. -->
-<img src="https://cadence.davidpreli.com/favIcon/og-image.png" width="1200" height="630" alt="Cadence: the motion system explorer" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" />
+<!-- V01: the overview video, delivered 2026-08-05. Vimeo embed in a responsive 16:9 frame;
+     Vimeo serves its own poster, so the OG-image placeholder retires. -->
+<div style="position: relative; padding: 56.25% 0 0 0; border-radius: 8px; overflow: hidden;">
+  <iframe src="https://player.vimeo.com/video/1218553606?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" title="Cadence: the case study overview" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+</div>
 
 Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior in real UI components, through the classic 12 principles of animation and six design-engineering extensions. It is built as a curriculum for designers learning how motion works at the system level.
 
