@@ -8,22 +8,19 @@
   <iframe src="https://player.vimeo.com/video/1218553606?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" title="Cadence: the case study overview" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
 </div>
 
-Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior in real UI components, through the classic 12 principles of animation and six design-engineering extensions. It is built as a curriculum for designers learning how motion works at the system level.
+Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior in real UI components, through the classic 12 principles of animation and six design-engineering extensions. Three tools share the vocabulary: Token Lab edits the tokens live, the Principles Library teaches them through eighteen cards, and Motion Tiles takes the named presets to field scale. It is built as a curriculum for designers learning how motion works at the system level.
 
 **Role:** Solo. Design, architecture, development, documentation.
-**Timeline:** Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 268 commits as of July 28.
+**Timeline:** Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 285 commits as of August 15.
 **Stack:** React, Framer Motion, CSS Custom Properties, Rive, Vite.
 **Live:** [cadence.davidpreli.com](https://cadence.davidpreli.com)
 
-<!-- V12: stat row. Values current as of 2026-07-28 (commit count moves; refresh on republish). -->
+<!-- V12: stat row. Values current as of 2026-08-15 (test and decision counts move; the commit
+     count lives in the Timeline line above; refresh both on republish). -->
 <div style="display: flex; gap: 40px; flex-wrap: wrap; margin: 24px 0 8px 0; font-family: 'IBM Plex Mono', ui-monospace, monospace;">
   <div>
     <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">13</div>
     <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">WEEKS TO PRODUCTION</div>
-  </div>
-  <div>
-    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">268</div>
-    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">COMMITS</div>
   </div>
   <div>
     <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">39</div>
@@ -32,6 +29,10 @@ Cadence is a motion design system explorer. It demonstrates how design tokens dr
   <div>
     <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">578</div>
     <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">TESTS</div>
+  </div>
+  <div>
+    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">39</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">DECISION RECORDS</div>
   </div>
 </div>
 
@@ -54,7 +55,7 @@ Cadence is that thing. Drag `duration.fast` from 50ms to 350ms and watch a butto
 ## Goals
 
 1. Build a tool that makes the token-to-behavior relationship visible and interactive
-2. Apply the classic 12 principles of animation, plus 6 design-engineering extensions, to real UI components, not abstract shapes
+2. Apply the classic 12 principles of animation, plus six design-engineering extensions, to real UI components, not abstract shapes
 3. Develop React and design systems fluency through a project with genuine utility
 4. Produce a portfolio artifact that demonstrates design engineering thinking
 

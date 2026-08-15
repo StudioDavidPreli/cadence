@@ -21,9 +21,9 @@ The architecture is the argument made physical. The tiles carry no clocks of the
 Token Lab's component demos read tokens into Framer Motion props, which is the easy case: everything speaks CSS. The Embeds category runs the same tokens into canvases that have never heard of CSS, and the two demos split the ownership of time between them.
 
 <!-- V09: live Rive Clock embed (?embed=rive-clock&theme=dark). Canvas only; a ghost pointer
-     tours the quadrants and yields to a real pointer. Ships with the next push to main.
+     tours the quadrants and yields to a real pointer. Live on production (PR #2, 2026-08-15).
      David's fallback SVG sits behind the iframe as its background. -->
-<figure style="float: right; width: 340px; margin: 0 0 16px 24px;">
+<figure style="float: right; width: 340px; max-width: 100%; margin: 0 0 16px 24px;">
   <iframe src="https://cadence.davidpreli.com/?embed=rive-clock&theme=dark" width="340" height="425" loading="lazy" title="Rive Clock, live from Cadence" style="border: 0; display: block; background: url(media/riveClockFallback.svg) center / contain no-repeat;"></iframe>
   <figcaption style="font-size: 12px; color: #909090; margin-top: 8px;">Live: the Rive Clock. The color plates chase a cursor on token timing; when nobody is there, a ghost takes the tour. Reach in and it yields. A click waters the plant.</figcaption>
 </figure>
@@ -41,7 +41,7 @@ Rive Clock inverts the ownership. The animation is an interactive state machine 
 </figure>
 The nav column carries an ambient background: a field of small hand-authored animal marks, six rats and four runners per library, placed by a generative composition, swaying on a slow two-sine wander, revealed as a section opens. Each of the three sections has its own mark library (hand-drawn for the Principles, pixel exports for Token Lab and Motion Tiles), and each library is authored in four colorways, one per theme, so the art is themed at the source instead of recolored at runtime.
 
-Two architecture rules shape it. First, a theme switch must never regenerate the field: geometry and placement hold still while only the paint changes, and the shipped build was verified holding every placement byte-identical across a switch. Second, the unit of loading is a folder: one library, chosen by the open section, in one colorway, chosen by the theme. Before that rule, all twelve colorway folders shipped eagerly and the background chunk weighed 495.71 kB gzipped, two and a half times the entire app; after it, the landing page fetches 12.75 kB. The parity check that guards the twelve folders against drifting apart moved out of the runtime and into the test suite, because the day an export goes out of step the build should fail, not a console line appear in a browser nobody has open.
+Two architecture rules shape it. First, a theme switch must never regenerate the field: geometry and placement hold still while only the paint changes, and the shipped build was verified holding every placement byte-identical across a switch. Second, the unit of loading is one file: one library, chosen by the open section, in one colorway, chosen by the theme. Before that rule, all twelve colorway files shipped eagerly and the background chunk weighed 495.71 kB gzipped, two and a half times the entire app; after it, the landing page fetches 12.75 kB. The parity check that guards the twelve files against drifting apart moved out of the runtime and into the test suite, because the day an export goes out of step the build should fail, not a console line appear in a browser nobody has open.
 
 The rendering is a stamp, not a stroke. The first face flattened every shape to a polyline and outlined it with a 1.3px pen, which reads as drawing on hand-drawn line work and as mud on pixel art, where the pen was 82% as wide as the cells it outlined. The shipped face places each authored mark in `<defs>` once and stamps it with a `<use>` per placement: no flattening, no outlining, no runtime color resolution, because the theme's own file already says what color everything is. The argument for it is that the drawing comes out right.
 

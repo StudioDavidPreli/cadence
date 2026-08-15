@@ -1,6 +1,6 @@
 # Cadence: Working with Claude
 
-**Status: Draft branch, 2026-07-30.** How the collaboration actually ran, drawn from [`claude-workflow.md`](../claude-workflow.md), the decision records, and the debugging chronology. The workflow doc records the mechanics; this branch is about which methods earned their keep.
+A companion to the [Cadence case study](hosted/index.md): how the collaboration actually ran, drawn from [`claude-workflow.md`](../claude-workflow.md), the decision records, and the debugging chronology. The workflow doc records the mechanics; this page is about which methods earned their keep.
 
 ---
 

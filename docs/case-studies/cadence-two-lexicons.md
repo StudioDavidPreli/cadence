@@ -2,7 +2,7 @@
 
 **One system. Two dialects.**
 
-**Status: Draft branch, 2026-07-30.** The engineering companion to [`case-study.md`](../case-study.md), organized as a translation table: each section takes one concept, states it in the motion designer's vocabulary and the design engineer's, and walks the machinery Cadence built to hold the two together. Facts and measurements are the main case study's; this paper rearranges them by concept.
+The engineering companion to the [Cadence case study](hosted/index.md), organized as a translation table: each section takes one concept, states it in the motion designer's vocabulary and the design engineer's, and walks the machinery Cadence built to hold the two together. Facts and measurements are the main case study's; this paper rearranges them by concept.
 
 ---
 
@@ -23,7 +23,7 @@ A frame at 24fps is about 42 milliseconds, so `duration.base` at 200ms is a five
 
 The engineering question is not the values but the plumbing. Tokens live as CSS custom properties, and components read them at runtime through `getComputedStyle`, which returns strings in whatever format a build tool wrote. That seam bit once in production: the CSS minifier rewrote `400ms` as `.4s`, a parser assumed the authored spelling, returned `NaN`, and every Modal blanked the deployed site while the dev server showed nothing wrong. The parsers now live in a tested module (28 tests) and accept any legal format.
 
-Live editing needs a second path. Reading CSS on every frame of a slider drag is too slow, so Token Lab dispatches each change twice from one reducer: a write to the custom property for anything reading the document, and a React context override that hands demo components the same values with no read at all. Both channels are fed from the same reducer, so they cannot disagree.
+Live editing needs a second path: a custom-property write is invisible to React, so nothing would retime until something else forced a render. Token Lab dispatches each change twice from one reducer: a write to the custom property for anything reading the document, and a React context override that hands demo components the same values with no read at all. Both channels are fed from the same reducer, so they cannot disagree.
 
 ## 02. The graph editor: curves become coordinates
 
@@ -32,7 +32,7 @@ Live editing needs a second path. Reading CSS on every frame of a slider drag is
 | Speed-graph handles, dragged by eye | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 | "Ease it in harder" | Move a control point; the four numbers follow |
 
-After Effects gives easing a graph editor; CSS gives it four numbers, the coordinates of two control points on a unit square. Cadence's bezier visualizer is the graph editor rebuilt on the CSS primitive: draggable handles whose positions serialize directly to the token value, so the designer's gesture and the engineer's syntax are one artifact.
+After Effects gives easing a graph editor; CSS gives it four numbers, the coordinates of two control points (x pinned inside the unit square, y free to leave it). Cadence's bezier visualizer is the graph editor rebuilt on the CSS primitive: draggable handles whose positions serialize directly to the token value, so the designer's gesture and the engineer's syntax are one artifact.
 
 The named slots do the organizational work: `ease.enter`, `ease.exit`, and `ease.standard` are editable; `ease.overshoot` surfaces its control only where the interface has vertical room for a handle above 1; `ease.linear` has no control at all, because the constant-velocity baseline every curve is measured against should not be movable.
 
@@ -56,7 +56,7 @@ One translation gap surfaced and closed: reduced-motion support flattens duratio
 | A two-frame hold before the move | `delay.short` |
 | Staggered entrances, offset by feel | Delay arithmetic per index |
 
-The smallest family, and the one with a named zero: `delay.none` exists so that "no delay" is a stated decision rather than an absence. The Hierarchy of Motion demonstration is the family at work, a parent element whose children answer in sequence on `short`, `medium`, and `long`; the cascade is the org chart made visible. In the shader demonstration the same idea runs per plate: three color layers chase the cursor, each one `delay.short` behind the last.
+The quietest family, and the one with a named zero: `delay.none` exists so that "no delay" is a stated decision rather than an absence. The Hierarchy of Motion demonstration is the family at work, a parent element whose children answer in sequence on `short`, `medium`, and `long`; the cascade is the org chart made visible. In the shader demonstration the same idea runs per plate: three color layers chase the cursor, each one `delay.short` behind the last.
 
 ## 05. Squash and stretch: deformation becomes scale
 

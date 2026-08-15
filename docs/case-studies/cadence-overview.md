@@ -1,6 +1,6 @@
 # Cadence: A Plain Overview
 
-**Status: Draft branch, 2026-07-30.** The general-audience version of [`case-study.md`](../case-study.md): what the tool does, in plain language, without the engineering depth. The full case study carries the decision records and the hiring-manager material.
+The general-audience companion to the [Cadence case study](hosted/index.md): what the tool does, in plain language, without the engineering depth. The full case study carries the decision records and the hiring-manager material.
 
 ---
 
@@ -8,7 +8,7 @@
 
 Press a button on a well-made website and it gives a little, then comes back. Someone decided how much it gives and how fast it returns. Cadence is a tool for looking at those decisions, changing them, and watching what changes.
 
-It is a free web tool, live at [cadence.davidpreli.com](https://cadence.davidpreli.com). It has three parts, and all three run on the same small set of shared values.
+It is a free web tool, live at [cadence.davidpreli.com](https://cadence.davidpreli.com). It has three parts, and one shared vocabulary runs through all three.
 
 ## The idea underneath
 
