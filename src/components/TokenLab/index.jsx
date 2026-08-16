@@ -534,8 +534,19 @@ function HoverTip({ text, children }) {
     setVisible(false)
   }
 
+  // Focus mirrors hover (added with the privacy info glyph, 2026-08-16): the
+  // glyph is keyboard-reachable, so its tooltip must be too, and the preset
+  // chips inherit the same courtesy. The 400ms delay keeps tabbing through
+  // the bar from popping a tip per stop.
   return (
-    <span ref={wrapperRef} className={styles.tooltipWrapper} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+    <span
+      ref={wrapperRef}
+      className={styles.tooltipWrapper}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
+    >
       {children}
       {createPortal(
         <AnimatePresence>
@@ -1421,13 +1432,74 @@ function EasingSection({ rawState, dispatch, exploreMode }) {
   )
 }
 
+// ─── PrivacyInfoGlyph ─────────────────────────────────────────────────────────
+// The counting disclosure's home since 2026-08-16 (it replaced a footer line;
+// docs/decisions/event-counter-2026-08-15.md). An info glyph that rides a
+// section heading: hover or keyboard focus shows the one-liner as a HoverTip,
+// click / tap / Enter opens a small viewport Modal with one more sentence.
+// The modal is what makes the disclosure reachable on touch (a large tablet
+// passes the MobileGate and has no hover).
+//
+// It renders inside the sectionHeader <button>, so it is a span, not a nested
+// <button> (invalid HTML, same reasoning as the preset-delete ✕ above). Unlike
+// that ✕ it adds real button semantics by hand: tabIndex to be focusable,
+// Enter/Space to activate (preventDefault on Space so the page does not
+// scroll), stopPropagation so opening the modal does not also toggle the
+// section. The aria-label carries the disclosure itself, so a screen reader
+// gets the text at the glyph without opening anything; the tooltip is a
+// visual duplicate.
+function PrivacyInfoGlyph() {
+  const [open, setOpen] = useState(false)
+
+  function activate(e) {
+    e.stopPropagation()
+    setOpen(true)
+  }
+
+  return (
+    <>
+      <HoverTip text="Exports and imports are counted anonymously.">
+        <span
+          role="button"
+          tabIndex={0}
+          className={styles.infoGlyph}
+          aria-haspopup="dialog"
+          aria-label="Privacy: exports and imports are counted anonymously."
+          onClick={activate}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              activate(e)
+            }
+          }}
+        >
+          i
+        </span>
+      </HoverTip>
+      <Modal isOpen={open} onClose={() => setOpen(false)} title="Privacy">
+        <p className={styles.privacyBody}>
+          Exports and imports are counted anonymously. Each event records the
+          format and nothing else: no cookies, no identifiers, no IP address.
+        </p>
+      </Modal>
+    </>
+  )
+}
+
 // ─── ControlSection ───────────────────────────────────────────────────────────
-function ControlSection({ label, isOpen, onToggle, children }) {
+function ControlSection({ label, isOpen, onToggle, children, info }) {
   const chrome = useChromeTransition()
   return (
     <div className={styles.section}>
       <button className={styles.sectionHeader} onClick={onToggle}>
-        {label}
+        {/* The label group keeps the header's space-between layout honest: an
+            optional info glyph sits tight against the label text on the left
+            while the chevron keeps the right edge. `label` stays a string
+            because it is also the AnimatePresence key below. */}
+        <span className={styles.sectionLabelGroup}>
+          {label}
+          {info}
+        </span>
         <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>▾</span>
       </button>
       <AnimatePresence initial={false}>
@@ -1884,6 +1956,7 @@ export function TokenLab() {
         label="Presets"
         isOpen={openSections.has('presets')}
         onToggle={() => toggleSection('presets')}
+        info={<PrivacyInfoGlyph />}
       >
         <PresetsSection
           rawState={rawState}
@@ -2010,6 +2083,7 @@ export function TokenLab() {
         label="Export"
         isOpen={openSections.has('export')}
         onToggle={() => toggleSection('export')}
+        info={<PrivacyInfoGlyph />}
       >
         <ExportSection rawState={rawState} />
       </ControlSection>

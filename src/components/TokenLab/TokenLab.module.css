@@ -677,6 +677,47 @@
   background-color: var(--color-surface-active);
 }
 
+/* Label + optional info glyph as one left-edge unit, so the header's
+   space-between still puts exactly two things on the row: this group and the
+   chevron. */
+.sectionLabelGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The "i" mark in its own circle, copied from PrinciplesLibrary.module.css
+   (CSS modules are per-component, so the recipe travels by copy, not import).
+   currentColor keeps it theme-correct for free: it rides the sectionHeader's
+   muted color and its hover shift to text-base. The focus ring marks it as
+   its own stop inside the header button (it opens the privacy modal, not the
+   section). */
+.infoGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 9px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.infoGlyph:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Privacy modal copy: the Modal's .content sets size and color; the global
+   reset zeroes p margins, so nothing to restore for a single paragraph. */
+.privacyBody {
+  margin: 0;
+}
+
 .chevron {
   composes: type-glyph from global;
   transition: transform var(--feedback-ui-duration);

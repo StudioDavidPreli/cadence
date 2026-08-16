@@ -14,25 +14,6 @@
   gap: 16px;
 }
 
-/* The counter's privacy disclosure, in the © line's voice (same mono, size,
-   and muted color). margin-right: auto claims the row's leftover space, so
-   this sits at the left edge under the tool-bar column while the © and the
-   button keep the right edge (David's placement, 2026-08-16). The 17px
-   padding aligns the text with the tool bar's section labels above it, not
-   the column's border box: measured as the column's 1px offset plus the
-   section buttons' 16px inner padding, so type sits over type. If the tool
-   bar's button padding ever changes, this follows by hand. Unlike the ©, it
-   is selectable (information, not chrome) and may wrap rather than overflow
-   the row at the 574px minimum viewport. */
-.privacy {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  margin-right: auto;
-  padding-left: 17px;
-}
-
 /* Copyright signature, mono per request. Muted text (meets AA on the page bg in
    every theme: text-muted is >=5:1 on bg, pure black/white in the HC themes). Not
    selectable, so it reads as chrome rather than content. */

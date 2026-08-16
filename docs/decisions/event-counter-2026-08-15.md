@@ -82,10 +82,18 @@ One artifact worth recording: the browser's own network log showed every event t
 
 Miniflare accepts `writeDataPoint` locally but stores nothing queryable, so the counts-actually-in-the-dataset check runs on production after merge: press each export button on the live site, then run the first curl above and watch the counts move. That step is already on the pre-launch checklist in `post-launch-capture.md`.
 
-## Footer disclosure (placed 2026-08-16)
+## The disclosure (moved to the tool bar, 2026-08-16)
 
-David suggested the footer for a one-line privacy disclosure and approved the wording after the counts verified on production:
+The disclosure went through three homes in two days, each David's call:
 
-> Exports and imports are counted anonymously.
+1. A footer line beside the © ("Exports and imports are counted anonymously." after his review trimmed a second sentence), left-aligned to the tool bar's labels.
+2. Same line, same row, but the footer's balance never sat right.
+3. Final: out of the footer entirely, into the Token Lab tool bar as an info glyph on the two section headings whose actions are counted, **Presets** (import lives there) and **Export**.
 
-(The draft's second sentence, "No cookies, no identifiers.", was cut on David's review; the shorter line carries it.) It lives in the app footer row (`src/components/BugReportButton/index.jsx`) in the © line's voice: same mono, size, and muted color, but anchored to the row's left edge under the tool-bar column while the © and button keep the right (David's placement). Like the ©, it persists on the Motion Tiles grid when the problem button hides, because a site-level disclosure is not tied to the button. Unlike the ©, it is selectable and may wrap, so the 574px minimum viewport cannot overflow the row.
+The glyph is `PrivacyInfoGlyph` in `src/components/TokenLab/index.jsx`: the Principles Library's circled-italic-`i` recipe (copied into TokenLab.module.css; `currentColor` makes it ride the header's theme and hover colors), rendered through `ControlSection`'s new optional `info` prop so the section label stays a string (it doubles as an animation key). Three ways in, covering every input:
+
+- **Hover**: the one-liner as a `HoverTip` dropdown, the house tooltip the preset chips already use.
+- **Keyboard**: the glyph is a focusable span with hand-built button semantics (span because it nests inside the sectionHeader `<button>`, and button-in-button is invalid HTML). Focus shows the tooltip (`HoverTip` grew focus/blur support, which the preset chips inherit); Enter or Space opens the modal; its `aria-label` carries the disclosure so a screen reader gets it without opening anything.
+- **Click / tap**: a viewport-centered Modal titled **Privacy**, which is what makes the disclosure reachable on touch (a large tablet at ≥720px passes the MobileGate and has no hover). Body: "Exports and imports are counted anonymously. Each event records the format and nothing else: no cookies, no identifiers, no IP address." `stopPropagation` keeps the click from also toggling the section.
+
+Scoping the disclosure to the tool is also more accurate than the footer was: the counter only counts Token Lab actions, and the footer line rode along on the Motion Tiles view where nothing is counted.
