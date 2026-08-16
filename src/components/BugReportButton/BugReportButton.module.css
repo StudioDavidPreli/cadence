@@ -24,6 +24,16 @@
   color: var(--color-text-muted);
   white-space: nowrap;
   user-select: none;
+  /* A link since 2026-08-16 (it goes home to davidpreli.com). Quiet at rest —
+     the signature should not shout — with the underline arriving on hover to
+     say it goes somewhere. */
+  text-decoration: none;
+  transition: color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.copyright:hover {
+  color: var(--color-text-base);
+  text-decoration: underline;
 }
 
 /* The button base (fill + rounded corners) is baked into the problembutton2

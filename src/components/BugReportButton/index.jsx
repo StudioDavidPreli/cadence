@@ -180,7 +180,17 @@ export function BugReportButton() {
 
   return (
     <div className={styles.root}>
-      <span className={styles.copyright}>© MMXXVI DAVID PRELI</span>
+      {/* The signature is also the way home: it links the portfolio. New tab,
+          so a visitor mid-exploration does not lose their token edits to a
+          navigation. */}
+      <a
+        className={styles.copyright}
+        href="https://davidpreli.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        © MMXXVI DAVID PRELI
+      </a>
 
       {showButton && (
         <>
