@@ -90,8 +90,9 @@ export const BUILT_IN_PRESETS = [
       easing:   { standard: 'enter', enter: 'enter', exit: 'exit', overshoot: 'overshoot' },
       delay:    { short: 100, medium: 200, long: 400 },
       scale:    { pressSubtle: 0.99, pressBase: 0.97, pressExpressive: 0.94, lift: 1.01 },
-      // Soft and heavy: low stiffness plus extra mass make a slow arrival with
-      // almost no bounce.
+      // Near-critically damped: the extra damping over Standard buys a clean,
+      // bounce-free settle. Cinematic's slowness lives in its duration ladder;
+      // the spring's job here is composure, not weight.
       spring:   { stiffness: 180, damping: 26, mass: 1.2 },
       // Held at 1 like every preset: the scalar is not a personality axis.
       scalar:   1,
@@ -430,9 +431,9 @@ export const SCALAR_BOUNDS = { min: 0.1, max: 4 }
 // `spring` is an editable-CLASS token: it varies per preset (so it cannot be a
 // fixed reference, which are identical across presets), lives in state, and
 // round-trips through import. It is listed here so the importer validates it and
-// the drift guard (schema ∪ fixed = every runtime token) stays satisfied. It has
-// no slider yet: the spring editor UI and its settle-curve visualizer are a
-// deferred follow-up (scope B). Controls are rendered by explicit *Section
+// the drift guard (schema ∪ fixed = every runtime token) stays satisfied. It is
+// edited through TokenLab's Spring section — three sliders plus the
+// SpringVisualizer settle curve. Controls are rendered by explicit *Section
 // components, not by iterating this schema, so listing spring adds no control on
 // its own. Same posture as `overshoot`, which is schema-listed but Explore-gated.
 export const EDITABLE_TOKEN_SCHEMA = {
