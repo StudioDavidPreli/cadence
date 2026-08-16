@@ -1,4 +1,4 @@
-import { lazy, Suspense, useReducer, useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useReducer, useState, useEffect, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
@@ -1501,21 +1501,19 @@ function PrivacyInfoGlyph() {
 
   return (
     <>
+      {/* Not focusable, no role: the glyph sits inside the sectionHeader
+          <button>, and a focusable or role-carrying element nested in a button
+          is axe's nested-interactive (serious; the 2026-08-16 merge
+          verification caught it on every themed page). The plain onClick keeps
+          the modal for pointer and touch, which is what the modal existed for.
+          Assistive tech gets the disclosure on the header button itself via
+          aria-describedby (see ControlSection's infoDescription), a control it
+          can actually reach — the nested pattern's Enter/Space never could
+          fire for a screen reader anyway, since the outer button swallows
+          activation. aria-hidden keeps the bare "i" out of the header's
+          accessible name. */}
       <HoverTip text="Exports and imports are counted anonymously." side="right">
-        <span
-          role="button"
-          tabIndex={0}
-          className={styles.infoGlyph}
-          aria-haspopup="dialog"
-          aria-label="Privacy: exports and imports are counted anonymously."
-          onClick={activate}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              activate(e)
-            }
-          }}
-        >
+        <span aria-hidden="true" className={styles.infoGlyph} onClick={activate}>
           i
         </span>
       </HoverTip>
@@ -1530,11 +1528,19 @@ function PrivacyInfoGlyph() {
 }
 
 // ─── ControlSection ───────────────────────────────────────────────────────────
-function ControlSection({ label, isOpen, onToggle, children, info }) {
+function ControlSection({ label, isOpen, onToggle, children, info, infoDescription }) {
   const chrome = useChromeTransition()
+  // When a section carries an info glyph, the disclosure text rides the header
+  // button as its aria-description: the glyph itself is deliberately not
+  // focusable (see PrivacyInfoGlyph), so this is where assistive tech hears it.
+  const descId = useId()
   return (
     <div className={styles.section}>
-      <button className={styles.sectionHeader} onClick={onToggle}>
+      <button
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        aria-describedby={infoDescription ? descId : undefined}
+      >
         {/* The label group keeps the header's space-between layout honest: an
             optional info glyph sits tight against the label text on the left
             while the chevron keeps the right edge. `label` stays a string
@@ -1543,6 +1549,11 @@ function ControlSection({ label, isOpen, onToggle, children, info }) {
           {label}
           {info}
         </span>
+        {infoDescription && (
+          <span id={descId} className={styles.srOnly}>
+            {infoDescription}
+          </span>
+        )}
         <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>▾</span>
       </button>
       <AnimatePresence initial={false}>
@@ -2081,6 +2092,7 @@ export function TokenLab() {
         isOpen={openSections.has('presets')}
         onToggle={() => toggleSection('presets')}
         info={<PrivacyInfoGlyph />}
+        infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
         <PresetsSection
           rawState={rawState}
@@ -2174,6 +2186,7 @@ export function TokenLab() {
         isOpen={openSections.has('export')}
         onToggle={() => toggleSection('export')}
         info={<PrivacyInfoGlyph />}
+        infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
         <ExportSection rawState={rawState} />
       </ControlSection>
