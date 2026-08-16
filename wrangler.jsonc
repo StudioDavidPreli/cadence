@@ -14,5 +14,18 @@
   },
   "vars": {
     "GH_REPO": "StudioDavidPreli/cadence"
-  }
+  },
+  // The export/import event counter's store (worker/index.js handleEvent).
+  // The deploy rejected this binding until Analytics Engine was enabled on
+  // the account and the dataset created in the dashboard (David, 2026-08-15;
+  // the failed build was baf96e93). Both names are contracts: the Worker
+  // reads env.EVENTS, and cadence_events is the dashboard dataset and the
+  // table name in the SQL read queries. Full story and the queries:
+  // docs/decisions/event-counter-2026-08-15.md.
+  "analytics_engine_datasets": [
+    {
+      "binding": "EVENTS",
+      "dataset": "cadence_events"
+    }
+  ]
 }

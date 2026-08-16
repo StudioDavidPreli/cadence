@@ -50,6 +50,7 @@ import {
   importTokens,
   reducer,
 } from '../../data/motionPresets'
+import { trackEvent } from '../../utils/trackEvent'
 import styles from './TokenLab.module.css'
 
 // ─── Lazy boundaries: PrinciplesLibrary and Carousel ─────────────────────────
@@ -484,9 +485,15 @@ function generatePresetTooltip(state) {
 // ancestor entirely. Position is calculated from getBoundingClientRect() at
 // hover time and expressed as fixed coordinates so it lands correctly
 // regardless of scroll or nesting.
-function HoverTip({ text, children }) {
+// side: which way the bubble grows from the trigger. 'left' (default) anchors
+// to the trigger's right edge and grows leftward, correct for the preset chips
+// sitting at the bar's right region. 'right' anchors to the trigger's right
+// edge and grows rightward, for triggers near the window's left edge (the
+// privacy info glyph) where a left-growing bubble would sit on the wrong side
+// of the pointer (David's correction, 2026-08-16).
+function HoverTip({ text, children, side = 'left' }) {
   const [visible, setVisible]  = useState(false)
-  const [coords, setCoords]    = useState({ top: 0, right: 0 })
+  const [coords, setCoords]    = useState({ top: 0 })
   const wrapperRef = useRef(null)
   const timerRef   = useRef(null)
   const chrome     = useChromeTransition()
@@ -495,7 +502,10 @@ function HoverTip({ text, children }) {
     timerRef.current = setTimeout(() => {
       if (wrapperRef.current) {
         const rect = wrapperRef.current.getBoundingClientRect()
-        setCoords({
+        setCoords(side === 'right'
+          // Below the trigger, starting just right of it, growing rightward.
+          ? { top: rect.bottom + 8, left: rect.right }
+          : {
           // Position below the trigger with an 8px gap
           top:   rect.bottom + 8,
           // Right-align to the trigger's right edge, expressed as distance from
@@ -512,15 +522,28 @@ function HoverTip({ text, children }) {
     setVisible(false)
   }
 
+  // Focus mirrors hover (added with the privacy info glyph, 2026-08-16): the
+  // glyph is keyboard-reachable, so its tooltip must be too, and the preset
+  // chips inherit the same courtesy. The 400ms delay keeps tabbing through
+  // the bar from popping a tip per stop.
   return (
-    <span ref={wrapperRef} className={styles.tooltipWrapper} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+    <span
+      ref={wrapperRef}
+      className={styles.tooltipWrapper}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
+    >
       {children}
       {createPortal(
         <AnimatePresence>
           {visible && (
             <motion.span
               className={styles.tooltip}
-              style={{ top: coords.top, right: coords.right }}
+              // Whichever horizontal anchor the side mode set; the other is
+              // undefined and React drops it.
+              style={{ top: coords.top, right: coords.right, left: coords.left }}
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
@@ -677,6 +700,17 @@ export function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave,
 // four segments share the width equally), Export and Copy sit beneath. Four
 // segments plus both actions do not fit one 300px row without the FM segment
 // clipping, so the toggle gets the whole width and the actions drop below it.
+// The wire names the /api/event counter records per export format. The UI's
+// internal keys stay as they are ('flat', 'fm'); the counter speaks the
+// endpoint's contract instead ('json', 'framer-motion'), so the report reads
+// without a decoder ring. This map is the single translation point.
+const EXPORT_EVENT_FORMAT = {
+  dtcg: 'dtcg',
+  flat: 'json',
+  css:  'css',
+  fm:   'framer-motion',
+}
+
 export function ExportSection({ rawState, format, onFormatChange }) {
   // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
   // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
@@ -723,6 +757,9 @@ export function ExportSection({ rawState, format, onFormatChange }) {
       fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
     }[exportFormat]
     downloadTextFile(file.name, exportText(), file.mime)
+    // Count the export (fire-and-forget; see trackEvent). Downloads and copies
+    // both count as "a spec left the building", per the capture doc.
+    trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
   }
 
   async function handleCopy() {
@@ -730,6 +767,9 @@ export function ExportSection({ rawState, format, onFormatChange }) {
       await navigator.clipboard.writeText(exportText())
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
+      // Inside the try, after the await: a failed copy put nothing on the
+      // clipboard, so it must not count as an export either.
+      trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
     } catch {
       // clipboard API is unavailable in insecure contexts; the download button
       // is the reliable path, so a failed copy is a silent no-op.
@@ -1435,13 +1475,74 @@ export function EasingSection({ rawState, dispatch, exploreMode, display = false
   )
 }
 
+// ─── PrivacyInfoGlyph ─────────────────────────────────────────────────────────
+// The counting disclosure's home since 2026-08-16 (it replaced a footer line;
+// docs/decisions/event-counter-2026-08-15.md). An info glyph that rides a
+// section heading: hover or keyboard focus shows the one-liner as a HoverTip,
+// click / tap / Enter opens a small viewport Modal with one more sentence.
+// The modal is what makes the disclosure reachable on touch (a large tablet
+// passes the MobileGate and has no hover).
+//
+// It renders inside the sectionHeader <button>, so it is a span, not a nested
+// <button> (invalid HTML, same reasoning as the preset-delete ✕ above). Unlike
+// that ✕ it adds real button semantics by hand: tabIndex to be focusable,
+// Enter/Space to activate (preventDefault on Space so the page does not
+// scroll), stopPropagation so opening the modal does not also toggle the
+// section. The aria-label carries the disclosure itself, so a screen reader
+// gets the text at the glyph without opening anything; the tooltip is a
+// visual duplicate.
+function PrivacyInfoGlyph() {
+  const [open, setOpen] = useState(false)
+
+  function activate(e) {
+    e.stopPropagation()
+    setOpen(true)
+  }
+
+  return (
+    <>
+      <HoverTip text="Exports and imports are counted anonymously." side="right">
+        <span
+          role="button"
+          tabIndex={0}
+          className={styles.infoGlyph}
+          aria-haspopup="dialog"
+          aria-label="Privacy: exports and imports are counted anonymously."
+          onClick={activate}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              activate(e)
+            }
+          }}
+        >
+          i
+        </span>
+      </HoverTip>
+      <Modal isOpen={open} onClose={() => setOpen(false)} title="Privacy">
+        <p className={styles.privacyBody}>
+          Exports and imports are counted anonymously. Each event records the
+          format and nothing else: no cookies, no identifiers, no IP address.
+        </p>
+      </Modal>
+    </>
+  )
+}
+
 // ─── ControlSection ───────────────────────────────────────────────────────────
-function ControlSection({ label, isOpen, onToggle, children }) {
+function ControlSection({ label, isOpen, onToggle, children, info }) {
   const chrome = useChromeTransition()
   return (
     <div className={styles.section}>
       <button className={styles.sectionHeader} onClick={onToggle}>
-        {label}
+        {/* The label group keeps the header's space-between layout honest: an
+            optional info glyph sits tight against the label text on the left
+            while the chevron keeps the right edge. `label` stays a string
+            because it is also the AnimatePresence key below. */}
+        <span className={styles.sectionLabelGroup}>
+          {label}
+          {info}
+        </span>
         <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>▾</span>
       </button>
       <AnimatePresence initial={false}>
@@ -1730,6 +1831,10 @@ export function TokenLab() {
       localStorage.setItem('cadence-presets', JSON.stringify(next))
       // LOAD_PRESET fires both channels: CSS variables and the reducer state.
       dispatch({ type: 'LOAD_PRESET', payload: result.state })
+      // Count the round-trip (fire-and-forget; see trackEvent). Only a
+      // successful import counts: a file that failed validation never became
+      // a token set, so it is not the loop closing.
+      trackEvent({ type: 'import' })
     }
     setImportResult(result)
   }
@@ -1975,6 +2080,7 @@ export function TokenLab() {
         label="Presets"
         isOpen={openSections.has('presets')}
         onToggle={() => toggleSection('presets')}
+        info={<PrivacyInfoGlyph />}
       >
         <PresetsSection
           rawState={rawState}
@@ -2067,6 +2173,7 @@ export function TokenLab() {
         label="Export"
         isOpen={openSections.has('export')}
         onToggle={() => toggleSection('export')}
+        info={<PrivacyInfoGlyph />}
       >
         <ExportSection rawState={rawState} />
       </ControlSection>

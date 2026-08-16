@@ -639,7 +639,11 @@
 .tooltip {
   composes: type-microcopy from global;
   position: fixed;
-  background-color: var(--color-surface-raised);
+  /* The mode's own page ground, not surface-raised: in light, raised is pure
+     white against the #f5f5f5 page and the bubble read as the wrong white
+     (David's spec, 2026-08-16). The border carries the separation; in both
+     HC themes bg and raised are the same value anyway. */
+  background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -675,6 +679,53 @@
 .sectionHeader:hover {
   color: var(--color-text-base);
   background-color: var(--color-surface-active);
+}
+
+/* Label + optional info glyph as one left-edge unit, so the header's
+   space-between still puts exactly two things on the row: this group and the
+   chevron. */
+.sectionLabelGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The "i" mark in its own circle, copied from PrinciplesLibrary.module.css
+   (CSS modules are per-component, so the recipe travels by copy, not import).
+   currentColor keeps it theme-correct for free: it rides the sectionHeader's
+   muted color and its hover shift to text-base. The focus ring marks it as
+   its own stop inside the header button (it opens the privacy modal, not the
+   section). */
+.infoGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 9px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  /* The header composes type-eyebrow, whose uppercase transform and tracking
+     would otherwise reach this glyph and capitalize its "i" (the bug David
+     caught 2026-08-16). The Principles Library original never sits inside an
+     eyebrow, so these two resets are the price of the new context. */
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.infoGlyph:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Privacy modal copy: the Modal's .content sets size and color; the global
+   reset zeroes p margins, so nothing to restore for a single paragraph. */
+.privacyBody {
+  margin: 0;
 }
 
 .chevron {
