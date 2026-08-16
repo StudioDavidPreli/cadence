@@ -42,13 +42,13 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** ProgressBar with a Tokens / Linear toggle
 **Token values driving it:** `ease.standard` vs `ease.linear`, `duration.slow`
 **Key decision:** Same duration on both settings, so the only variable is the curve. When the toggle returns to Tokens, the controls panel's title flashes once, drawing the thread to where the value lives.
-**What it demonstrates:** Identical timing, different curve, categorically different character. Linear motion belongs to machines.
+**What it demonstrates:** Identical timing, different curve, categorically different character. Linear motion is often too direct at the terminals; the effect is a distracting contrast.
 
 #### 07. Arc
 **UI Component:** Tooltip
 **Token values driving it:** `duration.base`, `ease.enter`
 **Key decision:** Three keyframes, not two. Two keyframes ease the speed but leave the path a straight line; the third bends the trajectory, and the bend is the principle.
-**What it demonstrates:** A tooltip that rises straight up reads as a notification. One that arcs in reads as an answer arriving from somewhere.
+**What it demonstrates:** A tooltip that rises straight up reads as a launched notification. One that arcs in reads as an answer arriving from somewhere. Arc can extend depth to a response.
 
 #### 08. Secondary Action
 **UI Component:** Dropdown with rotating chevron
@@ -66,7 +66,7 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** NotificationBadge with New / Clear triggers
 **Token values driving it:** `scale.pressExpressive`, `ease.overshoot`, `duration.slow`
 **Key decision:** Re-key the badge on every increment so the enter animation fires each time; the compress comes from the initial scale and the overshoot from the bezier, two motion sources composing one alert.
-**What it demonstrates:** A badge that scales to exactly 1.0 registers as a state change. The overshoot is what turns it into an alert.
+**What it demonstrates:** A badge that scales to exactly 1.0 registers as a state change. The overshoot is what captures the eye; it is what turns it into an alert.
 
 #### 11. Solid Drawing
 **UI Component:** Card, centered with room around it
@@ -78,7 +78,7 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** A 2x2 grid of compact Cards with ASCII faces
 **Token values driving it:** All of them: `duration.slower` drives an ambient drift, `duration.base` the settle, `ease.standard` the neutral states, `ease.overshoot` the selection
 **Key decision:** Per-card phase offsets on the idle drift so the four never sync. Selection freezes the drift, dims the siblings, lifts the chosen card.
-**What it demonstrates:** Appeal is the other principles working in concert. Nothing here is remarkable alone; nothing is wrong.
+**What it demonstrates:** Appeal is the other principles working in concert. A system of choices combining to create value as an emergent property.
 
 ### The Extended 6
 
@@ -86,25 +86,25 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** A Tempo slider over a Toggle, compact Card, and ProgressBar
 **Token values driving it:** The whole duration family, scaled proportionally by the slider
 **Key decision:** Scale durations only. Delays stay proportional and easing stays untouched, because the principle is temporal coherence, not curve shape.
-**What it demonstrates:** One slider moves and every component responds at its own native speed. The system has one voice.
+**What it demonstrates:** One slider moves and every component responds at its own native speed. A unified system voice.
 
 #### 14. Hierarchy of Motion
 **UI Component:** A PARENT pill above three indented CHILD rows, drawn as a tree
 **Token values driving it:** `duration.base`, `ease.standard`, `delay.short/medium/long`
 **Key decision:** The children are not interactive. Only the parent can initiate motion, so the demo's interaction model enforces the principle it teaches.
-**What it demonstrates:** Authority flows downward, and the cascading delays are the hierarchy made visible.
+**What it demonstrates:** Authority flows downward, and the cascading delays are the hierarchy made evident.
 
 #### 15. Economy
 **UI Component:** Three horizontal bars with a Pan trigger
 **Token values driving it:** `duration.slow/base/fast`, `ease.standard`, one per bar
-**Key decision:** Depth from three opacity levels and three speeds, no shadows, no stacking order. Three layers of parallax suggest a world; thirty just suggest thirty.
-**What it demonstrates:** The smallest set of moves that produces the intended depth. Every motion element earns its place.
+**Key decision:** Depth from three opacity levels and three speeds, no shadows, no stacking order. Intentional restraint: three layers of parallax suggest a world; thirty just suggest thirty.
+**What it demonstrates:** A small set of simple moves can produce larger, complex effects.
 
 #### 16. Token Fidelity
 **UI Component:** Three identical pills, one deviant
 **Token values driving it:** `duration.base` and `ease.standard` on two pills; a hardcoded 600ms linear on the third, and a Harmonize toggle that repairs it
 **Key decision:** Make the wrongness perceptual before it is explained. The deviant pill arrives late at constant velocity and reads as mechanical before the viewer knows why.
-**What it demonstrates:** A hardcoded value is not a shortcut; it is visible damage.
+**What it demonstrates:** A hardcoded value is not a shortcut; it is at best inflexible. Values outside a fluid system can cause visible damage as the system evolves.
 
 #### 17. Reduced Motion
 **UI Component:** A Reduce toggle over a Run button, ProgressBar, and Card
@@ -116,7 +116,7 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** Two tracks, two dots, one curve
 **Token values driving it:** The named presets themselves; the demo pins canonical curve values so the binding between name and numbers stays fixed
 **Key decision:** Label one track "Snappy" and the other "0.34, 1.56, 0.64, 1" and let them run identically. The comparison is the whole demo.
-**What it demonstrates:** Motion values that cannot be named cannot be systematized. The name carries the intention the numbers cannot, and a named preset is the minimum unit of design-engineering communication.
+**What it demonstrates:** Motion values that cannot be named cannot be systematized. The name carries the intention the numbers cannot, and a named preset is the minimum unit of design-engineering communication. If context is required, it should be described.
 
 ---
 

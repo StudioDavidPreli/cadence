@@ -19,9 +19,9 @@
 </style>
 <div class="v08-layout">
   <div class="v08-text">
-    <p>Every principle is demonstrated twice: a Rive illustration on the animation side, and a real UI component driven by the live token system on the other. The pairing is the pedagogy. A motion designer already knows what anticipation looks like; what Cadence shows is where anticipation lives in an interface (a drawer that lifts before it leaves) and which tokens produce it (<code>ease.exit</code> at <code>duration.slow</code>, with keyframes carrying the countermotion).</p>
+    <p>Every principle is demonstrated twice: an illustrated Rive animation, and a real UI component driven by the live token system. The pairing is the pedagogy. A motion designer already knows what anticipation looks like; what Cadence shows is where anticipation lives in an interface (a drawer that lifts before it leaves) and which tokens produce it (<code>ease.exit</code> at <code>duration.slow</code>, with keyframes carrying the countermotion).</p>
     <p>Real components were chosen over abstract shapes because abstraction is the problem being solved. A bouncing ball demonstrates easing; it does not demonstrate why a dropdown's chevron should share its menu's timing. The demos borrow Token Lab's own Button, Drawer, Modal, and Carousel, so a principle learned in one tool is recognizable in the other, and every demo responds when a token changes.</p>
-    <p>The six extensions are the original contribution. The classic 12 teach how motion reads; the extensions teach how motion scales: Systematization, Hierarchy of Motion, Economy, Token Fidelity, Reduced Motion, and Shared Vocabulary. They are the principles I needed when I moved from animating one thing well to making motion consistent across a system.</p>
+    <p>The six extensions were arrived at while building Cadence. The classic 12 teach how motion reads; the extensions teach how motion scales: Systematization, Hierarchy of Motion, Economy, Token Fidelity, Reduced Motion, and Shared Vocabulary. They are the principles I needed when I moved from animating one thing well to making motion consistent across a system.</p>
   </div>
   <figure class="v08-figure">
     <iframe src="https://cadence.davidpreli.com/?embed=token-fidelity&theme=dark" width="462" height="522" loading="lazy" title="Token Fidelity, live from Cadence"></iframe>
@@ -51,7 +51,7 @@ Each of the eighteen carries the same four fields: the component, the tokens dri
 **UI Component:** Three identical pills, one deviant
 **Token values driving it:** `duration.base` and `ease.standard` on two pills; a hardcoded 600ms linear on the third, and a Harmonize toggle that repairs it
 **Key decision:** Make the wrongness perceptual before it is explained. The deviant pill arrives late at constant velocity and reads as mechanical before the viewer knows why.
-**What it demonstrates:** A hardcoded value is not a shortcut; it is visible damage.
+**What it demonstrates:** A hardcoded value is not a shortcut; it is at best inflexible. Values outside a fluid system can cause visible damage as the system evolves.
 
 ---
 
