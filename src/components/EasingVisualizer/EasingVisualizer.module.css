@@ -74,6 +74,12 @@
   cursor: grabbing;
 }
 
+/* Readout mode (no onCurveChange): the handles are information, not controls,
+   so they must not advertise a grab they will decline. */
+.controlPointStatic {
+  cursor: default;
+}
+
 /* Fixed endpoint dots (P0, P3) */
 /* --color-surface (#1e1e1e in dark) was invisible against the dark SVG
    background. --color-text-base is high-contrast in all three themes. */

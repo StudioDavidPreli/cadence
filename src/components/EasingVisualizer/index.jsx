@@ -51,10 +51,16 @@ function buildPath(points) {
 // headroom sits above y=1:
 //   NORMAL  — viewBox "0 -25 100 135" → draggable bezierY up to ~1.25. Fine for
 //             standard / enter / exit, whose control points live near the square.
-//   TALL    — viewBox "0 -70 100 180" → draggable bezierY up to ~1.70. Needed for
-//             the overshoot slot, whose default handle sits at y=1.56, above the
-//             normal ceiling. The container switches to a portrait aspect ratio
-//             so the taller viewBox is not letterboxed (see .containerTall).
+//   TALL    — viewBox "0 -70 100 180" → draggable bezierY up to ~1.70. Needed
+//             for the overshoot slot, whose default handle sits at y=1.56,
+//             above the normal ceiling. The container switches to a portrait
+//             aspect ratio so the taller viewBox is not letterboxed (see
+//             .containerTall).
+//
+// Which space is in use follows the SLOT, not the curve. A curve whose control
+// point sits above the normal ceiling simply draws it above the frame (.svg is
+// overflow: visible, so nothing is clipped). See the component below for why
+// that is the right trade.
 //
 // Coordinate steps, given a pointer at (clientX, clientY) and the SVG rect:
 //   1. normalize to [0,1] in the element's pixel bounds
@@ -102,7 +108,29 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd,
   const svgRef    = useRef(null)
   const [dragging, setDragging] = useState(null) // 'p1' | 'p2' | null
 
-  // Overshoot slots need extra vertical headroom to reach their y=1.56 handle.
+  // The coordinate space follows the SLOT being edited, never the curve being
+  // shown. That distinction was briefly the other way round (2026-08-11) and it
+  // was a mistake worth recording, because the reasoning sounded better than it
+  // played.
+  //
+  // The argument for switching on the curve: Snappy puts the overshoot curve in
+  // the standard slot, so its y = 1.56 control point sits above the normal
+  // ceiling of 1.25 and draws outside the box. True, but harmless. `.svg` is
+  // overflow: visible, so the handle is not clipped, it just sits loose above
+  // the frame, and it had done so for months without anyone minding.
+  //
+  // The cost of switching on the curve: the plot rescales the moment a preset
+  // loads a high curve, so the grid the eye is using as a reference changes
+  // size underneath the thing it is meant to be measuring. Stepping presets
+  // made the curve jump around (David, 2026-08-11). A reference frame that
+  // moves is worse than a handle that escapes it, which is the general form of
+  // the lesson: lock the bounds, let the handles draw where they may.
+  //
+  // So headroom is granted for one reason only, the reason it was built for:
+  // the caller lets the user DRAG above the ceiling, and the room has to exist
+  // before the handle can be taken there. That case also gets the portrait
+  // container (see the class below), and being a deliberate tab switch rather
+  // than a value load, it is a context change the user asked for.
   const view = allowOvershoot ? VIEW.tall : VIEW.normal
 
   const points = sampleCurve(x1, y1, x2, y2)
@@ -113,7 +141,15 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd,
   const p1 = { x: x1 * 100, y: (1 - y1) * 100 }
   const p2 = { x: x2 * 100, y: (1 - y2) * 100 }
 
+  // A visualizer without an onCurveChange is a readout (EasingSection's
+  // display mode). The move handler already drops drags, but half-responding
+  // is its own bug: capturing the pointer and lighting the handle while
+  // nothing moves reads as a broken editor. A readout declines the drag at the
+  // source, and its handles drop the grab cursor (.controlPointStatic).
+  const interactive = onCurveChange != null
+
   function startDrag(point) {
+    if (!interactive) return undefined
     return (e) => {
       e.preventDefault()
       // setPointerCapture ensures the SVG receives all subsequent pointer events
@@ -198,7 +234,7 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd,
           cy={p1.y}
           animate={{ cx: p1.x, cy: p1.y }}
           transition={transition(pointDuration('p1'))}
-          className={`${styles.controlPoint} ${dragging === 'p1' ? styles.controlPointActive : ''}`}
+          className={`${styles.controlPoint} ${interactive ? '' : styles.controlPointStatic} ${dragging === 'p1' ? styles.controlPointActive : ''}`}
           onPointerDown={startDrag('p1')}
         />
 
@@ -209,7 +245,7 @@ export function EasingVisualizer({ curve, onCurveChange, onDragStart, onDragEnd,
           cy={p2.y}
           animate={{ cx: p2.x, cy: p2.y }}
           transition={transition(pointDuration('p2'))}
-          className={`${styles.controlPoint} ${dragging === 'p2' ? styles.controlPointActive : ''}`}
+          className={`${styles.controlPoint} ${interactive ? '' : styles.controlPointStatic} ${dragging === 'p2' ? styles.controlPointActive : ''}`}
           onPointerDown={startDrag('p2')}
         />
 

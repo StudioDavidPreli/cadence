@@ -713,3 +713,41 @@ export function importTokens(text) {
     throw e
   }
 }
+
+// ─── The Token Lab reducer ────────────────────────────────────────────────────
+// Moved here from TokenLab/index.jsx (2026-08-16). Two reasons. It transitions
+// exactly the state shape this module owns (INITIAL_STATE and every preset's
+// `state`), so this is where a reader looks for it. And the capture rig needs
+// the REAL reducer — a preset load in a capture must be the same state
+// transition a preset load in the app is — but exporting a non-component from
+// the TokenLab component module disabled React Fast Refresh for that whole
+// file. Note this is the bare reducer, not TokenLab's dispatch wrapper: the
+// wrapper's second channel writes tokens to CSS, which non-app consumers have
+// no use for.
+export function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_DURATION':
+      return { ...state, duration: { ...state.duration, [action.key]: action.value } }
+    case 'SET_EASING':
+      return {
+        ...state,
+        easing: { ...state.easing, [action.slot]: action.value },
+      }
+    case 'SET_DELAY':
+      return { ...state, delay: { ...state.delay, [action.key]: action.value } }
+    case 'SET_SCALE':
+      return { ...state, scale: { ...state.scale, [action.key]: action.value } }
+    case 'SET_SPRING':
+      return { ...state, spring: { ...state.spring, [action.key]: action.value } }
+    case 'SET_SCALAR':
+      // The scalar is a lone value, not a family of keys, so the action carries
+      // just a value (no key), unlike SET_DURATION / SET_SPRING.
+      return { ...state, scalar: action.value }
+    case 'RESET_TO_DEFAULTS':
+      return { ...INITIAL_STATE }
+    case 'LOAD_PRESET':
+      return { ...action.payload }
+    default:
+      throw new Error(`TokenLab reducer: unknown action type "${action.type}"`)
+  }
+}

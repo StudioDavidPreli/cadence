@@ -29,6 +29,23 @@ export default [
       ...reactHooks.configs.recommended.rules,
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Added 2026-08-11 after a real one. A module-level `const` table in the
+      // capture rig referenced another `const` declared forty lines below it,
+      // which is a temporal dead zone: the module threw on evaluation and the
+      // whole scene rendered nothing. Both builds passed and all 518 tests
+      // passed, because neither one evaluates that module. This rule is the
+      // thing that catches it, and it found nothing else in the codebase, so it
+      // costs nothing to keep.
+      //
+      // functions and classes stay false: function declarations hoist, and
+      // calling one defined further down is normal and safe. `variables: true`
+      // is the half that matters, because let and const do not.
+      'no-use-before-define': ['error', {
+        functions: false,
+        classes: false,
+        variables: true,
+        allowNamedExports: true,
+      }],
       // The two React-Compiler-era rules are off, not warn. Every one of their
       // 31 preview hits landed on a documented Cadence pattern (the Rive
       // bounds→aspect read, the getComputedStyle token sync in
