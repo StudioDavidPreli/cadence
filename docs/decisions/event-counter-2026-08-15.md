@@ -46,7 +46,7 @@ To finish (David):
 2. If it names Analytics Engine: in the dashboard's account sidebar find **Analytics Engine** (under Workers & Pages / Storage & Databases, naming varies) and complete its enable/setup step. It is free-plan eligible, so this should be a confirmation, not a purchase.
 3. Uncomment the `analytics_engine_datasets` block in `wrangler.jsonc`, commit, push. The dataset creates itself on the first event after deploy.
 
-**Resolved same day:** the log confirmed the Analytics Engine enablement was the cause. David enabled it and created the dataset in the dashboard (name `cadence_events`, binding `EVENTS`, matching the config), and the binding went back into `wrangler.jsonc`. So the honest version of the setup story: one dashboard enablement, once per account, then config-only from there.
+**Resolved same day, in two rounds.** The log confirmed Analytics Engine enablement was the cause (`code: 10089` from the versions API). Round one, creating the `cadence_events` dataset in the dashboard, was not enough: the config-declared binding still deployed into the same 10089, and the enable link in the error just looped back to dataset creation. What actually flipped the account flag was adding the binding manually on the Worker itself: **cadence → Settings → Bindings → Add → Analytics Engine dataset**, variable `EVENTS`, dataset `cadence_events`, the same pair the config declares so the two sides agree. The next build deployed green. So the honest version of the setup story: dataset creation plus one manual binding add on the Worker, once, then config-only from there.
 
 ## Reading the counts (David, one-time setup)
 
