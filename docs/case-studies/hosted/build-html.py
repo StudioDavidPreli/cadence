@@ -55,6 +55,7 @@ STYLE = """
     h1 { font-size: 26px; line-height: 1.3; }
     h2 { font-size: 20px; margin-top: 56px; }
     h3 { font-size: 16px; margin-top: 40px; }
+    h4 { font-size: 14px; margin-top: 32px; }
     a { color: #76c17d; text-decoration: none; }
     a:hover { text-decoration: underline; }
     code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
@@ -72,6 +73,7 @@ TITLES = {
   "index": "Cadence: Case Study",
   "token-system": "The Token System · Cadence Case Study",
   "principles": "The Principles · Cadence Case Study",
+  "build-notes": "Build Notes · Cadence Case Study",
   "fields-and-canvases": "Fields and Canvases · Cadence Case Study",
   "key-decisions": "Key Decisions · Cadence Case Study",
   "built-and-learned": "What I Built, What I Learned · Cadence Case Study",

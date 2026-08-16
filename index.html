@@ -76,5 +76,11 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Cloudflare Web Analytics beacon (cookie-less visit counts for the post-launch
+         ledger; see docs/case-studies/post-launch-capture.md). The token is public.
+         Sits after the app script so it can never delay first paint. Local and
+         wrangler-dev runs report hostname localhost, which Web Analytics keys away
+         from the production site, so test traffic never pollutes the ledger. -->
+    <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c879504f005643d185dea02b0d487768"}'></script>
   </body>
 </html>

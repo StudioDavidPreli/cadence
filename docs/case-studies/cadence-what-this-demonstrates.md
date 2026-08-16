@@ -1,6 +1,6 @@
 # Cadence: What This Demonstrates
 
-**Status: Draft branch, 2026-07-30.** The hiring-manager cut, extracted from [`case-study.md`](../case-study.md) so the public case study can link it rather than carry it. For the full build record, start there.
+The hiring-manager cut of the [Cadence case study](hosted/index.md). For the full build record, start there.
 
 ---
 
@@ -14,5 +14,5 @@ For the hiring manager reading this directly:
 ---
 
 - **Live tool:** [cadence.davidpreli.com](https://cadence.davidpreli.com)
-- **Full case study:** [`case-study.md`](../case-study.md)
+- **Full case study:** [Cadence: Case Study](hosted/index.md)
 - **Portfolio:** [davidpreli.com](https://davidpreli.com)

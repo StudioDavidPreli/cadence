@@ -1,0 +1,106 @@
+{
+  "daily": {
+    "2026-08-01": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 16,
+      "cloneUniques": 11
+    },
+    "2026-08-02": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 4,
+      "cloneUniques": 4
+    },
+    "2026-08-03": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 7,
+      "cloneUniques": 6
+    },
+    "2026-08-04": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-05": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-06": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-07": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 2,
+      "cloneUniques": 2
+    },
+    "2026-08-08": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-09": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-10": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-11": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 5,
+      "cloneUniques": 5
+    },
+    "2026-08-12": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-13": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-14": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    }
+  },
+  "snapshots": [
+    {
+      "capturedAt": "2026-08-16T03:50:22.548Z",
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "views14d": {
+        "count": 0,
+        "uniques": 0
+      },
+      "clones14d": {
+        "count": 39,
+        "uniques": 33
+      },
+      "referrers": [],
+      "paths": []
+    }
+  ]
+}
