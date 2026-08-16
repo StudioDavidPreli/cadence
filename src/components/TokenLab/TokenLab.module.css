@@ -639,7 +639,11 @@
 .tooltip {
   composes: type-microcopy from global;
   position: fixed;
-  background-color: var(--color-surface-raised);
+  /* The mode's own page ground, not surface-raised: in light, raised is pure
+     white against the #f5f5f5 page and the bubble read as the wrong white
+     (David's spec, 2026-08-16). The border carries the separation; in both
+     HC themes bg and raised are the same value anyway. */
+  background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -705,6 +709,12 @@
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
+  /* The header composes type-eyebrow, whose uppercase transform and tracking
+     would otherwise reach this glyph and capitalize its "i" (the bug David
+     caught 2026-08-16). The Principles Library original never sits inside an
+     eyebrow, so these two resets are the price of the new context. */
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .infoGlyph:focus-visible {

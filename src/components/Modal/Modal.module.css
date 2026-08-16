@@ -21,7 +21,11 @@
   left: 50%;
   translate: -50% -50%;
   z-index: 61;
-  background-color: var(--color-surface-raised);
+  /* The mode's page ground rather than surface-raised, matching the tool-bar
+     tooltip's treatment (David's spec, 2026-08-16): light-mode raised is pure
+     white and read as the wrong white over the #f5f5f5 page. Border and
+     backdrop dim carry the panel's separation. */
+  background-color: var(--color-bg);
   border: 1px solid var(--color-accent);
   border-radius: 12px;
   padding: 20px 24px 24px;

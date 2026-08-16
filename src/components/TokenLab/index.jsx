@@ -506,9 +506,15 @@ function generatePresetTooltip(state) {
 // ancestor entirely. Position is calculated from getBoundingClientRect() at
 // hover time and expressed as fixed coordinates so it lands correctly
 // regardless of scroll or nesting.
-function HoverTip({ text, children }) {
+// side: which way the bubble grows from the trigger. 'left' (default) anchors
+// to the trigger's right edge and grows leftward, correct for the preset chips
+// sitting at the bar's right region. 'right' anchors to the trigger's right
+// edge and grows rightward, for triggers near the window's left edge (the
+// privacy info glyph) where a left-growing bubble would sit on the wrong side
+// of the pointer (David's correction, 2026-08-16).
+function HoverTip({ text, children, side = 'left' }) {
   const [visible, setVisible]  = useState(false)
-  const [coords, setCoords]    = useState({ top: 0, right: 0 })
+  const [coords, setCoords]    = useState({ top: 0 })
   const wrapperRef = useRef(null)
   const timerRef   = useRef(null)
   const chrome     = useChromeTransition()
@@ -517,7 +523,10 @@ function HoverTip({ text, children }) {
     timerRef.current = setTimeout(() => {
       if (wrapperRef.current) {
         const rect = wrapperRef.current.getBoundingClientRect()
-        setCoords({
+        setCoords(side === 'right'
+          // Below the trigger, starting just right of it, growing rightward.
+          ? { top: rect.bottom + 8, left: rect.right }
+          : {
           // Position below the trigger with an 8px gap
           top:   rect.bottom + 8,
           // Right-align to the trigger's right edge, expressed as distance from
@@ -553,7 +562,9 @@ function HoverTip({ text, children }) {
           {visible && (
             <motion.span
               className={styles.tooltip}
-              style={{ top: coords.top, right: coords.right }}
+              // Whichever horizontal anchor the side mode set; the other is
+              // undefined and React drops it.
+              style={{ top: coords.top, right: coords.right, left: coords.left }}
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
@@ -1458,7 +1469,7 @@ function PrivacyInfoGlyph() {
 
   return (
     <>
-      <HoverTip text="Exports and imports are counted anonymously.">
+      <HoverTip text="Exports and imports are counted anonymously." side="right">
         <span
           role="button"
           tabIndex={0}
