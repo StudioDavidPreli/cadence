@@ -29,3 +29,16 @@ export async function seedStorage(context, entries) {
 // The Principles intro modal auto-opens on first visit. Tests that want the
 // grid (not the modal) seed the seen flag; tests that want the modal do not.
 export const INTRO_SEEN = { 'cadence-principles-intro-v1': 'true' }
+
+// The Cloudflare Web Analytics beacon (index.html, 2026-08-16) loads from
+// static.cloudflareinsights.com. Sandboxed or offline test environments may
+// fail to resolve that host, and the failed load logs exactly the console
+// error the console-clean tests assert against. Analytics is not under test:
+// fulfill the request with an empty module so every environment sees the
+// same, deterministically clean console. Works on a Page or a BrowserContext;
+// call before the first goto.
+export async function stubAnalyticsBeacon(target) {
+  await target.route('https://static.cloudflareinsights.com/**', (route) =>
+    route.fulfill({ contentType: 'application/javascript', body: '' }),
+  )
+}
