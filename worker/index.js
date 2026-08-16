@@ -1,4 +1,4 @@
-// Cloudflare Worker: bug-report endpoint + static-asset server.
+// Cloudflare Worker: bug-report endpoint, event counter + static-asset server.
 //
 // Why a Worker and not a Pages Function: the Cloudflare project backing this
 // repo is a Worker with static assets, not a Pages project, so the Pages-only
@@ -53,6 +53,62 @@ async function handleBugReport(request, env) {
   return new Response(null, { status: 204 });
 }
 
+// POST /api/event: the anonymous export/import counter behind the post-launch
+// report (docs/decisions/event-counter-2026-08-15.md). One Analytics Engine
+// data point per event, nothing else: no cookies, no identifiers, and the
+// request's IP and headers are never read. Analytics Engine over KV because a
+// data point is an append (no read-modify-write to race under launch-day
+// bursts, which KV increments would silently lose); the dataset creates itself
+// on first write, so the binding in wrangler.jsonc is the whole setup.
+//
+// Validation is allowlist-only, same posture as the bug report above: two
+// event types, four export formats, 400 for everything else. A format on an
+// import is rejected too; letting unknown shapes through would let junk POSTs
+// pollute the counts the report is built on. Nothing from the body is ever
+// echoed back.
+
+const EVENT_TYPES = ['export', 'import'];
+const EXPORT_FORMATS = ['dtcg', 'json', 'css', 'framer-motion'];
+
+async function handleEvent(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response('Bad request', { status: 400 });
+  }
+
+  const { type, format } = body;
+
+  if (!EVENT_TYPES.includes(type)) {
+    return new Response('Bad request', { status: 400 });
+  }
+  // Format is required on export (a per-format count is the whole point) and
+  // must be absent on import (there is only one import path).
+  if (type === 'export' && !EXPORT_FORMATS.includes(format)) {
+    return new Response('Bad request', { status: 400 });
+  }
+  if (type === 'import' && format !== undefined) {
+    return new Response('Bad request', { status: 400 });
+  }
+
+  // A metrics failure must never surface to the tool: the client fires and
+  // forgets, and this catch keeps the server side to the same rule. The
+  // console.error is not dead weight, observability.enabled in wrangler.jsonc
+  // captures it in the dashboard's live logs, so a broken binding is loud to
+  // us and invisible to the visitor.
+  try {
+    env.EVENTS.writeDataPoint({
+      blobs: [type, type === 'export' ? format : ''],
+      doubles: [1],
+      indexes: [type],
+    });
+  } catch (err) {
+    console.error('event write failed:', err);
+  }
+  return new Response(null, { status: 204 });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -61,6 +117,12 @@ export default {
         return new Response('Method not allowed', { status: 405 });
       }
       return handleBugReport(request, env);
+    }
+    if (url.pathname === '/api/event') {
+      if (request.method !== 'POST') {
+        return new Response('Method not allowed', { status: 405 });
+      }
+      return handleEvent(request, env);
     }
     // Response headers on pages (the frame-ancestors policy for the principle
     // embed) do NOT live here: wrangler.jsonc scopes run_worker_first to

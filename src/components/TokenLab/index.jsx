@@ -49,6 +49,7 @@ import {
   tokenKeyToCssSuffix,
   importTokens,
 } from '../../data/motionPresets'
+import { trackEvent } from '../../utils/trackEvent'
 import styles from './TokenLab.module.css'
 
 // ─── Lazy boundaries: PrinciplesLibrary and Carousel ─────────────────────────
@@ -698,6 +699,17 @@ function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImpo
 // four segments share the width equally), Export and Copy sit beneath. Four
 // segments plus both actions do not fit one 300px row without the FM segment
 // clipping, so the toggle gets the whole width and the actions drop below it.
+// The wire names the /api/event counter records per export format. The UI's
+// internal keys stay as they are ('flat', 'fm'); the counter speaks the
+// endpoint's contract instead ('json', 'framer-motion'), so the report reads
+// without a decoder ring. This map is the single translation point.
+const EXPORT_EVENT_FORMAT = {
+  dtcg: 'dtcg',
+  flat: 'json',
+  css:  'css',
+  fm:   'framer-motion',
+}
+
 function ExportSection({ rawState }) {
   // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
   // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
@@ -728,6 +740,9 @@ function ExportSection({ rawState }) {
       fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
     }[exportFormat]
     downloadTextFile(file.name, exportText(), file.mime)
+    // Count the export (fire-and-forget; see trackEvent). Downloads and copies
+    // both count as "a spec left the building", per the capture doc.
+    trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
   }
 
   async function handleCopy() {
@@ -735,6 +750,9 @@ function ExportSection({ rawState }) {
       await navigator.clipboard.writeText(exportText())
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
+      // Inside the try, after the await: a failed copy put nothing on the
+      // clipboard, so it must not count as an export either.
+      trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
     } catch {
       // clipboard API is unavailable in insecure contexts; the download button
       // is the reliable path, so a failed copy is a silent no-op.
@@ -1617,6 +1635,10 @@ export function TokenLab() {
       localStorage.setItem('cadence-presets', JSON.stringify(next))
       // LOAD_PRESET fires both channels: CSS variables and the reducer state.
       dispatch({ type: 'LOAD_PRESET', payload: result.state })
+      // Count the round-trip (fire-and-forget; see trackEvent). Only a
+      // successful import counts: a file that failed validation never became
+      // a token set, so it is not the loop closing.
+      trackEvent({ type: 'import' })
     }
     setImportResult(result)
   }

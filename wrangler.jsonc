@@ -14,5 +14,16 @@
   },
   "vars": {
     "GH_REPO": "StudioDavidPreli/cadence"
-  }
+  },
+  // The export/import event counter's store (worker/index.js handleEvent).
+  // Analytics Engine needs no dashboard setup: the dataset is created on the
+  // first writeDataPoint, so this binding riding the next deploy is the whole
+  // provisioning step. Reading it back is a SQL API query; the ready-made
+  // queries live in docs/decisions/event-counter-2026-08-15.md.
+  "analytics_engine_datasets": [
+    {
+      "binding": "EVENTS",
+      "dataset": "cadence_events"
+    }
+  ]
 }
