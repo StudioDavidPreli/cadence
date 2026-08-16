@@ -10,7 +10,8 @@
 
 Cadence is a motion design system explorer. It demonstrates how design tokens drive animation behavior in real UI components, through the classic 12 principles of animation and six design-engineering extensions. Three tools share the vocabulary: Token Lab edits the tokens live, the Principles Library teaches them through eighteen cards, and Motion Tiles takes the named presets to field scale. It is built as a curriculum for designers learning how motion works at the system level.
 
-**Role:** Solo. Design, architecture, development, documentation.
+**Role:** Design, architecture, development, documentation.
+**Built with:** Claude. Planning in conversation, building in Claude Code; every line read and defended before it landed.
 **Timeline:** Thirteen weeks to production. First commit April 18, 2026; live July 15, 2026, and still shipping. 285 commits as of August 15.
 **Stack:** React, Framer Motion, CSS Custom Properties, Rive, Vite.
 **Live:** [cadence.davidpreli.com](https://cadence.davidpreli.com)
@@ -30,10 +31,10 @@ Cadence is a motion design system explorer. It demonstrates how design tokens dr
     <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">578</div>
     <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">TESTS</div>
   </div>
-  <div>
-    <div style="font-size: 24px; font-weight: 600; color: #e1e1e1;">39</div>
-    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">DECISION RECORDS</div>
-  </div>
+  <a href="key-decisions.html" style="text-decoration: none;">
+    <div style="font-size: 24px; font-weight: 600; color: #76c17d;">39</div>
+    <div style="font-size: 10px; letter-spacing: 1px; color: #909090; margin-top: 2px;">DECISION RECORDS →</div>
+  </a>
 </div>
 
 ---
@@ -77,7 +78,7 @@ Four companion documents, each a different cut of the same project:
 
 - **[The Plain Overview](../cadence-overview.md):** what Cadence does, in plain language, no engineering required
 - **[Two Lexicons](../cadence-two-lexicons.md):** the technical paper, organized as a translation table between motion design and design engineering
-- **[Working with Claude](../working-with-claude.md):** how the human-AI collaboration ran, and which methods earned their keep
+- **[Working with Claude](../working-with-claude.md):** how the collaboration ran, every line read before it landed, and which methods earned their keep
 - **[What This Demonstrates](../cadence-what-this-demonstrates.md):** the direct version, for hiring managers
 
 ---

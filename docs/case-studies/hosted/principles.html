@@ -61,98 +61,22 @@
 </div></p>
 <hr />
 <h2>Build Notes</h2>
-<h3>The Classic 12</h3>
-<h4>01. Squash and Stretch</h4>
-<p><strong>UI Component:</strong> Button (the same one from Token Lab's Press &amp; State demo)<br />
-<strong>Token values driving it:</strong> <code>scale.pressBase</code>, <code>duration.fast</code>, <code>ease.standard</code>, <code>ease.overshoot</code><br />
-<strong>Key decision:</strong> One scale value carries both halves of the principle; the split lives in the easing, <code>ease.standard</code> down and <code>ease.overshoot</code> back. And reuse the component the user has already met rather than build a demo prop, so the principle attaches to something they have pressed before.<br />
-<strong>What it demonstrates:</strong> Weight. The press compresses, the release overshoots past rest before settling, and the travel is a few percent of scale doing the whole job.</p>
-<h4>02. Anticipation</h4>
-<p><strong>UI Component:</strong> Drawer (scoped, from Enter &amp; Exit)<br />
-<strong>Token values driving it:</strong> <code>duration.slow</code>, <code>ease.enter</code>, <code>ease.exit</code><br />
-<strong>Key decision:</strong> Enter and exit share one duration; the character splits in the easing and the keyframe spacing, and the countermotion lives on the exit, a lift in the first fifth of the clock before the drop.<br />
-<strong>What it demonstrates:</strong> An action that is caused rather than one that merely happens. The drawer states its intent before it leaves.</p>
-<h4>03. Staging</h4>
-<p><strong>UI Component:</strong> Modal with backdrop<br />
-<strong>Token values driving it:</strong> <code>duration.slow</code>, <code>ease.enter</code><br />
-<strong>Key decision:</strong> The backdrop is the demonstration, not the panel. Staging is the darkening as much as the lighting.<br />
-<strong>What it demonstrates:</strong> Clearing the stage. The dim removes everywhere else the eye could land.</p>
-<h4>04. Straight Ahead and Pose to Pose</h4>
-<p><strong>UI Component:</strong> Compact Stepper above a ProgressBar, one shared <code>step</code> counter<br />
-<strong>Token values driving it:</strong> <code>duration.base</code>, <code>ease.standard</code>, <code>delay.short/medium/long</code>, <code>duration.slow</code><br />
-<strong>Key decision:</strong> Drive both components from a single counter so "two approaches to the same motion" is literal: one advance, one discrete visualization, one continuous.<br />
-<strong>What it demonstrates:</strong> The designer controls the poses; the system controls the in-betweens. UI animation is pose to pose almost by definition.</p>
+<p>Each of the eighteen carries the same four fields: the component, the tokens driving it, the key decision, and what it demonstrates. Three are here because each argues something the others do not; the full set has <a href="build-notes.html">its own page</a>.</p>
 <h4>05. Follow Through and Overlapping Action</h4>
 <p><strong>UI Component:</strong> Carousel (compact, text-only) with its dot indicator<br />
 <strong>Token values driving it:</strong> <code>spring.stiffness</code>, <code>spring.damping</code>, <code>spring.mass</code>: the snap runs the real physics spring, with the flattened bezier branch as the reduced-motion fallback<br />
 <strong>Key decision:</strong> The dot's width animates on the same transition object as the slide, so the follow-through is a property of the system, not a choreographed lag. The dot spent months on a CSS transition to stay clear of the projection system; it returned to Framer Motion as direct value animation, which never touches projection, once the original hazard was named precisely enough to know what was safe. (See <a href="key-decisions.html">Key Decisions</a>.)<br />
 <strong>What it demonstrates:</strong> Settling as physics. The slide overshoots and rings down, the dot rides the same spring, and nothing here has a duration.</p>
-<h4>06. Slow In and Slow Out</h4>
-<p><strong>UI Component:</strong> ProgressBar with a Tokens / Linear toggle<br />
-<strong>Token values driving it:</strong> <code>ease.standard</code> vs <code>ease.linear</code>, <code>duration.slow</code><br />
-<strong>Key decision:</strong> Same duration on both settings, so the only variable is the curve. When the toggle returns to Tokens, the controls panel's title flashes once, drawing the thread to where the value lives.<br />
-<strong>What it demonstrates:</strong> Identical timing, different curve, categorically different character. Linear motion belongs to machines.</p>
-<h4>07. Arc</h4>
-<p><strong>UI Component:</strong> Tooltip<br />
-<strong>Token values driving it:</strong> <code>duration.base</code>, <code>ease.enter</code><br />
-<strong>Key decision:</strong> Three keyframes, not two. Two keyframes ease the speed but leave the path a straight line; the third bends the trajectory, and the bend is the principle.<br />
-<strong>What it demonstrates:</strong> A tooltip that rises straight up reads as a notification. One that arcs in reads as an answer arriving from somewhere.</p>
-<h4>08. Secondary Action</h4>
-<p><strong>UI Component:</strong> Dropdown with rotating chevron<br />
-<strong>Token values driving it:</strong> <code>duration.fast</code>, <code>ease.standard</code>, shared by menu and chevron<br />
-<strong>Key decision:</strong> One timing for both motions so they read as a single gesture. The chevron carries no information the menu does not; confirmation is its entire job.<br />
-<strong>What it demonstrates:</strong> Subordination. The moment a secondary action pulls the eye from the thing it supports, it has become noise.</p>
 <h4>09. Timing</h4>
 <p><strong>UI Component:</strong> Two Toggles, each scoped to a different preset via <code>MotionTokensProvider</code><br />
 <strong>Token values driving it:</strong> <code>duration.fast/base/slow</code> compared across presets<br />
 <strong>Key decision:</strong> The real presets differ by only 100ms on the token the Toggle animates, too small to read in one flip, so the demo slows the Cinematic slot by a fixed, demo-scoped factor. The amplification is honest and documented; the preset keeps its true values everywhere else.<br />
 <strong>What it demonstrates:</strong> Duration alone changes personality. No easing difference, no path difference, and one Toggle feels decisive while the other feels considered.</p>
-<h4>10. Exaggeration</h4>
-<p><strong>UI Component:</strong> NotificationBadge with New / Clear triggers<br />
-<strong>Token values driving it:</strong> <code>scale.pressExpressive</code>, <code>ease.overshoot</code>, <code>duration.slow</code><br />
-<strong>Key decision:</strong> Re-key the badge on every increment so the enter animation fires each time; the compress comes from the initial scale and the overshoot from the bezier, two motion sources composing one alert.<br />
-<strong>What it demonstrates:</strong> A badge that scales to exactly 1.0 registers as a state change. The overshoot is what turns it into an alert.</p>
-<h4>11. Solid Drawing</h4>
-<p><strong>UI Component:</strong> Card, centered with room around it<br />
-<strong>Token values driving it:</strong> <code>scale.lift</code>, <code>duration.base</code>, <code>ease.standard</code><br />
-<strong>Key decision:</strong> Sixteen pixels of margin on every side so the 2% lift reads against empty space instead of against neighbors.<br />
-<strong>What it demonstrates:</strong> The implied z-axis. The selected card is not highlighted; it has come forward, and the surface it was embedded in is now behind it.</p>
-<h4>12. Appeal</h4>
-<p><strong>UI Component:</strong> A 2x2 grid of compact Cards with ASCII faces<br />
-<strong>Token values driving it:</strong> All of them: <code>duration.slower</code> drives an ambient drift, <code>duration.base</code> the settle, <code>ease.standard</code> the neutral states, <code>ease.overshoot</code> the selection<br />
-<strong>Key decision:</strong> Per-card phase offsets on the idle drift so the four never sync. Selection freezes the drift, dims the siblings, lifts the chosen card.<br />
-<strong>What it demonstrates:</strong> Appeal is the other principles working in concert. Nothing here is remarkable alone; nothing is wrong.</p>
-<h3>The Extended 6</h3>
-<h4>13. Systematization</h4>
-<p><strong>UI Component:</strong> A Tempo slider over a Toggle, compact Card, and ProgressBar<br />
-<strong>Token values driving it:</strong> The whole duration family, scaled proportionally by the slider<br />
-<strong>Key decision:</strong> Scale durations only. Delays stay proportional and easing stays untouched, because the principle is temporal coherence, not curve shape.<br />
-<strong>What it demonstrates:</strong> One slider moves and every component responds at its own native speed. The system has one voice.</p>
-<h4>14. Hierarchy of Motion</h4>
-<p><strong>UI Component:</strong> A PARENT pill above three indented CHILD rows, drawn as a tree<br />
-<strong>Token values driving it:</strong> <code>duration.base</code>, <code>ease.standard</code>, <code>delay.short/medium/long</code><br />
-<strong>Key decision:</strong> The children are not interactive. Only the parent can initiate motion, so the demo's interaction model enforces the principle it teaches.<br />
-<strong>What it demonstrates:</strong> Authority flows downward, and the cascading delays are the hierarchy made visible.</p>
-<h4>15. Economy</h4>
-<p><strong>UI Component:</strong> Three horizontal bars with a Pan trigger<br />
-<strong>Token values driving it:</strong> <code>duration.slow/base/fast</code>, <code>ease.standard</code>, one per bar<br />
-<strong>Key decision:</strong> Depth from three opacity levels and three speeds, no shadows, no stacking order. Three layers of parallax suggest a world; thirty just suggest thirty.<br />
-<strong>What it demonstrates:</strong> The smallest set of moves that produces the intended depth. Every motion element earns its place.</p>
 <h4>16. Token Fidelity</h4>
 <p><strong>UI Component:</strong> Three identical pills, one deviant<br />
 <strong>Token values driving it:</strong> <code>duration.base</code> and <code>ease.standard</code> on two pills; a hardcoded 600ms linear on the third, and a Harmonize toggle that repairs it<br />
 <strong>Key decision:</strong> Make the wrongness perceptual before it is explained. The deviant pill arrives late at constant velocity and reads as mechanical before the viewer knows why.<br />
 <strong>What it demonstrates:</strong> A hardcoded value is not a shortcut; it is visible damage.</p>
-<h4>17. Reduced Motion</h4>
-<p><strong>UI Component:</strong> A Reduce toggle over a Run button, ProgressBar, and Card<br />
-<strong>Token values driving it:</strong> All of them, conditionally: durations flatten to 0.01s, delays to zero; easing and scale stay, since they are not perceived at near-zero duration<br />
-<strong>Key decision:</strong> The demo's toggle is the single source of truth inside its scope, so both states are visible regardless of the viewer's OS setting. The support underneath is real: <code>prefers-reduced-motion</code> is wired through the entire codebase, not simulated in one card.<br />
-<strong>What it demonstrates:</strong> Reduced motion as a first-class state. The interface communicates the same information without requiring the user to process movement.</p>
-<h4>18. Shared Vocabulary</h4>
-<p><strong>UI Component:</strong> Two tracks, two dots, one curve<br />
-<strong>Token values driving it:</strong> The named presets themselves; the demo pins canonical curve values so the binding between name and numbers stays fixed<br />
-<strong>Key decision:</strong> Label one track "Snappy" and the other "0.34, 1.56, 0.64, 1" and let them run identically. The comparison is the whole demo.<br />
-<strong>What it demonstrates:</strong> Motion values that cannot be named cannot be systematized. The name carries the intention the numbers cannot, and a named preset is the minimum unit of design-engineering communication.</p>
 <hr />
 <p><a href="token-system.html">← The Token System</a> · <a href="fields-and-canvases.html">Fields and Canvases →</a></p>
   </main>

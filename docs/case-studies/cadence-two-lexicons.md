@@ -74,7 +74,7 @@ In drawn animation, deformation carries weight. In an interface the same job fal
 | A video and a timing chart, sent across a wall | Four export formats off one normalized object |
 | "Match this" | A file the pipeline consumes directly |
 
-The traditional deliverable is a rendering of the intent; the receiving engineer re-derives the values by inspection. Cadence exports the values themselves, four ways: W3C DTCG (the shape Style Dictionary and Figma Variables consume), flat JSON, a drop-in CSS `:root` block, and a ready-to-use Framer Motion module with the spring as a native config. All four serialize from one normalized object so they cannot drift.
+The traditional deliverable is a rendering of the intent; the receiving engineer re-derives the values by inspection. Cadence exports the values themselves, four ways: the W3C Design Tokens Community Group format (DTCG, the shape Style Dictionary and Figma Variables consume), flat JSON, a drop-in CSS `:root` block, and a ready-to-use Framer Motion module with the spring as a native config. All four serialize from one normalized object so they cannot drift.
 
 The spring posed the one format question, because the DTCG draft has no spring type. It ships as three `number` leaves under a `motion.spring` group: valid DTCG today, no invented type, the group name carrying the composition. Import runs the pipeline in reverse with validation, and the validation has manners: out-of-range scalars clamp and report, missing tokens fill from Standard and report, but a spring parameter at zero or below fails the import outright, because a spring that never settles should not be bent into something that merely looks valid.
 

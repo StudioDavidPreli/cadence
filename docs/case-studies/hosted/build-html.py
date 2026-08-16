@@ -73,6 +73,7 @@ TITLES = {
   "index": "Cadence: Case Study",
   "token-system": "The Token System · Cadence Case Study",
   "principles": "The Principles · Cadence Case Study",
+  "build-notes": "Build Notes · Cadence Case Study",
   "fields-and-canvases": "Fields and Canvases · Cadence Case Study",
   "key-decisions": "Key Decisions · Cadence Case Study",
   "built-and-learned": "What I Built, What I Learned · Cadence Case Study",
