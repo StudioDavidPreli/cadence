@@ -1,105 +1,13 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import Prism from 'prismjs'
-// The jsx grammar (markup tags + embedded JS expressions) — the core bundle
-// carries markup/clike/javascript; jsx is an add-on component.
-import 'prismjs/components/prism-jsx'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useActiveToken } from '../../context/ActiveTokenContext'
 import { TOKEN_REF, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
+// The tokenizer, the scope map, and the span renderer live in ./highlight.jsx
+// (extracted 2026-08-10) so the case-study capture rig can paint its own text
+// with this same palette. Everything left in this file is the live-token-value
+// behavior, which is CodeBlock's alone.
+import { tokenizeLines, renderRuns } from './highlight'
 import styles from './CodeBlock.module.css'
-
-// Prism ships an auto-highlight pass that scans the whole DOM on
-// DOMContentLoaded. We use only its tokenizer (Prism.tokenize) and render the
-// spans ourselves, so that pass has nothing to do — switch it off.
-Prism.manual = true
-
-// Prism token type → CSS-module class, grouped the way VS Code's TextMate
-// scopes group (David's direction, 2026-07-19: an expansive, editor-grade
-// scope map). Six visual roles:
-//   keyword.* / constant.language  → tokKeyword   (const, return, true)
-//   string / JSX attr values       → tokString
-//   constant.numeric               → tokNumber
-//   entity.name.function / .tag    → tokEntity    (useMotionTokens, motion.div)
-//   variable.other.property /
-//     entity.other.attribute-name  → tokProperty  (duration:, whileTap=)
-//   comment                        → tokComment
-// Identifiers, punctuation, and operators stay base — VS Code leaves them at
-// the default foreground too — and member-access reads (tokens.duration.fast)
-// classify as plain identifiers, so the token reads stay base and the accent
-// chip under them stays the loudest signal in the block.
-const SYNTAX_CLASS = {
-  'keyword':          'tokKeyword',
-  'boolean':          'tokKeyword',
-  'string':           'tokString',
-  'attr-value':       'tokString',
-  'number':           'tokNumber',
-  'comment':          'tokComment',
-  'function':         'tokEntity',
-  'class-name':       'tokEntity',
-  'tag':              'tokEntity',
-  'literal-property': 'tokProperty',
-  'property':         'tokProperty',
-  'attr-name':        'tokProperty',
-  // variable.other.constant — SCREAMING_CASE names (WATER_SEQUENCE, WILT).
-  // VS Code puts constants in the same ice-blue family as properties.
-  'constant':         'tokProperty',
-}
-
-// Types that CONTAIN other tokens rather than being spans of one kind:
-// Prism's 'tag' wraps the entire JSX tag (name, attrs, embedded scripts), so
-// every leaf inside a tag carries it in its stack. Without this guard, any
-// unclassified leaf inside a tag (a brace, an =, whitespace) would fall back
-// up the stack to 'tag' and paint as an entity — the first build did exactly
-// that, 193 teal spans in one snippet. A container classifies only when it IS
-// the leaf's own type (the tag name itself).
-const CONTAINER_TYPES = new Set(['tag', 'script'])
-
-// Flatten Prism's nested token tree into per-line runs of { types, text }.
-// The snippet tokenizes as ONE text (a JSX tag and its attributes span
-// several lines, so per-line lexing can never classify them), and this walk
-// re-splits the result at newlines while carrying each leaf's full type
-// stack — the same normalization prism-react-renderer performs. A leaf's
-// class resolves from the INNERMOST matching type (VS Code semantics: the
-// most specific scope wins), so e.g. the quote punctuation nested inside a
-// JSX attr-value falls back to base while the value text reads as a string.
-function splitTokensIntoLines(tokens) {
-  const lines = [[]]
-  const push = (text, types) => {
-    text.split('\n').forEach((part, i) => {
-      if (i > 0) lines.push([])
-      if (part) lines[lines.length - 1].push({ types, text: part })
-    })
-  }
-  const walk = (toks, stack) => {
-    for (const tok of toks) {
-      if (typeof tok === 'string') {
-        push(tok, stack)
-        continue
-      }
-      const aliases = tok.alias ? [].concat(tok.alias) : []
-      const types = [...stack, tok.type, ...aliases]
-      walk(Array.isArray(tok.content) ? tok.content : [tok.content], types)
-    }
-  }
-  walk(tokens, [])
-  return lines
-}
-
-function runClass(types) {
-  for (let i = types.length - 1; i >= 0; i--) {
-    if (CONTAINER_TYPES.has(types[i]) && i !== types.length - 1) continue
-    const cls = SYNTAX_CLASS[types[i]]
-    if (cls) return cls
-  }
-  return null
-}
-
-function renderRuns(runs) {
-  return runs.map((run, i) => {
-    const cls = runClass(run.types)
-    return cls ? <span key={i} className={styles[cls]}>{run.text}</span> : run.text
-  })
-}
 
 // How long the flash chip holds before the CSS transition on .comment fades it
 // back out. Tool chrome, so a fixed timing (like the Copy button's transition
@@ -144,10 +52,7 @@ export function CodeBlock({ code }) {
   // read as tag/attr-name scopes when the lexer sees the full tag. A construct
   // the grammar can't match degrades to plain JS tokens for that stretch,
   // never to a broken block.
-  const lineRuns = useMemo(
-    () => splitTokensIntoLines(Prism.tokenize(code, Prism.languages.jsx)),
-    [code],
-  )
+  const lineRuns = useMemo(() => tokenizeLines(code, 'jsx'), [code])
 
   // Every token path this snippet reads, with its current resolved display value.
   // `sig` is the value fingerprint: it changes only when a displayed value

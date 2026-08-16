@@ -29,8 +29,7 @@ export function Anticipation({ drawerOpen, setDrawerOpen }) {
         onClose={() => setDrawerOpen(false)}
         title="Anticipation"
       >
-        Close this drawer and it lifts before it drops away. That small
-        reverse motion is anticipation: intent shown before the move.
+        Close this drawer and it lifts before it drops away.
       </Drawer>
     </div>
   )

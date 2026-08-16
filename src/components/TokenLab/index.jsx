@@ -1,4 +1,4 @@
-import { lazy, Suspense, useReducer, useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useReducer, useState, useEffect, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
@@ -48,6 +48,7 @@ import {
   toFramerMotion,
   tokenKeyToCssSuffix,
   importTokens,
+  reducer,
 } from '../../data/motionPresets'
 import { trackEvent } from '../../utils/trackEvent'
 import styles from './TokenLab.module.css'
@@ -162,33 +163,11 @@ const TOKEN_COMPONENT_MAP = {
 // PrincipleCard's Timing demo can read the same preset data without forming
 // a circular import (TokenLab → PrinciplesLibrary → PrincipleCard → TokenLab).
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'SET_DURATION':
-      return { ...state, duration: { ...state.duration, [action.key]: action.value } }
-    case 'SET_EASING':
-      return {
-        ...state,
-        easing: { ...state.easing, [action.slot]: action.value },
-      }
-    case 'SET_DELAY':
-      return { ...state, delay: { ...state.delay, [action.key]: action.value } }
-    case 'SET_SCALE':
-      return { ...state, scale: { ...state.scale, [action.key]: action.value } }
-    case 'SET_SPRING':
-      return { ...state, spring: { ...state.spring, [action.key]: action.value } }
-    case 'SET_SCALAR':
-      // The scalar is a lone value, not a family of keys, so the action carries
-      // just a value (no key), unlike SET_DURATION / SET_SPRING.
-      return { ...state, scalar: action.value }
-    case 'RESET_TO_DEFAULTS':
-      return { ...INITIAL_STATE }
-    case 'LOAD_PRESET':
-      return { ...action.payload }
-    default:
-      throw new Error(`TokenLab reducer: unknown action type "${action.type}"`)
-  }
-}
+// The reducer itself moved to motionPresets.js too (2026-08-16): the capture
+// rig needs the REAL reducer, and exporting a non-component from this module
+// disables React Fast Refresh for the whole file (react-refresh's rule), so
+// every dev edit to TokenLab would drop in-progress state on save. It lives
+// beside INITIAL_STATE, the state shape it transitions, and is imported above.
 
 // ─── CSS bulk write ───────────────────────────────────────────────────────────
 // Writes all token values to CSS custom properties in one pass.
@@ -590,7 +569,7 @@ function HoverTip({ text, children, side = 'left' }) {
 //
 // The save flow is intentionally minimal: show a text input inline rather than
 // opening a modal or panel. The Escape key cancels without saving.
-function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImport }) {
+export function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave, onImport }) {
   const [isSaving, setIsSaving] = useState(false)
   const [saveName, setSaveName]  = useState('')
   const fileInputRef = useRef(null)
@@ -732,13 +711,29 @@ const EXPORT_EVENT_FORMAT = {
   fm:   'framer-motion',
 }
 
-function ExportSection({ rawState }) {
+export function ExportSection({ rawState, format, onFormatChange }) {
   // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
   // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
   // serialize from the same stateToExport object, so the toggle only selects
   // which stringifier runs at export time. Import handles dtcg/flat only; css and
   // fm are export-only (a destination, not an interchange format).
-  const [exportFormat, setExportFormat] = useState('dtcg')
+  const [internalFormat, setInternalFormat] = useState('dtcg')
+  // Optionally controlled. In the app nothing outside this section needs to know
+  // which format is selected, so it owns the state. The case-study capture rig
+  // (src/caseStudyMedia/captureRig/ExportFormatsScene.jsx) renders a code panel
+  // beneath this component showing the selected format's output, which means the
+  // format has to live above both — so it may be supplied. Passing neither prop
+  // leaves the component exactly as it was.
+  // Controlled-or-not is decided by `format` alone, and the pairing is
+  // checked: `format` without an `onFormatChange` would render four
+  // live-looking buttons that update the invisible internal state and change
+  // nothing on screen, so dev fails loud instead of shipping a dead toggle.
+  const controlled = format !== undefined
+  if (import.meta.env.DEV && controlled && !onFormatChange) {
+    console.warn('ExportSection: `format` supplied without `onFormatChange`; the format buttons will be inert.')
+  }
+  const exportFormat = controlled ? format : internalFormat
+  const setExportFormat = controlled ? (onFormatChange ?? (() => {})) : setInternalFormat
   const [copied, setCopied] = useState(false)
 
   // The current token state serialized in the selected format. Computed on
@@ -1345,7 +1340,24 @@ const EASING_TABS = [
 // constants you reference, not dials you turn.
 const OVERSHOOT_TAB = { id: 'overshoot', label: 'Overshoot' }
 
-function EasingSection({ rawState, dispatch, exploreMode }) {
+// `display` (default false) renders the section as a readout instead of an
+// editor: the curve, and its four numbers underneath it. No slot tabs, no
+// named-curve grid, no drag. Only the capture rig passes it.
+//
+// It is one prop rather than three because the three things it turns off are
+// one decision. A clip that steps presets needs the frame to hold still, and
+// every piece of chrome here is a moving part: the tab strip is a 3-column grid
+// that gains a fourth tab in Explore mode and wraps to two rows, the curve grid
+// grows a sixth button when a curve goes custom, and the coordinate readout
+// mounts and unmounts on that same condition with a height animation attached.
+// Each one changes the section's height on a beat where nothing should move but
+// the curve. Turning them off individually would let a future caller assemble a
+// half-still frame, which is not a state anything wants.
+//
+// Same shape as PixelPlant's `chromeless`: a shipped component keeping a
+// reduced form for a surface that needs one, rather than the surface reaching
+// in and hiding parts of it from outside.
+export function EasingSection({ rawState, dispatch, exploreMode, display = false }) {
   const setActiveToken = useSetActiveToken()
   const [activeSlot, setActiveSlot] = useState('standard')
   const [resetHovered, setResetHovered] = useState(false)
@@ -1366,6 +1378,26 @@ function EasingSection({ rawState, dispatch, exploreMode }) {
 
   function setSlot(value) {
     dispatch({ type: 'SET_EASING', slot: activeSlot, value })
+  }
+
+  // The readout. allowOvershoot stays false whatever the curve is doing, which
+  // is what locks the plot's bounds: the square is a fixed reference and a
+  // control point above it draws above it (the svg is overflow: visible). No
+  // onCurveChange, so the handles render but do not drag. The numbers sit under
+  // the curve rather than over it, and they are always present rather than
+  // appearing only for a custom curve, so the block's height is the same on
+  // every beat.
+  if (display) {
+    return (
+      <>
+        <div className={styles.curveDisplayRoom}>
+          <EasingVisualizer curve={activeCurve} allowOvershoot={false} />
+        </div>
+        <div className={`${styles.curveValues} ${styles.curveValuesBelow}`}>
+          [{activeCurve.map(v => v.toFixed(2)).join(', ')}]
+        </div>
+      </>
+    )
   }
 
   return (
@@ -1469,21 +1501,19 @@ function PrivacyInfoGlyph() {
 
   return (
     <>
+      {/* Not focusable, no role: the glyph sits inside the sectionHeader
+          <button>, and a focusable or role-carrying element nested in a button
+          is axe's nested-interactive (serious; the 2026-08-16 merge
+          verification caught it on every themed page). The plain onClick keeps
+          the modal for pointer and touch, which is what the modal existed for.
+          Assistive tech gets the disclosure on the header button itself via
+          aria-describedby (see ControlSection's infoDescription), a control it
+          can actually reach — the nested pattern's Enter/Space never could
+          fire for a screen reader anyway, since the outer button swallows
+          activation. aria-hidden keeps the bare "i" out of the header's
+          accessible name. */}
       <HoverTip text="Exports and imports are counted anonymously." side="right">
-        <span
-          role="button"
-          tabIndex={0}
-          className={styles.infoGlyph}
-          aria-haspopup="dialog"
-          aria-label="Privacy: exports and imports are counted anonymously."
-          onClick={activate}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              activate(e)
-            }
-          }}
-        >
+        <span aria-hidden="true" className={styles.infoGlyph} onClick={activate}>
           i
         </span>
       </HoverTip>
@@ -1498,11 +1528,19 @@ function PrivacyInfoGlyph() {
 }
 
 // ─── ControlSection ───────────────────────────────────────────────────────────
-function ControlSection({ label, isOpen, onToggle, children, info }) {
+function ControlSection({ label, isOpen, onToggle, children, info, infoDescription }) {
   const chrome = useChromeTransition()
+  // When a section carries an info glyph, the disclosure text rides the header
+  // button as its aria-description: the glyph itself is deliberately not
+  // focusable (see PrivacyInfoGlyph), so this is where assistive tech hears it.
+  const descId = useId()
   return (
     <div className={styles.section}>
-      <button className={styles.sectionHeader} onClick={onToggle}>
+      <button
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        aria-describedby={infoDescription ? descId : undefined}
+      >
         {/* The label group keeps the header's space-between layout honest: an
             optional info glyph sits tight against the label text on the left
             while the chevron keeps the right edge. `label` stays a string
@@ -1511,6 +1549,11 @@ function ControlSection({ label, isOpen, onToggle, children, info }) {
           {label}
           {info}
         </span>
+        {infoDescription && (
+          <span id={descId} className={styles.srOnly}>
+            {infoDescription}
+          </span>
+        )}
         <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>▾</span>
       </button>
       <AnimatePresence initial={false}>
@@ -1530,6 +1573,86 @@ function ControlSection({ label, isOpen, onToggle, children, info }) {
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+// ─── SpringSection / DurationSection ─────────────────────────────────────────
+// The two token families that carry a graph, lifted out of TokenLab's
+// controlsContent (2026-08-11) the same way ExportSection was on 2026-07-21 and
+// for the same reason: the case-study capture rig composes the tool bar's
+// sections as side-by-side columns, which it cannot do while they are inline
+// JSX in a 2100-line render.
+//
+// Each takes the shape EasingSection already established, (rawState, dispatch,
+// exploreMode), and picks its own config off exploreMode. That is what lets the
+// `springConfig` / `durationConfig` locals leave the main component: the choice
+// between a constrained and an explore range belongs with the sliders it
+// governs, not in a variable four hundred lines away.
+//
+// Scale and Delay stay inline. They are bare slider maps with no graph, nothing
+// composes them yet, and extracting a component to be used once is how a file
+// gets longer rather than shorter.
+
+export function SpringSection({ rawState, dispatch, exploreMode }) {
+  const config = exploreMode ? SPRING_CONFIG_EXPLORE : SPRING_CONFIG
+  return (
+    <>
+      {Object.entries(config).map(([key, cfg]) => (
+        <SliderRow
+          key={key}
+          name={key}
+          value={rawState.spring[key]}
+          config={cfg}
+          onChange={value => dispatch({ type: 'SET_SPRING', key, value })}
+          tokenKey={`spring.${key}`}
+        />
+      ))}
+      {/* Reads the live spring values straight from rawState — the controls
+          column is outside MotionTokensProvider, so the visualizer takes the
+          numbers as a prop, the same as DurationVisualizer. */}
+      <SpringVisualizer spring={rawState.spring} />
+    </>
+  )
+}
+
+// showVisualizer (default true) drops the duration-vs-distance graphic, leaving
+// the four token sliders alone. Only the capture rig passes false: the
+// visualizer is the tallest thing in the tool bar (distance plot, four-way
+// selector, constant-duration/velocity toggle, three distance sliders, scalar
+// footer) and a clip about four numbers retiming does not need the plot that
+// explains a fifth. Same idea as EasingSection's `display` above: a subset
+// render for a camera, not a second mode.
+export function DurationSection({ rawState, dispatch, exploreMode, showVisualizer = true }) {
+  const config = exploreMode ? DURATION_CONFIG_EXPLORE : DURATION_CONFIG
+  return (
+    <>
+      {Object.entries(config).map(([key, cfg]) => (
+        <SliderRow
+          key={key}
+          name={key}
+          value={rawState.duration[key]}
+          config={cfg}
+          onChange={value => dispatch({ type: 'SET_DURATION', key, value })}
+          tokenKey={`duration.${key}`}
+        />
+      ))}
+      {/* Reads the live duration values straight from rawState — the controls
+          column is outside MotionTokensProvider, so the visualizer takes the
+          numbers as a prop rather than through useMotionTokens(). The duration
+          scalar rides along the same way, with its scrub owned by the viz (see
+          DurationVisualizer): a lone editable token whose only consumer is this
+          graphic, so its slider lives with the effect it produces. Which is why
+          hiding it hides the scalar too: with no consumer in the tree there is
+          nothing for that value to do. */}
+      {showVisualizer && (
+        <DurationVisualizer
+          durations={rawState.duration}
+          scalar={rawState.scalar}
+          scalarConfig={exploreMode ? SCALAR_CONFIG_EXPLORE : SCALAR_CONFIG}
+          onScalarChange={value => dispatch({ type: 'SET_SCALAR', value })}
+        />
+      )}
+    </>
   )
 }
 
@@ -1635,10 +1758,11 @@ export function TokenLab() {
   const allPresets = [...BUILT_IN_PRESETS, ...userPresets]
 
   // Active config depends on explore mode.
-  const durationConfig = exploreMode ? DURATION_CONFIG_EXPLORE : DURATION_CONFIG
+  // Only the two families that are still inline need their config resolved
+  // here. Spring and Duration moved into their own components and pick their
+  // own (see SpringSection / DurationSection).
   const delayConfig    = exploreMode ? DELAY_CONFIG_EXPLORE    : DELAY_CONFIG
   const scaleConfig    = exploreMode ? SCALE_CONFIG_EXPLORE    : SCALE_CONFIG
-  const springConfig   = exploreMode ? SPRING_CONFIG_EXPLORE   : SPRING_CONFIG
 
   // The epoch moves only for the two actions that rewrite every token at once.
   // A slider drag goes through SET_DURATION and friends and leaves it alone,
@@ -1968,6 +2092,7 @@ export function TokenLab() {
         isOpen={openSections.has('presets')}
         onToggle={() => toggleSection('presets')}
         info={<PrivacyInfoGlyph />}
+        infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
         <PresetsSection
           rawState={rawState}
@@ -2008,20 +2133,7 @@ export function TokenLab() {
         isOpen={openSections.has('spring')}
         onToggle={() => toggleSection('spring')}
       >
-        {Object.entries(springConfig).map(([key, config]) => (
-          <SliderRow
-            key={key}
-            name={key}
-            value={rawState.spring[key]}
-            config={config}
-            onChange={value => dispatch({ type: 'SET_SPRING', key, value })}
-            tokenKey={`spring.${key}`}
-          />
-        ))}
-        {/* Reads the live spring values straight from rawState — the controls
-            column is outside MotionTokensProvider, so the visualizer takes the
-            numbers as a prop, the same as DurationVisualizer. */}
-        <SpringVisualizer spring={rawState.spring} />
+        <SpringSection rawState={rawState} dispatch={dispatch} exploreMode={exploreMode} />
       </ControlSection>
 
       <ControlSection
@@ -2064,28 +2176,7 @@ export function TokenLab() {
         isOpen={openSections.has('duration')}
         onToggle={() => toggleSection('duration')}
       >
-        {Object.entries(durationConfig).map(([key, config]) => (
-          <SliderRow
-            key={key}
-            name={key}
-            value={rawState.duration[key]}
-            config={config}
-            onChange={value => dispatch({ type: 'SET_DURATION', key, value })}
-            tokenKey={`duration.${key}`}
-          />
-        ))}
-        {/* Reads the live duration values straight from rawState — the controls
-            column is outside MotionTokensProvider, so the visualizer takes the
-            numbers as a prop rather than through useMotionTokens(). The duration
-            scalar rides along the same way, with its scrub owned by the viz (see
-            DurationVisualizer): a lone editable token whose only consumer is this
-            graphic, so its slider lives with the effect it produces. */}
-        <DurationVisualizer
-          durations={rawState.duration}
-          scalar={rawState.scalar}
-          scalarConfig={exploreMode ? SCALAR_CONFIG_EXPLORE : SCALAR_CONFIG}
-          onScalarChange={value => dispatch({ type: 'SET_SCALAR', value })}
-        />
+        <DurationSection rawState={rawState} dispatch={dispatch} exploreMode={exploreMode} />
       </ControlSection>
 
       {/* Export tools — their own collapsible section (split from Presets,
@@ -2095,6 +2186,7 @@ export function TokenLab() {
         isOpen={openSections.has('export')}
         onToggle={() => toggleSection('export')}
         info={<PrivacyInfoGlyph />}
+        infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
         <ExportSection rawState={rawState} />
       </ControlSection>

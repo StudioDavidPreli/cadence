@@ -2,6 +2,7 @@
 // coverage gap named in docs/open-items-audit-2026-07-16.md: the checklists
 // described an app one tool smaller than the one that shipped.
 import { test, expect } from '@playwright/test'
+import { stubAnalyticsBeacon } from './helpers'
 
 test.describe('motion tiles grid', () => {
   test('the grid mounts its tile field, serves WASM from our origin, and stays console-clean', async ({ page, baseURL }) => {
@@ -11,6 +12,7 @@ test.describe('motion tiles grid', () => {
     const thirdPartyRuntime = []
     page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()) })
     page.on('pageerror', (err) => pageErrors.push(String(err)))
+    await stubAnalyticsBeacon(page)
     page.on('request', (req) => {
       const url = req.url()
       if (url.endsWith('.wasm')) wasmRequests.push(url)

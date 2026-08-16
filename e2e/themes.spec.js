@@ -3,7 +3,7 @@
 // colorScheme/contrast must be set before the pre-paint script in index.html
 // runs; that script is the code under test.
 import { test, expect } from '@playwright/test'
-import { readToken, seedStorage, INTRO_SEEN } from './helpers'
+import { readToken, seedStorage, INTRO_SEEN, stubAnalyticsBeacon } from './helpers'
 
 test.describe('OS-preference first load (no stored choice)', () => {
   const matrix = [
@@ -221,6 +221,7 @@ test('the mobile gate binds the homogenized hero file console-clean in HC-dark',
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(m.text())
   })
+  await stubAnalyticsBeacon(context)
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'high-contrast-dark')
   // Generous timeout: this is a cold context fetching two .riv files through

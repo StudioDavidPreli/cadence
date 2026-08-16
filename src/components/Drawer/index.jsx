@@ -57,6 +57,13 @@ import styles from './Drawer.module.css'
 export function Drawer({ isOpen, onClose, title, children, scoped = false, portalTarget = null, motionMode = 'bezier' }) {
   const tokens = useMotionTokens()
   const anchored = scoped || portalTarget != null
+  // Scoped WITHOUT a portal is the principle-card use: a ~200px demo box where
+  // the viewport drawer's anatomy does not survive miniaturization (David's
+  // 2026-08-16 screenshot: viewport-scale type overflowing into scrollbars,
+  // the close button squeezed oval by the header flex). In-card the drawer
+  // compacts: inset card framing, fitted type, no scrolling. Token Lab's
+  // portaled use keeps the full-size anatomy — its demo column has the room.
+  const inCard = scoped && portalTarget == null
 
   // The entrance. In spring mode the panel springs to a single 0% target and
   // overshoots on its own physics; otherwise it runs the keyframe overshoot.
@@ -109,7 +116,7 @@ export function Drawer({ isOpen, onClose, title, children, scoped = false, porta
       {isOpen && (
         <motion.div
           key="drawer-panel"
-          className={[styles.drawer, anchored && styles.drawerScoped].filter(Boolean).join(' ')}
+          className={[styles.drawer, anchored && styles.drawerScoped, inCard && styles.drawerCard].filter(Boolean).join(' ')}
           initial={{ y: '100%', opacity: 0 }}
           animate={enterAnimate}
           // Exit keeps its keyframe anticipation in both modes: you dip, then

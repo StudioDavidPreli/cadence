@@ -63,6 +63,55 @@
   padding: 12px 16px 20px;
 }
 
+/* ── In-card mode ────────────────────────────────────────────────────────────
+   Scoped without a portal: the principle-card demos, a box around 200px on a
+   side. The viewport anatomy at that scale was the 2026-08-16 regression
+   screenshot: 16px/14px type overflowing into scrollbars in a demonstration
+   whose whole subject is the panel's motion. In-card the drawer reads as a
+   card within the card: inset on all sides, every corner rounded, type fitted
+   to the box, and overflow hidden because a drawer that scrolls inside a demo
+   this size is furniture fighting the lesson. The close button leaves the
+   header row for the top-right corner, so the centered title never squeezes
+   it. */
+.drawerCard {
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  max-height: calc(100% - 20px);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-accent);
+  border-radius: 16px;
+  padding: 10px 14px 14px;
+  overflow: hidden;
+}
+
+.drawerCard .handle {
+  margin-bottom: 12px;
+}
+
+.drawerCard .header {
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.drawerCard .title {
+  font-size: 13px;
+}
+
+.drawerCard .closeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  font-size: 9px;
+}
+
+.drawerCard .content {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 /* ── Drag handle ─────────────────────────────────────────────────────────── */
 
 /* Centered cluster of three lines — signals "this panel can be dragged."
@@ -101,9 +150,12 @@
   font-family: inherit;
 }
 
-/* Close button — minimal, inherits font, no visual noise */
+/* Close button — minimal, inherits font, no visual noise.
+   flex: none — the button is a flex item in the header row, and without it a
+   long title compresses the fixed width and the circle renders as an oval. */
 .closeButton {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   width: 28px;

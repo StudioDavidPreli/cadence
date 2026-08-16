@@ -116,6 +116,342 @@
   transform-origin: top center;
 }
 
+/* ── principle card flip scenes (V01 material) ──────────────────────────────
+   The whole expanded card, in the presentation the deep-link modal and the
+   case-study embed share: the 460 x 520 body wearing Modal's panel skin
+   (surface-raised, 1px accent border, 12px radius). Transcribed from
+   PrincipleEmbed.module.css .panel rather than composed from it, the same call
+   that file makes about the modal, so the rig does not couple to its internals.
+
+   The wrapper reserves what the scaled card actually paints. A transform paints
+   outside its layout box without enlarging it, so without the calc the card
+   would center by its unscaled box and hang off the bottom of the stage. The
+   two dimensions live on the wrapper and inherit down, so the panel size is
+   written once.
+
+   Scale, never resize: the card lays out at its shipped geometry and the
+   browser rasterizes it crisp, the same reasoning .compareStage and
+   .principleStage carry. This is the one scene where that has a ceiling, since
+   the card contains a Rive canvas and a transform does not re-rasterize a
+   bitmap. useRiveSupersampling sizes the backing store from offsetWidth, which
+   ignores transforms, at min(dpr, 2) x 2: 4x layout size on a retina display.
+   Recording at 2x asks for (2 x scale) layout pixels, so 2 is the ceiling and
+   1.5 has room to spare. Above that, magnify with browser zoom instead, which
+   moves devicePixelRatio and takes the backing store with it. */
+.cardScale {
+  --card-w: 460px;
+  --card-h: 520px;
+  width: calc(var(--card-w) * var(--card-scale, 1.5));
+  height: calc(var(--card-h) * var(--card-scale, 1.5));
+  flex: 0 0 auto;
+}
+
+.cardPanel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: var(--card-w, 460px);
+  height: var(--card-h, 520px);
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-accent);
+  transform: scale(var(--card-scale, 1.5));
+  transform-origin: top center;
+}
+
+/* ── export-formats (V01 material) ──────────────────────────────────────────
+   This clip is a plate in a 3D composite, not a full frame. The scene map
+   (exportScene/sceneMap/exportMap.png) puts the green area at 864 x 978 inside
+   1920 x 1080, so .plate is authored at exactly that size and David records it
+   at 2x. The footage then drops onto the composite 1:1 with no scaling. The
+   portrait aspect is why this scene stacks instead of sitting side by side. */
+.plateWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plate {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 40px;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* Framing aid. `outline` sits outside the box and takes no layout, so the plate
+   stays exactly its authored size while the line is on; crop just inside it.
+   SHOW_CROP_GUIDE turns this off for the real take. */
+.plateGuide {
+  outline: 1px solid #b9b0ff;
+}
+
+/* Reserves the scaled height of the Export section. A transform paints outside
+   the layout box without enlarging it, so the band's height is measured from
+   the scaled element at mount rather than authored — otherwise the code panel
+   would ride up underneath the control. */
+.controlBand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* The shipped tool-bar column width. Scale, never resize: the component lays
+   out at its shipped geometry and the browser rasterizes it crisp, the same
+   reasoning .compareStage and .principleStage carry. */
+.exportControl {
+  width: 300px;
+  transform: scale(var(--control-scale, 2));
+  transform-origin: top center;
+}
+
+/* The code panel. Rig furniture, so it sets its own type rather than being
+   scaled: what matters here is rows per panel, and scaling would tie font size
+   to panel size. Colors and mono face are the shipped ones.
+
+   The bottom fade is always on. It only bites when an output is longer than the
+   panel, which is exactly the reading the clip wants: CSS and Flat sit whole,
+   FM and DTCG run past the edge because they are longer documents. */
+.codePanel {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: var(--color-text-base);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
+}
+
+/* white-space: pre, not CodeBlock's pre-wrap. A wrapped row would occupy two
+   visual rows and break both the row count and the scramble's row model, which
+   addresses rows by index. The panel is sized so the longest line across the
+   four outputs (an FM header comment, 82 characters) fits without wrapping;
+   anything wider clips rather than reflowing, which keeps the grid honest. */
+.codeLine {
+  white-space: pre;
+}
+
+/* ── rive-embed (V01 material) ──────────────────────────────────────────────
+   Another plate clip, measured off riveBlockReference.png: the red area is
+   1728 x 864 centered in a 1920 x 1080 frame. Landscape 2:1, so the code and
+   the canvas sit side by side.
+
+   The container is semi-transparent in the composite (it rides an animated
+   background) while the code panel and the canvas are opaque. A screen
+   recording carries no alpha, so the rig gives the operator a backdrop to
+   record against instead. See BACKDROP in RiveEmbedScene.jsx. */
+
+/* Flat chroma for pulling a matte in the composite. The real take. */
+.backdrop_key {
+  background: var(--key-color, #ff00ff);
+}
+
+/* Alpha checkerboard. Framing aid only: it makes the container tint legible
+   while composing, and never appears in a take. */
+.backdrop_checker {
+  background-color: #808080;
+  background-image:
+    linear-gradient(45deg, #6b6b6b 25%, transparent 25%, transparent 75%, #6b6b6b 75%),
+    linear-gradient(45deg, #6b6b6b 25%, transparent 25%, transparent 75%, #6b6b6b 75%);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+/* The theme's own background, for reading the plate the way the app renders. */
+.backdrop_page {
+  background: var(--color-bg);
+}
+
+/* The container. Its tint is an alpha over the theme background rather than an
+   authored color, so CONTAINER_TINT = 0 leaves a genuinely empty container and
+   only the two panels carry pixels. */
+.rivePlate {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 48px;
+  overflow: hidden;
+  /* A flex item shrinks below its width by default, and 1728 is wider than
+     plenty of windows. Shrinking here would quietly change the plate size,
+     which is the one number in this scene that cannot move: the footage drops
+     onto the composite 1:1. Hold the width and let the window scroll instead,
+     so a too-narrow window is visible rather than silent. */
+  flex: 0 0 auto;
+  background: color-mix(
+    in srgb,
+    var(--color-bg) calc(var(--container-tint, 0.55) * 100%),
+    transparent
+  );
+}
+
+/* The code panel takes the remaining width after the square canvas column.
+   Opaque: it is one of the two things that carry pixels in a keyed take. */
+.riveCodePanel {
+  flex: 1;
+  align-self: stretch;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  color: var(--color-text-base);
+}
+
+/* Square, so the icon's 1:1 art fills it without letterboxing. Opaque for the
+   same reason the code panel is.
+
+   The background is per-theme rather than var(--color-bg) because the theme
+   flip in this scene is scoped to the Rive instance and never reaches :root
+   (every theme selector in color.css is :root-anchored). The art was authored
+   against its theme's page color (the Light instance is dark ink), so a fixed
+   dark plate would swallow half the cycle. These four values mirror
+   --color-bg in src/tokens/color.css (lines 106, 201, 278, 361); if a theme's
+   page color changes there, this block follows. */
+.riveCanvasPanel {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* --color-accent rides along for the same reason and from the same place
+   (color.css lines 145, 230, 308, 387). The Solid Drawing icon binds it to
+   colorPropertyOutline, and useRiveAccentColor reads the token off this panel
+   rather than off :root, so the outline follows the canvas's theme instead of
+   the rig's. Redeclaring it here is what makes that read resolve. */
+.riveCanvasPanel[data-theme='dark'] {
+  background: #141414;
+  --color-accent: #76c17d;
+}
+.riveCanvasPanel[data-theme='light'] {
+  background: #f5f5f5;
+  --color-accent: #5a4fcf;
+}
+.riveCanvasPanel[data-theme='high-contrast-light'] {
+  background: #ffffff;
+  --color-accent: #855a0d;
+}
+.riveCanvasPanel[data-theme='high-contrast-dark'] {
+  background: #000000;
+  --color-accent: #aaccf6;
+}
+
+/* RiveComponent renders a div + canvas; sizing the outer div lets the canvas
+   fill the square. Same shape as PrincipleIcon's .riveCanvas. */
+.riveCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── presets-explore (V01 material) ─────────────────────────────────────────
+   The same 1728 x 864 plate rive-embed uses, laid out for a different subject:
+   the preset row across the top, then the three token families that carry a
+   graph as columns beneath it. Landscape 2:1 is what makes the argument
+   possible, because the claim is that one click moves all three at once and
+   that only reads if all three are in frame together. */
+.presetsPlate {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 48px;
+  overflow: hidden;
+  background: color-mix(
+    in srgb,
+    var(--color-bg) calc(var(--container-tint, 0.55) * 100%),
+    transparent
+  );
+  /* Held at its authored width for the same reason rive-embed's plate is: the
+     footage drops onto the composite 1:1, so a shrunk plate would be the wrong
+     size and look fine while being it. */
+  flex: 0 0 auto;
+}
+
+/* Three panels, space-between so the spare width distributes into the two gaps
+   and the set stays centred at whatever COLUMN_SCALE is set to.
+
+   align-items is set by the scene, not here: stretch makes the three panels one
+   even band (the default, and the safer shape to composite over a moving
+   background), flex-start lets each panel end at its own content. The Duration
+   column is much the shortest now that it is four sliders, so the two readings
+   are quite different and the choice belongs on a knob. */
+.presetsColumns {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* The opaque panel (David, 2026-08-11). Two jobs at once: it is the surface the
+   sections sit on, and it is the only thing standing between them and the key
+   colour. Everything inside must be opaque or it keys out with the field.
+
+   It also reserves the width the scaled content paints. A transform paints
+   outside its layout box without enlarging it, so without this the third panel
+   would run off the right edge of the plate. Width is reservable in CSS because
+   the natural width is known (the tool bar column is 300px by construction);
+   height is not, which is what the scene's fit measurement is for. */
+.presetsColumn {
+  flex: 0 0 auto;
+  width: calc(var(--bar-width) * var(--column-scale, 1.6));
+  box-sizing: border-box;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.presetsColumnScale {
+  width: var(--bar-width);
+  transform: scale(var(--column-scale, 1.6));
+  transform-origin: top left;
+}
+
+/* The role the real section headers compose, so the column titles read as the
+   tool bar's own rather than as rig lettering. */
+.presetsColumnLabel {
+  composes: type-eyebrow from global;
+  padding: 12px 16px;
+  color: var(--color-text-muted);
+}
+
+/* Mirrors .sectionInner in TokenLab.module.css (8px 16px 16px, 14px gap), so a
+   column body sits at the spacing it has inside the bar. */
+.presetsColumnBody {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Operator-facing only: the measured-overflow warning in the strip above the
+   crop line. It means the take is already wrong, so it takes --color-accent3,
+   the amber warning role, in all four themes. The no-accent-on-errors rule
+   governs visitor-facing error surfaces; this strip is above the crop line and
+   never reaches a frame. */
+.overflowWarn {
+  color: var(--color-accent3);
+}
+
 /* The wrong-scene-name error surface. Operator-facing only. */
 .unknown {
   padding: 24px;

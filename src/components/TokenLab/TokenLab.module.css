@@ -910,6 +910,31 @@
   padding-bottom: 4px;
 }
 
+/* The readout sits ABOVE the plot in the editor, where it is a value that
+   appeared, and BELOW it in display mode (EasingSection `display`), where it is
+   a caption on the curve. Only the padding swaps sides. */
+.curveValuesBelow {
+  padding-bottom: 0;
+  padding-top: 10px;
+}
+
+/* Headroom above a locked plot, for the control points that leave it.
+   Display mode fixes the coordinate space so the grid cannot move between
+   presets, which means a curve whose handle sits above the ceiling draws above
+   the frame instead of the frame growing to meet it. The svg is
+   overflow: visible so nothing clips it there, but an ancestor with
+   overflow: hidden would, and the capture rig's panel is exactly that.
+
+   The number is derived, not chosen. Percentage padding resolves against the
+   containing block's width, and the plot's scale is width/135 (a 100 x 135
+   viewBox meeting a square box), so one svg unit of headroom is 1/135 of the
+   width. 30% buys 40 units, which reaches bezierY 1.65: past the 1.56 of the
+   overshoot curve, the highest any built-in preset carries, with room left for
+   the handle's own radius. */
+.curveDisplayRoom {
+  padding-top: 30%;
+}
+
 /* Sixth easeGrid button — appears when a custom curve is active.
    Accent border distinguishes it as an action (reset to standard)
    rather than a passive preset selection. */
@@ -1263,4 +1288,18 @@
   padding: 24px;
   color: var(--color-text-muted);
   font-size: 13px;
+}
+
+/* Screen-reader-only text (the header buttons' privacy description). Same
+   pattern as TokenLabGuide's .srOnly. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

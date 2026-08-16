@@ -11,7 +11,9 @@ export default defineConfig({
   test: {
     // e2e/ is the Playwright suite (its own runner, `npm run test:e2e`);
     // Vitest must not pick its .spec.js files up alongside the co-located
-    // unit tests in src/.
-    exclude: ['node_modules/**', 'e2e/**'],
+    // unit tests in src/. .claude/ holds task-session worktrees, each a full
+    // repo copy: without the exclude, Vitest sweeps their duplicated unit
+    // tests and their Playwright specs whenever a session is running.
+    exclude: ['node_modules/**', 'e2e/**', '.claude/**'],
   },
 })

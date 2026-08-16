@@ -36,4 +36,4 @@ Motion designers curious what happens to their craft inside a design system. Eng
 
 The argument, if the tool has one: putting motion into a system does not flatten it. Naming a value is how one person's timing judgment reaches every corner of an interface at once.
 
-Drag the fastest slider from 50 to 350 and press the button again. It is a different button now.
+Drag the fastest slider from 50 to 350 and press the button again: same component, different feel.

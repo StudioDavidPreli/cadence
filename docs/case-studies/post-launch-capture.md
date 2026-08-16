@@ -10,9 +10,9 @@ The amendment gets its own posting round when it lands. Target: first update at 
 
 **One week out, or earlier:**
 
-- [ ] **Enable Cloudflare Web Analytics** on the Worker (dashboard, Analytics tab). Free, cookie-less, no consent banner. Verify the beacon appears on production by viewing source. This must be live before the post goes out; day one is the biggest day and cannot be recaptured.
-- [ ] **Build and deploy the export/import event counter** (`/api/event`). Separate app-code session; the prompt is queued. Verify end-to-end on built output before launch: press each export button on production, watch the counts move.
-- [ ] **Stand up the GitHub traffic snapshotter.** The traffic API (clones, views, referrers) retains only 14 days, so unsnapshotted weeks are gone forever. A scheduled GitHub Action on a weekly cron, committing `metrics/traffic.json` to the repo, is enough. Run it once manually to confirm the file lands.
+- [x] **Enable Cloudflare Web Analytics** on the Worker (dashboard, Analytics tab). Free, cookie-less, no consent banner. Verify the beacon appears on production by viewing source. This must be live before the post goes out; day one is the biggest day and cannot be recaptured.
+- [x] **Build and deploy the export/import event counter** (`/api/event`). Separate app-code session; the prompt is queued. Verify end-to-end on built output before launch: press each export button on production, watch the counts move.
+- [x] **Stand up the GitHub traffic snapshotter.** The traffic API (clones, views, referrers) retains only 14 days, so unsnapshotted weeks are gone forever. A scheduled GitHub Action on a weekly cron, committing `metrics/traffic.json` to the repo, is enough. Run it once manually to confirm the file lands.
 - [ ] **Decide the posting plan.** Which channels beyond LinkedIn, in what order, and the exact posting time. Day zero must be unambiguous for every later denominator.
 
 **The day before:**
