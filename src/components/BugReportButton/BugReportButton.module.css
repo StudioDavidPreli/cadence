@@ -15,18 +15,17 @@
 }
 
 /* The counter's privacy disclosure, in the © line's voice (same mono, size,
-   and muted color, so the two read as one signature row). Unlike the ©, it is
-   selectable (it is information, not chrome) and it may wrap: at the 574px
-   minimum viewport a nowrap line this long would overflow the row, so it
-   wraps to two lines there instead. text-align keeps the wrapped lines
-   ragged-left against the right-aligned row. */
+   and muted color). margin-right: auto claims the row's leftover space, so
+   this sits at the left edge under the tool-bar column while the © and the
+   button keep the right edge (David's placement, 2026-08-16). Unlike the ©,
+   it is selectable (information, not chrome) and may wrap rather than
+   overflow the row at the 574px minimum viewport. */
 .privacy {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
-  text-align: right;
-  max-width: 48ch;
+  margin-right: auto;
 }
 
 /* Copyright signature, mono per request. Muted text (meets AA on the page bg in

@@ -86,6 +86,6 @@ Miniflare accepts `writeDataPoint` locally but stores nothing queryable, so the 
 
 David suggested the footer for a one-line privacy disclosure and approved the wording after the counts verified on production:
 
-> Exports and imports are counted anonymously. No cookies, no identifiers.
+> Exports and imports are counted anonymously.
 
-It lives in the app footer row (`src/components/BugReportButton/index.jsx`), beside the © line and in its voice: same mono, size, and muted color. Like the ©, it persists on the Motion Tiles grid when the problem button hides, because a site-level disclosure is not tied to the button. Unlike the ©, it is selectable and may wrap, so the 574px minimum viewport cannot overflow the row.
+(The draft's second sentence, "No cookies, no identifiers.", was cut on David's review; the shorter line carries it.) It lives in the app footer row (`src/components/BugReportButton/index.jsx`) in the © line's voice: same mono, size, and muted color, but anchored to the row's left edge under the tool-bar column while the © and button keep the right (David's placement). Like the ©, it persists on the Motion Tiles grid when the problem button hides, because a site-level disclosure is not tied to the button. Unlike the ©, it is selectable and may wrap, so the 574px minimum viewport cannot overflow the row.

@@ -180,13 +180,15 @@ export function BugReportButton() {
 
   return (
     <div className={styles.root}>
-      {/* Privacy disclosure for the export/import counter (David approved the
-          wording 2026-08-16; docs/decisions/event-counter-2026-08-15.md). It
-          rides the footer row like the © line and, like it, persists on the
-          Motion Tiles grid when the button hides: a site-level disclosure is
-          not tied to the button. */}
+      {/* Privacy disclosure for the export/import counter (David's wording and
+          placement, 2026-08-16; docs/decisions/event-counter-2026-08-15.md).
+          Anchored to the row's left edge, under the tool-bar side of the
+          window, while the © and button keep the right. It rides the footer
+          row like the © line and, like it, persists on the Motion Tiles grid
+          when the button hides: a site-level disclosure is not tied to the
+          button. */}
       <span className={styles.privacy}>
-        Exports and imports are counted anonymously. No cookies, no identifiers.
+        Exports and imports are counted anonymously.
       </span>
       <span className={styles.copyright}>© MMXXVI DAVID PRELI</span>
 
