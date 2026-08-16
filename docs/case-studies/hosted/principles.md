@@ -8,7 +8,7 @@
 
 <!-- V08: live Token Fidelity embed. The iframe serves ExpandedPrincipleBody's third frame
      from the app itself (?embed=token-fidelity&theme=dark); the route is live on production
-     (PR #2, 2026-08-15). David's fallback SVG sits behind the iframe as its background:
+     (PR #2, 2026-08-15). The fallback SVG sits behind the iframe as its background:
      visible while the document loads and when it cannot. -->
 <style>
   .v08-layout { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }

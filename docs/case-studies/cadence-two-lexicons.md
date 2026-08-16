@@ -8,7 +8,7 @@ The engineering companion to the [Cadence case study](hosted/index.md), organize
 
 ## 00. Why a lexicon
 
-Two people watch the same button compress. One sees a five-frame press with a two-frame settle; the other sees 200 milliseconds on an ease-out. Same event, no shared sentence.
+Two people watch the same button compress. One sees a five-frame action with a two-frame settle; the other sees 200 milliseconds on an ease-out. Same event, different reads.
 
 Most of the friction attributed to design-engineering handoff is translation loss between these vocabularies. Cadence was built as a translation surface, and its token layer is the dictionary: every value has a name both dialects can use, and both tools of the trade (the timing chart and the stylesheet) resolve to the same entry. The sections below walk the shared concepts one pair at a time, with the engineering underneath each.
 
@@ -107,4 +107,5 @@ The same inversion appears at single-component scale. The plant demonstration's 
 - **The tool's own interface deliberately does not speak the editable lexicon.** Chrome timing reads fixed constants so that a demonstration value dragged to an extreme cannot disable the interface demonstrating it. A translation surface needs one part of the room to stay still.
 - **Frames quantize and milliseconds do not.** A designer thinking in frames will produce values the token ladder does not contain. The constrained ranges teach the ladder; the Explore ranges admit the values a timing chart actually holds.
 
-Two people watch the same button compress. There is still only one button; now there is one sentence for it too.
+
+Two people watch the same button compress. They see a five-frame action with a two-frame settle that takes place over 200 milliseconds on an ease-out. Same event, same read.
