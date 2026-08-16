@@ -82,10 +82,10 @@ One artifact worth recording: the browser's own network log showed every event t
 
 Miniflare accepts `writeDataPoint` locally but stores nothing queryable, so the counts-actually-in-the-dataset check runs on production after merge: press each export button on the live site, then run the first curl above and watch the counts move. That step is already on the pre-launch checklist in `post-launch-capture.md`.
 
-## Footer disclosure (draft, not placed)
+## Footer disclosure (placed 2026-08-16)
 
-David suggested the footer for a one-line privacy disclosure. Draft, pending his approval and placement:
+David suggested the footer for a one-line privacy disclosure and approved the wording after the counts verified on production:
 
 > Exports and imports are counted anonymously. No cookies, no identifiers.
 
-Not placed in any component; the © line row in the app footer is the likely home when approved.
+It lives in the app footer row (`src/components/BugReportButton/index.jsx`), beside the © line and in its voice: same mono, size, and muted color. Like the ©, it persists on the Motion Tiles grid when the problem button hides, because a site-level disclosure is not tied to the button. Unlike the ©, it is selectable and may wrap, so the 574px minimum viewport cannot overflow the row.
