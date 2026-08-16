@@ -4,6 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Token System · Cadence Case Study</title>
+  <meta name="description" content="Five token families, the two-channel dispatch, and the bezier that spent three months claiming to be a spring." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/token-system.html" />
+  <meta property="og:title" content="The Token System · Cadence Case Study" />
+  <meta property="og:description" content="Five token families, the two-channel dispatch, and the bezier that spent three months claiming to be a spring." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/token-system.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Token System · Cadence Case Study" />
+  <meta name="twitter:description" content="Five token families, the two-channel dispatch, and the bezier that spent three months claiming to be a spring." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
   <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,7 +125,7 @@ Tokens are CSS custom properties in one file, <code>src/tokens/motion.css</code>
 The tool surface makes the difference visible. The Spring section carries three sliders and a settle-curve visualizer: a plot of displacement over time, rising, overshooting the target, settling, redrawn as the sliders move. The math underneath is the damped harmonic oscillator, the same second-order system Framer Motion integrates, kept in a pure module so the three regimes (underdamped rings, critical arrives clean, overdamped crawls) test without React. Switch a Button to Spring, drag stiffness, and the button, the chart, and the dedicated SpringDemo move together off one context.</p>
 <p>One gap surfaced on the way. Reduced-motion support here works by flattening durations to near zero, and a spring has no duration to flatten, so the preference slid right past it. The flattened token set now carries a flag the spring consumers read, falling back to the bezier branch whose timing is already collapsed. The principle demo that forced the fix is Follow Through, the first reduced-motion-respecting surface to run the real spring.</p>
 <hr />
-<p><strong>Companion:</strong> <a href="../cadence-two-lexicons.md">Two Lexicons</a>, the same engineering organized as a translation table between motion design and design engineering.</p>
+<p><strong>Companion:</strong> <a href="cadence-two-lexicons.html">Two Lexicons</a>, the same engineering organized as a translation table between motion design and design engineering.</p>
 <p><a href="index.html">← Case Study</a> · <a href="principles.html">The Principles →</a></p>
   </main>
 </body>

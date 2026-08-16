@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Plain Overview · Cadence Case Study</title>
+  <meta name="description" content="What Cadence does, in plain language, no engineering required." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/cadence-overview.html" />
+  <meta property="og:title" content="The Plain Overview · Cadence Case Study" />
+  <meta property="og:description" content="What Cadence does, in plain language, no engineering required." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/cadence-overview.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Plain Overview · Cadence Case Study" />
+  <meta name="twitter:description" content="What Cadence does, in plain language, no engineering required." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    h4 { font-size: 14px; margin-top: 32px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<h1>Cadence: A Plain Overview</h1>
+<p>The general-audience companion to the <a href="index.html">Cadence case study</a>: what the tool does, in plain language, without the engineering depth. The full case study carries the decision records and the hiring-manager material.</p>
+<hr />
+<h2>What it is</h2>
+<p>Press a button on a well-made website and it gives a little, then comes back. Someone decided how much it gives and how fast it returns. Cadence is a tool for looking at those decisions, changing them, and watching what changes.</p>
+<p>It is a free web tool, live at <a href="https://cadence.davidpreli.com">cadence.davidpreli.com</a>. It has three parts, and one shared vocabulary runs through all three.</p>
+<h2>The idea underneath</h2>
+<p>A design token is a named decision. Instead of writing "200 milliseconds" in forty places across an app, you write it once, give it a name, and the forty places ask for the name. Change the value and everything that asked for it changes together. Design systems have worked this way for color and spacing for years. Cadence does it for motion, and makes the connection visible: you drag a slider, and every component listening to that name moves differently in the same second.</p>
+<h2>The three tools</h2>
+<p><strong>Token Lab</strong> is the control room. Sliders govern how long animations take, how they accelerate and settle, how long they wait before starting, and how far they travel. Drag one and a set of familiar components (buttons, cards, toggles, progress bars) retimes in front of you. Three presets named Snappy, Standard, and Cinematic swap whole personalities at once. A tuned set can be saved, or exported as a file an engineer can use directly.</p>
+<p><strong>The Principles Library</strong> is a grid of eighteen cards: the classic twelve principles of animation, plus six additions for people who build systems rather than single animations. Each card opens into a pair, an illustration of the principle on one side and a real interface component demonstrating it on the other, driven by the same values Token Lab edits. Anticipation is not a bouncing ball here; it is a drawer that lifts slightly before it leaves.</p>
+<p><strong>Motion Tiles</strong> is the same vocabulary at scale: a field of more than fifty animated tiles running on one clock. Pick a preset and every tile changes character together. Drag the stagger control and the change crosses the field like a wave.</p>
+<h2>Three decisions worth knowing about</h2>
+<p>The components are not pretending. Each demonstration reads its timing from the token layer at the moment it runs, the same way a production design system would. When you drag a slider, you are editing the same kind of value an engineering team ships.</p>
+<p>The tool protects itself from you, politely. You can drag durations to extremes and the demonstrations will obey, but the interface's own feedback (hovers, menus, page transitions) runs on separate fixed values, so the tool never becomes unusable in your hands.</p>
+<p>And motion can be turned off. For people whose devices ask for reduced motion, the interface communicates everything without requiring them to process movement. That support runs through the whole tool, and it is also one of the eighteen cards.</p>
+<h2>Who it is for</h2>
+<p>Motion designers curious what happens to their craft inside a design system. Engineers curious why 100 milliseconds and 400 milliseconds feel like different people. Anyone who has pressed a button and wondered why it felt good.</p>
+<p>The argument, if the tool has one: putting motion into a system does not flatten it. Naming a value is how one person's timing judgment reaches every corner of an interface at once.</p>
+<p>Drag the fastest slider from 50 to 350 and press the button again: same component, different feel.</p>
+  </main>
+</body>
+</html>

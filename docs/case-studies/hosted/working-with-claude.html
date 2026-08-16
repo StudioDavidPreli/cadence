@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Working with Claude · Cadence Case Study</title>
+  <meta name="description" content="How the collaboration ran, every line read before it landed, and which methods earned their keep." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/working-with-claude.html" />
+  <meta property="og:title" content="Working with Claude · Cadence Case Study" />
+  <meta property="og:description" content="How the collaboration ran, every line read before it landed, and which methods earned their keep." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/working-with-claude.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Working with Claude · Cadence Case Study" />
+  <meta name="twitter:description" content="How the collaboration ran, every line read before it landed, and which methods earned their keep." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    h4 { font-size: 14px; margin-top: 32px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<h1>Cadence: Working with Claude</h1>
+<p>A companion to the <a href="index.html">Cadence case study</a>: how the collaboration actually ran, drawn from <a href="https://github.com/StudioDavidPreli/cadence/blob/main/docs/claude-workflow.md"><code>claude-workflow.md</code></a>, the decision records, and the debugging chronology. The workflow doc records the mechanics; this page is about which methods earned their keep.</p>
+<hr />
+<h2>The rule everything else hangs on</h2>
+<p>Every line of code in Cadence was read by a person before it landed. The project instructions state it as a constraint on the tool ("do not write code I won't understand"), but in practice it is a constraint on me: I ask for explanations until the reasoning is clear, and a feature is not done when it works; it is done when I can defend it. Cadence is my React-fluency vehicle before it is a portfolio piece, and unreviewed code would defeat the reason it exists.</p>
+<h2>Two surfaces</h2>
+<p>The work runs on two Claude surfaces with different senses. The browser Project on claude.ai is the thinking side: planning a feature before building it, learning a React concept through an analogy to motion, drafting prose. It cannot see the repository. Claude Code, in the terminal, is the building side: it reads the actual files, and it starts every session from CLAUDE.md, the instructions file that functions as a contract both sides have read.</p>
+<p>The split drifted, and the drift was informative. As the record grew past twenty decision docs, planning moved into the terminal too, because plans increasingly turned on facts only the repo held: which grid decision was load-bearing, what a Rive file's view model actually exposed, which removals had already been made. The browser kept the writing and the career thinking, where knowing the story matters more than seeing the code.</p>
+<h2>The loop</h2>
+<p>Most sessions run the same four steps. Plan first: a feature starts as a conversation about approach, and when two approaches are valid, a discussion leads to a reasoned engineering choice. Build under the CLAUDE.md constraints, with a test gate failing the build on any hardcoded animation value. Review everything. Document immediately: decisions get a dated file while the reasoning is fresh.</p>
+<p>The documentation step is the one I would defend hardest. A Claude session begins with no memory of the previous one; a decision that lives only in a conversation is a decision the next session will re-litigate. Written down, it becomes a fact the next session reads and builds on instead. The record is the collaboration's shared memory, and it works on me the same way it works on Claude. The project's tracker carries sections for my build notes and Claude Code's session summaries.</p>
+<h2>What the failure taught</h2>
+<p>The method was priced by its absence. In late April, eleven days of work on one card's expand-and-collapse animation produced zero commits, and the chronology we assembled afterward reads as a study in amnesia: the same fix added, reverted, and added again across sessions with no learning carried between them; a state variable introduced, iterated, deleted, then proposed again as if new; an orphaned prop left behind by one session and reasoned about by the next as if it were intentional. Naming conventions drifted and my inexperience with the technology surfaced. Each session treated the current working tree as a settled design when it was actually a half-applied experiment.</p>
+<p>The discipline that ended it is now the method: commits between every change, briefings between sessions, measurements before architectural decisions, and a stop-and-write rule when reasoning heads toward a pattern already tried and rejected. Claude Code put questions back to me, and the answers showed where my understanding was thin. The same problem that consumed eleven undocumented days resolved in four documented ones.</p>
+<h2>Division of labor</h2>
+<p>The division of labor settled early and held. Design verdicts are mine: anything only eyes can close, I close, and Claude Code does not sign off on how motion feels. Architecture is a conversation with a fixed ending: Claude proposes, explains, and pushes back; I decide. The pushback is the part I would not trade. Learning a new skill is one cornerstone of the project: descriptions came with justifications and implications, and I always had time to request references.</p>
+<p>Claude Code carries the implementation, the audits that keep the record honest, and the verification rule that every session exercises production builds, a rule that exists because a minified bundle once crashed in a way the dev server could not show. It also carried one workload I want to name because it surprised me: the Motion Tiles bindings were built by Claude Code driving the Rive editor itself over MCP, provisioning view models across dozens of tile files. It read one provisioned tile and repeated the pattern across the rest, at a rate I could not have matched by hand. The landing page presents that workflow as part of the demonstration.</p>
+<h2>The contract wall</h2>
+<p>The method I would export to any team: when the Rive authoring and the React driver had to be built on opposite sides of a boundary neither tool can see across, we committed a contract document first, naming every property, its type, and who writes it. When the two sides disagreed about what a number meant, the disagreement went to the document, not the debugger. The same shape recurs everywhere in the project: CLAUDE.md is a contract about how to build, the decision docs are contracts about what was already settled, and the voice file is a contract about how to write. The collaboration works because the agreements are files, and files are the one thing every participant can read.</p>
+<p>CLAUDE.md ends with a thank-you note I wrote to the collaborator mid-project. Every session reads it before getting to work. I put it in there the day I started to understand what I was building, when I realized the plan was working and that I was learning. When I learned about limits to the usefulness of CLAUDE.md files and the character count best practices, I split parts of the files out into skills. The thank-you note stayed.</p>
+  </main>
+</body>
+</html>

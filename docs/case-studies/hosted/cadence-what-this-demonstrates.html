@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What This Demonstrates · Cadence Case Study</title>
+  <meta name="description" content="The hiring-manager cut of the Cadence case study." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/cadence-what-this-demonstrates.html" />
+  <meta property="og:title" content="What This Demonstrates · Cadence Case Study" />
+  <meta property="og:description" content="The hiring-manager cut of the Cadence case study." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/cadence-what-this-demonstrates.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What This Demonstrates · Cadence Case Study" />
+  <meta name="twitter:description" content="The hiring-manager cut of the Cadence case study." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    h4 { font-size: 14px; margin-top: 32px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<h1>Cadence: What This Demonstrates</h1>
+<p>The hiring-manager cut of the <a href="index.html">Cadence case study</a>. For the full build record, start there.</p>
+<hr />
+<p>For the hiring manager reading this directly:</p>
+<ul>
+<li><strong>React fluency:</strong> The two-channel Context architecture with a reducer behind it. Controlled and uncontrolled variants across Toggle, Card, and Stepper. ResizeObserver for column-count awareness. AnimatePresence orchestration with its documented sharp edges avoided for stated reasons. A class-component ErrorBoundary where the API demands one. <code>requestAnimationFrame</code> drivers feeding live tokens into Rive view models and a WebGL shader. All of it built, none of it from a library.</li>
+<li><strong>Design systems thinking:</strong> A token architecture that matches Material and Primer patterns, split into editable tokens and fixed references with a test enforcing the partition. Four export formats off one normalized object, including a spring family the DTCG draft has no type for, serialized as plain number leaves rather than an invented one, and a Framer Motion module that hands an engineer the motion-side artifact directly. The chrome/demonstration boundary, extended to typography: the toolbar's text runs on named <code>type-*</code> roles in a shared layer, because the tool that argues values must be named should not leave its own chrome as the counterexample. Naming as a design act: the bezier that claimed to be a spring was renamed, then a real spring was built; the scale family was renamed so no key implies a neutral it does not have. Shared Vocabulary is a principle in the tool because it was a lesson in the build.</li>
+<li><strong>Motion expertise applied to product context:</strong> Eighteen principles, each argued through a component a product actually ships. The <code>layoutId</code> and Carousel diagnoses show motion knowledge operating at the implementation layer, where it either works in the projection tree or it does not. The eye that tuned these curves now ships the system, not the spec.</li>
+<li><strong>The Rive/React boundary:</strong> Rive holds poses; React holds time. The plant demonstration's <code>.riv</code> carries no duration and no easing, every animation a linear timeline scrubbed from 0 to 1, while a <code>requestAnimationFrame</code> driver integrates live tokens into eased progress each frame, so a slider dragged mid-animation bends the motion on the next frame. Both sides were built against a contract document committed first, naming every property, its type, and which side writes it, because neither tool can see across the boundary and a disagreement about what a number means otherwise becomes a debugger session. The theme layer earned its own rule from a bug where switching themes watered the plant: baked-instance rebinding is for art that only watches, and a state machine that listens gets its colors written instead.</li>
+<li><strong>AI fluency:</strong> Two Claude surfaces with different senses: the browser for planning and prose, Claude Code in the terminal for the files, and a CLAUDE.md every session reads before starting, which is how a collaborator with no memory of yesterday inherits yesterday's decisions. The governing constraint is mine, do not write code I will not understand, so a feature is not done when it works; it is done when I can defend it. The workload I did not expect to hand over was authoring: the Motion Tiles bindings were built by Claude Code driving the Rive editor over MCP, provisioning view models across dozens of tile files. When the instructions file outgrew what one file should hold, the specialist parts moved into skills.</li>
+<li><strong>Documentation discipline:</strong> Twenty-plus decision records, each with alternatives and reasoning. A per-principle doc for all eighteen. An honest chronology of the worst debugging stretch, kept because the mistakes instruct. The project's own instructions file enforces the writing voice, the architecture rules, and the verification standard that caught the production crash.</li>
+</ul>
+<hr />
+<ul>
+<li><strong>Live tool:</strong> <a href="https://cadence.davidpreli.com">cadence.davidpreli.com</a></li>
+<li><strong>Full case study:</strong> <a href="index.html">Cadence: Case Study</a></li>
+<li><strong>Portfolio:</strong> <a href="https://davidpreli.com">davidpreli.com</a></li>
+</ul>
+  </main>
+</body>
+</html>

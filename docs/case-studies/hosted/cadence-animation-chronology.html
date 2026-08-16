@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Animation Chronology · Cadence Case Study</title>
+  <meta name="description" content="Eleven days of iteration on the PrincipleCard animation that produced no commits, kept because the patterns instruct." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/cadence-animation-chronology.html" />
+  <meta property="og:title" content="The Animation Chronology · Cadence Case Study" />
+  <meta property="og:description" content="Eleven days of iteration on the PrincipleCard animation that produced no commits, kept because the patterns instruct." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/cadence-animation-chronology.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Animation Chronology · Cadence Case Study" />
+  <meta name="twitter:description" content="Eleven days of iteration on the PrincipleCard animation that produced no commits, kept because the patterns instruct." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #141414; color: #e1e1e1;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.7; }
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 26px; line-height: 1.3; }
+    h2 { font-size: 20px; margin-top: 56px; }
+    h3 { font-size: 16px; margin-top: 40px; }
+    h4 { font-size: 14px; margin-top: 32px; }
+    a { color: #76c17d; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+    hr { border: 0; border-top: 1px solid #2e2e2e; margin: 40px 0; }
+    img, svg, iframe { max-width: 100%; }
+    h1 img, main > img, figure img { display: block; margin-left: auto; margin-right: auto; }
+    figcaption { text-align: center; }
+    figure { margin: 0 0 16px 0; }
+    strong { color: #ffffff; }
+    ol, ul { padding-left: 24px; }
+    li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <main>
+<hr />
+<p>Subject: PrincipleCard expand/collapse animation<br />
+Period: 2026-04-20 to 2026-05-01<br />
+Status: Resolved. The fix landed (commit 6b59838, see Resolution section); observation period passed without recurrence. Header corrected 2026-07-16.<br />
+Author: Studio David Preli + Claude Code, debugging session chronology</p>
+<hr />
+<p>This document records eleven days of iteration on the PrincipleCard animation that produced no commits. It exists because the iteration produced loops, orphans, and amnesia — patterns that future sessions need to be able to recognize and avoid. Read this document before proposing changes to PrincipleCard's expand/collapse machinery.</p>
+<h2>Chronology of the Principles Library build</h2>
+<h3>What the git history actually shows</h3>
+<p>Three commits exist. Only three.</p>
+<pre><code>2a21b93  2026-04-20  docs: Grid architecture journey in CLAUDE.md
+8492ffe  2026-04-20  Phase 1: responsive CSS Grid with 2x2 expansion
+e494eef  2026-04-18  Fix Toggle FLIP, Carousel dot CSS, Spinner initial, DemoWrapper warning logic
+</code></pre>
+<p>Every animation architecture change in PrincipleCard since April 20 is in the working tree. Eleven days of animation work produced zero commits.</p>
+<hr />
+<h3>What the last committed PrincipleCard looked like</h3>
+<p>Commit <code>8492ffe</code> created PrincipleCard with this state model:</p>
+<pre><code class="language-jsx">const [uiMode, setUiMode] = useState(false)
+</code></pre>
+<p>One state variable. No <code>isAnimating</code>, <code>isStable</code>, <code>isClosing</code>, <code>holdFootprint</code>, <code>expandedDimensions</code>, <code>wrapperRef</code>, <code>cardRef</code>, <code>isAnimatingRef</code>, <code>hasExpandedRef</code>, <code>tokensRef</code>. No <code>useReducedMotion</code>. No <code>supportsHover</code>. No <code>setTimeout</code>.</p>
+<p>The expand/collapse used a single <code>AnimatePresence</code> with two keyed children — <code>key="expanded"</code> and <code>key="collapsed"</code> — both inside the wrapper. Exit animation on the expanded state: <code>scale: 0.85, duration: tokens.duration.base, ease: tokens.ease.exit, delay: 0</code>. Collapsed content faded in after a <code>tokens.duration.slow * 0.8</code> delay.</p>
+<p>That was the architecture when the grid commit landed.</p>
+<hr />
+<h3>The working-tree chronology (April 20 → May 1)</h3>
+<p><strong>April 24</strong> — Rive integration. <code>PrincipleAnimation</code> component built and wired into the card. Card restructured: bridge text removed, crossfading summary added, <code>QuoteBlock</code> added. Typewriter effect added then immediately reverted to AnimatePresence crossfade. First introduction of <code>isStable</code> state (April 29 — see below).</p>
+<p><strong>April 27</strong> — Close button was not working. Root cause: button was positioned outside <code>expandedContent</code> which had <code>position: relative</code>. Fixed by moving the button inside. Scoped Drawer added for Anticipation card.</p>
+<p><strong>April 28-29</strong> — Drawer height, anticipation overshoot, simultaneous close with card collapse. These were contained to the Drawer and did not affect the card animation architecture.</p>
+<hr />
+<p><strong>April 29, 14:08 — First explicit animation fix for collapse.</strong></p>
+<p>User: "Content scales with card during collapse." Fix: changed expanded content exit from <code>tokens.duration.base</code> to <code>tokens.duration.slow</code>. This was the first attempt to address the close animation and it was purely about duration, not mechanism.</p>
+<p><strong>April 29, 14:17–14:41 — Diagnostic phase 1: scale values and easing.</strong></p>
+<p>Series of timing adjustments. Exit scale changed from 0.85 → 0.4, then both states made symmetric mirrors (scale 0.4, duration.base, no delays). No state machine changes yet.</p>
+<p><strong>April 29, 16:38 — <code>isStable</code> introduced.</strong></p>
+<p>First appearance of <code>isStable</code>. Purpose: prevent inner AnimatePresence crossfades from firing during the enter animation. Timer: <code>tokens.duration.slow</code> after <code>isExpanded</code> becomes true, reset immediately when <code>isExpanded</code> becomes false.</p>
+<p><strong>April 29, 16:57 — PrincipleAnimation stays mounted.</strong></p>
+<p>The inner AnimatePresence was removed. Both the animation div and UI component div became always-mounted siblings, crossfading via direct opacity animation. This is the current architecture for that part of the card.</p>
+<p><strong>April 29, 17:21–17:43 — <code>mode="wait"</code> experiments.</strong></p>
+<p><code>mode="wait"</code> added to outer AnimatePresence. Then removed (overlapping crossfade tried). Then reinstated. Then the entire AnimatePresence structure was replaced with always-rendered position-absolute siblings. This is the structural change that removed the <code>key="collapsed"</code> / <code>key="expanded"</code> pattern from the committed code. Now both states coexist in the DOM and crossfade via opacity.</p>
+<p><strong>April 29, 19:05–20:48 — The <code>holdFootprint</code> / <code>isClosing</code> / <code>isLayoutExpanded</code> era.</strong></p>
+<p>First introduction of <code>holdFootprint</code>, <code>isClosing</code>, <code>isLayoutExpanded</code>, and <code>isLanding</code> states. These were introduced to address the core problem: when <code>isExpanded</code> flips false, the footprint clears immediately, causing the card to snap to 1×1 in the grid before the close animation runs.</p>
+<p>Over this period the close approach cycled through:<br />
+- <code>isLayoutExpanded</code> clearing after a delay (sequential)<br />
+- <code>isLayoutExpanded</code> clearing immediately (simultaneous — broke content)<br />
+- <code>layout</code> added to the wrapper as "option 2" (broke expansion — reverted same session)<br />
+- <code>expandedSizeRef</code> capturing card dimensions to freeze wrapper during close<br />
+- <code>holdFootprint</code> holding the grid footprint during the scale animation<br />
+- <code>closeTransform</code> capturing scaleX, scaleY, x, y translation to correct center-origin drift</p>
+<p><strong>April 30, 17:20 — Two-phase approach with <code>transformOrigin</code> computed from cell position.</strong></p>
+<p>Computed <code>transformOrigin</code> from the card's grid position to make the scale shrink toward the correct corner. This added <code>isLanding</code> state and translation correction.</p>
+<p><strong>April 30, 18:57 — "Architectural simplification."</strong></p>
+<p>User: "Abandon the two-phase scale approach. Use FLIP layout for the close, but keep the wrapper at FIXED expanded dimensions."</p>
+<p>Full rewrite. Deleted: <code>isClosing</code>, <code>holdFootprint</code>, <code>closeTransform</code>, <code>isLanding</code>, <code>isLayoutExpanded</code>, <code>cardRef</code>, <code>expandedSizeRef</code>. Added: <code>wrapperRef</code>, <code>expandedDimensions</code> (measured when <code>isStable</code>), <code>hasExpandedRef</code>. The wrapper received a <code>style</code> prop applying fixed inline <code>width</code>/<code>height</code> during exit. <code>isAnimating</code> and <code>isTransitioning</code> timeouts also introduced here.</p>
+<p><strong>April 30, 19:05 — Immediately replaced with "scale the entire card uniformly."</strong></p>
+<p>User: "Drop layout FLIP. Scale card uniformly on close. Content scales with frame as one motion."</p>
+<p>Implemented. Card dimensions measured on close, scale computed, card animated down. Wrapper <code>inset: 0</code> restored.</p>
+<p><strong>April 30, 19:19 — User asked to revert.</strong></p>
+<p>User: "revert to the last build please" — then clarified: "I mean, undo the last changes, not return to the last commit."</p>
+<p>Restored to the fixed-dimensions approach from 18:57.</p>
+<p><strong>April 30, 20:38 — User provides diagnosis.</strong></p>
+<p>User pastes analysis: "The code uses two different mechanisms for what should be one animation."</p>
+<p><strong>April 30, 20:56 — Full rewrite in response to that diagnosis.</strong></p>
+<p>This produced what became the pre-cheap-fix baseline. Deleted <code>isClosing</code>, <code>holdFootprint</code>, <code>closeTransform</code>, <code>isLanding</code>, <code>isLayoutExpanded</code>, <code>isTransitioning</code>. Kept <code>isAnimating</code>, <code>isStable</code>, <code>expandedDimensions</code>, <code>wrapperRef</code>, <code>hasExpandedRef</code>, <code>tokensRef</code>. The architecture became: <code>layout</code> on card, no <code>layout</code> on wrapper, <code>expandedDimensions</code> pinning the wrapper during exit.</p>
+<p><strong>April 30, 23:29 — <code>layout</code> added to wrapper, <code>scale: 0.95</code> added to exit.</strong></p>
+<p>User: "let's try the layout add to the wrapper and the explicit exit scale."</p>
+<p><code>layout</code> added to wrapper. <code>exit={{ opacity: 0, scale: 0.95 }}</code> added. User tested it and reported the expansion animation broke.</p>
+<p><strong>April 30, 23:35–23:38 — Diagnosis then abandonment.</strong></p>
+<p>User: "explain why this change breaks the previous build's expansion animation." Explanation provided. User: "can it only apply to the card content collapse?" Answer: no, not cleanly, because AnimatePresence can't distinguish enter from exit for the same motion.div.</p>
+<p>Session ends here. No revert performed.</p>
+<p><strong>May 1, 14:40 — Surgical edit removing <code>layout</code> from wrapper.</strong></p>
+<p>Removed <code>layout</code> from the wrapper. Updated the comment. <code>scale: 0.95</code> on exit was explicitly left in place per an instruction that scoped the edit too narrowly.</p>
+<p>This was the state of the file at the pre-cheap-fix baseline commit (<code>d5ed471</code>).</p>
+<p><strong>May 1 (this session) — Two surgical removals applied as <code>d636b93</code>.</strong></p>
+<ul>
+<li><code>scale: 0.95</code> removed from wrapper exit (orphan from the April 30, 23:29 experiment)</li>
+<li><code>expandedDimensions</code> mechanism removed entirely (wrapperRef, hasExpandedRef, measurement useEffect, tClearDims timeout, inline style on wrapper)</li>
+</ul>
+<hr />
+<h3>The loops</h3>
+<p><strong>Loop 1 — <code>layout</code> on the wrapper: added, reverted, added, removed.</strong></p>
+<ul>
+<li>April 29, 20:40: added as "option 2." Reverted April 29, 20:44.</li>
+<li>April 30, 23:29: added again. Not reverted cleanly — session ended.</li>
+<li>May 1, 14:40: removed again (surgical edit).</li>
+</ul>
+<p>Same diagnosis both times. Same result both times. No learning transferred between sessions.</p>
+<p><strong>Loop 2 — <code>isClosing</code> / <code>holdFootprint</code>: introduced, iterated, deleted, proposed again.</strong></p>
+<ul>
+<li>April 29 ~20:00: introduced.</li>
+<li>April 29–30: iterated across multiple sessions.</li>
+<li>April 30, 20:56: explicitly deleted as part of "architectural simplification."</li>
+<li>May 1, 15:13: the explicit scale proposal in that session proposed reintroducing <code>isClosing</code> for footprint hold — without noting it had already been through this exact lifecycle.</li>
+</ul>
+<p><strong>Loop 3 — scale-driven close: implemented, reverted, proposed again.</strong></p>
+<ul>
+<li>April 30, 19:05: implemented. Reverted at 19:19.</li>
+<li>May 1, 15:13: the explicit scale proposal proposed the same mechanism (explicit <code>scaleX</code>/<code>scaleY</code> MotionValues, footprint held during animation).</li>
+</ul>
+<hr />
+<h3>The hallucination</h3>
+<p>The <code>scale: 0.95</code> on the wrapper exit was an orphan from the April 30, 23:29 session when <code>layout</code> was on the wrapper. When <code>layout</code> was removed (May 1, 14:40), <code>scale: 0.95</code> was not removed. The surgical edit's reasoning ("wrapper layout prop is blocking FLIP corrective inheritance") had nothing to do with <code>scale: 0.95</code>, so it was left behind with no architectural justification. The comment added during the surgical edit described the wrapper as inheriting the card's FLIP corrective as "the visible scaling motion of the contents" — but <code>scale: 0.95</code> on exit composed with that inherited transform and added a second, center-anchored shrink. The comment and the exit prop were describing two different intended behaviors simultaneously.</p>
+<hr />
+<h3>What the code has never had</h3>
+<p>The animation has never been observed working correctly and committed. Every version that was "working" — to whatever degree — existed only in the working tree and was either reverted or replaced before the next session began. There is no stable baseline to return to except the April 20 commit, which uses a different and significantly simpler architecture.</p>
+<hr />
+<h3>The pattern that produced the loops</h3>
+<p>Each session began with a context summary describing the most recent architectural state. That summary was treated as ground truth. But the most recent state was frequently a diagnostic test, a partially-applied fix, or an abandoned experiment — not a settled design. The next session read that state, reasoned about it as if it were intentional, and proposed changes based on that reasoning. When those changes failed, the session ended and the cycle repeated.</p>
+<p>The eleven days of uncommitted work made this worse. Without commits, there was no record of which states were tried and rejected — only the current working-tree state and whatever the context summary chose to include.</p>
+<hr />
+<h3>What to do next</h3>
+<ol>
+<li>
+<p>Observe the cheap fix (<code>d636b93</code>) in the browser. The close animation should now show the card and its contents shrinking as a single unit toward the top-left, driven entirely by the card's FLIP corrective cascading through CSS transform inheritance.</p>
+</li>
+<li>
+<p>If the close animation looks correct: commit the observation note and move on to the next principle.</p>
+</li>
+<li>
+<p>If the close animation still has visible artifacts: read this document before proposing a new approach. Check whether the proposed approach has already been tried (see the loops above). If it has, name why this attempt differs before implementing.</p>
+</li>
+<li>
+<p>Do not propose reintroducing <code>isClosing</code>, <code>holdFootprint</code>, or explicit <code>scaleX</code>/<code>scaleY</code> MotionValues without first explaining how this attempt differs from the April 29–30 iterations that were explicitly deleted.</p>
+</li>
+</ol>
+<hr />
+<h2>Resolution</h2>
+<p>Commit <code>6b59838</code> (May 2026): replaced FLIP-driven card scaling with explicit animate scale on the card, with footprint hold during close via <code>isClosing</code> state.</p>
+<p>The architecture that landed had been proposed and reverted twice in earlier loops (Loop 3 in the chronology above). It is now in place because the diagnostic captures in <code>docs/briefings/principle-card-briefing.md</code> confirmed the geometric failure mode that justifies it: at narrow CSS width, the wrapper's flex column collapses asymmetrically, driving the Rive canvas to zero height. The FLIP corrective cannot compensate for layout reflow, only for visual position and size. Explicit scale separates the two: the CSS box stays at expanded dimensions throughout the close animation; the visible shrink is a transform that does not affect descendants' layout.</p>
+<p>Both axis animations are coordinated via <code>Promise.all</code> so post-animation state transitions run after both complete. An earlier draft of the architecture used <code>onComplete</code> on one animation to coordinate state for both, which produced a registration-order race that left scaleY frozen at the close target. The race was diagnosed in one round-trip via measurement; the fix was two lines.</p>
+<p>The discipline that produced this resolution: commits between every change, briefings between sessions, measurements before architectural decisions, predictions before observations, and a stop-and-write rule when reasoning toward a previously-rejected pattern. The chronology above documents what happened in the eleven days before that discipline was in place. This section documents what happened in the four days after.</p>
+  </main>
+</body>
+</html>

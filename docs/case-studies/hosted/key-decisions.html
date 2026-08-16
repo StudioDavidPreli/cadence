@@ -4,6 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Key Decisions · Cadence Case Study</title>
+  <meta name="description" content="Why layoutId left the codebase, why the grid took five tries, and the bug that existed only in production." />
+  <link rel="canonical" href="https://davidpreli.com/cadence/key-decisions.html" />
+  <meta property="og:title" content="Key Decisions · Cadence Case Study" />
+  <meta property="og:description" content="Why layoutId left the codebase, why the grid took five tries, and the bug that existed only in production." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://davidpreli.com/cadence/key-decisions.html" />
+  <meta property="og:image" content="https://davidpreli.com/cadence/media/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Key Decisions · Cadence Case Study" />
+  <meta name="twitter:description" content="Why layoutId left the codebase, why the grid took five tries, and the bug that existed only in production." />
+  <meta name="twitter:image" content="https://davidpreli.com/cadence/media/og-image.png" />
   <link rel="icon" href="https://cadence.davidpreli.com/favIcon/favIcon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,9 +134,9 @@
 <p><strong>The deep link is a guest entrance, not a second front door.</strong> In-grid expansion had held a reserved URL since June, and the obvious build was to give the expanded card one: paste a link, the grid opens that card in place. It shipped as the opposite. A direct link mounts the grid untouched and floats the principle in a modal above it, because in-grid expansion earns its meaning from the neighbors sliding and a cell going empty, the system making room, and reconstructing that during a lazy mount reconstructs a performance nobody is there to watch. So the two doors open differently: residents expand a card and the grid rearranges; guests arrive at a modal and the grid behind it waits. The URL carries a slug that reads like language and the state carries a number, with one function translating between them, so a bad link fails soft to the plain grid and a mismatched filter resolves in the principle's favor. Closing rewrites the hash in place, through <code>replaceState</code>, so the back button cannot reopen what was just dismissed. The expanded card's body was lifted into one component that serves both doors, its state left where each caller already reset it, so the card that had been tuned for months did not move a pixel.</p>
 <p><strong>Some 1,500 lines of rendering machinery were removed with a single design decision.</strong> The background originally kept two renderers in agreement off one display list, and the machinery that reconciled them, an ink census, a keyed palette, a runtime color transform, plus an in-page tuning panel, existed only to facilitate that agreement. When the shipped renderer began reading each colorway's authored fills directly, there was nothing left to reconcile, and all of it went. The tuning panel earned its deletion twice over: seeded with its own copy of the settled values, it had been hiding the committed default, so the wrong renderer shipped for days while every check looked through the panel's override instead of at the flag. The reasoning stays in the decision docs and the code stays in git.</p>
 <p><strong>The dev server lies; the built output tells the truth.</strong> In production, opening any Modal blanked the entire page. The dev server was clean. The chain: the CSS minifier rewrites <code>400ms</code> as <code>.4s</code>, a token parser assumed the authored spelling and returned <code>NaN</code>, the <code>NaN</code> reached the Web Animations API and threw, and with no error boundary the whole tree unmounted. The fix was three layers deep: format-tolerant parsers extracted into a tested module (28 tests), an ErrorBoundary at the app root so one component's failure is no longer total, and a standing rule in the project's instructions that every session's verification exercises built output, not just <code>npm run dev</code>. The bug cost an evening but the lesson and the rule it produced were of greater value.</p>
-<p>Twenty-plus further decisions, each with its reasoning and rejected alternatives, live in <a href="https://github.com/StudioDavidPreli/cadence/tree/main/docs/decisions"><code>docs/decisions/</code></a>. The eleven-day debugging stretch that produced zero commits and the process discipline that ended it is its own record: <a href="../cadence-animation-chronology.md"><code>cadence-animation-chronology.md</code></a>.</p>
+<p>Twenty-plus further decisions, each with its reasoning and rejected alternatives, live in <a href="https://github.com/StudioDavidPreli/cadence/tree/main/docs/decisions"><code>docs/decisions/</code></a>. The eleven-day debugging stretch that produced zero commits and the process discipline that ended it is its own record: <a href="cadence-animation-chronology.html"><code>cadence-animation-chronology.md</code></a>.</p>
 <hr />
-<p><strong>Companion:</strong> <a href="../working-with-claude.md">Working with Claude</a>, the process these decisions came out of.</p>
+<p><strong>Companion:</strong> <a href="working-with-claude.html">Working with Claude</a>, the process these decisions came out of.</p>
 <p><a href="fields-and-canvases.html">← Fields and Canvases</a> · <a href="built-and-learned.html">What I Built, What I Learned →</a></p>
   </main>
 </body>
