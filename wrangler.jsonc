@@ -14,16 +14,22 @@
   },
   "vars": {
     "GH_REPO": "StudioDavidPreli/cadence"
-  },
+  }
   // The export/import event counter's store (worker/index.js handleEvent).
-  // Analytics Engine needs no dashboard setup: the dataset is created on the
-  // first writeDataPoint, so this binding riding the next deploy is the whole
-  // provisioning step. Reading it back is a SQL API query; the ready-made
-  // queries live in docs/decisions/event-counter-2026-08-15.md.
-  "analytics_engine_datasets": [
-    {
-      "binding": "EVENTS",
-      "dataset": "cadence_events"
-    }
-  ]
+  // TEMPORARILY DISABLED, 2026-08-15: the Workers build deploys this config,
+  // and the deploy rejected this binding twice (build baf96e93, then a clean
+  // retry), while the same tree deploys green without it. The build log is
+  // dashboard-only, but the likely cause is Analytics Engine needing a
+  // one-time enablement on the account. Without the binding the endpoint
+  // still answers 204 and counts nothing (handleEvent catches the missing
+  // binding and console.errors, visible in live logs). Once the dashboard
+  // side is settled, uncomment this block and push; the dataset then creates
+  // itself on the first write. Full story and the read-side queries:
+  // docs/decisions/event-counter-2026-08-15.md.
+  // "analytics_engine_datasets": [
+  //   {
+  //     "binding": "EVENTS",
+  //     "dataset": "cadence_events"
+  //   }
+  // ]
 }

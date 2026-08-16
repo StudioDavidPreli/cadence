@@ -34,6 +34,18 @@ David's call, 2026-08-15, from this tradeoff:
 
 Each data point: `blobs: [type, format]` (format empty for imports), `doubles: [1]`, `indexes: [type]`. The index is the sampling key; at this volume the sample interval stays 1 and `SUM(_sample_interval)` returns exact counts.
 
+## The deploy rejection (2026-08-15, same day)
+
+The zero-dashboard-clicks claim above did not survive contact with the deploy pipeline. The push to main failed the Workers build twice: once on the merge commit, once on a clean empty-commit retry of the identical tree, while every prior commit built green and the same tree builds and serves locally. The only deploy-relevant change was the `analytics_engine_datasets` binding, so the deploy API is rejecting it; the build log is dashboard-only. Likely cause: Analytics Engine needing a one-time enablement on the account.
+
+To keep the pipeline green (a red build means later pushes silently stop deploying), the binding is commented out in `wrangler.jsonc` and everything else shipped. The endpoint runs live with no store: 204s, counts nothing, and logs `event write failed` in the Worker's live logs. Nothing client-side knows the difference.
+
+To finish (David):
+
+1. Open the failed build's log and read the actual error: dashboard → **Workers & Pages** → **cadence** → **Deployments / Builds**, build `baf96e93` (or the direct link in the GitHub check on commit `cdb297d`).
+2. If it names Analytics Engine: in the dashboard's account sidebar find **Analytics Engine** (under Workers & Pages / Storage & Databases, naming varies) and complete its enable/setup step. It is free-plan eligible, so this should be a confirmation, not a purchase.
+3. Uncomment the `analytics_engine_datasets` block in `wrangler.jsonc`, commit, push. The dataset creates itself on the first event after deploy.
+
 ## Reading the counts (David, one-time setup)
 
 No setup is needed for writing. Reading goes through the Analytics Engine SQL API, which needs an API token once:
