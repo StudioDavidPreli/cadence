@@ -93,3 +93,102 @@ describe('POST /api/event', () => {
     consoleError.mockRestore()
   })
 })
+
+// The launch trace links (docs/decisions/trace-links-2026-08-17.md): a known
+// slug counts one visit and redirects, crawlers and typos redirect without
+// counting, and a storage failure never costs the visitor the redirect.
+
+function linkRequest(slug, { method = 'GET', ua = 'Mozilla/5.0' } = {}) {
+  return new Request(`https://cadence.test/l/${slug}`, {
+    method,
+    headers: ua ? { 'User-Agent': ua } : {},
+  })
+}
+
+describe('GET /l/<slug>', () => {
+  it('counts a known channel and redirects to the tool', async () => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkedin'), env)
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('https://cadence.test/')
+    expect(res.headers.get('Cache-Control')).toBe('no-store')
+    expect(env.EVENTS.writeDataPoint).toHaveBeenCalledWith({
+      blobs: ['visit', 'linkedin', 'tool'],
+      doubles: [1],
+      indexes: ['visit'],
+    })
+  })
+
+  it('sends a -cs slug to the case study with a case-study blob', async () => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkedin-cs'), env)
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('https://davidpreli.com/cadence')
+    expect(env.EVENTS.writeDataPoint).toHaveBeenCalledWith({
+      blobs: ['visit', 'linkedin', 'case-study'],
+      doubles: [1],
+      indexes: ['visit'],
+    })
+  })
+
+  it.each(['som', 'claudeai', 'webdev', 'rive', 'contra', 'dm'])(
+    'accepts channel %s',
+    async (channel) => {
+      const env = mockEnv()
+      const res = await worker.fetch(linkRequest(channel), env)
+      expect(res.status).toBe(302)
+      expect(env.EVENTS.writeDataPoint).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it('redirects an unknown slug home without counting', async () => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkdin'), env)
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('https://cadence.test/')
+    expect(env.EVENTS.writeDataPoint).not.toHaveBeenCalled()
+  })
+
+  it('redirects an unknown -cs slug home, not to the case study', async () => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkdin-cs'), env)
+    expect(res.headers.get('Location')).toBe('https://cadence.test/')
+    expect(env.EVENTS.writeDataPoint).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['LinkedInBot/1.0 (compatible; Mozilla/5.0)'],
+    ['Mozilla/5.0 (compatible; redditbot/1.0)'],
+    ['facebookexternalhit/1.1'],
+    ['Slackbot-LinkExpanding 1.0'],
+  ])('redirects a link-preview crawler (%s) without counting', async (ua) => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkedin', { ua }), env)
+    expect(res.status).toBe(302)
+    expect(env.EVENTS.writeDataPoint).not.toHaveBeenCalled()
+  })
+
+  it('redirects a HEAD request without counting', async () => {
+    const env = mockEnv()
+    const res = await worker.fetch(linkRequest('linkedin', { method: 'HEAD' }), env)
+    expect(res.status).toBe(302)
+    expect(env.EVENTS.writeDataPoint).not.toHaveBeenCalled()
+  })
+
+  it('still redirects when the write throws (metrics never break the tool)', async () => {
+    const env = { EVENTS: { writeDataPoint: vi.fn(() => { throw new Error('down') }) } }
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await worker.fetch(linkRequest('linkedin'), env)
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('https://cadence.test/')
+    expect(consoleError).toHaveBeenCalled()
+    consoleError.mockRestore()
+  })
+
+  it('still redirects when the binding is absent entirely', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await worker.fetch(linkRequest('linkedin'), {})
+    expect(res.status).toBe(302)
+    consoleError.mockRestore()
+  })
+})

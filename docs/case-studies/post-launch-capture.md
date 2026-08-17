@@ -14,7 +14,7 @@ The amendment gets its own posting round when it lands. Target: first update at 
 - [x] **Build and deploy the export/import event counter** (`/api/event`). Separate app-code session; the prompt is queued. Verify end-to-end on built output before launch: press each export button on production, watch the counts move.
 - [x] **Stand up the GitHub traffic snapshotter.** The traffic API (clones, views, referrers) retains only 14 days, so unsnapshotted weeks are gone forever. A scheduled GitHub Action on a weekly cron, committing `metrics/traffic.json` to the repo, is enough. Run it once manually to confirm the file lands.
 - [x] **Decide the posting plan.** Which channels beyond LinkedIn, in what order, and the exact posting time. Day zero must be unambiguous for every later denominator. Decided 2026-08-16; the plan is the next section.
-- [ ] **Build the UTM link set.** One tagged URL per channel (`?utm_source=linkedin`, `reddit`, `som`, `contra`, `rive`), for both the tool and the case study. LinkedIn and Reddit strip or mangle referrers often enough to poison a denominator, and referrer is the one metric in the daily list with no other source. Keep the set in the ledger notes so the same link goes out every time a channel is used twice.
+- [x] **Build the trace-link set.** Built 2026-08-17, and not as UTM links: Cloudflare Web Analytics never logs query strings, on either domain, so `?utm_source=` would have measured nothing. Instead the channel rides in the path and the Worker counts it server-side: `cadence.davidpreli.com/l/<channel>` writes one visit data point to the `cadence_events` store and 302s to the tool; the `-cs` suffix 302s to the case study on davidpreli.com, which has no Worker of its own, so its counting lives here too. Link-preview crawlers redirect uncounted, so unfurls are not phantom visits. Reasoning and query recipe: `docs/decisions/trace-links-2026-08-17.md`. The full set is in the ledger notes; before any post goes out, click its link once and confirm the redirect lands.
 
 **Two days out:**
 
@@ -108,7 +108,7 @@ The tagging that moves the actual goal is people, not companies. Twenty direct m
 ## Data hygiene
 
 - Every number enters the ledger with its capture date and source. No number in the amendment without a ledger row behind it.
-- Attribute traffic by UTM parameter, not by referrer. A referrer that arrives stripped is an unknown, and an unknown counted against a channel is a wrong number with a date on it.
+- Attribute traffic by trace link, not by referrer. A referrer that arrives stripped is an unknown, and an unknown counted against a channel is a wrong number with a date on it. The trace-link counts are clicks on posted links; direct, search, and word-of-mouth traffic never touches `/l/` and shows up only in the Web Analytics totals. The two numbers answer different questions and do not reconcile; the ledger keeps both.
 - Exports are counted as downloads and copies, not uses; say so in the amendment.
 - Small numbers stay small. The amendment frames honestly or not at all.
 
@@ -116,9 +116,25 @@ The tagging that moves the actual goal is people, not companies. Twenty direct m
 
 The loop closing, in order of strength: a person who used a Cadence-tuned token set and said so; an import event (someone round-tripped a set); an export event (a spec left the building); a repeat visitor; a visit. The counts frame the story; the quotes carry it.
 
+## The trace links
+
+One link per channel per destination. The same link goes out every time a channel is used twice; a new channel gets a new slug added to `VISIT_CHANNELS` in `worker/index.js` before it posts. `dm` is the direct-outreach batches.
+
+| Channel | Tool | Case study |
+|---|---|---|
+| LinkedIn | `cadence.davidpreli.com/l/linkedin` | `cadence.davidpreli.com/l/linkedin-cs` |
+| School of Motion | `cadence.davidpreli.com/l/som` | `cadence.davidpreli.com/l/som-cs` |
+| r/ClaudeAI | `cadence.davidpreli.com/l/claudeai` | `cadence.davidpreli.com/l/claudeai-cs` |
+| Engineer subreddit | `cadence.davidpreli.com/l/webdev` | `cadence.davidpreli.com/l/webdev-cs` |
+| Rive community | `cadence.davidpreli.com/l/rive` | `cadence.davidpreli.com/l/rive-cs` |
+| Contra | `cadence.davidpreli.com/l/contra` | `cadence.davidpreli.com/l/contra-cs` |
+| Direct outreach | `cadence.davidpreli.com/l/dm` | `cadence.davidpreli.com/l/dm-cs` |
+
+Pre-post check clicks and any dry-run clicks land in the counts; the baseline row absorbs them, which is one more reason the baseline capture is not optional.
+
 ## The ledger
 
-| Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Exports (fmt) | Imports | Stars | Forks | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| | baseline | | | | | | | | | | | |
-| | 0 | | | | | | | | | | | |
+| Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Link clicks (channel) | Exports (fmt) | Imports | Stars | Forks | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| | baseline | | | | | | | | | | | | |
+| | 0 | | | | | | | | | | | | |

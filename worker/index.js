@@ -109,9 +109,73 @@ async function handleEvent(request, env) {
   return new Response(null, { status: 204 });
 }
 
+// GET /l/<channel> and /l/<channel>-cs: the launch trace links
+// (docs/decisions/trace-links-2026-08-17.md). Cloudflare Web Analytics never
+// logs query strings, so ?utm_source= tags are invisible on both domains; and
+// the referrer header is stripped often enough by the LinkedIn and Reddit
+// in-app browsers that channel attribution can't ride on it. So the channel
+// name rides in the path instead, the Worker writes one visit data point to
+// the same Analytics Engine dataset as the export counter, and the visitor is
+// redirected on: bare slug to the tool, -cs suffix to the case study on
+// davidpreli.com (which has no Worker of its own, so its counting lives here).
+//
+// The count happens server-side before any page loads. Nothing client-side
+// (ad blockers, a bounce before the bundle runs) can prevent the row.
+//
+// Three deliberate choices:
+// - 302, never 301. Browsers cache a 301 permanently, so a repeat click would
+//   skip the Worker and go uncounted. Cache-Control: no-store for the same
+//   reason, aimed at intermediaries.
+// - Link-preview crawlers are not visits. When LinkedIn or Reddit unfurls a
+//   posted link, their bot fetches it; without the guard, day zero starts
+//   with phantom rows. This is the one place the Worker reads a request
+//   header: the user-agent is tested and dropped, never stored, which keeps
+//   the event counter's no-identifiers posture. Crawlers still get the
+//   redirect so the preview unfurls from the real page.
+// - An unknown slug (a typo'd link in a post) redirects home uncounted rather
+//   than 404ing: a stranger's first impression must never be a dead page.
+//   The pre-flight step of clicking every link before posting is what catches
+//   the typo; this branch just keeps it from costing a visitor.
+
+const VISIT_CHANNELS = ['linkedin', 'som', 'claudeai', 'webdev', 'rive', 'contra', 'dm'];
+const CASE_STUDY_URL = 'https://davidpreli.com/cadence';
+
+function handleVisitLink(request, env, slug) {
+  const toCaseStudy = slug.endsWith('-cs');
+  const channel = toCaseStudy ? slug.slice(0, -3) : slug;
+  const known = VISIT_CHANNELS.includes(channel);
+
+  const ua = request.headers.get('user-agent') || '';
+  const isCrawler = /bot|crawl|spider|preview|facebookexternalhit/i.test(ua);
+
+  if (known && request.method === 'GET' && !isCrawler) {
+    // Same never-break rule as handleEvent: a metrics failure logs for us and
+    // stays invisible to the visitor, who gets the redirect regardless.
+    try {
+      env.EVENTS.writeDataPoint({
+        blobs: ['visit', channel, toCaseStudy ? 'case-study' : 'tool'],
+        doubles: [1],
+        indexes: ['visit'],
+      });
+    } catch (err) {
+      console.error('visit write failed:', err);
+    }
+  }
+
+  const dest =
+    known && toCaseStudy ? CASE_STUDY_URL : new URL('/', request.url).toString();
+  return new Response(null, {
+    status: 302,
+    headers: { Location: dest, 'Cache-Control': 'no-store' },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith('/l/')) {
+      return handleVisitLink(request, env, url.pathname.slice(3));
+    }
     if (url.pathname === '/api/bug-report') {
       if (request.method !== 'POST') {
         return new Response('Method not allowed', { status: 405 });
