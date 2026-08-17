@@ -69,6 +69,19 @@ Three tools sharing one token layer, live at <a href="https://cadence.davidpreli
 <p><strong>The Principles Library</strong> is an 18-card grid, the classic 12 plus the extended 6. Each card expands to demonstrate two faces: a Rive illustration of the principle on one side and a live, token-driven UI demo on the other. Each expanded card hosts a Motion/UI toggle, a sourced quote, a pill naming exactly which tokens drive the demo, and a copy-link control that hands the principle's URL to the clipboard. All 18 demos respond to Token Lab edits.</p>
 <p><strong>Motion Tiles</strong> is the vocabulary at scale: a pooled mosaic of Rive tiles driven by one React clock, with population control, presets, stagger patterns, an adjustable grid, and a reshuffle. Plus a crab-based easter egg reachable through the logo.</p>
 <p>Underneath: 39 custom React components and zero from a UI library. A generative background field in the nav column, its mark libraries loaded per section and painted per theme, drifting on the token clock. Four themes (light, dark, and two high-contrast variants), WCAG AA verified from computed luminance, not by eye. Reduced motion wired globally as a first-class state. Hash routing with deep links, including per-principle links that open as a spotlight modal over the grid. A bug-report pipeline from an in-app Rive button through a Cloudflare Worker to a GitHub issue. 578 tests (518 unit, 60 end-to-end against built output), including the gate that fails the build on hardcoded animation values. Deployed as a Cloudflare Worker with the Rive WASM runtime pinned to the site's own origin.</p>
+<p><!-- V15: three Motion Tiles (r1c3, r2c3, r3c2) on one shared clock. Self-contained embed
+     (tiles-embed.html plus the vendored webgl2 runtime in hosted/rive/): the driver mirrors
+     the app's grid clock math and preset personalities verbatim; a click cycles the preset
+     for all three together. Also in the single-page doc with hosted/ paths. --><br />
+<style>
+  .tiles-figure { margin: 24px 0 16px 0; }
+  .tiles-figure iframe { border: 0; display: block; width: 100%; max-width: 560px; aspect-ratio: 560 / 180; height: auto; background: #141414; }
+  .tiles-caption { font-size: 12px; color: #909090; margin-top: 8px; }
+</style><br />
+<figure class="tiles-figure">
+  <iframe src="tiles-embed.html" width="560" height="180" loading="lazy" title="Three Motion Tiles on one clock: click to cycle the preset"></iframe>
+  <figcaption class="tiles-caption">click a tile to cycle the preset</figcaption>
+</figure></p>
 <hr />
 <h2>What I Learned</h2>
 <p>React stopped being a syntax problem the day the two-channel system made sense. Context is for ambient data many unrelated components need; props configure a specific instance; and a Context default of <code>null</code> with a thrown error beats a fallback object, because a fallback that silently does nothing is a bug you find weeks later. Fail fast was a phrase I knew from the lab bench. It turned out to mean the same thing here.</p>

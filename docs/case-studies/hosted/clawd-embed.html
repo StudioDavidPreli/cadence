@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- clawd-embed.html: self-contained interactive clawd tile, iframed by
+     working-with-claude.html. Everything loads same-origin from rive/ (the
+     vendored webgl2 runtime the app itself pins, plus clawd.riv), so the embed
+     runs identically on localhost, preview, and production — no app dependency.
+     clawd is self-driven: its idle and click sequence live entirely in its own
+     clawdSM state machine (MotionTilesGrid.jsx keeps the grid clock off it for
+     the same reason), so this page boots the machine, binds the standard preset
+     instance for palette, and lets clicks do the rest. Reduced motion: the
+     machine holds its resting pose until the reader clicks (motion on request).
+     NOT built from markdown — build-html.py does not touch this file. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>clawd</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #141414; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; cursor: pointer; touch-action: manipulation; }
+  </style>
+</head>
+<body>
+  <canvas id="clawd"></canvas>
+  <script src="rive/rive.js"></script>
+  <script>
+    (function () {
+      var rmq = matchMedia('(prefers-reduced-motion: reduce)');
+      var canvas = document.getElementById('clawd');
+      rive.RuntimeLoader.setWasmUrl('rive/rive.wasm');
+      var r = new rive.Rive({
+        src: 'rive/clawd.riv',
+        canvas: canvas,
+        artboard: 'clawd',
+        stateMachines: 'clawdSM',
+        autoplay: !rmq.matches,
+        autoBind: true, // default instance as backstop; standard rebinds below
+        layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
+        onLoad: function () {
+          r.resizeDrawingSurfaceToCanvas();
+          var vm = r.viewModelByName('PathEffectVM') || r.defaultViewModel();
+          var inst = vm && vm.instanceByName('standard');
+          if (inst) r.bindViewModelInstance(inst);
+        },
+      });
+      // Under reduced motion the machine starts paused on its resting pose; the
+      // first click is an explicit request for motion, so start it then — the
+      // machine's own listeners take over from there.
+      if (rmq.matches) {
+        canvas.addEventListener('pointerdown', function () { r.play(); }, { once: true });
+      }
+      addEventListener('resize', function () { r.resizeDrawingSurfaceToCanvas(); });
+    })();
+  </script>
+</body>
+</html>

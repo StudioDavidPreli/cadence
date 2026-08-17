@@ -51,7 +51,27 @@
 <p>A companion to the <a href="index.html">Cadence case study</a>: how the collaboration actually ran, drawn from <a href="https://github.com/StudioDavidPreli/cadence/blob/main/docs/claude-workflow.md"><code>claude-workflow.md</code></a>, the decision records, and the debugging chronology. The workflow doc records the mechanics; this page is about which methods earned their keep.</p>
 <hr />
 <h2>The rule everything else hangs on</h2>
-<p>Every line of code in Cadence was read by a person before it landed. The project instructions state it as a constraint on the tool ("do not write code I won't understand"), but in practice it is a constraint on me: I ask for explanations until the reasoning is clear, and a feature is not done when it works; it is done when I can defend it. Cadence is my React-fluency vehicle before it is a portfolio piece, and unreviewed code would defeat the reason it exists.</p>
+<p><!-- V14: interactive clawd beside the rule. Self-contained embed (clawd-embed.html plus
+     the vendored webgl2 runtime in hosted/rive/), so it runs on any origin with no app
+     dependency; clawd's idle and click sequence live in its own clawdSM state machine.
+     Figure left, text right; stacks on narrow screens. Hosted page only — this section
+     is not in the single-page doc (companion, not chapter). --><br />
+<style>
+  .clawd-layout { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  .clawd-text { flex: 1 1 320px; min-width: 280px; }
+  .clawd-figure { flex: 0 0 auto; max-width: 100%; margin: 0; }
+  .clawd-figure iframe { border: 0; display: block; background: #141414; }
+  .clawd-caption { font-size: 12px; color: #909090; max-width: 260px; margin-top: 8px; }
+</style><br />
+<div class="clawd-layout">
+  <figure class="clawd-figure">
+    <iframe src="clawd-embed.html" width="260" height="260" loading="lazy" title="clawd, the interactive Motion Tile"></iframe>
+    <figcaption class="clawd-caption">click a clawd!</figcaption>
+  </figure>
+  <div class="clawd-text">
+    <p>Every line of code in Cadence was read by a person before it landed. The project instructions state it as a constraint on the tool ("do not write code I won't understand"), but in practice it is a constraint on me: I ask for explanations until the reasoning is clear, and a feature is not done when it works; it is done when I can defend it. Cadence is my React-fluency vehicle before it is a portfolio piece, and unreviewed code would defeat the reason it exists.</p>
+  </div>
+</div></p>
 <h2>Two surfaces</h2>
 <p>The work runs on two Claude surfaces with different senses. The browser Project on claude.ai is the thinking side: planning a feature before building it, learning a React concept through an analogy to motion, drafting prose. It cannot see the repository. Claude Code, in the terminal, is the building side: it reads the actual files, and it starts every session from CLAUDE.md, the instructions file that functions as a contract both sides have read.</p>
 <p>The split drifted, and the drift was informative. As the record grew past twenty decision docs, planning moved into the terminal too, because plans increasingly turned on facts only the repo held: which grid decision was load-bearing, what a Rive file's view model actually exposed, which removals had already been made. The browser kept the writing and the career thinking, where knowing the story matters more than seeing the code.</p>

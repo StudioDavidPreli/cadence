@@ -6,7 +6,27 @@ A companion to the [Cadence case study](hosted/index.md): how the collaboration 
 
 ## The rule everything else hangs on
 
-Every line of code in Cadence was read by a person before it landed. The project instructions state it as a constraint on the tool ("do not write code I won't understand"), but in practice it is a constraint on me: I ask for explanations until the reasoning is clear, and a feature is not done when it works; it is done when I can defend it. Cadence is my React-fluency vehicle before it is a portfolio piece, and unreviewed code would defeat the reason it exists.
+<!-- V14: interactive clawd beside the rule. Self-contained embed (clawd-embed.html plus
+     the vendored webgl2 runtime in hosted/rive/), so it runs on any origin with no app
+     dependency; clawd's idle and click sequence live in its own clawdSM state machine.
+     Figure left, text right; stacks on narrow screens. Hosted page only — this section
+     is not in the single-page doc (companion, not chapter). -->
+<style>
+  .clawd-layout { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  .clawd-text { flex: 1 1 320px; min-width: 280px; }
+  .clawd-figure { flex: 0 0 auto; max-width: 100%; margin: 0; }
+  .clawd-figure iframe { border: 0; display: block; background: #141414; }
+  .clawd-caption { font-size: 12px; color: #909090; max-width: 260px; margin-top: 8px; }
+</style>
+<div class="clawd-layout">
+  <figure class="clawd-figure">
+    <iframe src="clawd-embed.html" width="260" height="260" loading="lazy" title="clawd, the interactive Motion Tile"></iframe>
+    <figcaption class="clawd-caption">click a clawd!</figcaption>
+  </figure>
+  <div class="clawd-text">
+    <p>Every line of code in Cadence was read by a person before it landed. The project instructions state it as a constraint on the tool ("do not write code I won't understand"), but in practice it is a constraint on me: I ask for explanations until the reasoning is clear, and a feature is not done when it works; it is done when I can defend it. Cadence is my React-fluency vehicle before it is a portfolio piece, and unreviewed code would defeat the reason it exists.</p>
+  </div>
+</div>
 
 ## Two surfaces
 

@@ -31,6 +31,8 @@ Capture rule: everything is recorded against **built output** (the standing rule
 
 - [x] **V12. Stat row on the landing.** DONE 2026-07-31: mono row (13 · 268 · 39 · 578) under the Live line in `hosted/index.md` and the single-page doc. Commit count is dated 2026-07-28; refresh on republish (comment in place).
 - [x] **V13. Spring section glyph.** DONE 2026-07-31: the `spring.svg` path inlined into the heading in `hosted/token-system.md` and the single-page doc, ink set to heading color (the source file is black-on-transparent, so an `<img>` reference would vanish on dark).
+- [x] **V14. Interactive clawd beside the rule.** DONE 2026-08-16: `hosted/clawd-embed.html` (self-contained; vendored webgl2 runtime + clawd.riv in `hosted/rive/`) iframed in `working-with-claude.md`, figure left of "The rule everything else hangs on" with the text flowing right; caption "click a clawd!". Companion page only, so NOT in the single-page doc. clawd is self-driven (clawdSM); reduced motion holds the pose until clicked.
+- [x] **V15. Three Motion Tiles on one clock.** DONE 2026-08-16: `hosted/tiles-embed.html` (r1c3, r2c3, r3c2; driver math and preset personalities copied verbatim from MotionTilesGrid.jsx — keep in sync if presets retune; r2c3 drives `phase`, the others `progress`) iframed in `hosted/built-and-learned.md` after the "Underneath:" paragraph AND in the single-page doc with `hosted/` paths; caption "click a tile to cycle the preset". Click cycles standard → snappy → cinematic for all three together; reduced motion parks the clock, clicks still recolor.
 
 ---
 

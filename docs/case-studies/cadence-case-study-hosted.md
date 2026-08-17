@@ -471,6 +471,20 @@ Three tools sharing one token layer, live at [cadence.davidpreli.com](https://ca
 
 Underneath: 39 custom React components and zero from a UI library. A generative background field in the nav column, its mark libraries loaded per section and painted per theme, drifting on the token clock. Four themes (light, dark, and two high-contrast variants), WCAG AA verified from computed luminance, not by eye. Reduced motion wired globally as a first-class state. Hash routing with deep links, including per-principle links that open as a spotlight modal over the grid. A bug-report pipeline from an in-app Rive button through a Cloudflare Worker to a GitHub issue. 578 tests (518 unit, 60 end-to-end against built output), including the gate that fails the build on hardcoded animation values. Deployed as a Cloudflare Worker with the Rive WASM runtime pinned to the site's own origin.
 
+<!-- V15: three Motion Tiles (r1c3, r2c3, r3c2) on one shared clock. Self-contained embed
+     (hosted/tiles-embed.html plus the vendored webgl2 runtime in hosted/rive/): the driver
+     mirrors the app's grid clock math and preset personalities verbatim; a click cycles the
+     preset for all three together. Chapter copy lives in hosted/built-and-learned.md. -->
+<style>
+  .tiles-figure { margin: 24px 0 16px 0; }
+  .tiles-figure iframe { border: 0; display: block; width: 100%; max-width: 560px; aspect-ratio: 560 / 180; height: auto; background: #141414; }
+  .tiles-caption { font-size: 12px; color: #909090; margin-top: 8px; }
+</style>
+<figure class="tiles-figure">
+  <iframe src="hosted/tiles-embed.html" width="560" height="180" loading="lazy" title="Three Motion Tiles on one clock: click to cycle the preset"></iframe>
+  <figcaption class="tiles-caption">click a tile to cycle the preset</figcaption>
+</figure>
+
 ---
 
 ## What I Learned

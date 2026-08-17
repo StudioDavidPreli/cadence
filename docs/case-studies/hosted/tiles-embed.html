@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<!-- tiles-embed.html: three Motion Tiles (r1c3, r2c3, r3c2) on ONE shared clock,
+     iframed by built-and-learned.html. The tiles carry no clocks of their own —
+     the case study's own argument — so this page runs a miniature of the app's
+     grid driver: one rAF loop writing eased progress into each tile's view model
+     every frame, with the per-tile stagger applied before the write. The math and
+     the preset personalities (speed / easing / spread / cellSize / gapSize) are
+     copied verbatim from MotionTilesGrid.jsx so the tiles move here exactly as
+     they move in the tool. r2c3 is one of the four geometry tiles and exposes
+     `phase`; the other two expose `progress` — each is driven by the property it
+     exposes, same as the app.
+
+     Clicking any tile cycles the preset for all three together (one vocabulary):
+     the preset's baked palette instance rebinds in each .riv, the clock swaps its
+     timing personality, and the pixelation values are written to each view model.
+     Everything loads same-origin from rive/ (the vendored webgl2 runtime the app
+     itself pins). Reduced motion: the clock never runs — the tiles hold a resting
+     pose — but a click still cycles the preset palette (no motion required).
+     NOT built from markdown — build-html.py does not touch this file. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Motion Tiles</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #141414; overflow: hidden; }
+    .row { display: flex; gap: 12px; height: 100%; cursor: pointer; }
+    canvas { display: block; flex: 1 1 0; min-width: 0; height: 100%; touch-action: manipulation; }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <canvas data-tile="r1c3"></canvas>
+    <canvas data-tile="r2c3"></canvas>
+    <canvas data-tile="r3c2"></canvas>
+  </div>
+  <script src="rive/rive.js"></script>
+  <script>
+    (function () {
+      var rmq = matchMedia('(prefers-reduced-motion: reduce)');
+      rive.RuntimeLoader.setWasmUrl('rive/rive.wasm');
+
+      // Copied from MotionTilesGrid.jsx: the preset personalities (speed/easing/
+      // spread feed the clock; cell/gap are written to each tile's VM) and the
+      // envelope math. Keep in sync with the app if the presets ever retune.
+      var BASE_PERIOD = 2.0;
+      var PRESETS = {
+        standard:  { instance: 'standard',  speed: 1.0,  easing: 1.70, spread: 0.40, cell: 3.5, gap: 0.05 },
+        snappy:    { instance: 'snappy',    speed: 1.25, easing: 3.60, spread: 0.20, cell: 2,   gap: 0.25 },
+        cinematic: { instance: 'cinematic', speed: 0.8,  easing: 1.15, spread: 0.70, cell: 8,   gap: 1.00 },
+      };
+      var ORDER = ['standard', 'snappy', 'cinematic'];
+      var presetIndex = 0;
+
+      function easeK(t, k) {
+        if (t <= 0) return 0;
+        if (t >= 1) return 1;
+        var a = Math.pow(t, k);
+        var b = Math.pow(1 - t, k);
+        return a / (a + b);
+      }
+      // Envelope: hold, ease up, hold, ease back. k is the easing exponent.
+      function cycleProgress(ph, k) {
+        if (ph < 0.25) return 0;
+        if (ph < 0.5) return easeK((ph - 0.25) * 4, k);
+        if (ph < 0.75) return 1;
+        return 1 - easeK((ph - 0.75) * 4, k);
+      }
+
+      // r2c3 is a geometry tile (GROUP2_GEOMETRY in the app): it exposes `phase`,
+      // not `progress`. The stagger weights are the tiles' positions in the row.
+      var TILES = [
+        { name: 'r1c3', prop: 'progress', weight: 0 },
+        { name: 'r2c3', prop: 'phase', weight: 1 / 3 },
+        { name: 'r3c2', prop: 'progress', weight: 2 / 3 },
+      ];
+
+      var loaded = 0;
+      TILES.forEach(function (tile) {
+        var canvas = document.querySelector('canvas[data-tile="' + tile.name + '"]');
+        var r = new rive.Rive({
+          src: 'rive/' + tile.name + '.riv',
+          canvas: canvas,
+          artboard: tile.name,
+          stateMachines: tile.name + 'SM',
+          // The SM must play so each per-frame write redraws (the app's rule);
+          // nothing moves without the clock's writes, so this is safe under RM.
+          autoplay: true,
+          autoBind: true, // default instance as backstop; bindPreset takes over
+          layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
+          onLoad: function () {
+            r.resizeDrawingSurfaceToCanvas();
+            tile.rive = r;
+            bindPreset(tile);
+            loaded += 1;
+            // Under reduced motion the clock never starts: park every tile on
+            // its resting frame once, so the row holds still but shows art.
+            if (rmq.matches && tile.driver) tile.driver.value = 0;
+          },
+        });
+      });
+
+      // Rebind the current preset's baked palette instance and re-acquire the
+      // number handles (handles belong to the INSTANCE, so every rebind must
+      // re-grab them), then write the preset's pixelation values.
+      function bindPreset(tile) {
+        var p = PRESETS[ORDER[presetIndex]];
+        var r = tile.rive;
+        var vm = r.viewModelByName('PathEffectVM') || r.defaultViewModel();
+        if (!vm) return;
+        var inst = vm.instanceByName(p.instance);
+        if (!inst) return;
+        r.bindViewModelInstance(inst);
+        tile.driver = inst.number(tile.prop);
+        var cell = inst.number('cellSize');
+        var gap = inst.number('gapSize');
+        if (cell) cell.value = p.cell;
+        if (gap) gap.value = p.gap;
+      }
+
+      // ONE clock for all three tiles (the architecture in miniature): eased,
+      // phase-offset progress written into each tile's exposed property.
+      var elapsed = 0;
+      var last = null;
+      function loop(now) {
+        if (last === null) last = now;
+        elapsed += (now - last) / 1000;
+        last = now;
+        var p = PRESETS[ORDER[presetIndex]];
+        var period = BASE_PERIOD / p.speed;
+        var ph = (elapsed % period) / period;
+        TILES.forEach(function (tile) {
+          if (!tile.driver) return;
+          var phk = (((ph - p.spread * tile.weight) % 1) + 1) % 1;
+          tile.driver.value = cycleProgress(phk, p.easing);
+        });
+        raf = requestAnimationFrame(loop);
+      }
+      var raf = null;
+      if (!rmq.matches) raf = requestAnimationFrame(loop);
+      rmq.addEventListener('change', function () {
+        if (rmq.matches) {
+          if (raf) cancelAnimationFrame(raf);
+          raf = null;
+          TILES.forEach(function (tile) { if (tile.driver) tile.driver.value = 0; });
+        } else if (!raf) {
+          last = null;
+          raf = requestAnimationFrame(loop);
+        }
+      });
+
+      // Click anywhere in the row: cycle the preset for all three together.
+      // Under RM this still recolors (palette + pixelation), with no motion.
+      document.querySelector('.row').addEventListener('pointerdown', function () {
+        if (loaded === 0) return;
+        presetIndex = (presetIndex + 1) % ORDER.length;
+        TILES.forEach(function (tile) {
+          if (tile.rive) bindPreset(tile);
+          if (rmq.matches && tile.driver) tile.driver.value = 0;
+        });
+      });
+
+      addEventListener('resize', function () {
+        TILES.forEach(function (tile) {
+          if (tile.rive) tile.rive.resizeDrawingSurfaceToCanvas();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
