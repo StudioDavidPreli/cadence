@@ -145,6 +145,13 @@ SOURCES = [(src, True) for src in sorted(HOSTED.glob("*.md"))] + [
     (HOSTED.parent / f"{stem}.md", False) for stem in COMPANIONS
 ]
 PAGE_STEMS = {src.stem for src, _ in SOURCES}
+# The chapters carry a "[Cadence: Case Study](index.md) · Chapter N" breadcrumb in
+# their sources; the companion sources do not (on GitHub their directory context is
+# the way back). The hosted pages need one, so the build injects it: after the
+# page's <h1> when there is one, at the top of the body for the chronology (which
+# opens with its metadata block instead of a heading).
+CRUMB = '<p><a href="index.html">Cadence: Case Study</a> · Companion</p>'
+
 for src, in_hosted in SOURCES:
     stem = src.stem
     text = rewrite_links(src.read_text(), in_hosted, PAGE_STEMS)
@@ -153,6 +160,11 @@ for src, in_hosted in SOURCES:
     body = md.convert(protected)
     for n, block in enumerate(blocks):
         body = body.replace(f"<p>HTMLPROTECT{n}TOK</p>", block).replace(f"HTMLPROTECT{n}TOK", block)
+    if stem in COMPANIONS:
+        if "</h1>" in body:
+            body = body.replace("</h1>", "</h1>\n" + CRUMB, 1)
+        else:
+            body = CRUMB + "\n" + body
     title = htmlmod.escape(TITLES.get(stem, stem))
     desc = htmlmod.escape(DESCRIPTIONS.get(stem, DESCRIPTIONS["index"]))
     # The index's canonical URL is the bare directory; every other page keeps its
