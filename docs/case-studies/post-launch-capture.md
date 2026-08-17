@@ -18,7 +18,7 @@ The amendment gets its own posting round when it lands. Target: first update at 
 
 **Two days out:**
 
-- [ ] **Every destination surface finished.** Contra project live, portfolio integration done, LinkedIn Featured section pointing at the tool and the case study, repo README current, the four hosted case-study pages reachable from the index. These are where a stranger lands after a post, and day zero is the day the most strangers will ever look up the name at once. None of them belong on the posting calendar; a half-built profile found on day zero cannot be un-found.
+- [ ] **Every destination surface finished.** Contra project live, portfolio integration done, LinkedIn Featured section pointing at the tool and the case study, repo README current, the four hosted case-study pages reachable from the index. These are where a stranger lands after a post, and day zero is the day the most strangers will ever look up the name at once. None of them belong on the posting calendar; a half-built profile found on day zero cannot be un-found. Progress 2026-08-17: portfolio integration and README done, both OG cards verified (they share one thumbnail image, worth splitting before the Featured section shows them side by side). Contra and Featured remain.
 
 **The day before:**
 
