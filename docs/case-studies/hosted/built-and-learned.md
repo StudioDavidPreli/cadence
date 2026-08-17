@@ -36,7 +36,7 @@ Underneath: 39 custom React components and zero from a UI library. A generative 
      for all three together. Also in the single-page doc with hosted/ paths. -->
 <style>
   .tiles-figure { margin: 24px 0 16px 0; }
-  .tiles-figure iframe { border: 0; display: block; width: 100%; max-width: 560px; aspect-ratio: 560 / 180; height: auto; background: #141414; }
+  .tiles-figure iframe { border: 0; display: block; margin-left: auto; margin-right: auto; width: 100%; max-width: 560px; aspect-ratio: 560 / 180; height: auto; background: #141414; }
   .tiles-caption { font-size: 12px; color: #909090; margin-top: 8px; }
 </style>
 <figure class="tiles-figure">
