@@ -138,7 +138,9 @@ async function handleEvent(request, env) {
 //   the typo; this branch just keeps it from costing a visitor.
 
 const VISIT_CHANNELS = ['linkedin', 'som', 'claudeai', 'webdev', 'rive', 'contra', 'dm'];
-const CASE_STUDY_URL = 'https://davidpreli.com/cadence';
+// Trailing slash matters: the bare path answers a 308 to add it, so this
+// spelling saves every case-study click a second redirect hop.
+const CASE_STUDY_URL = 'https://davidpreli.com/cadence/';
 
 function handleVisitLink(request, env, slug) {
   const toCaseStudy = slug.endsWith('-cs');

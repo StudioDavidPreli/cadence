@@ -123,7 +123,7 @@ describe('GET /l/<slug>', () => {
     const env = mockEnv()
     const res = await worker.fetch(linkRequest('linkedin-cs'), env)
     expect(res.status).toBe(302)
-    expect(res.headers.get('Location')).toBe('https://davidpreli.com/cadence')
+    expect(res.headers.get('Location')).toBe('https://davidpreli.com/cadence/')
     expect(env.EVENTS.writeDataPoint).toHaveBeenCalledWith({
       blobs: ['visit', 'linkedin', 'case-study'],
       doubles: [1],
