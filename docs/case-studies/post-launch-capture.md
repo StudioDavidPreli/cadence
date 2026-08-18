@@ -136,5 +136,5 @@ Pre-post check clicks and any dry-run clicks land in the counts; the baseline ro
 
 | Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Link clicks (channel) | Exports (fmt) | Imports | Stars | Forks | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| | baseline | | | | | | | | | | | | |
+| 2026-08-17 | baseline | 0 | 0 | 0 | 0 | tbd | 7 | 16 (rive/tool 2, claudeai/cs 2, rest 1) | 1 | 1 | 0 | 0 | Pre-launch test clicks; subtract this row from day-0 totals. Uniques pending a dashboard read. |
 | | 0 | | | | | | | | | | | | |
