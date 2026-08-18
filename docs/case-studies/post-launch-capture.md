@@ -41,15 +41,16 @@ Day zero is a Tuesday. The weekday anchors carry more weight than the day number
 | 6 | Mon | none | Reply day. |
 | 7 | Tue | LinkedIn | Case study: The Token System, Fields and Canvas. Tag Rive. |
 | 8 | Wed | r/webdev or r/Frontend | The receiving-end question, below. |
-| 9 | Thu | LinkedIn | Case study: Working with Claude. Tag Anthropic. |
+| 9 | Thu | none | Reply day. |
 | 10 | Fri | none | Reply day. |
 | 11-12 | Sat/Sun | none | Monitor. |
 | 13 | Mon | none | Reply day. Second outreach batch. |
-| 14 | Tue | LinkedIn | The open question, below. Soft signal for v2. |
+| 14 | Tue | LinkedIn | Case study: Working with Claude. Tag Anthropic. (Moved from day 9, 2026-08-18: the day-2 video insertion made five posts in two weeks, so the schedule takes a third week instead.) |
+| 16 | Thu | LinkedIn | The open question, below. Soft signal for v2. |
 | 21 | Tue | LinkedIn | Figma design-system file, if it exists by then. Tag Figma. |
 | 30 | | all | Amendment round, per the top of this document. |
 
-Four LinkedIn posts in fourteen days is the ceiling on one subject. Past that each post reaches fewer people than the last, and the case-study posts are the two that have to travel.
+Two LinkedIn posts in any seven-day window is the ceiling on one subject; past that each post reaches fewer people than the last, and the case-study posts are the two that have to travel. The day-2 video insertion broke the original four-in-fourteen plan, so the calendar runs three weeks instead (reset 2026-08-18): Tuesdays anchor, Thursdays are the only second slot.
 
 Replies are same-day, every day, not a task at the end. On LinkedIn the first sixty to ninety minutes of replies decide whether a post keeps distributing. Days 6, 10 and 13 exist to keep that habit from competing with a publish.
 
@@ -63,7 +64,7 @@ Each channel gets one question, and it has to be a question that channel can act
 - **School of Motion, day 1:** a sharper variant of the same, for an audience that has lived it in more detail. Warmest room, most likely to produce the substantive comment the amendment needs.
 - **r/ClaudeAI, day 2:** neither of the above. That room has no spec-sheet experience and no stake in motion handoff. Ask where the wall was in their own builds, and put the Cadence answer in the comment: the converters the MCP could not edit, the Script nodes it could not place, the production-only NaN crash the dev server hid for a day.
 - **r/webdev or r/Frontend, day 8:** *What has receiving timelines from motion designers been like?* The mirror question, and the one worth asking of engineers. Blunt answers under a post about a tool that addresses that exact handoff are the most useful comments available.
-- **LinkedIn, day 14:** *What would you want in a motion token tool?* Open text, not a poll. At this audience size a poll returns a number too small to act on and reads as engagement bait; the text replies are specific enough to quote.
+- **LinkedIn, day 16:** *What would you want in a motion token tool?* Open text, not a poll. At this audience size a poll returns a number too small to act on and reads as engagement bait; the text replies are specific enough to quote.
 
 Post the answer to your own question in the replies once a few people have gone first, never in the original post.
 
@@ -72,7 +73,7 @@ Post the answer to your own question in the replies once a few people have gone 
 Tag an organization only where that organization is the subject. A stack list of mentions reads as spam to the reader and to the classifier, and it dilutes the one mention that could have earned a reshare. Two org mentions per post, maximum, each defensible in a sentence.
 
 - **Rive**, day 7. The highest reshare probability on the list. Per-tile view-model bindings driven through MCP against a single React clock is not something that feed sees often.
-- **Anthropic**, day 9. On topic there and nowhere else. The version that gets carried is the methodology piece with the failures in it, which is the register `docs/claude-workflow.md` already holds.
+- **Anthropic**, day 14. On topic there and nowhere else. The version that gets carried is the methodology piece with the failures in it, which is the register `docs/claude-workflow.md` already holds.
 - **School of Motion**, day zero, if the crossover is wanted.
 - **Figma**, day 21 only, and only if the file is substantive. Tagging Figma for having used Figma is noise.
 
