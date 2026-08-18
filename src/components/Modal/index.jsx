@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
+import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import styles from './Modal.module.css'
 
@@ -82,8 +83,21 @@ import styles from './Modal.module.css'
 // 372×480 card) sits flush inside the dialog frame. The class lives in
 // Modal.module.css so its cascade order over .panel is controlled. Off by
 // default, which keeps the standard dialog sizing.
-export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null, hideHeader = false, bare = false }) {
+// chrome (default false) switches this dialog's own timing off the editable
+// --motion-* tokens and onto the fixed --feedback-* constants, via
+// useChromeTransition. Off by default because Modal IS the Staging principle's
+// demonstration: there it must animate on the tokens, since watching a slider
+// change how the dialog arrives is the whole lesson.
+//
+// It is on for the tool's report dialogs, and the reason is specific. A report
+// about a token set cannot be timed by that same set: drag duration.slow to
+// 2000ms in Explore mode and the dialog telling you about it would take two
+// seconds to appear, and a near-zero value would make it flash in with no
+// transition at all. The dialog is chrome the moment its content is the tool
+// talking about itself rather than a component demonstrating a token.
+export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null, hideHeader = false, bare = false, chrome = false }) {
   const tokens = useMotionTokens()
+  const chromeTransition = useChromeTransition()
   const panelRef = useRef(null)
   const anchored = scoped || portalTarget != null
 
@@ -94,6 +108,18 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
   // than overridden in CSS (CSS cannot beat the inline style).
   const reduceTransparency = useMediaQuery('(prefers-reduced-transparency: reduce)')
   const backdropOpacity = reduceTransparency ? 1 : 0.8
+
+  // The enter/exit pair, resolved once. On tokens (the default) the asymmetry
+  // described in the motion-grammar note above is preserved: slow + enter on the
+  // way in, base + exit on the way out. On chrome there is one fixed duration and
+  // one fixed curve, because --feedback-* deliberately does not carry a slow/base
+  // distinction: chrome is not supposed to have a tempo of its own to notice.
+  const enterTransition = chrome
+    ? chromeTransition.nav
+    : { duration: tokens.duration.slow, ease: tokens.ease.enter }
+  const exitTransition = chrome
+    ? chromeTransition.nav
+    : { duration: tokens.duration.base, ease: tokens.ease.exit }
 
   // Escape closes — standard dialog affordance.
   useEffect(() => {
@@ -143,9 +169,9 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
           animate={{ opacity: backdropOpacity }}
           exit={{
             opacity: 0,
-            transition: { duration: tokens.duration.base, ease: tokens.ease.exit },
+            transition: exitTransition,
           }}
-          transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
+          transition={enterTransition}
           onMouseDown={onClose}
         />
       )}
@@ -172,9 +198,9 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
           exit={{
             scale: 0.98,
             opacity: 0,
-            transition: { duration: tokens.duration.base, ease: tokens.ease.exit },
+            transition: exitTransition,
           }}
-          transition={{ duration: tokens.duration.slow, ease: tokens.ease.enter }}
+          transition={enterTransition}
           onMouseDown={e => e.stopPropagation()}
         >
           {!hideHeader && (

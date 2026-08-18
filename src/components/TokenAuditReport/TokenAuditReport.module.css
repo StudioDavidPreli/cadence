@@ -1,0 +1,196 @@
+/* ── Token audit report (modal body) ──────────────────────────────────────────
+   Sized and spaced to match the import report, which is the dialog this one sits
+   beside in the user's mental model: both are the tool reporting on a token set.
+   Type comes from the global chrome roles, never spelled locally.
+
+   No rule here changes background-color, so the CLAUDE.md pairing rule (any
+   background change must also set color) has nothing to bite on except the two
+   buttons, which set both. */
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary {
+  composes: type-body from global;
+  margin: 0;
+  color: var(--color-text-base);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionTitle {
+  composes: type-eyebrow from global;
+  color: var(--color-text-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Finding and note rows ───────────────────────────────────────────────────
+   Severity reads from the marker and the section it sits under, never from hue.
+   See the component header for why. */
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.rowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.message {
+  composes: type-body from global;
+  color: var(--color-text-base);
+}
+
+/* The token paths the check actually read. Mono and muted, matching the import
+   report's inline code, so a path reads as a path in both dialogs. */
+.paths {
+  font-family: var(--font-mono);
+  font-size: var(--type-size-base);
+  color: var(--color-text-muted);
+  /* Long path lists wrap rather than stretching the dialog. */
+  overflow-wrap: anywhere;
+}
+
+/* A filled disc for a finding, a ring for a note. Both are graphical, so both are
+   on --color-text-base and clear the 3:1 UI bar in every theme by the same margin
+   the body text clears 4.5:1. The 0.55em top margin optically centers the marker
+   against the first line of the message rather than its box. */
+.marker,
+.markerNote {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 0.55em;
+  border-radius: 50%;
+}
+
+.marker {
+  background-color: var(--color-text-base);
+}
+
+.markerNote {
+  border: 1px solid var(--color-text-base);
+}
+
+/* ── Measurement rows ────────────────────────────────────────────────────────
+   Three columns on one line: what was measured, the number, and the reference it
+   was measured against. The reference column is the widest and the least
+   important, so it takes the remaining space and wraps first. */
+
+/* Two lines per measurement rather than three columns, and the reason is worth
+   recording: a grid across rows (display: contents on the row) mis-set the
+   columns, because rows without a reference contribute two cells instead of
+   three and grid auto-placement then shifts every following item. Padding the
+   empty cell would have fixed that, but the reference text still had no room:
+   at the dialog's 420px the Nielsen reference string wrapped to four lines
+   inside its column. (Spelling that string out here trips the token-integrity
+   gate, which scans comments too.)
+   
+   So the value right-aligns against the label on the first line (space-between
+   does the column job for two items), and the reference takes the full width
+   beneath it, where it fits on one line. */
+.measureList {
+  /* Same reset as .list. Without it the browser's default ul padding indents the
+     measurements past the finding rows above them. */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.measureRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.measureHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.measureLabel {
+  composes: type-body from global;
+  color: var(--color-text-base);
+}
+
+.measureValue {
+  composes: type-value from global;
+  color: var(--color-text-base);
+}
+
+.measureReference {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────────
+   Same shape as the Export section's Export/Copy pair, including the fixed
+   --feedback-* transition timing: these are chrome, and an edited duration token
+   must never reach the tool's own hover feedback. */
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.downloadButton {
+  composes: type-button from global;
+  flex: 1;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration);
+}
+
+.downloadButton:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.copyButton {
+  composes: type-button from global;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+}
+
+.copyButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}

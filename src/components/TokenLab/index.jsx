@@ -1,4 +1,4 @@
-import { lazy, Suspense, useReducer, useState, useEffect, useRef, useId } from 'react'
+import { lazy, Suspense, useReducer, useState, useEffect, useMemo, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
@@ -8,6 +8,8 @@ import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { SECTIONS } from '../../data/navigation'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
+import { auditTokens, auditToMarkdown } from '../../tokens/tokenAudit'
+import { TokenAuditReport } from '../TokenAuditReport'
 import { EasingVisualizer } from '../EasingVisualizer'
 import { DurationVisualizer } from '../DurationVisualizer'
 import { SpringVisualizer } from '../SpringVisualizer'
@@ -711,7 +713,7 @@ const EXPORT_EVENT_FORMAT = {
   fm:   'framer-motion',
 }
 
-export function ExportSection({ rawState, format, onFormatChange }) {
+export function ExportSection({ rawState, format, onFormatChange, onOpenAudit }) {
   // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
   // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
   // serialize from the same stateToExport object, so the toggle only selects
@@ -735,6 +737,19 @@ export function ExportSection({ rawState, format, onFormatChange }) {
   const exportFormat = controlled ? format : internalFormat
   const setExportFormat = controlled ? (onFormatChange ?? (() => {})) : setInternalFormat
   const [copied, setCopied] = useState(false)
+
+  // The one-line audit verdict for the tool bar. Only the counts are shown here;
+  // the modal carries the rows. Recomputed when the token set changes, which for
+  // this section means on every slider release rather than every frame, since
+  // rawState is the committed state and not a drag value.
+  const auditSummary = useMemo(() => {
+    const { counts } = auditTokens(rawState)
+    if (counts.finding === 0 && counts.note === 0) return 'Audit: nothing to flag'
+    const parts = []
+    if (counts.finding > 0) parts.push(`${counts.finding} ${counts.finding === 1 ? 'finding' : 'findings'}`)
+    if (counts.note > 0) parts.push(`${counts.note} ${counts.note === 1 ? 'note' : 'notes'}`)
+    return `Audit: ${parts.join(', ')}`
+  }, [rawState])
 
   // The current token state serialized in the selected format. Computed on
   // demand (export and copy both call it) rather than held in state.
@@ -818,6 +833,21 @@ export function ExportSection({ rawState, format, onFormatChange }) {
           FM
         </button>
       </div>
+      {/* The audit line. Present only when a caller wires it (the capture rig
+          renders this section without one), and always visible when it is: a
+          clean set says so, which is the state most sets are in and the one a
+          user needs to be able to trust. The full report is a modal rather than
+          more rows here, because a 300px column cannot hold a findings list and
+          a measurements table without becoming a scroll of its own. */}
+      {onOpenAudit && (
+        <div className={styles.auditRow}>
+          <span className={styles.auditSummary}>{auditSummary}</span>
+          <button type="button" className={styles.auditButton} onClick={onOpenAudit}>
+            View report
+          </button>
+        </div>
+      )}
+
       {/* Row two: the download actions, beneath the full-width toggle. Export
           fills the remaining width; Copy sits compact at its right. */}
       <div className={styles.exportActions}>
@@ -845,11 +875,25 @@ function ImportReport({ result }) {
   const loaded = total - filled.length
   const formatLabel = format === 'dtcg' ? 'DTCG' : 'flat'
 
+  // The audit verdict on what just landed, as one line. Import validation and the
+  // audit answer different questions (did this file load, versus is the set it
+  // describes coherent), and a file can pass the first cleanly while failing the
+  // second, so the import report would be misleading without it. Counts only: the
+  // rows live in the audit modal, and stacking a second dialog on top of this one
+  // to show them would be a worse answer than a sentence.
+  const auditCounts = auditTokens(result.state).counts
+
   return (
     <div className={styles.importReport}>
       <p className={styles.importSummary}>
         Loaded {loaded} of {total} tokens from a {formatLabel} file
         {filled.length > 0 && `, filled ${filled.length} from defaults`}.
+      </p>
+
+      <p className={styles.importSummary}>
+        {auditCounts.finding === 0 && auditCounts.note === 0
+          ? 'Nothing in the imported set contradicts itself.'
+          : `The imported set has ${auditCounts.finding} ${auditCounts.finding === 1 ? 'finding' : 'findings'} and ${auditCounts.note} ${auditCounts.note === 1 ? 'note' : 'notes'}. Open the audit report under Export to read them.`}
       </p>
 
       {renamed.length > 0 && (
@@ -1821,6 +1865,11 @@ export function TokenLab() {
 
   // Import result for the report modal. null = closed.
   const [importResult, setImportResult] = useState(null)
+  // Audit report modal. Opened from the Export section's audit line; null-free
+  // because unlike importResult there is no payload, the report is derived from
+  // rawState at render time.
+  const [auditOpen, setAuditOpen] = useState(false)
+  const [auditCopied, setAuditCopied] = useState(false)
 
   function handleImport(result) {
     if (result.ok) {
@@ -1848,6 +1897,35 @@ export function TokenLab() {
       trackEvent({ type: 'import' })
     }
     setImportResult(result)
+  }
+
+  // The label the audit document is headed with. The active preset's name when
+  // the set matches one, and nothing when it does not: a set the user has since
+  // edited is no longer that preset, and heading the report with a stale name
+  // would misdescribe the very thing the report exists to describe.
+  const auditLabel = allPresets.find(p => p.id === getActivePresetId(rawState, allPresets))?.label ?? null
+
+  // The audit document. Named for what it is about (the user's motion tokens)
+  // rather than for the tool that produced it: this file leaves here and lands in
+  // somebody else's repo or pull request, where a "cadence-" prefix would name
+  // the wrong thing. text/markdown so it opens as a document.
+  function handleAuditDownload() {
+    downloadTextFile(
+      'motion-token-audit.md',
+      auditToMarkdown(rawState, { presetLabel: auditLabel }),
+      'text/markdown',
+    )
+  }
+
+  async function handleAuditCopy() {
+    try {
+      await navigator.clipboard.writeText(auditToMarkdown(rawState, { presetLabel: auditLabel }))
+      setAuditCopied(true)
+      setTimeout(() => setAuditCopied(false), 1500)
+    } catch {
+      // Same posture as the export Copy button: the clipboard API is unavailable
+      // in insecure contexts, and Download is the working path there.
+    }
   }
 
   const liveTokens = stateToTokens(rawState)
@@ -2188,7 +2266,7 @@ export function TokenLab() {
         info={<PrivacyInfoGlyph />}
         infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
-        <ExportSection rawState={rawState} />
+        <ExportSection rawState={rawState} onOpenAudit={() => setAuditOpen(true)} />
       </ControlSection>
     </>
   )
@@ -2278,13 +2356,40 @@ export function TokenLab() {
       )}
 
       {/* Import report. Opens after any import attempt; the title reflects
-          success vs a fatal parse / validation failure. */}
+          success vs a fatal parse / validation failure.
+
+          chrome, for the same reason the audit report below carries it: this
+          dialog reports ON a token set, so it must not be timed BY one. The set
+          it is describing is the one that just loaded, which means without this
+          a file carrying duration.slow: 2000ms would take two seconds to tell
+          you it had loaded, and a file carrying near-zero would flash the report
+          in with no transition at all. Both report dialogs now share the fixed
+          --feedback-* timing, so they open identically regardless of what is on
+          the sliders. */}
       <Modal
         isOpen={importResult !== null}
         onClose={() => setImportResult(null)}
         title={importResult?.ok ? 'Import complete' : 'Import failed'}
+        chrome
       >
         {importResult && <ImportReport result={importResult} />}
+      </Modal>
+
+      {/* The audit report. chrome: this dialog is the tool talking about the
+          user's token set, so it must not be timed BY that set. See the chrome
+          prop's note in Modal. */}
+      <Modal
+        isOpen={auditOpen}
+        onClose={() => setAuditOpen(false)}
+        title="Motion token audit"
+        chrome
+      >
+        <TokenAuditReport
+          state={rawState}
+          onDownload={handleAuditDownload}
+          onCopy={handleAuditCopy}
+          copied={auditCopied}
+        />
       </Modal>
 
     </div>

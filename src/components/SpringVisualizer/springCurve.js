@@ -106,15 +106,26 @@ export function overshootFraction(params) {
 // Walks the analytic envelope rather than the samples so it is independent of how
 // densely the chart is drawn. For under/critical the envelope is decay·e^{-r t};
 // for overdamped the slow root dominates. Solve envelope = band for t.
-export function settleTime(params, band = 0.02) {
+//
+// clamp (default true) exists because this function was written to label a chart,
+// where a number past the plot window is not worth drawing and WINDOW_MAX is the
+// honest edge of what the visualizer shows. The token audit asks a different
+// question: it wants to report how long a spring actually rings, and a set of
+// in-range values can describe a spring that takes a minute to settle. Clamping
+// that to 4 would hide exactly the case the audit exists to surface, so it passes
+// { clamp: false } and gets the raw solve. The visualizer is untouched.
+export function settleTime(params, band = 0.02, { clamp = true } = {}) {
   const p = safe(params)
   if (!p) return 0
   const rate = decayRate(p)
-  if (!(rate > 0)) return settleWindow(p)
+  // Unreachable once safe() has guaranteed positive params (every branch of
+  // decayRate is then positive), kept as a guard for a direct caller. Unclamped,
+  // "the transient never decays" is honestly Infinity rather than a plot width.
+  if (!(rate > 0)) return clamp ? settleWindow(p) : Infinity
   // Envelope amplitude at t=0 is ~1 for the underdamped cosine and for the
   // overdamped slow term; ln(1/band) / rate is the standard settle estimate.
   const t = Math.log(1 / band) / rate
-  return Math.min(t, WINDOW_MAX)
+  return clamp ? Math.min(t, WINDOW_MAX) : t
 }
 
 // Sample the curve for drawing: evenly spaced points across the settle window,
