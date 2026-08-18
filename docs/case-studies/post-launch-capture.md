@@ -136,5 +136,5 @@ Pre-post check clicks and any dry-run clicks land in the counts; the baseline ro
 
 | Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Link clicks (channel) | Exports (fmt) | Imports | Stars | Forks | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 2026-08-17 | baseline | 0 | 0 | 0 | 0 | tbd | 7 | 16 (rive/tool 2, claudeai/cs 2, rest 1) | 1 | 1 | 0 | 0 | Pre-launch test clicks; subtract this row from day-0 totals. Uniques pending a dashboard read. |
+| 2026-08-17 | baseline | 0 | 0 | 0 | 0 | 19 | 7 | 16 (rive/tool 2, claudeai/cs 2, rest 1) | 1 | 1 | 0 | 0 | Pre-launch test clicks; subtract this row from day-0 totals. Visits (19) exceeds views (7), so the two were likely read over different time ranges; re-read both from one range at the day-before-launch recapture. |
 | | 0 | | | | | | | | | | | | |
