@@ -129,6 +129,7 @@ One link per channel per destination. The same link goes out every time a channe
 | Rive community | `cadence.davidpreli.com/l/rive` | `cadence.davidpreli.com/l/rive-cs` |
 | Contra | `cadence.davidpreli.com/l/contra` | `cadence.davidpreli.com/l/contra-cs` |
 | Direct outreach | `cadence.davidpreli.com/l/dm` | `cadence.davidpreli.com/l/dm-cs` |
+| LinkedIn Featured (profile) | `cadence.davidpreli.com/l/featured` | `cadence.davidpreli.com/l/featured-cs` |
 
 Pre-post check clicks and any dry-run clicks land in the counts; the baseline row absorbs them, which is one more reason the baseline capture is not optional.
 

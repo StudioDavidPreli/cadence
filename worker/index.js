@@ -137,7 +137,9 @@ async function handleEvent(request, env) {
 //   The pre-flight step of clicking every link before posting is what catches
 //   the typo; this branch just keeps it from costing a visitor.
 
-const VISIT_CHANNELS = ['linkedin', 'som', 'claudeai', 'webdev', 'rive', 'contra', 'dm'];
+// 'featured' is the LinkedIn Featured section: profile-driven clicks (someone
+// looking the profile up), kept separate from 'linkedin' (feed clicks on posts).
+const VISIT_CHANNELS = ['linkedin', 'som', 'claudeai', 'webdev', 'rive', 'contra', 'dm', 'featured'];
 // Trailing slash matters: the bare path answers a 308 to add it, so this
 // spelling saves every case-study click a second redirect hop.
 const CASE_STUDY_URL = 'https://davidpreli.com/cadence/';

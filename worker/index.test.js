@@ -131,7 +131,7 @@ describe('GET /l/<slug>', () => {
     })
   })
 
-  it.each(['som', 'claudeai', 'webdev', 'rive', 'contra', 'dm'])(
+  it.each(['som', 'claudeai', 'webdev', 'rive', 'contra', 'dm', 'featured'])(
     'accepts channel %s',
     async (channel) => {
       const env = mockEnv()
