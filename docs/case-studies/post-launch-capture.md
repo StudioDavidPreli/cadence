@@ -28,7 +28,7 @@ The amendment gets its own posting round when it lands. Target: first update at 
 
 Day zero is a Tuesday. The weekday anchors carry more weight than the day numbers: Tuesday morning is the strongest LinkedIn slot, Friday the weakest, and the second Tuesday is where the case study lands. If the calendar slips, slip it a week, not a day.
 
-**Day zero is set: Tuesday 2026-08-18** (David, decided 2026-08-18). Every day number in the table counts from this date. **Actual publish: 9:34 AM Eastern.** The 9:15 scheduled post failed on link format: LinkedIn's scheduler rejects scheme-less URLs, so every link in a post must be written complete, `https://` included. The trace-link table below now carries the full spelling; paste from it, never retype.
+**Day zero is set: Tuesday 2026-08-18** (David, decided 2026-08-18). Every day number in the table counts from this date. **Actual publish: 9:34 AM Eastern.** The 9:15 scheduled post failed on link format: LinkedIn's scheduler rejects scheme-less URLs, so every link in a post must be written complete, `https://` included. The trace-link table below now carries the full spelling; paste from it, never retype. A second suspected factor (unconfirmed): the Vimeo video's embed-domain restriction, which would block any surface embedding the player rather than hosting a native upload. Lesson either way, found 2026-08-18: the video's embed allowlist is a pre-flight item; every posting surface that embeds the player must be allowed (the case-study page at davidpreli.com embeds it, confirmed), or the setting goes to Anywhere and the class of failure disappears.
 
 | Day | Weekday | Channel | What |
 |---|---|---|---|
