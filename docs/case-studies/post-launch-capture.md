@@ -28,6 +28,8 @@ The amendment gets its own posting round when it lands. Target: first update at 
 
 Day zero is a Tuesday. The weekday anchors carry more weight than the day numbers: Tuesday morning is the strongest LinkedIn slot, Friday the weakest, and the second Tuesday is where the case study lands. If the calendar slips, slip it a week, not a day.
 
+**Day zero is set: Tuesday 2026-08-18, 9:15 AM Eastern** (David, decided 2026-08-18). Every day number in the table counts from this date.
+
 | Day | Weekday | Channel | What |
 |---|---|---|---|
 | 0 | Tue | LinkedIn | Launch. Native video upload, captions burned in. Tool link and case-study link both in the body. |
