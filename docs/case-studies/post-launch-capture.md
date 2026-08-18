@@ -28,7 +28,7 @@ The amendment gets its own posting round when it lands. Target: first update at 
 
 Day zero is a Tuesday. The weekday anchors carry more weight than the day numbers: Tuesday morning is the strongest LinkedIn slot, Friday the weakest, and the second Tuesday is where the case study lands. If the calendar slips, slip it a week, not a day.
 
-**Day zero is set: Tuesday 2026-08-18, 9:15 AM Eastern** (David, decided 2026-08-18). Every day number in the table counts from this date.
+**Day zero is set: Tuesday 2026-08-18** (David, decided 2026-08-18). Every day number in the table counts from this date. **Actual publish: 9:34 AM Eastern.** The 9:15 scheduled post failed on link format: LinkedIn's scheduler rejects scheme-less URLs, so every link in a post must be written complete, `https://` included. The trace-link table below now carries the full spelling; paste from it, never retype.
 
 | Day | Weekday | Channel | What |
 |---|---|---|---|
@@ -124,14 +124,14 @@ One link per channel per destination. The same link goes out every time a channe
 
 | Channel | Tool | Case study |
 |---|---|---|
-| LinkedIn | `cadence.davidpreli.com/l/linkedin` | `cadence.davidpreli.com/l/linkedin-cs` |
-| School of Motion | `cadence.davidpreli.com/l/som` | `cadence.davidpreli.com/l/som-cs` |
-| r/ClaudeAI | `cadence.davidpreli.com/l/claudeai` | `cadence.davidpreli.com/l/claudeai-cs` |
-| Engineer subreddit | `cadence.davidpreli.com/l/webdev` | `cadence.davidpreli.com/l/webdev-cs` |
-| Rive community | `cadence.davidpreli.com/l/rive` | `cadence.davidpreli.com/l/rive-cs` |
-| Contra | `cadence.davidpreli.com/l/contra` | `cadence.davidpreli.com/l/contra-cs` |
-| Direct outreach | `cadence.davidpreli.com/l/dm` | `cadence.davidpreli.com/l/dm-cs` |
-| LinkedIn Featured (profile) | `cadence.davidpreli.com/l/featured` | `cadence.davidpreli.com/l/featured-cs` |
+| LinkedIn | `https://cadence.davidpreli.com/l/linkedin` | `https://cadence.davidpreli.com/l/linkedin-cs` |
+| School of Motion | `https://cadence.davidpreli.com/l/som` | `https://cadence.davidpreli.com/l/som-cs` |
+| r/ClaudeAI | `https://cadence.davidpreli.com/l/claudeai` | `https://cadence.davidpreli.com/l/claudeai-cs` |
+| Engineer subreddit | `https://cadence.davidpreli.com/l/webdev` | `https://cadence.davidpreli.com/l/webdev-cs` |
+| Rive community | `https://cadence.davidpreli.com/l/rive` | `https://cadence.davidpreli.com/l/rive-cs` |
+| Contra | `https://cadence.davidpreli.com/l/contra` | `https://cadence.davidpreli.com/l/contra-cs` |
+| Direct outreach | `https://cadence.davidpreli.com/l/dm` | `https://cadence.davidpreli.com/l/dm-cs` |
+| LinkedIn Featured (profile) | `https://cadence.davidpreli.com/l/featured` | `https://cadence.davidpreli.com/l/featured-cs` |
 
 Pre-post check clicks and any dry-run clicks land in the counts; the baseline row absorbs them, which is one more reason the baseline capture is not optional.
 
