@@ -35,6 +35,7 @@ Day zero is a Tuesday. The weekday anchors carry more weight than the day number
 | 0 | Tue | LinkedIn | Launch. Native video upload, captions burned in. Tool link and case-study link both in the body. |
 | 1 | Wed | School of Motion Circle | Short overview, tool link. |
 | 2 | Thu | r/ClaudeAI | Video and tool link. Technical detail in a top-level comment from OP. |
+| 2 | Thu | LinkedIn | Native-video post, motion-design angle (added 2026-08-18: the launch post shipped without its video). |
 | 3 | Fri | Rive community | The tile work as the subject. First direct-outreach batch, ten messages. |
 | 4-5 | Sat/Sun | none | Monitor, reply. |
 | 6 | Mon | none | Reply day. |
@@ -140,4 +141,4 @@ Pre-post check clicks and any dry-run clicks land in the counts; the baseline ro
 | Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Link clicks (channel) | Exports (fmt) | Imports | Stars | Forks | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-08-17 | baseline | 0 | 0 | 0 | 0 | 19 | 7 | 18 (rive/tool 2, claudeai/cs 2, featured 1, featured-cs 1, rest 1) | 1 | 1 | 0 | 0 | Pre-launch test clicks; subtract this row from day-0 totals. Featured-card test clicks added 2026-08-18 pre-launch. Visits (19) exceeds views (7): read over different time ranges; day-0 capture reads both from one range. |
-| 2026-08-18 | 0 | | | | | | | | | | | | Published 9:34 AM ET: linkedin.com/posts/davidpreli_designsystems-motiondesign-designengineering-share-7495472968685207552-jlSm. Body carries plain site URLs; the trace links did not survive the scheduler. LinkedIn-channel clicks for this post are therefore not counted in `l/linkedin`: read the launch post as analytics totals minus the tagged channels, corroborated by the linkedin.com referrer row. Featured-card trace links unaffected. |
+| 2026-08-18 | 0 | | | | | | | | | | | | Published 9:34 AM ET: linkedin.com/posts/davidpreli_designsystems-motiondesign-designengineering-share-7495472968685207552-jlSm. Body carries plain site URLs; the trace links did not survive the scheduler. LinkedIn-channel clicks for this post are therefore not counted in `l/linkedin`: read the launch post as analytics totals minus the tagged channels, corroborated by the linkedin.com referrer row. Featured-card trace links unaffected. Post shipped without the native video; its link card leads to the case study, which opens on the working Vimeo embed. Native-video LinkedIn post inserted day 2. SoM Circle post went live day 0 (ahead of its day-1 slot), video embed playing. |
