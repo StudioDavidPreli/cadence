@@ -34,13 +34,13 @@ Day zero is a Tuesday. The weekday anchors carry more weight than the day number
 |---|---|---|---|
 | 0 | Tue | LinkedIn | Launch. Native video upload, captions burned in. Tool link and case-study link both in the body. |
 | 1 | Wed | School of Motion Circle | Short overview, tool link. |
-| 2 | Thu | r/ClaudeAI | Video and tool link. Technical detail in a top-level comment from OP. |
+| 2 | Thu | r/ClaudeAI | POSTPONED (2026-08: Reddit gates new accounts on account age / time-in-community, and the account is brand new). Post when unlocked; draft holds. Interim: participate genuinely in the target subs, which ages the account and gives the eventual post a human posting history. |
 | 2 | Thu | LinkedIn | Native-video post, motion-design angle, 9:15 AM, posted by hand, never scheduled (added 2026-08-18: the launch post shipped without its video; draft final in `~/Desktop/cadenceLaunch/posts/linkedin-day2-video.md`). |
 | 3 | Fri | Rive community | The tile work as the subject. First direct-outreach batch, ten messages. |
 | 4-5 | Sat/Sun | none | Monitor, reply. |
 | 6 | Mon | none | Reply day. |
 | 7 | Tue | LinkedIn | Case study: The Token System, Fields and Canvas. Tag Rive. |
-| 8 | Wed | r/webdev or r/Frontend | The receiving-end question, below. |
+| 8 | Wed | r/webdev or r/Frontend | POSTPONED, same Reddit account gates as day 2. Post when unlocked. |
 | 9 | Thu | none | Reply day. |
 | 10 | Fri | none | Reply day. |
 | 11-12 | Sat/Sun | none | Monitor. |
