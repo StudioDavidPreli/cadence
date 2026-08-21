@@ -137,6 +137,8 @@ One link per channel per destination. The same link goes out every time a channe
 
 Pre-post check clicks and any dry-run clicks land in the counts; the baseline row absorbs them, which is one more reason the baseline capture is not optional.
 
+**Typo incident, found 2026-08-19:** the live Contra post carried `cadcadence.davidpreli.com/l/contra-cs` (hostname retyped at entry rather than pasted; the draft file was correct). Every case-study click from Contra between publish and the fix hit a dead hostname: uncounted, and worse, a dead end for the visitor. Fix: the post link edited in place, and `cadcadence.davidpreli.com` added to the cadence Worker as a custom domain, which turns the typo into a working alias (same Worker, same counting, same redirect). Contra `-cs` counts before the fix are an undercount; the ledger reads them accordingly. Second confirmation of the paste-never-retype rule.
+
 ## The ledger
 
 | Date | Day | LI impressions | LI reactions | LI comments | LI reposts | Uniques | Views | Link clicks (channel) | Exports (fmt) | Imports | Stars | Forks | Notes |
