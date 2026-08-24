@@ -89,6 +89,54 @@
       "viewUniques": 0,
       "clones": 17,
       "cloneUniques": 8
+    },
+    "2026-08-16": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 60,
+      "cloneUniques": 42
+    },
+    "2026-08-17": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 73,
+      "cloneUniques": 34
+    },
+    "2026-08-18": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 43,
+      "cloneUniques": 30
+    },
+    "2026-08-19": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 22,
+      "cloneUniques": 13
+    },
+    "2026-08-20": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 11,
+      "cloneUniques": 6
+    },
+    "2026-08-21": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 6,
+      "cloneUniques": 6
+    },
+    "2026-08-22": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 11,
+      "cloneUniques": 5
+    },
+    "2026-08-23": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 2,
+      "cloneUniques": 2
     }
   },
   "snapshots": [
@@ -136,6 +184,22 @@
       "clones14d": {
         "count": 40,
         "uniques": 29
+      },
+      "referrers": [],
+      "paths": []
+    },
+    {
+      "capturedAt": "2026-08-24T10:03:22.422Z",
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "views14d": {
+        "count": 0,
+        "uniques": 0
+      },
+      "clones14d": {
+        "count": 252,
+        "uniques": 123
       },
       "referrers": [],
       "paths": []
