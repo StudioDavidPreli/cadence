@@ -137,6 +137,48 @@
       "viewUniques": 0,
       "clones": 2,
       "cloneUniques": 2
+    },
+    "2026-08-24": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 6,
+      "cloneUniques": 6
+    },
+    "2026-08-25": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-26": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-08-27": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-28": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-29": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 0,
+      "cloneUniques": 0
+    },
+    "2026-08-30": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
     }
   },
   "snapshots": [
@@ -200,6 +242,22 @@
       "clones14d": {
         "count": 252,
         "uniques": 123
+      },
+      "referrers": [],
+      "paths": []
+    },
+    {
+      "capturedAt": "2026-08-31T17:03:26.051Z",
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "views14d": {
+        "count": 0,
+        "uniques": 0
+      },
+      "clones14d": {
+        "count": 177,
+        "uniques": 91
       },
       "referrers": [],
       "paths": []
