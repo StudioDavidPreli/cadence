@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,6 +17,7 @@
   },
   "dependencies": {
     "@rive-app/react-webgl2": "^4.29.4",
+    "cadence-tokens": "*",
     "framer-motion": "^11.0.0",
     "prismjs": "^1.30.0",
     "react": "^18.3.1",

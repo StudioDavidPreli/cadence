@@ -1,8 +1,22 @@
-// Motion-token preset data. Lives in its own leaf module so it can be imported
-// by TokenLab (which authored these presets) and by PrincipleCard (the Timing
-// principle demo) without forming a circular dependency. TokenLab imports
-// PrinciplesLibrary, which imports PrincipleCard, so PrincipleCard cannot
-// import from TokenLab without a cycle. A separate leaf module breaks the loop.
+// cadence-tokens: the Cadence motion token system as a package.
+//
+// This module was src/data/motionPresets.js until 2026-09-03, when it was
+// extracted into a workspace package so the token system has a home outside
+// the site (docs/briefings/V2_BUILD_ORDER_2026-09-03.md, item 2, decisions
+// D1-D5). The site is now this package's first consumer: every app import
+// that used to say '../../data/motionPresets' says 'cadence-tokens' instead,
+// and the values live here alone. Nothing about the module's original reason
+// changed: it is still a leaf with no imports, so any component can consume
+// it without forming a cycle (the original motivation was that TokenLab
+// imports PrinciplesLibrary imports PrincipleCard, so shared data could not
+// live in TokenLab).
+//
+// Two vocabularies live here, deliberately namespaced apart (decision D5):
+// the interaction tokens (duration / easing / delay / scale / spring, the
+// Token Lab vocabulary) and the ambient presets (speed / easing k / spread /
+// cell / gap, the Motion Tiles vocabulary). Snappy, Standard, and Cinematic
+// name the same three personalities in both; the named preset is the unit
+// the two vocabularies share.
 
 // ─── Easing curves ────────────────────────────────────────────────────────────
 // Each curve has a `css` form (cubic-bezier string, for setProperty calls) and
@@ -99,6 +113,31 @@ export const BUILT_IN_PRESETS = [
     },
   },
 ]
+
+// ─── Ambient presets (the Motion Tiles vocabulary) ────────────────────────────
+// The second vocabulary the three personalities speak. Where the interaction
+// tokens above describe event-driven motion (a press, an enter, an exit), these
+// set an ambient clock over a field of tiles: `speed` divides the base period
+// (period = AMBIENT_BASE_PERIOD / speed), `easing` is the exponent k in the
+// symmetric ease t^k / (t^k + (1 - t)^k) (k = 1.70 is the measured source
+// easing, roughly CSS ease-in-out), `spread` staggers the field spatially,
+// and `cell` / `gap` size the pixelation path effect. `riveInstance` is the
+// name of the ViewModel instance each preset binds inside the .riv files, so
+// a consumer wiring their own Rive file to these presets binds the same
+// palette the site does.
+//
+// The values are lifted verbatim from the Motion Tiles grid's PRESETS table
+// (MotionTilesGrid.jsx), which remains the running copy until build-order
+// item 3 points the grid at this export. Until then this is the declared
+// source of truth and the grid is a to-be-retired duplicate; do not edit one
+// without the other.
+export const AMBIENT_BASE_PERIOD = 2.0 // seconds per cycle at speed 1
+
+export const AMBIENT_PRESETS = {
+  snappy:    { label: 'Snappy',    riveInstance: 'snappy',    speed: 1.25, easing: 3.60, spread: 0.20, cell: 2,   gap: 0.25 },
+  standard:  { label: 'Standard',  riveInstance: 'standard',  speed: 1.0,  easing: 1.70, spread: 0.40, cell: 3.5, gap: 0.05 },
+  cinematic: { label: 'Cinematic', riveInstance: 'cinematic', speed: 0.8,  easing: 1.15, spread: 0.70, cell: 8,   gap: 1.00 },
+}
 
 // ─── stateToTokens ────────────────────────────────────────────────────────────
 // Converts a preset's `state` object (CSS-side units: ms, named easing keys
@@ -223,12 +262,16 @@ export function tokenKeyToCssSuffix(key) {
 // type, and it round-trips through importTokens. Tokens are grouped under a
 // top-level `motion` namespace so the file composes cleanly if colour or spacing
 // tokens are ever added beside it.
-export function toDtcgJson(state) {
+// toDtcgDoc returns the document as an object; toDtcgJson stringifies it. The
+// split exists for the package's generator (buildTokensDocument), which embeds
+// the DTCG tree of each preset inside cadence.tokens.json and must not embed a
+// pre-stringified blob. The in-app export button still downloads the string.
+export function toDtcgDoc(state) {
   const t = stateToExport(state)
   const duration = ms => ({ $type: 'duration', $value: `${ms}ms` })
   const bezier   = arr => ({ $type: 'cubicBezier', $value: arr })
   const number   = n => ({ $type: 'number', $value: n })
-  const doc = {
+  return {
     motion: {
       duration: mapGroup(t.duration, duration),
       easing:   mapGroup(t.easing, bezier),
@@ -240,7 +283,10 @@ export function toDtcgJson(state) {
       scalar:   number(t.scalar),
     },
   }
-  return JSON.stringify(doc, null, 2)
+}
+
+export function toDtcgJson(state) {
+  return JSON.stringify(toDtcgDoc(state), null, 2)
 }
 
 // Flat JSON mirroring the CSS variable names and units: ms strings for
@@ -267,12 +313,19 @@ export function toFlatJson(state) {
 // unitless. Only the editable token scale is emitted — the `--feedback-*` vars
 // in motion.css are tool chrome, not part of the exported token document. This
 // is export-only: importTokens reads JSON, not CSS.
-export function toCssVars(state) {
+//
+// `prefix` (decision D4): the property namespace. It defaults to '--motion-'
+// so the in-app export and the site's own stylesheet stay on the spelling the
+// whole codebase already reads. The published package file is generated at
+// '--cadence-' instead, because in a stranger's codebase a bare '--motion-'
+// namespace is a collision waiting to happen and 'cadence' says whose tokens
+// these are. One emitter, two call sites, no fork to drift.
+export function toCssVars(state, { prefix = '--motion-' } = {}) {
   const t = stateToExport(state)
-  // Each family becomes a run of `  --motion-<family>-<key>: <value>;` lines.
+  // Each family becomes a run of `  <prefix><family>-<key>: <value>;` lines.
   // The families are separated by a blank line, matching motion.css's grouping.
   const block = (family, group, fmt) =>
-    Object.entries(group).map(([k, v]) => `  --motion-${family}-${tokenKeyToCssSuffix(k)}: ${fmt(v)};`)
+    Object.entries(group).map(([k, v]) => `  ${prefix}${family}-${tokenKeyToCssSuffix(k)}: ${fmt(v)};`)
   const lines = [
     ...block('duration', t.duration, ms => `${ms}ms`),
     '',
@@ -285,10 +338,10 @@ export function toCssVars(state) {
     ...block('spring', t.spring, n => n),
     '',
     // The duration scalar is a lone value, so it does not go through block()
-    // (which builds --motion-<family>-<key> names). Its custom property keeps
-    // the recorded --motion-duration-scalar spelling even though its JSON path
-    // is the shorter `scalar`.
-    `  --motion-duration-scalar: ${t.scalar};`,
+    // (which builds <prefix><family>-<key> names). Its custom property keeps
+    // the recorded duration-scalar spelling even though its JSON path is the
+    // shorter `scalar`.
+    `  ${prefix}duration-scalar: ${t.scalar};`,
   ]
   return `:root {\n${lines.join('\n')}\n}`
 }
@@ -358,6 +411,43 @@ export function toFramerMotion(state) {
     spring,
     transitions,
   ].join('\n\n') + '\n'
+}
+
+// ─── The package document ─────────────────────────────────────────────────────
+// buildTokensDocument composes cadence.tokens.json, the canonical published
+// artifact: all three personalities, both vocabularies. It is a pure function
+// (the generator script just writes its return value) so the document's shape
+// is unit-testable without touching the filesystem.
+//
+// Shape decisions:
+// - `interaction` is each preset's DTCG `motion` group, typed leaves and all.
+//   Reusing toDtcgDoc means the published document and the in-app DTCG export
+//   can never disagree about a value or a $type.
+// - `ambient` is plain numbers plus the Rive instance name. DTCG has no types
+//   for a clock vocabulary (period divisors, ease exponents, path-effect cell
+//   sizes), and inventing $types would be costume, not compliance. The two
+//   vocabularies keeping different shapes in the same file IS the scoping
+//   decision (one tool bar per tool, 2026-07-16) expressed as data.
+// - `version` is injected by the caller (the generator passes the package
+//   version) rather than imported here, so the source module never reads its
+//   own package.json at runtime.
+export function buildTokensDocument({ version = '0.0.0' } = {}) {
+  return {
+    name: 'cadence-tokens',
+    version,
+    // Seconds per ambient cycle at speed 1; period = ambientBasePeriodSeconds / speed.
+    ambientBasePeriodSeconds: AMBIENT_BASE_PERIOD,
+    presets: Object.fromEntries(
+      BUILT_IN_PRESETS.map(preset => {
+        const { label, riveInstance, ...ambientValues } = AMBIENT_PRESETS[preset.id]
+        return [preset.id, {
+          label: preset.label,
+          interaction: toDtcgDoc(preset.state).motion,
+          ambient: { riveInstance, ...ambientValues },
+        }]
+      })
+    ),
+  }
 }
 
 // ─── Token import ─────────────────────────────────────────────────────────────

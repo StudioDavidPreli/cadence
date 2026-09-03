@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { StaticThemeProvider } from '../../context/ThemeContext'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
-import { INITIAL_STATE, stateToTokens } from '../../data/motionPresets'
+import { INITIAL_STATE, stateToTokens } from 'cadence-tokens'
 import { principleBySlug } from '../../data/principles'
 import { ExpandedPrincipleBody } from '../../components/PrincipleCard/ExpandedPrincipleBody'
 // Imported for one hashed class name, not for styling: `fire` needs a handle on

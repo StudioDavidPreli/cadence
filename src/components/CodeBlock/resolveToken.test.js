@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { extractTokenPaths, resolveTokenDisplay, tokenPathMatchesActive, isEditableToken } from './resolveToken'
 import { DEMO_SNIPPETS } from '../TokenLab/demoSnippets'
-import { EDITABLE_TOKEN_SCHEMA, FIXED_REFERENCE_PATHS } from '../../data/motionPresets'
+import { EDITABLE_TOKEN_SCHEMA, FIXED_REFERENCE_PATHS } from 'cadence-tokens'
 
 // The schema and the fixed set use control-layer naming (`easing`); snippets and
 // the runtime tokens use `ease`. These convert between the two so the partition

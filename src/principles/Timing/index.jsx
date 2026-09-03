@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Toggle } from '../../components/Toggle'
-import { BUILT_IN_PRESETS, stateToTokens } from '../../data/motionPresets'
+import { BUILT_IN_PRESETS, stateToTokens } from 'cadence-tokens'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { useDemoMotionAllowed } from '../../components/DemoMotionGate/motionGateContext'
 import styles from './Timing.module.css'

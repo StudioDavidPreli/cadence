@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { auditTokens, auditToMarkdown, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
-import { INITIAL_STATE, BUILT_IN_PRESETS } from '../data/motionPresets'
+import { INITIAL_STATE, BUILT_IN_PRESETS } from 'cadence-tokens'
 
 // Build a state by overriding one family of INITIAL_STATE, so each test states
 // only the thing it is testing and everything else stays at a known-clean value.

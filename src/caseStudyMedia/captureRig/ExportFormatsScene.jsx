@@ -6,7 +6,7 @@ import {
   toFlatJson,
   toCssVars,
   toFramerMotion,
-} from '../../data/motionPresets'
+} from 'cadence-tokens'
 import { Button } from '../../components/Button'
 import { ScrambleCode } from './ScrambleCode'
 import rigStyles from './CaptureRig.module.css'

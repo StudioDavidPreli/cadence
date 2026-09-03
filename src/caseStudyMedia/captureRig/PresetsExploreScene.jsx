@@ -6,7 +6,7 @@ import {
 } from '../../components/TokenLab'
 import { Button } from '../../components/Button'
 import { ActiveTokenProvider } from '../../context/ActiveTokenContext'
-import { INITIAL_STATE, BUILT_IN_PRESETS, reducer } from '../../data/motionPresets'
+import { INITIAL_STATE, BUILT_IN_PRESETS, reducer } from 'cadence-tokens'
 import rigStyles from './CaptureRig.module.css'
 
 // ─── PresetsExploreScene (V01 material, David's spec 2026-08-11) ─────────────

@@ -51,7 +51,7 @@ import {
   tokenKeyToCssSuffix,
   importTokens,
   reducer,
-} from '../../data/motionPresets'
+} from 'cadence-tokens'
 import { trackEvent } from '../../utils/trackEvent'
 import styles from './TokenLab.module.css'
 
@@ -161,11 +161,11 @@ const TOKEN_COMPONENT_MAP = {
 }
 
 // EASING_CURVES, INITIAL_STATE, BUILT_IN_PRESETS, and stateToTokens now live
-// in src/data/motionPresets.js and are imported above. They were extracted so
+// in the cadence-tokens package (packages/tokens) and are imported above. They were extracted so
 // PrincipleCard's Timing demo can read the same preset data without forming
 // a circular import (TokenLab → PrinciplesLibrary → PrincipleCard → TokenLab).
 
-// The reducer itself moved to motionPresets.js too (2026-08-16): the capture
+// The reducer itself moved to the token module too (2026-08-16, now cadence-tokens): the capture
 // rig needs the REAL reducer, and exporting a non-component from this module
 // disables React Fast Refresh for the whole file (react-refresh's rule), so
 // every dev edit to TokenLab would drop in-progress state on save. It lives
@@ -263,7 +263,7 @@ function syncToCss(action) {
   }
 }
 
-// stateToTokens (the Channel 2 transform) lives in src/data/motionPresets.js
+// stateToTokens (the Channel 2 transform) lives in the cadence-tokens package
 // alongside the preset data it transforms. Imported above.
 
 // ─── Slider config ────────────────────────────────────────────────────────────
@@ -329,7 +329,7 @@ const SCALE_CONFIG_EXPLORE = {
 
 // Spring — unitless. Constrained ranges cover the band that produces usable UI
 // springs (a legible arrival, a little bounce, not a rubber ball and not a
-// door-closer). Explore ranges are the SPRING_BOUNDS from motionPresets.js, so an
+// door-closer). Explore ranges are the SPRING_BOUNDS from cadence-tokens, so an
 // imported value always lands on the track. The three params carry different
 // ranges, so unlike the families above each key is tuned on its own.
 const SPRING_CONFIG = {
@@ -346,7 +346,7 @@ const SPRING_CONFIG_EXPLORE = {
 // Duration scalar — a single unitless multiplier (effective duration = base ×
 // scalar), scrubbed inside DurationVisualizer rather than as a section slider.
 // Constrained covers a legible band around 1 (half speed to double); Explore
-// widens to SCALAR_BOUNDS (motionPresets.js) so an imported value always lands on
+// widens to SCALAR_BOUNDS (cadence-tokens) so an imported value always lands on
 // the track, the same lockstep SPRING_CONFIG_EXPLORE keeps with SPRING_BOUNDS.
 // Starting ranges; David tunes them by feel against the live strip.
 const SCALAR_CONFIG         = { min: 0.5, max: 2, step: 0.05, unit: '×' }
@@ -446,7 +446,7 @@ function migratePresetScalar(preset) {
 // undefined. Only the three renamed keys are remapped; any other key (lift, or
 // a value already under the new name) passes through. A preset with no
 // state.scale is returned untouched. Mirrors the import-side alias in
-// motionPresets.js, applied here for the localStorage path.
+// cadence-tokens, applied here for the localStorage path.
 const SCALE_MIGRATION = { subtle: 'pressSubtle', base: 'pressBase', expressive: 'pressExpressive' }
 function migratePresetScale(preset) {
   const scale = preset?.state?.scale

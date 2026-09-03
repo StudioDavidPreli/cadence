@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { EASING_CURVES } from '../../data/motionPresets'
+import { EASING_CURVES } from 'cadence-tokens'
 import styles from './DurationVisualizer.module.css'
 
 // Mode descriptions. Formerly a caption under the chart; now shown as a hover

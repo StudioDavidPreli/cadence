@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
-import { INITIAL_STATE, stateToTokens } from '../../data/motionPresets'
+import { INITIAL_STATE, stateToTokens } from 'cadence-tokens'
 import { Toggle } from '../../components/Toggle'
 import rigStyles from './CaptureRig.module.css'
 

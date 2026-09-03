@@ -9,7 +9,7 @@
 //   scale            → unitless number
 // so resolution is a lookup plus a per-group display format.
 
-import { EDITABLE_TOKEN_SCHEMA } from '../../data/motionPresets'
+import { EDITABLE_TOKEN_SCHEMA } from 'cadence-tokens'
 
 // Matches `tokens.<group>.<key>` for the five editable families. Global so a
 // single line with two reads (rare, snippets put one read per line) is fully
@@ -43,7 +43,7 @@ export function tokenPathMatchesActive(path, activeToken) {
 
 // Can the tool bar edit this token, or is it a fixed reference?
 //
-// EDITABLE_TOKEN_SCHEMA (data/motionPresets.js) is the single source of truth for
+// EDITABLE_TOKEN_SCHEMA (cadence-tokens) is the single source of truth for
 // what the editor exposes a control for. A token whose key is not in the schema
 // for its family is a fixed reference: ease.linear (corners only, nothing to
 // drag) and delay.none. Overshoot is in the schema, an editable slot whose

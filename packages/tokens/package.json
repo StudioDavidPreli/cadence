@@ -1,0 +1,18 @@
+{
+  "name": "cadence-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Cadence motion token system: three motion personalities (Snappy, Standard, Cinematic) as data, with emitters for CSS custom properties, DTCG, flat JSON, and Framer Motion.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate.mjs"
+  }
+}

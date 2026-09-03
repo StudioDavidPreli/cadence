@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
-import { INITIAL_STATE, stateToTokens } from '../../data/motionPresets'
+import { INITIAL_STATE, stateToTokens } from 'cadence-tokens'
 import { Button } from '../../components/Button'
 import tlStyles from '../../components/TokenLab/TokenLab.module.css'
 import rigStyles from './CaptureRig.module.css'

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
-import { EASING_CURVES, INITIAL_STATE, stateToTokens } from '../../data/motionPresets'
+import { EASING_CURVES, INITIAL_STATE, stateToTokens } from 'cadence-tokens'
 import { Toggle } from '../../components/Toggle'
 import { EasingVisualizer } from '../../components/EasingVisualizer'
 import { SpringVisualizer } from '../../components/SpringVisualizer'

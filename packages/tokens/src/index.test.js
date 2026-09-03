@@ -10,7 +10,7 @@ import {
   INITIAL_STATE,
   BUILT_IN_PRESETS,
   EASING_CURVES,
-} from './motionPresets'
+} from './index.js'
 
 // stateToTokens is the CSS-side -> React-side converter. These tests pin its
 // contract: ms become seconds, delay.none is injected, named easing slots

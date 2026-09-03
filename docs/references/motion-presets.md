@@ -2,7 +2,7 @@
 
 The three built-in presets and their token values. Standard is the baseline (its
 state is `INITIAL_STATE`); Snappy and Cinematic are the two personality
-contrasts. This document is a readable mirror of `src/data/motionPresets.js`,
+contrasts. This document is a readable mirror of the `cadence-tokens` package (`packages/tokens/src/index.js`, which was `src/data/motionPresets.js` until the 2026-09-03 extraction),
 which is the source of truth. When a preset value changes there, update the
 matching cell here.
 
@@ -109,7 +109,7 @@ curve, so it reads as an anchor there; toggling Explore off resets it. It is in
 ## Named easing curves
 
 The five curves the easing slots resolve to (`EASING_CURVES` in
-`motionPresets.js`). Each has a CSS `cubic-bezier()` form and a Framer Motion
+the `cadence-tokens` package). Each has a CSS `cubic-bezier()` form and a Framer Motion
 four-number form.
 
 | Curve | Bezier | Character |
