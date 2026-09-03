@@ -40,6 +40,7 @@ import {
   useViewModelInstance,
   useViewModelInstanceNumber,
 } from '@rive-app/react-webgl2'
+import { AMBIENT_PRESETS as PRESETS } from 'cadence-tokens'
 import { Modal } from '../Modal'
 import styles from './MotionTilesGrid.module.css'
 
@@ -232,13 +233,18 @@ const STATIC_POOL = Array.from({ length: STATIC_COUNT }, (_, k) => {
   }
 })
 
-// Presets. `instance` is the PathEffectVM instance the tiles bind (its baked palette);
-// speed/easing/spread feed the JS clock; cell/gap are written to each tile's VM.
-const PRESETS = {
-  snappy:    { label: 'Snappy',    instance: 'snappy',    speed: 1.25, easing: 3.60, spread: 0.20, cell: 2, gap: 0.25 },
-  standard:  { label: 'Standard',  instance: 'standard',  speed: 1.0,  easing: 1.70, spread: 0.40, cell: 3.5, gap: 0.05 },
-  cinematic: { label: 'Cinematic', instance: 'cinematic', speed: 0.8,  easing: 1.15, spread: 0.70, cell: 8, gap: 1.00 },
-}
+// Presets come from the cadence-tokens package (build-order item 3,
+// 2026-09-03): AMBIENT_PRESETS is the ambient vocabulary the three
+// personalities speak here, and importing it retires the duplicate table this
+// file carried while the values also lived baked into the VM instances and,
+// since item 2, in the package. One source now; "same k and speed inside and
+// outside the site" is enforced by this import, not by discipline.
+// `riveInstance` is the PathEffectVM instance the tiles bind (its baked
+// palette); speed/easing/spread feed the JS clock; cell/gap are written to
+// each tile's VM.
+//
+// PRESET_ORDER stays local on purpose: it is the button row's presentation
+// order (lowest to greatest spread), a UI concern, not part of the vocabulary.
 const PRESET_ORDER = ['snappy', 'standard', 'cinematic'] // lowest → greatest spread
 
 // Envelope: hold, ease up, hold, ease back. k is the easing exponent.
@@ -922,7 +928,7 @@ export function MotionTilesGrid() {
     setCellSize(p.cell)
     setGapSize(p.gap)
   }
-  const instanceName = PRESETS[preset].instance
+  const instanceName = PRESETS[preset].riveInstance
 
   // Board sizing: keep the whole grid roughly constant footprint (~720px) as N
   // changes, so 3×3 and 8×8 both read at a comfortable size. Set as CSS custom

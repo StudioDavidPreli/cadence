@@ -4,6 +4,7 @@ import {
   toDtcgJson,
   toCssVars,
   buildTokensDocument,
+  buildRiveDefaults,
   AMBIENT_PRESETS,
   AMBIENT_BASE_PERIOD,
   BUILT_IN_PRESETS,
@@ -104,5 +105,43 @@ describe('buildTokensDocument', () => {
 
   it('is JSON-serializable without loss', () => {
     expect(JSON.parse(JSON.stringify(doc))).toEqual(doc)
+  })
+})
+
+describe('buildRiveDefaults (build-order item 3)', () => {
+  const defaults = buildRiveDefaults()
+
+  it('names the view model and carries all three presets', () => {
+    expect(defaults.viewModel).toBe('PathEffectVM')
+    expect(Object.keys(defaults.presets).sort()).toEqual(Object.keys(AMBIENT_PRESETS).sort())
+  })
+
+  it('maps each preset to its VM instance and the four VM properties, under the .riv property names', () => {
+    for (const [id, ambient] of Object.entries(AMBIENT_PRESETS)) {
+      const preset = defaults.presets[id]
+      expect(preset.instance).toBe(ambient.riveInstance)
+      // cell/gap (the ambient vocabulary) become cellSize/gapSize (the VM
+      // property names in the shipped files); the emitter owns that seam.
+      expect(preset.properties).toEqual({
+        speed: ambient.speed,
+        easing: ambient.easing,
+        cellSize: ambient.cell,
+        gapSize: ambient.gap,
+      })
+    }
+  })
+
+  it('keeps spread out of the VM properties and in the clock block', () => {
+    // spread is a field-level stagger the clock applies, not a VM binding;
+    // documenting it as a property would describe wiring that does not exist.
+    for (const preset of Object.values(defaults.presets)) {
+      expect(preset.properties.spread).toBeUndefined()
+    }
+    expect(defaults.clock.basePeriodSeconds).toBe(AMBIENT_BASE_PERIOD)
+    expect(defaults.clock.spread.standard).toBe(AMBIENT_PRESETS.standard.spread)
+  })
+
+  it('is JSON-serializable without loss', () => {
+    expect(JSON.parse(JSON.stringify(defaults))).toEqual(defaults)
   })
 })

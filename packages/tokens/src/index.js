@@ -126,11 +126,10 @@ export const BUILT_IN_PRESETS = [
 // a consumer wiring their own Rive file to these presets binds the same
 // palette the site does.
 //
-// The values are lifted verbatim from the Motion Tiles grid's PRESETS table
-// (MotionTilesGrid.jsx), which remains the running copy until build-order
-// item 3 points the grid at this export. Until then this is the declared
-// source of truth and the grid is a to-be-retired duplicate; do not edit one
-// without the other.
+// The values were lifted verbatim from the Motion Tiles grid's PRESETS table;
+// since build-order item 3 (2026-09-03) the grid imports this export and its
+// own table is gone, so this is the only copy outside the .riv files' baked
+// VM instances. Tune a personality here and the field retimes with it.
 export const AMBIENT_BASE_PERIOD = 2.0 // seconds per cycle at speed 1
 
 export const AMBIENT_PRESETS = {
@@ -447,6 +446,60 @@ export function buildTokensDocument({ version = '0.0.0' } = {}) {
         }]
       })
     ),
+  }
+}
+
+// ─── Rive VM defaults ─────────────────────────────────────────────────────────
+// buildRiveDefaults composes cadence.rive.json (build-order item 3): the three
+// personalities as PathEffectVM values, for a consumer wiring their own Rive
+// file to the Cadence presets. Like buildTokensDocument it is a pure function
+// the generator script writes out.
+//
+// What it says and what it deliberately does not: `instance` is the named VM
+// instance a preset binds (each bakes its own palette in the shipped files);
+// `properties` are the four numbers a PathEffectVM carries per preset, under
+// the property names the .riv files use (cellSize/gapSize, not the shorter
+// cell/gap the ambient table speaks — the emitter owns that seam so neither
+// side renames for the other). `spread` is NOT here: it is a field-level
+// stagger the clock applies across tiles, not a VM property, so putting it in
+// `properties` would document a binding that does not exist. It rides in
+// `clock` beside the period math instead.
+//
+// The `notes` block carries the binding-unit lessons from the tile build
+// (docs/principles/conventions.md and the group2 closeouts): data-binding
+// units are per-property and the editor's display units do not predict them,
+// so the three that burned us are stated for the next person.
+export function buildRiveDefaults() {
+  return {
+    viewModel: 'PathEffectVM',
+    presets: Object.fromEntries(
+      Object.entries(AMBIENT_PRESETS).map(([id, p]) => [id, {
+        instance: p.riveInstance,
+        properties: {
+          speed: p.speed,
+          easing: p.easing,
+          cellSize: p.cell,
+          gapSize: p.gap,
+        },
+      }])
+    ),
+    clock: {
+      // The shipped grid drives each tile's `progress` (0..1) from a React
+      // rAF clock rather than an in-file driver; period = basePeriodSeconds /
+      // speed, eased by t^k / (t^k + (1 - t)^k) with k = the preset's
+      // `easing`. `spread` staggers the field spatially (0 = synced, 1 = the
+      // full wave) and is applied clock-side, never written to a VM.
+      basePeriodSeconds: AMBIENT_BASE_PERIOD,
+      spread: Object.fromEntries(
+        Object.entries(AMBIENT_PRESETS).map(([id, p]) => [id, p.spread])
+      ),
+    },
+    notes: [
+      'Data-binding units are per-property; the editor UI display units do not predict them. Probe a new property type with a test value before writing converter formulas.',
+      'Rotation bindings take radians, not degrees (a degrees formula once produced a 15,469-degree spin).',
+      'Opacity bindings take 0-100.',
+      'Scale bindings take a factor (1.0 = 100%).',
+    ],
   }
 }
 
