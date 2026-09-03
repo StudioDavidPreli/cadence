@@ -10,6 +10,8 @@ import {
   TOKEN_LAB_GUIDE,
   MOTION_TILES_LANDING,
   MOTION_TILES_GRID,
+  GLOSSARY_TOKENS,
+  GLOSSARY_COMPONENTS,
 } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
@@ -76,15 +78,21 @@ export function NavColumn({ collapsed, open, onToggle, onClose }) {
 // to pick a category). In the inline column onNavigate is undefined (no close).
 function NavAccordion({ onNavigate }) {
   const { section, destination, expandedSection, principleFilter } = useNavState()
-  const { selectCategory, toggleSection, setFilter, showMotionTilesLanding, enterMotionTilesGrid } = useNavActions()
+  const {
+    selectCategory, toggleSection, setFilter,
+    showMotionTilesLanding, enterMotionTilesGrid,
+    showGlossaryTokens, showGlossaryComponents,
+  } = useNavActions()
 
   const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
   const principlesOpen   = expandedSection === SECTIONS.PRINCIPLES
   const motionTilesOpen  = expandedSection === SECTIONS.MOTION_TILES
+  const glossaryOpen        = expandedSection === SECTIONS.GLOSSARY
 
   const tokenLabBodyId    = 'nav-section-token-lab'
   const principlesBodyId  = 'nav-section-principles'
   const motionTilesBodyId = 'nav-section-motion-tiles'
+  const glossaryBodyId       = 'nav-section-glossary'
 
   const pickCategory    = id => { selectCategory(id); onNavigate?.() }
   const pickFilter      = f  => { setFilter(f); onNavigate?.() }
@@ -99,6 +107,11 @@ function NavAccordion({ onNavigate }) {
   const clickMotionTiles  = () => toggleSection(SECTIONS.MOTION_TILES)
   const pickMotionLanding = () => { showMotionTilesLanding(); onNavigate?.() }
   const pickMotionGrid    = () => { enterMotionTilesGrid();   onNavigate?.() }
+  // The Glossary opens like Motion Tiles: the header discloses its two leaves and
+  // shows the Tokens view; the drawer stays open on toggle.
+  const clickGlossary          = () => toggleSection(SECTIONS.GLOSSARY)
+  const pickGlossaryTokens     = () => { showGlossaryTokens();     onNavigate?.() }
+  const pickGlossaryComponents = () => { showGlossaryComponents(); onNavigate?.() }
 
   return (
     <>
@@ -176,6 +189,32 @@ function NavAccordion({ onNavigate }) {
           active={destination === MOTION_TILES_GRID}
           tabbable={motionTilesOpen}
           onClick={pickMotionGrid}
+        />
+      </AccordionBody>
+
+      {/* ── Glossary ──────────────────────────────────────────────────── */}
+      <SectionHeader
+        label="Glossary"
+        open={glossaryOpen}
+        bodyId={glossaryBodyId}
+        active={section === SECTIONS.GLOSSARY}
+        current={section === SECTIONS.GLOSSARY}
+        onClick={clickGlossary}
+      />
+      <AccordionBody id={glossaryBodyId} open={glossaryOpen}>
+        {/* Tokens is the per-family view (values, provenance, consumers);
+            Components is the inverse read (per component, what it consumes). */}
+        <NavRow
+          label="Tokens"
+          active={destination === GLOSSARY_TOKENS}
+          tabbable={glossaryOpen}
+          onClick={pickGlossaryTokens}
+        />
+        <NavRow
+          label="Components"
+          active={destination === GLOSSARY_COMPONENTS}
+          tabbable={glossaryOpen}
+          onClick={pickGlossaryComponents}
         />
       </AccordionBody>
     </>

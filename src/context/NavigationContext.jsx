@@ -5,6 +5,8 @@ import {
   TOKEN_LAB_GUIDE,
   MOTION_TILES_LANDING,
   MOTION_TILES_GRID,
+  GLOSSARY_TOKENS,
+  GLOSSARY_COMPONENTS,
 } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
@@ -76,6 +78,17 @@ function navReducer(state, action) {
           principleFilter: FILTERS.ALL,
         }
       }
+      // The Glossary opens like Motion Tiles: disclosure and destination in one,
+      // landing on the Tokens view. The Components leaf (or a deep link) swaps
+      // the view via SET_GLOSSARY_VIEW.
+      if (action.id === SECTIONS.GLOSSARY) {
+        return {
+          section: SECTIONS.GLOSSARY,
+          expandedSection: SECTIONS.GLOSSARY,
+          destination: GLOSSARY_TOKENS,
+          principleFilter: FILTERS.ALL,
+        }
+      }
       // Opening Token Lab reveals the four categories AND shows the guide as
       // its destination, symmetric to Principles opening to the grid. The guide
       // is the Token Lab landing: a how-to that crossfades in from the hero. A
@@ -98,6 +111,16 @@ function navReducer(state, action) {
       return {
         section: SECTIONS.MOTION_TILES,
         expandedSection: SECTIONS.MOTION_TILES,
+        destination: action.view,
+        principleFilter: FILTERS.ALL,
+      }
+
+    // A Glossary view selected: Tokens or Components. Both keep the section open;
+    // same shape as SET_MOTION_TILES_VIEW.
+    case 'SET_GLOSSARY_VIEW':
+      return {
+        section: SECTIONS.GLOSSARY,
+        expandedSection: SECTIONS.GLOSSARY,
         destination: action.view,
         principleFilter: FILTERS.ALL,
       }
@@ -159,6 +182,10 @@ export function NavigationProvider({ children }) {
         dispatch({ type: 'SET_MOTION_TILES_VIEW', view: MOTION_TILES_LANDING }),
       enterMotionTilesGrid: () =>
         dispatch({ type: 'SET_MOTION_TILES_VIEW', view: MOTION_TILES_GRID }),
+      showGlossaryTokens: () =>
+        dispatch({ type: 'SET_GLOSSARY_VIEW', view: GLOSSARY_TOKENS }),
+      showGlossaryComponents: () =>
+        dispatch({ type: 'SET_GLOSSARY_VIEW', view: GLOSSARY_COMPONENTS }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
       // Flag the replaceState write, then clear the deep-link modal. Order
       // matters: the ref must be true before the dispatch that triggers the

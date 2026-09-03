@@ -6,6 +6,8 @@ import {
   TOKEN_LAB_GUIDE,
   MOTION_TILES_LANDING,
   MOTION_TILES_GRID,
+  GLOSSARY_TOKENS,
+  GLOSSARY_COMPONENTS,
 } from '../data/navigation'
 import { principleBySlug, principleById } from '../data/principles'
 
@@ -26,6 +28,9 @@ import { principleBySlug, principleById } from '../data/principles'
 //   #/principles/<filter>/<slug>    grid + one principle open as a deep-link modal
 //   #/motion-tiles                  Motion Tiles landing (the Enter gate)
 //   #/motion-tiles/grid             the live Motion Tiles grid
+//   #/glossary                      the glossary, Tokens view
+//   #/glossary/tokens               same (Tokens is the default view)
+//   #/glossary/components           the glossary, Components view
 //
 // The third principles segment is the deep-link entrance (designed 2026-07-21):
 // a direct link mounts the grid in its default state and opens the named
@@ -112,6 +117,19 @@ export function parseHash(hash) {
     }
   }
 
+  if (first === SECTIONS.GLOSSARY) {
+    // #/glossary, #/glossary/tokens, or #/glossary/components. Any other tail falls back
+    // to the Tokens view, the same fail-soft posture as the other sections.
+    const isComponents = second === GLOSSARY_COMPONENTS
+    return {
+      section: SECTIONS.GLOSSARY,
+      expandedSection: SECTIONS.GLOSSARY,
+      destination: isComponents ? GLOSSARY_COMPONENTS : GLOSSARY_TOKENS,
+      principleFilter: FILTERS.ALL,
+      principleId: null,
+    }
+  }
+
   return { ...LANDING }
 }
 
@@ -143,6 +161,13 @@ export function stateToHash(state) {
     return state.destination === MOTION_TILES_GRID
       ? `#/${SECTIONS.MOTION_TILES}/${MOTION_TILES_GRID}`
       : `#/${SECTIONS.MOTION_TILES}`
+  }
+  if (state.section === SECTIONS.GLOSSARY) {
+    // Only Components fills the tail; the default Tokens view serializes to the
+    // bare route, so #/glossary and #/glossary/tokens are one state one way out.
+    return state.destination === GLOSSARY_COMPONENTS
+      ? `#/${SECTIONS.GLOSSARY}/${GLOSSARY_COMPONENTS}`
+      : `#/${SECTIONS.GLOSSARY}`
   }
   return '#/'
 }

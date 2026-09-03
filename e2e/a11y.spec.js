@@ -12,6 +12,8 @@ const VIEWS = [
   { name: 'press-state demos', path: '/#/token-lab/press-state' },
   { name: 'principles grid', path: '/#/principles' },
   { name: 'motion-tiles landing', path: '/#/motion-tiles' },
+  { name: 'glossary tokens', path: '/#/glossary' },
+  { name: 'glossary components', path: '/#/glossary/components' },
 ]
 
 for (const theme of THEMES) {

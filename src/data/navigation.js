@@ -9,6 +9,7 @@ export const SECTIONS = {
   TOKEN_LAB: 'token-lab',
   PRINCIPLES: 'principles',
   MOTION_TILES: 'motion-tiles',
+  GLOSSARY: 'glossary',
 }
 
 // The Token Lab guide is a destination, not a category. Opening the Token Lab
@@ -26,6 +27,15 @@ export const TOKEN_LAB_GUIDE = 'overview'
 // TOKEN_LAB_GUIDE is distinct from the category ids.
 export const MOTION_TILES_LANDING = 'landing'
 export const MOTION_TILES_GRID = 'grid'
+
+// The Glossary (build-order item 5) is the generated style guide: views over
+// the same data. Tokens is per-family (values per preset, provenance,
+// consumers); Components is the inverse read (per component, what it
+// consumes). Named Glossary rather than Guide (David, 2026-09-03) so a third
+// leaf of defined terms can join these two later. Same destination-constant
+// pattern as Motion Tiles' two views.
+export const GLOSSARY_TOKENS = 'tokens'
+export const GLOSSARY_COMPONENTS = 'components'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but

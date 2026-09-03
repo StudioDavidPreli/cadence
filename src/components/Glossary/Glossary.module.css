@@ -1,0 +1,293 @@
+/* The Glossary's document styles. Conventions follow TokenLabGuide (the project's
+   established reading document): left-aligned, a bounded measure, mono headings
+   over muted body, the code chip on accent-subtle. This section replaces the
+   whole right region (like Motion Tiles), so unlike TokenLabGuide it owns its
+   own scroll.
+
+   Color pairings are all existing audited ones: text-base and text-muted on
+   surface-raised (the DemoArea document pairing), code chips on accent-subtle
+   with text-base (the TokenLabGuide chip). No new pairing, so the contrast
+   audit is untouched. All motion here is chrome; there is none. */
+
+.scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: var(--color-surface-raised);
+}
+
+/* Keyboard focus on the scroll region (it is a tab stop so keyboard users can
+   scroll a document with no interactive content). Inset so the ring is not
+   clipped by the region's own overflow. */
+.scroll:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+  color: var(--color-text-base);
+}
+
+/* View title: the same editorial serif moment as the TokenLabGuide title. */
+.title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+.lede {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* The provenance legend: three quiet lines above the families. */
+.legend {
+  margin: 0 0 32px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.legendRow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.legendRow:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Disclosure sections ──────────────────────────────────────────────────────
+   Both views are tall, so each family / component is a closed-by-default
+   disclosure (David's call, 2026-09-03). The expand is the nav accordion's
+   grid-template-rows 0fr <-> 1fr technique: pure CSS on the fixed
+   --feedback-nav-duration (chrome timing, so Explore mode cannot collapse it),
+   no JS measurement, no ProjectionNode. */
+.disclosure {
+  margin: 0 0 10px;
+}
+
+/* The heading carries the button so the document outline keeps its h3 while
+   the whole row is the click target. */
+.heading {
+  margin: 0;
+}
+
+.headingButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  /* Same type as TokenLabGuide's section headings (text-base, not
+     text-primary, for the same audited reason). */
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+}
+
+.headingButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The nav accordion's caret, at the document's scale. */
+.caret {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform var(--feedback-nav-duration) ease;
+  flex-shrink: 0;
+}
+
+.caret[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+.headingLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Row count on the closed heading, so a closed section still says how much it
+   holds. Muted, tabular. */
+.count {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--feedback-nav-duration) ease;
+}
+
+.bodyOpen {
+  grid-template-rows: 1fr;
+}
+
+/* No padding here: at 0fr the border-box cannot shrink below its own padding,
+   so a padded inner would hold every closed section 16px open. Spacing rides
+   the first child's margin instead, which the 0-height overflow box clips.
+
+   visibility does what the overflow clip alone cannot: a clipped child still
+   has a layout box, so find-in-page, selection, and tooling all consider it
+   present. Hidden-when-closed makes the closed state real, delayed by the nav
+   duration so the content stays paintable while the row shrinks shut; opening
+   flips it visible immediately so the content is there as the row grows. */
+.bodyInner {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  transition: visibility 0s var(--feedback-nav-duration);
+}
+
+.bodyOpen .bodyInner {
+  visibility: visible;
+  transition: visibility 0s;
+}
+
+.bodyInner > :first-child {
+  margin-top: 12px;
+}
+
+/* One token's block: property, tag, the three preset values, the story. */
+.row {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.rowHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+
+.property {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-size: 12px;
+}
+
+/* The provenance tag: bracketed mono, deliberately typographic rather than a
+   colored chip. Color-coding three tags would add three new contrast pairings
+   for no information the brackets do not already carry. */
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* The three preset values as a compact grid. Wide content scrolls inside the
+   row rather than the page (the standing overflow rule). */
+.values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin: 0 0 10px;
+  overflow-x: auto;
+}
+
+.value {
+  min-width: 0;
+}
+
+.valueLabel {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.valueNumber {
+  margin: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-base);
+  overflow-wrap: break-word;
+}
+
+.note {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.source {
+  color: var(--color-text-muted);
+}
+
+.presetsNote {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.consumers {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* Components view: a plain list of token paths per component. */
+.readsList {
+  margin: 0;
+  padding: 0 0 0 2px;
+  list-style: none;
+}
+
+.readsList li {
+  margin: 0 0 6px;
+}
+
+.readPath {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-size: 12px;
+}
+
+/* Reduced motion: hold the disclosure and caret states statically, the same
+   rule the nav accordion carries. */
+@media (prefers-reduced-motion: reduce) {
+  .body,
+  .bodyInner,
+  .caret {
+    transition: none;
+  }
+}
