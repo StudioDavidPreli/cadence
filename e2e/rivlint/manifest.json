@@ -1,0 +1,5792 @@
+{
+  "rive/anticipation.riv": {
+    "artboards": [
+      {
+        "name": "Anticipation",
+        "animations": [
+          "pause/play",
+          "idle",
+          "active"
+        ],
+        "stateMachines": [
+          "anticipationSM"
+        ]
+      },
+      {
+        "name": "active",
+        "animations": [
+          "activeSeqence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "anticipationIdle",
+        "animations": [
+          "idleSequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/appeal.riv": {
+    "artboards": [
+      {
+        "name": "appeal",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "appealSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "appealAction",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "appealIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/arc.riv": {
+    "artboards": [
+      {
+        "name": "Arc",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "arcSM"
+        ]
+      },
+      {
+        "name": "arcActive2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "arcIDLE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/carouselStatics/followthrough_static.riv": {
+    "artboards": [
+      {
+        "name": "frame_followThrough",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "followThrough_staticSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/carouselStatics/imitationoflife_static.riv": {
+    "artboards": [
+      {
+        "name": "frame_imitationOfLife",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "imitationOfLife_staticSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/carouselStatics/slowinslowout_static.riv": {
+    "artboards": [
+      {
+        "name": "frame_slowINslowOut",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "slowInSlowOut_staticSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/carouselStatics/squash&stretch_static.riv": {
+    "artboards": [
+      {
+        "name": "frame_squash&stretch",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "squash&stretch_staticSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/economy.riv": {
+    "artboards": [
+      {
+        "name": "economy",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "economySM"
+        ]
+      },
+      {
+        "name": "economyActive",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "economyIdle2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/exaggeration.riv": {
+    "artboards": [
+      {
+        "name": "exaggeration",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "exaggerationSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "exaggerationIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "exaggerationAction",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/follow-through.riv": {
+    "artboards": [
+      {
+        "name": "FollowThrough",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "followThroughSM"
+        ]
+      },
+      {
+        "name": "followAction",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "followIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/hero3.riv": {
+    "artboards": [
+      {
+        "name": "Hero3",
+        "animations": [
+          "JoyStickY",
+          "JoyStickX",
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "hero3SM"
+        ]
+      },
+      {
+        "name": "bike1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "bike1SM"
+        ]
+      },
+      {
+        "name": "conductor",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "conductorSM"
+        ]
+      },
+      {
+        "name": "crew",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "crewSM"
+        ]
+      },
+      {
+        "name": "marching",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "marchingSM"
+        ]
+      },
+      {
+        "name": "bike2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "bike2"
+        ]
+      },
+      {
+        "name": "dancers",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "dancersSM"
+        ]
+      },
+      {
+        "name": "titles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "titlesSM"
+        ]
+      },
+      {
+        "name": "dancers 2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "dancersSM"
+        ]
+      },
+      {
+        "name": "runners",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "runnersSM"
+        ]
+      },
+      {
+        "name": "horse",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "horseSM"
+        ]
+      },
+      {
+        "name": "subTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "birds",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "birdsSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "Hero3ViewModel",
+        "instances": [
+          "darkMode",
+          "contrastDark",
+          "lightMode",
+          "contrastLight"
+        ],
+        "properties": [
+          {
+            "name": "seedNumber",
+            "type": "number"
+          },
+          {
+            "name": "colorAccent",
+            "type": "color"
+          },
+          {
+            "name": "action",
+            "type": "trigger"
+          },
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/hierarchyofmotion.riv": {
+    "artboards": [
+      {
+        "name": "hierarchyOfMotion",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "hierarchyOfMotionSM"
+        ]
+      },
+      {
+        "name": "homACTIVE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "homIDLE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/pixelplant.riv": {
+    "artboards": [
+      {
+        "name": "pixelPlant",
+        "animations": [
+          "idleON",
+          "clickedOff",
+          "idle",
+          "clicked",
+          "rainFall",
+          "idleGrow",
+          "rainingIdle",
+          "idleDead",
+          "rainStop",
+          "grow",
+          "die",
+          "noRainIdle"
+        ],
+        "stateMachines": [
+          "pixelPlantSM"
+        ]
+      },
+      {
+        "name": "Flowers",
+        "animations": [
+          "flowersIdle",
+          "flowersDie",
+          "flowersGrow"
+        ],
+        "stateMachines": [
+          "flowersSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PixelPlantVM",
+        "instances": [
+          "darkMode",
+          "contrastDark",
+          "contrastLight",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "sun",
+            "type": "color"
+          },
+          {
+            "name": "dryTimeBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "waterMeBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "hoverFillOpacity2",
+            "type": "number"
+          },
+          {
+            "name": "bgHover2",
+            "type": "color"
+          },
+          {
+            "name": "clicked2",
+            "type": "boolean"
+          },
+          {
+            "name": "hoverScale2",
+            "type": "number"
+          },
+          {
+            "name": "background2",
+            "type": "color"
+          },
+          {
+            "name": "stroke2",
+            "type": "color"
+          },
+          {
+            "name": "text2",
+            "type": "color"
+          },
+          {
+            "name": "textHover2",
+            "type": "color"
+          },
+          {
+            "name": "textReturn2",
+            "type": "color"
+          },
+          {
+            "name": "water",
+            "type": "color"
+          },
+          {
+            "name": "wiggle",
+            "type": "number"
+          },
+          {
+            "name": "grow",
+            "type": "boolean"
+          },
+          {
+            "name": "leavesLight",
+            "type": "color"
+          },
+          {
+            "name": "specs",
+            "type": "color"
+          },
+          {
+            "name": "shadow",
+            "type": "color"
+          },
+          {
+            "name": "flowerFaces2",
+            "type": "color"
+          },
+          {
+            "name": "flowerPetals2",
+            "type": "color"
+          },
+          {
+            "name": "leavesShadow",
+            "type": "color"
+          },
+          {
+            "name": "trunkShadow",
+            "type": "color"
+          },
+          {
+            "name": "trunk",
+            "type": "color"
+          },
+          {
+            "name": "soil",
+            "type": "color"
+          },
+          {
+            "name": "planterAccent",
+            "type": "color"
+          },
+          {
+            "name": "planterStroke",
+            "type": "color"
+          },
+          {
+            "name": "fillOpacity",
+            "type": "number"
+          },
+          {
+            "name": "strokeOpacity",
+            "type": "number"
+          },
+          {
+            "name": "planterFill",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/pose2pose.riv": {
+    "artboards": [
+      {
+        "name": "Staging",
+        "animations": [
+          "out",
+          "in",
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "pose2poseSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "p2pOUT",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "p2pIDLE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "p2pACTIVE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "p2pIN",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon01.riv": {
+    "artboards": [
+      {
+        "name": "Squash&StretchIcon",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "squash&stretchIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "squash&strechIcon",
+        "animations": [
+          "Timeline 1",
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "state machine"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon02.riv": {
+    "artboards": [
+      {
+        "name": "AnticipationIcon",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "anticipationIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "anticipationIcon2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon03.riv": {
+    "artboards": [
+      {
+        "name": "StagingIcon",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "stagingIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "staggingIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon04.riv": {
+    "artboards": [
+      {
+        "name": "Pose2PoseIcon",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "pose2poseIconSM"
+        ]
+      },
+      {
+        "name": "pose2poseIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "pose2poseOutline",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon05.riv": {
+    "artboards": [
+      {
+        "name": "FollowThroughIcon",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "followThroughIconSM"
+        ]
+      },
+      {
+        "name": "followICON",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon06.riv": {
+    "artboards": [
+      {
+        "name": "SlowInSlowOut",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "slowInSlowOutIconSM"
+        ]
+      },
+      {
+        "name": "slowIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon07.riv": {
+    "artboards": [
+      {
+        "name": "Arc",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "arcIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "arcIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon08.riv": {
+    "artboards": [
+      {
+        "name": "SecondaryAction",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "secondaryActionIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "secondaryICON",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon09.riv": {
+    "artboards": [
+      {
+        "name": "Timing",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "timingSM"
+        ]
+      },
+      {
+        "name": "timingIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon10.riv": {
+    "artboards": [
+      {
+        "name": "Exaggeration",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "exaggerationIconSM"
+        ]
+      },
+      {
+        "name": "exaggerationIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon11.riv": {
+    "artboards": [
+      {
+        "name": "SolidDrawing",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "solidDrawingIconSM"
+        ]
+      },
+      {
+        "name": "eyeMask",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "solidDrawingIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon12.riv": {
+    "artboards": [
+      {
+        "name": "Appeal",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "appealIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "appealIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon13.riv": {
+    "artboards": [
+      {
+        "name": "systematization",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "systematizationIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "systematizedICON",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon14.riv": {
+    "artboards": [
+      {
+        "name": "HierarchyOfMotion",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "hierarchyOfMotionSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "homICON",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon15.riv": {
+    "artboards": [
+      {
+        "name": "Economy",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "economyIconSM"
+        ]
+      },
+      {
+        "name": "economyIcon10",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon16.riv": {
+    "artboards": [
+      {
+        "name": "tokenFidelity",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "tokenFidelityIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "tokenfidelityIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon17.riv": {
+    "artboards": [
+      {
+        "name": "redeucedMotion",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "reducedMotionIconSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "reducedMotionIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/principles_icon18.riv": {
+    "artboards": [
+      {
+        "name": "shardVocabulary",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "sharedVocabularyIconSM"
+        ]
+      },
+      {
+        "name": "sharedVocabularyClrIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "sharedVocabularyBlkIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/reducedMotion.riv": {
+    "artboards": [
+      {
+        "name": "reducedMotion",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "reducedMotionSM"
+        ]
+      },
+      {
+        "name": "reducedMotionIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "reducedMotionAction",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/secondaryaction.riv": {
+    "artboards": [
+      {
+        "name": "Secondary Action",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "secondaryActionSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "secondaryIDLE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "secondaryActive",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/sharedvocabulary.riv": {
+    "artboards": [
+      {
+        "name": "shardVocabulary",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "sharedVocabularySM"
+        ]
+      },
+      {
+        "name": "sharedVocabularyAction",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "sharedVocabularyIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/slowinslowout.riv": {
+    "artboards": [
+      {
+        "name": "SlowInSlowOut",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "slowInSlowOutSM"
+        ]
+      },
+      {
+        "name": "slowIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "slowActive",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/solid-drawing.riv": {
+    "artboards": [
+      {
+        "name": "solidDrawing",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "solidDrawingSM"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "solidDrawingIdle",
+        "animations": [
+          "Timeline 1",
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "solidDrawingAction",
+        "animations": [
+          "Timeline 1",
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/squash-stretch.riv": {
+    "artboards": [
+      {
+        "name": "Squash&Stretch",
+        "animations": [
+          "pause/play",
+          "idle",
+          "active"
+        ],
+        "stateMachines": [
+          "squash&stretchSM"
+        ]
+      },
+      {
+        "name": "idle_v2",
+        "animations": [
+          "PNG Sequence",
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "active_v2",
+        "animations": [
+          "Timeline 1",
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/staging.riv": {
+    "artboards": [
+      {
+        "name": "Staging",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "stagingSM"
+        ]
+      },
+      {
+        "name": "staggingIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "action",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/systematization.riv": {
+    "artboards": [
+      {
+        "name": "systematization",
+        "animations": [
+          "pause/play",
+          "idle",
+          "exit",
+          "action"
+        ],
+        "stateMachines": [
+          "systematizationSM"
+        ]
+      },
+      {
+        "name": "systematizedIDLE",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "systematizedACTION",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/timing.riv": {
+    "artboards": [
+      {
+        "name": "Timing",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "timingSM"
+        ]
+      },
+      {
+        "name": "timingIdle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "timingActive",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/tokenfidelity.riv": {
+    "artboards": [
+      {
+        "name": "tokenFidelity",
+        "animations": [
+          "pause/play",
+          "idle",
+          "action"
+        ],
+        "stateMachines": [
+          "tokenFidelitySM"
+        ]
+      },
+      {
+        "name": "tokenFidelity2idle",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "tokenFidelity2action",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "PAUSE/PLAY",
+        "animations": [
+          "PAUSE",
+          "entryIdle",
+          "PLAY"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/tokenlabhero2.riv": {
+    "artboards": [
+      {
+        "name": "tokenLab2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "tokenLab2SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "TokenLabVM",
+        "instances": [
+          "dark",
+          "contrastDark",
+          "light",
+          "contrastLight"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyExtrude",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyFur1",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyFur2",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyFur3",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyPinks",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyPinks2",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyTEXT",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "rive/waterwiltreact.riv": {
+    "artboards": [
+      {
+        "name": "waterWilt",
+        "animations": [],
+        "stateMachines": [
+          "waterWiltSM"
+        ]
+      },
+      {
+        "name": "Plant",
+        "animations": [
+          "idleGrow",
+          "idleDead",
+          "grow",
+          "die"
+        ],
+        "stateMachines": [
+          "plantSM"
+        ]
+      },
+      {
+        "name": "Flowers",
+        "animations": [
+          "flowersIdle",
+          "flowersDie",
+          "flowersGrow"
+        ],
+        "stateMachines": [
+          "flowersSM"
+        ]
+      },
+      {
+        "name": "Rain",
+        "animations": [
+          "rainFall",
+          "rainingIdle",
+          "rainStop",
+          "noRainIdle"
+        ],
+        "stateMachines": [
+          "rainSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "WaterWiltVM",
+        "instances": [
+          "darkMode",
+          "contrastDark",
+          "contrastLight",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "plantIdleBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "sceneScale",
+            "type": "number"
+          },
+          {
+            "name": "idleBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "rainBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "postGrowthBoole",
+            "type": "boolean"
+          },
+          {
+            "name": "flowersDieProgress",
+            "type": "number"
+          },
+          {
+            "name": "flowersGrowProgress",
+            "type": "number"
+          },
+          {
+            "name": "rainFallProgress",
+            "type": "number"
+          },
+          {
+            "name": "rainStopProgress",
+            "type": "number"
+          },
+          {
+            "name": "dieProgress",
+            "type": "number"
+          },
+          {
+            "name": "growProgress",
+            "type": "number"
+          },
+          {
+            "name": "flowerFaces",
+            "type": "color"
+          },
+          {
+            "name": "flowerPetals",
+            "type": "color"
+          },
+          {
+            "name": "rainColor",
+            "type": "color"
+          },
+          {
+            "name": "leavesLightColor",
+            "type": "color"
+          },
+          {
+            "name": "specsColors",
+            "type": "color"
+          },
+          {
+            "name": "shadowColor",
+            "type": "color"
+          },
+          {
+            "name": "leavesShadowColor",
+            "type": "color"
+          },
+          {
+            "name": "trunkShadowColor",
+            "type": "color"
+          },
+          {
+            "name": "trunkColor",
+            "type": "color"
+          },
+          {
+            "name": "soilColor",
+            "type": "color"
+          },
+          {
+            "name": "planterAccentColor",
+            "type": "color"
+          },
+          {
+            "name": "planterFillColor",
+            "type": "color"
+          },
+          {
+            "name": "planterFillOpacity",
+            "type": "number"
+          },
+          {
+            "name": "planterStrokeColor",
+            "type": "color"
+          },
+          {
+            "name": "planterStrokeOpacity",
+            "type": "number"
+          },
+          {
+            "name": "artboardBG",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/clawd.riv": {
+    "artboards": [
+      {
+        "name": "clawd",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "clawdSM"
+        ]
+      },
+      {
+        "name": "jumpy3",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "looking2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "confetti_iso",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "confetti_body",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "flag3",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "weights2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "walking2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "confettiFix",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "walkingFix",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "tippytap",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "flag",
+            "type": "color"
+          },
+          {
+            "name": "purple",
+            "type": "color"
+          },
+          {
+            "name": "pink",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "clawdBody",
+            "type": "color"
+          },
+          {
+            "name": "headband",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "activeIndex",
+            "type": "number"
+          },
+          {
+            "name": "clicks",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/enterthegrid.riv": {
+    "artboards": [
+      {
+        "name": "enterTheGrid",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "enterTheGridSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "EnterButtonVM",
+        "instances": [
+          "lightMode",
+          "contrastDark",
+          "contrastLight",
+          "darkMode"
+        ],
+        "properties": [
+          {
+            "name": "hoverscale",
+            "type": "number"
+          },
+          {
+            "name": "extrudeColor",
+            "type": "color"
+          },
+          {
+            "name": "textColor",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c1.riv": {
+    "artboards": [
+      {
+        "name": "r1c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c1SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "zero",
+            "type": "number"
+          },
+          {
+            "name": "t3ey",
+            "type": "number"
+          },
+          {
+            "name": "t3vx",
+            "type": "number"
+          },
+          {
+            "name": "t0mx",
+            "type": "number"
+          },
+          {
+            "name": "t0my",
+            "type": "number"
+          },
+          {
+            "name": "t1mx",
+            "type": "number"
+          },
+          {
+            "name": "t1my",
+            "type": "number"
+          },
+          {
+            "name": "t2mx",
+            "type": "number"
+          },
+          {
+            "name": "t2my",
+            "type": "number"
+          },
+          {
+            "name": "t3mx",
+            "type": "number"
+          },
+          {
+            "name": "t3my",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot",
+            "type": "number"
+          },
+          {
+            "name": "rounded",
+            "type": "number"
+          },
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c2.riv": {
+    "artboards": [
+      {
+        "name": "r1c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c2SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "gapAcc",
+            "type": "number"
+          },
+          {
+            "name": "gapInk",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c3.riv": {
+    "artboards": [
+      {
+        "name": "r1c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c3SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "snappy",
+          "cinematic",
+          "standard"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "posN",
+            "type": "number"
+          },
+          {
+            "name": "posP",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c4.riv": {
+    "artboards": [
+      {
+        "name": "r1c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c4SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "cinematic",
+          "snappy",
+          "standard"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "hiX",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c5.riv": {
+    "artboards": [
+      {
+        "name": "r1c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c5SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot45",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r1c6.riv": {
+    "artboards": [
+      {
+        "name": "r1c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c6SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "cinematic",
+          "standard",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "circleScale",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c1.riv": {
+    "artboards": [
+      {
+        "name": "r2c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c1SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "op0",
+            "type": "number"
+          },
+          {
+            "name": "op1",
+            "type": "number"
+          },
+          {
+            "name": "op2",
+            "type": "number"
+          },
+          {
+            "name": "op3",
+            "type": "number"
+          },
+          {
+            "name": "op4",
+            "type": "number"
+          },
+          {
+            "name": "op5",
+            "type": "number"
+          },
+          {
+            "name": "op6",
+            "type": "number"
+          },
+          {
+            "name": "phase",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c2.riv": {
+    "artboards": [
+      {
+        "name": "r2c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c2SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "colB1",
+            "type": "number"
+          },
+          {
+            "name": "colB3",
+            "type": "number"
+          },
+          {
+            "name": "phase",
+            "type": "number"
+          },
+          {
+            "name": "rowR1",
+            "type": "number"
+          },
+          {
+            "name": "rowR3",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c3.riv": {
+    "artboards": [
+      {
+        "name": "r2c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c3SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "opr0",
+            "type": "number"
+          },
+          {
+            "name": "opr1",
+            "type": "number"
+          },
+          {
+            "name": "opr2",
+            "type": "number"
+          },
+          {
+            "name": "opr3",
+            "type": "number"
+          },
+          {
+            "name": "phase",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c4.riv": {
+    "artboards": [
+      {
+        "name": "r2c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c4SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "angNeg",
+            "type": "number"
+          },
+          {
+            "name": "angPos",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c5.riv": {
+    "artboards": [
+      {
+        "name": "r2c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c5SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "snappy",
+          "standard",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "bloomN",
+            "type": "number"
+          },
+          {
+            "name": "bloomP",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot90",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r2c6.riv": {
+    "artboards": [
+      {
+        "name": "r2c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c6SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r3c1.riv": {
+    "artboards": [
+      {
+        "name": "r3c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c1SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "splitDown",
+            "type": "number"
+          },
+          {
+            "name": "splitUp",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r3c2.riv": {
+    "artboards": [
+      {
+        "name": "r3c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c2SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "snappy",
+          "cinematic",
+          "standard"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "convN",
+            "type": "number"
+          },
+          {
+            "name": "convP",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r3c3.riv": {
+    "artboards": [
+      {
+        "name": "r3c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c3SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "rot",
+            "type": "number"
+          },
+          {
+            "name": "scale",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/group2/r3c4.riv": {
+    "artboards": [
+      {
+        "name": "r3c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c4SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "phase",
+            "type": "number"
+          },
+          {
+            "name": "sc0",
+            "type": "number"
+          },
+          {
+            "name": "sc1",
+            "type": "number"
+          },
+          {
+            "name": "sc2",
+            "type": "number"
+          },
+          {
+            "name": "sc3",
+            "type": "number"
+          },
+          {
+            "name": "sc4",
+            "type": "number"
+          },
+          {
+            "name": "sc5",
+            "type": "number"
+          },
+          {
+            "name": "sc6",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/ingredients_v8.riv": {
+    "artboards": [
+      {
+        "name": "r1c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c1SM"
+        ]
+      },
+      {
+        "name": "r4c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c3SM"
+        ]
+      },
+      {
+        "name": "r1c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c3SM"
+        ]
+      },
+      {
+        "name": "r3c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c6SM"
+        ]
+      },
+      {
+        "name": "r6c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c4SM"
+        ]
+      },
+      {
+        "name": "r2c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c3SM"
+        ]
+      },
+      {
+        "name": "r1c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c4SM"
+        ]
+      },
+      {
+        "name": "r1c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c6SM"
+        ]
+      },
+      {
+        "name": "r4c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c6SM"
+        ]
+      },
+      {
+        "name": "r3c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c3SM"
+        ]
+      },
+      {
+        "name": "r2c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c5SM"
+        ]
+      },
+      {
+        "name": "r2c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c6SM"
+        ]
+      },
+      {
+        "name": "r1c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c5SM"
+        ]
+      },
+      {
+        "name": "r2c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c1SM"
+        ]
+      },
+      {
+        "name": "r4c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c5SM"
+        ]
+      },
+      {
+        "name": "r3c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c5SM"
+        ]
+      },
+      {
+        "name": "r5c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c1SM"
+        ]
+      },
+      {
+        "name": "r3c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c2SM"
+        ]
+      },
+      {
+        "name": "r6c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c2SM"
+        ]
+      },
+      {
+        "name": "r2c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c2SM"
+        ]
+      },
+      {
+        "name": "r3c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c1SM"
+        ]
+      },
+      {
+        "name": "r4c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c4SM"
+        ]
+      },
+      {
+        "name": "r5c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c2SM"
+        ]
+      },
+      {
+        "name": "r6c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c3SM"
+        ]
+      },
+      {
+        "name": "r4c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c2SM"
+        ]
+      },
+      {
+        "name": "r6c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c6SM"
+        ]
+      },
+      {
+        "name": "r5c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c5SM"
+        ]
+      },
+      {
+        "name": "r6c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c1SM"
+        ]
+      },
+      {
+        "name": "r5c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c6SM"
+        ]
+      },
+      {
+        "name": "r5c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c4SM"
+        ]
+      },
+      {
+        "name": "r6c5",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r6c5SM"
+        ]
+      },
+      {
+        "name": "r5c3",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r5c3SM"
+        ]
+      },
+      {
+        "name": "r2c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r2c4SM"
+        ]
+      },
+      {
+        "name": "r4c1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c1SM"
+        ]
+      },
+      {
+        "name": "r1c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r1c2SM"
+        ]
+      },
+      {
+        "name": "r3c4",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r3c4SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "spread",
+            "type": "number"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "darkBlue",
+            "type": "color"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "lightBlue",
+            "type": "color"
+          },
+          {
+            "name": "magenta",
+            "type": "color"
+          },
+          {
+            "name": "orange",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/motiontileslogo.riv": {
+    "artboards": [
+      {
+        "name": "motionTilesLogo",
+        "animations": [
+          "clicked",
+          "idle",
+          "walkWave"
+        ],
+        "stateMachines": [
+          "motionTilesLogoSM"
+        ]
+      },
+      {
+        "name": "mouse",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "r1c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "r4c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c2SM"
+        ]
+      },
+      {
+        "name": "r2c4",
+        "animations": [],
+        "stateMachines": [
+          "State Machine 2"
+        ]
+      },
+      {
+        "name": "walking2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "flag3",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "cinematic",
+          "snappy"
+        ],
+        "properties": [
+          {
+            "name": "clicked",
+            "type": "boolean"
+          },
+          {
+            "name": "hoverScale",
+            "type": "number"
+          },
+          {
+            "name": "mouse",
+            "type": "color"
+          },
+          {
+            "name": "blueShape",
+            "type": "color"
+          },
+          {
+            "name": "greenShape",
+            "type": "color"
+          },
+          {
+            "name": "redShape",
+            "type": "color"
+          },
+          {
+            "name": "blackShape",
+            "type": "color"
+          },
+          {
+            "name": "yellowShape",
+            "type": "color"
+          },
+          {
+            "name": "bgTile",
+            "type": "color"
+          },
+          {
+            "name": "spread",
+            "type": "number"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "purple",
+            "type": "color"
+          },
+          {
+            "name": "pink",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "headband",
+            "type": "color"
+          },
+          {
+            "name": "clawdBody",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "activeIndex",
+            "type": "number"
+          },
+          {
+            "name": "clicks",
+            "type": "number"
+          },
+          {
+            "name": "flag",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/motiontileslogooverview.riv": {
+    "artboards": [
+      {
+        "name": "motionTilesLogoOverview",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "motionTilesLogoOverviewSM"
+        ]
+      },
+      {
+        "name": "mouse",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "flag3",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "walking2",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "r4c2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "r4c2SM"
+        ]
+      },
+      {
+        "name": "r2c4",
+        "animations": [],
+        "stateMachines": [
+          "State Machine 2"
+        ]
+      },
+      {
+        "name": "r1c6",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "lightMode",
+          "contrastLight",
+          "contrastDark",
+          "darkMode"
+        ],
+        "properties": [
+          {
+            "name": "mouse",
+            "type": "color"
+          },
+          {
+            "name": "blueShape",
+            "type": "color"
+          },
+          {
+            "name": "greenShape",
+            "type": "color"
+          },
+          {
+            "name": "redShape",
+            "type": "color"
+          },
+          {
+            "name": "blackShape",
+            "type": "color"
+          },
+          {
+            "name": "yellowShape",
+            "type": "color"
+          },
+          {
+            "name": "bgTile",
+            "type": "color"
+          },
+          {
+            "name": "spread",
+            "type": "number"
+          },
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "easing",
+            "type": "number"
+          },
+          {
+            "name": "speed",
+            "type": "number"
+          },
+          {
+            "name": "extrudeText",
+            "type": "color"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "progress",
+            "type": "number"
+          },
+          {
+            "name": "purple",
+            "type": "color"
+          },
+          {
+            "name": "pink",
+            "type": "color"
+          },
+          {
+            "name": "blue",
+            "type": "color"
+          },
+          {
+            "name": "headband",
+            "type": "color"
+          },
+          {
+            "name": "clawdBody",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "flag",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "riveTiles/motiontilesstatics_v3.riv": {
+    "artboards": [
+      {
+        "name": "asset1",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a1SM"
+        ]
+      },
+      {
+        "name": "asset31",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a31SM"
+        ]
+      },
+      {
+        "name": "asset28",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a28SM"
+        ]
+      },
+      {
+        "name": "asset29",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a29SM"
+        ]
+      },
+      {
+        "name": "asset26",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a26SM"
+        ]
+      },
+      {
+        "name": "asset2",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a2SM"
+        ]
+      },
+      {
+        "name": "asset24",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a24SM"
+        ]
+      },
+      {
+        "name": "asset4",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a4SM"
+        ]
+      },
+      {
+        "name": "asset27",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a27SM"
+        ]
+      },
+      {
+        "name": "asset22",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a22SM"
+        ]
+      },
+      {
+        "name": "asset6",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a6SM"
+        ]
+      },
+      {
+        "name": "asset25",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a25SM"
+        ]
+      },
+      {
+        "name": "asset20",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a20SM"
+        ]
+      },
+      {
+        "name": "asset3",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a3SM"
+        ]
+      },
+      {
+        "name": "asset8",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a8SM"
+        ]
+      },
+      {
+        "name": "asset18",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a18SM"
+        ]
+      },
+      {
+        "name": "asset10",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a10SM"
+        ]
+      },
+      {
+        "name": "asset16",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a16SM"
+        ]
+      },
+      {
+        "name": "asset32",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a32SM"
+        ]
+      },
+      {
+        "name": "asset12",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a12SM"
+        ]
+      },
+      {
+        "name": "asset23",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a23SM"
+        ]
+      },
+      {
+        "name": "asset14",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a14SM"
+        ]
+      },
+      {
+        "name": "asset5",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a5SM"
+        ]
+      },
+      {
+        "name": "asset21",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a21SM"
+        ]
+      },
+      {
+        "name": "asset7",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a7SM"
+        ]
+      },
+      {
+        "name": "asset19",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a19SM"
+        ]
+      },
+      {
+        "name": "asset9",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a9SM"
+        ]
+      },
+      {
+        "name": "asset30",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a30SM"
+        ]
+      },
+      {
+        "name": "asset17",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a17SM"
+        ]
+      },
+      {
+        "name": "asset11",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a11SM"
+        ]
+      },
+      {
+        "name": "asset15",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a15SM"
+        ]
+      },
+      {
+        "name": "asset13",
+        "animations": [
+          "carousel"
+        ],
+        "stateMachines": [
+          "a13SM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "PathEffectVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "cellSize",
+            "type": "number"
+          },
+          {
+            "name": "gapSize",
+            "type": "number"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "black",
+            "type": "color"
+          },
+          {
+            "name": "pink",
+            "type": "color"
+          },
+          {
+            "name": "purple",
+            "type": "color"
+          },
+          {
+            "name": "darkBlue",
+            "type": "color"
+          },
+          {
+            "name": "green",
+            "type": "color"
+          },
+          {
+            "name": "yellow",
+            "type": "color"
+          },
+          {
+            "name": "orange",
+            "type": "color"
+          },
+          {
+            "name": "red",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "titleSVGS/heromobile.riv": {
+    "artboards": [
+      {
+        "name": "heroMobile",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "heroMobileSM"
+        ]
+      },
+      {
+        "name": "bike1",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "bike1SM"
+        ]
+      },
+      {
+        "name": "conductor",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "conductorSM"
+        ]
+      },
+      {
+        "name": "crew",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "crewSM"
+        ]
+      },
+      {
+        "name": "marching",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "marchingSM"
+        ]
+      },
+      {
+        "name": "bike2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "bike2"
+        ]
+      },
+      {
+        "name": "dancers",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "dancersSM"
+        ]
+      },
+      {
+        "name": "titles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "titlesSM"
+        ]
+      },
+      {
+        "name": "dancers 2",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "dancersSM"
+        ]
+      },
+      {
+        "name": "runners",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "runnersSM"
+        ]
+      },
+      {
+        "name": "horse",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "horseSM"
+        ]
+      },
+      {
+        "name": "subTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "State Machine 1"
+        ]
+      },
+      {
+        "name": "birds",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "birdsSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "Hero3ViewModel",
+        "instances": [
+          "darkMode",
+          "contrastDark",
+          "lightMode",
+          "contrastLight"
+        ],
+        "properties": [
+          {
+            "name": "seedNumber",
+            "type": "number"
+          },
+          {
+            "name": "colorAccent",
+            "type": "color"
+          },
+          {
+            "name": "action",
+            "type": "trigger"
+          },
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "titleSVGS/problembutton.riv": {
+    "artboards": [
+      {
+        "name": "problemButton",
+        "animations": [
+          "idle",
+          "click"
+        ],
+        "stateMachines": [
+          "problemSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ProblemVM",
+        "instances": [
+          "standard",
+          "snappy",
+          "cinematic"
+        ],
+        "properties": [
+          {
+            "name": "clicked",
+            "type": "boolean"
+          },
+          {
+            "name": "hoverScale",
+            "type": "number"
+          },
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "mantisBody2",
+            "type": "color"
+          },
+          {
+            "name": "mantisEyes2",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "titleSVGS/problembutton2.riv": {
+    "artboards": [
+      {
+        "name": "problemButton2",
+        "animations": [
+          "mantis",
+          "idle",
+          "click"
+        ],
+        "stateMachines": [
+          "problemSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ProblemVM",
+        "instances": [
+          "lightMode",
+          "contrastDark",
+          "contrastLight",
+          "darkMode"
+        ],
+        "properties": [
+          {
+            "name": "hoverFillOpacity",
+            "type": "number"
+          },
+          {
+            "name": "bgHover",
+            "type": "color"
+          },
+          {
+            "name": "clicked",
+            "type": "boolean"
+          },
+          {
+            "name": "hoverScale",
+            "type": "number"
+          },
+          {
+            "name": "background",
+            "type": "color"
+          },
+          {
+            "name": "stroke",
+            "type": "color"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "textHover",
+            "type": "color"
+          },
+          {
+            "name": "textReturn",
+            "type": "color"
+          },
+          {
+            "name": "mantisBody",
+            "type": "color"
+          },
+          {
+            "name": "mantisBodyHC",
+            "type": "color"
+          },
+          {
+            "name": "mantisBodyReturn",
+            "type": "color"
+          },
+          {
+            "name": "mouse2",
+            "type": "color"
+          },
+          {
+            "name": "mantisEyes2",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
+  "titleSVGS/singlelinelogo.riv": {
+    "artboards": [
+      {
+        "name": "singleLineLogo",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "singleLineLogoSM"
+        ]
+      },
+      {
+        "name": "flagWavingOppo",
+        "animations": [
+          "oppoFlag"
+        ],
+        "stateMachines": [
+          "oppoSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "SingleLineLogoVM",
+        "instances": [
+          "darkMode",
+          "contrastLight",
+          "contrastDark",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "accent",
+            "type": "color"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "mantisBody",
+            "type": "color"
+          },
+          {
+            "name": "mantisEyes",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  }
+}
