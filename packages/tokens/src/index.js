@@ -138,6 +138,25 @@ export const AMBIENT_PRESETS = {
   cinematic: { label: 'Cinematic', riveInstance: 'cinematic', speed: 0.8,  easing: 1.15, spread: 0.70, cell: 8,   gap: 1.00 },
 }
 
+// ─── The consumer entry point ─────────────────────────────────────────────────
+// `import { presets } from 'cadence-tokens'` — the sentence the package exists
+// to make true. BUILT_IN_PRESETS below is the EDITOR's shape: raw state in
+// CSS-side units (ms, named easing keys), because Token Lab loads presets into
+// sliders. A consumer outside the site wants resolved runtime values, so each
+// entry here carries `tokens`, the same stateToTokens output the Cadence demos
+// actually run (seconds, four-number bezier arrays, the spring as three
+// numbers), and `ambient`, the field vocabulary with the k and speed the
+// Motion Tiles grid runs. Both derive from the same sources as everything
+// else in this module, so this surface cannot drift from the site.
+// (stateToTokens is declared below; `export function` hoists.)
+export const presets = Object.fromEntries(
+  BUILT_IN_PRESETS.map(p => [p.id, {
+    label: p.label,
+    tokens: stateToTokens(p.state),
+    ambient: AMBIENT_PRESETS[p.id],
+  }])
+)
+
 // ─── stateToTokens ────────────────────────────────────────────────────────────
 // Converts a preset's `state` object (CSS-side units: ms, named easing keys
 // or four-number arrays per slot, unitless scale) into the React-side token

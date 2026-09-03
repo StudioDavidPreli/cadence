@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
+  presets,
+  stateToTokens,
   toDtcgDoc,
   toDtcgJson,
   toCssVars,
@@ -105,6 +107,26 @@ describe('buildTokensDocument', () => {
 
   it('is JSON-serializable without loss', () => {
     expect(JSON.parse(JSON.stringify(doc))).toEqual(doc)
+  })
+})
+
+describe('presets (the consumer entry point, build-order item 4)', () => {
+  it('carries all three personalities keyed by id', () => {
+    expect(Object.keys(presets).sort()).toEqual(BUILT_IN_PRESETS.map(p => p.id).sort())
+  })
+
+  it('tokens are exactly what the site runs for that preset', () => {
+    // The no-drift contract: presets.<id>.tokens must equal the stateToTokens
+    // output the demos consume, seconds and bezier arrays and all.
+    for (const p of BUILT_IN_PRESETS) {
+      expect(presets[p.id].tokens).toEqual(stateToTokens(p.state))
+    }
+  })
+
+  it('ambient carries the k and speed the grid runs', () => {
+    expect(presets.standard.ambient).toBe(AMBIENT_PRESETS.standard)
+    expect(presets.snappy.ambient.easing).toBe(3.60)
+    expect(presets.snappy.ambient.speed).toBe(1.25)
   })
 })
 

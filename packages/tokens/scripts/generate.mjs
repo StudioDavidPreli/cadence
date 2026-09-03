@@ -1,18 +1,30 @@
 // Generates the package's published artifacts into dist/. Run from the package
 // directory (or via `npm run generate -w cadence-tokens` at the repo root).
 //
-// Item 2 of the build order added the canonical document; item 3 added the
-// Rive VM defaults. The rest of the artifact set (a --cadence- prefixed CSS
-// file per preset, the Framer Motion module) lands with the publish item,
-// where the README documents each one. The emitters already exist, so those
-// are one-line adds here when their time comes.
+// The full published artifact set (build-order items 2-4):
 //
-// dist/ is generated output and gitignored; `npm publish` regenerates it via
-// prepack when the publish item wires that up.
+//   dist/cadence.tokens.json      the canonical document, both vocabularies
+//   dist/cadence.rive.json        PathEffectVM defaults + clock + unit notes
+//   dist/<preset>/cadence.css     that personality as --cadence- custom properties
+//   dist/<preset>/cadence.motion.js  that personality as a Framer Motion module
+//
+// The CSS and Framer Motion files are per-preset because both formats
+// serialize ONE state: a stylesheet declares one value per property and a
+// transition takes one duration. The JSON documents are the whole system;
+// the per-preset files are a chosen personality, ready to drop in.
+//
+// dist/ is generated output and gitignored; prepack regenerates it so a
+// publish can never ship stale artifacts.
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildTokensDocument, buildRiveDefaults } from '../src/index.js'
+import {
+  buildTokensDocument,
+  buildRiveDefaults,
+  toCssVars,
+  toFramerMotion,
+  BUILT_IN_PRESETS,
+} from '../src/index.js'
 
 const packageDir = dirname(dirname(fileURLToPath(import.meta.url)))
 const { version } = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'))
@@ -26,4 +38,11 @@ writeFileSync(join(outDir, 'cadence.tokens.json'), JSON.stringify(doc, null, 2) 
 const riveDefaults = buildRiveDefaults()
 writeFileSync(join(outDir, 'cadence.rive.json'), JSON.stringify(riveDefaults, null, 2) + '\n')
 
-console.log(`cadence.tokens.json + cadence.rive.json generated (version ${version})`)
+for (const preset of BUILT_IN_PRESETS) {
+  const presetDir = join(outDir, preset.id)
+  mkdirSync(presetDir, { recursive: true })
+  writeFileSync(join(presetDir, 'cadence.css'), toCssVars(preset.state, { prefix: '--cadence-' }) + '\n')
+  writeFileSync(join(presetDir, 'cadence.motion.js'), toFramerMotion(preset.state))
+}
+
+console.log(`generated (version ${version}): cadence.tokens.json, cadence.rive.json, and css + motion.js for ${BUILT_IN_PRESETS.map(p => p.id).join(', ')}`)

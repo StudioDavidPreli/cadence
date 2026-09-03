@@ -1,18 +1,42 @@
 {
   "name": "cadence-tokens",
-  "version": "0.1.0",
-  "private": true,
-  "description": "The Cadence motion token system: three motion personalities (Snappy, Standard, Cinematic) as data, with emitters for CSS custom properties, DTCG, flat JSON, and Framer Motion.",
+  "version": "1.0.0",
+  "description": "The Cadence motion token system: three motion personalities (Snappy, Standard, Cinematic) as data, with emitters for CSS custom properties, DTCG, flat JSON, Framer Motion, and Rive view-model defaults.",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./tokens.json": "./dist/cadence.tokens.json",
+    "./rive.json": "./dist/cadence.rive.json"
   },
+  "sideEffects": false,
   "files": [
-    "src",
+    "src/index.js",
     "dist"
   ],
   "scripts": {
-    "generate": "node scripts/generate.mjs"
-  }
+    "generate": "node scripts/generate.mjs",
+    "prepack": "npm run generate"
+  },
+  "keywords": [
+    "design-tokens",
+    "motion",
+    "animation",
+    "design-system",
+    "framer-motion",
+    "dtcg",
+    "css-custom-properties",
+    "rive"
+  ],
+  "author": "David Preli (https://davidpreli.com)",
+  "homepage": "https://cadence.davidpreli.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StudioDavidPreli/cadence.git",
+    "directory": "packages/tokens"
+  },
+  "bugs": {
+    "url": "https://github.com/StudioDavidPreli/cadence/issues"
+  },
+  "license": "MIT"
 }
