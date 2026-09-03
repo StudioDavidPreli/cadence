@@ -12,6 +12,7 @@
   "sideEffects": false,
   "files": [
     "src/index.js",
+    "src/provenance.js",
     "dist"
   ],
   "scripts": {

@@ -138,6 +138,10 @@ export const AMBIENT_PRESETS = {
   cinematic: { label: 'Cinematic', riveInstance: 'cinematic', speed: 0.8,  easing: 1.15, spread: 0.70, cell: 8,   gap: 1.00 },
 }
 
+// Provenance lives in its own module (it is prose-heavy documentation data)
+// and re-exports here so consumers have one entry point.
+export { provenance, PROVENANCE_TAGS } from './provenance.js'
+
 // ─── The consumer entry point ─────────────────────────────────────────────────
 // `import { presets } from 'cadence-tokens'` — the sentence the package exists
 // to make true. BUILT_IN_PRESETS below is the EDITOR's shape: raw state in
