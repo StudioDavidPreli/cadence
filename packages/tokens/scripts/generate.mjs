@@ -23,7 +23,10 @@ import {
   buildRiveDefaults,
   toCssVars,
   toFramerMotion,
+  toAfterEffects,
+  toFlow,
   BUILT_IN_PRESETS,
+  INITIAL_STATE,
 } from '../src/index.js'
 
 const packageDir = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -38,11 +41,20 @@ writeFileSync(join(outDir, 'cadence.tokens.json'), JSON.stringify(doc, null, 2) 
 const riveDefaults = buildRiveDefaults()
 writeFileSync(join(outDir, 'cadence.rive.json'), JSON.stringify(riveDefaults, null, 2) + '\n')
 
+// The Flow library: one file, not per-preset. Presets differ by slot POINTING
+// (Snappy's standard slot reads the overshoot curve), not by curve values, so
+// per-preset Flow files would repeat the same numbers under reshuffled names.
+// Standard's slots resolve 1:1 to the named curves, so this file is the
+// system's curve vocabulary. The .flow.txt extension matches how Flow's own
+// exported libraries name themselves.
+writeFileSync(join(outDir, 'cadence.flow.txt'), toFlow(INITIAL_STATE))
+
 for (const preset of BUILT_IN_PRESETS) {
   const presetDir = join(outDir, preset.id)
   mkdirSync(presetDir, { recursive: true })
   writeFileSync(join(presetDir, 'cadence.css'), toCssVars(preset.state, { prefix: '--cadence-' }) + '\n')
   writeFileSync(join(presetDir, 'cadence.motion.js'), toFramerMotion(preset.state))
+  writeFileSync(join(presetDir, 'cadence.tokens.jsx'), toAfterEffects(preset.state, { label: preset.label, version }))
 }
 
-console.log(`generated (version ${version}): cadence.tokens.json, cadence.rive.json, and css + motion.js for ${BUILT_IN_PRESETS.map(p => p.id).join(', ')}`)
+console.log(`generated (version ${version}): cadence.tokens.json, cadence.rive.json, and css + motion.js + tokens.jsx for ${BUILT_IN_PRESETS.map(p => p.id).join(', ')}`)

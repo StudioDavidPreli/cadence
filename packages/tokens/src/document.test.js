@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   presets,
   stateToTokens,
+  toFlow,
   toDtcgDoc,
   toDtcgJson,
   toCssVars,
@@ -107,6 +108,29 @@ describe('buildTokensDocument', () => {
 
   it('is JSON-serializable without loss', () => {
     expect(JSON.parse(JSON.stringify(doc))).toEqual(doc)
+  })
+})
+
+describe('toFlow (the Flow easing-library export)', () => {
+  const parsed = JSON.parse(toFlow(INITIAL_STATE))
+
+  it('carries the five curves as "x1,y1,x2,y2" strings at two decimals', () => {
+    expect(Object.keys(parsed)).toEqual(['linear', 'standard', 'enter', 'exit', 'overshoot'])
+    expect(parsed.standard).toBe('0.40,0.00,0.20,1.00')
+    expect(parsed.linear).toBe('0.00,0.00,1.00,1.00')
+    // y past 1 serializes as-is; Flow's own libraries carry values like 3.18.
+    expect(parsed.overshoot).toBe('0.34,1.56,0.64,1.00')
+  })
+
+  it('a custom-dragged curve exports its own numbers under its slot', () => {
+    const custom = { ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, standard: [0.1, -0.5, 0.9, 1.5] } }
+    expect(JSON.parse(toFlow(custom)).standard).toBe('0.10,-0.50,0.90,1.50')
+  })
+
+  it('matches the observed library format shape (4-space JSON, string values)', () => {
+    const text = toFlow(INITIAL_STATE)
+    expect(text).toContain('    "standard": "0.40,0.00,0.20,1.00"')
+    expect(text.endsWith('\n')).toBe(true)
   })
 })
 

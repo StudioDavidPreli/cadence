@@ -50,6 +50,8 @@ Each personality ships as a complete stylesheet of custom properties:
 | `dist/cadence.rive.json` | Per-preset view-model defaults for Rive, with the clock math and binding-unit notes. |
 | `dist/<preset>/cadence.css` | One personality as `--cadence-*` custom properties. |
 | `dist/<preset>/cadence.motion.js` | One personality as a ready Framer Motion module. |
+| `dist/<preset>/cadence.tokens.jsx` | One personality as a runnable After Effects script: creates or updates the `TOKENS Motion` control layer in the active comp. Re-running a different preset's file retimes the comp. |
+| `dist/cadence.flow.txt` | The five named curves as an easing library for Flow, the After Effects plugin. One file, not per preset: presets re-point slots at the same curves. |
 
 `cadence-tokens/tokens.json` and `cadence-tokens/rive.json` resolve as export paths if you prefer importing the documents to reading files.
 

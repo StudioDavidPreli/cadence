@@ -139,8 +139,12 @@ export const AMBIENT_PRESETS = {
 }
 
 // Provenance lives in its own module (it is prose-heavy documentation data)
-// and re-exports here so consumers have one entry point.
+// and re-exports here so consumers have one entry point. The After Effects
+// emitter likewise (it is mostly an ExtendScript template); its import of
+// stateToExport from this module is a benign cycle — function declarations
+// hoist, and nothing runs at module top level.
 export { provenance, PROVENANCE_TAGS } from './provenance.js'
+export { toAfterEffects, toAfterEffectsControls } from './afterEffects.js'
 
 // ─── The consumer entry point ─────────────────────────────────────────────────
 // `import { presets } from 'cadence-tokens'` — the sentence the package exists
@@ -366,6 +370,31 @@ export function toCssVars(state, { prefix = '--motion-' } = {}) {
     `  ${prefix}duration-scalar: ${t.scalar};`,
   ]
   return `:root {\n${lines.join('\n')}\n}`
+}
+
+// ─── Flow export ──────────────────────────────────────────────────────────────
+// Flow is a widely used After Effects plugin for applying and saving easing
+// curves; its library format is a JSON object of curve name -> "x1,y1,x2,y2"
+// strings at two decimals (per a real exported library; y is free to leave
+// [0,1], which is how its anticipation curves work, so Overshoot's 1.56
+// serializes as-is). This emits the current state's curve set as a library a
+// Flow user imports once and then applies from the panel: the four editable
+// slots plus Linear. Under the Standard preset the slots resolve 1:1 to the
+// named curves, so the generated dist file IS the system's curve vocabulary;
+// a custom-dragged curve exports its own numbers under its slot name, so the
+// in-app export path stays open. Format only, no affiliation: the file is
+// data Flow reads, the same posture as DTCG.
+export function toFlow(state) {
+  const t = stateToExport(state)
+  const fmt = arr => arr.map(n => n.toFixed(2)).join(',')
+  const doc = {
+    linear: fmt(t.easing.linear),
+    standard: fmt(t.easing.standard),
+    enter: fmt(t.easing.enter),
+    exit: fmt(t.easing.exit),
+    overshoot: fmt(t.easing.overshoot),
+  }
+  return JSON.stringify(doc, null, 4) + '\n'
 }
 
 // ─── Framer Motion export ─────────────────────────────────────────────────────

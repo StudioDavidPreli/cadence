@@ -1,7 +1,7 @@
 {
   "name": "cadence-tokens",
   "version": "1.0.0",
-  "description": "The Cadence motion token system: three motion personalities (Snappy, Standard, Cinematic) as data, with emitters for CSS custom properties, DTCG, flat JSON, Framer Motion, and Rive view-model defaults.",
+  "description": "The Cadence motion token system: three motion personalities (Snappy, Standard, Cinematic) as data, with emitters for CSS custom properties, DTCG, flat JSON, Framer Motion, After Effects (a TOKENS Motion control layer script), a Flow easing library, and Rive view-model defaults.",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
@@ -13,6 +13,7 @@
   "files": [
     "src/index.js",
     "src/provenance.js",
+    "src/afterEffects.js",
     "dist"
   ],
   "scripts": {
