@@ -24,6 +24,7 @@ import { useMemo, useState } from 'react'
 import { useNavState } from '../../context/NavigationContext'
 import { GLOSSARY_COMPONENTS } from '../../data/navigation'
 import { buildGlossaryModel, PRESET_LABELS } from './glossaryModel'
+import { TokensTitle, ComponentsTitle } from './GlossaryTitle'
 import styles from './Glossary.module.css'
 
 // The provenance legend, rendered once at the top of the Tokens view. The
@@ -92,7 +93,7 @@ function Disclosure({ id, title, count, children }) {
 function TokensView({ families }) {
   return (
     <>
-      <h2 className={styles.title}>Tokens</h2>
+      <TokensTitle />
       <p className={styles.lede}>
         Every value the system carries, with where it came from and who reads
         it. This page is generated from the same package the site runs
@@ -158,7 +159,7 @@ function TokenRow({ row }) {
 function ComponentsView({ components }) {
   return (
     <>
-      <h2 className={styles.title}>Components</h2>
+      <ComponentsTitle />
       <p className={styles.lede}>
         The same map read the other way: each demo component, and the tokens
         its source actually reads. A component is listed under a token only if

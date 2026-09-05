@@ -31,7 +31,8 @@
   color: var(--color-text-base);
 }
 
-/* View title: the same editorial serif moment as the TokenLabGuide title. */
+/* View title: the same editorial serif moment as the TokenLabGuide title.
+   (These type properties also style the Rive title's text fallback.) */
 .title {
   margin: 0 0 16px;
   font-family: var(--font-serif);
@@ -39,6 +40,51 @@
   font-size: 32px;
   line-height: 1.1;
   color: var(--color-text-base);
+}
+
+/* The animated title's box (ComponentsTitle): the artboard's natural 480x216,
+   centered in the page measure. Fixed to the natural size on purpose — the
+   art is 8px-cell pixel work, and 1:1 CSS pixels keep the cells crisp where a
+   scaled fit would soften them. max-width covers narrow cases; Contain keeps
+   the art whole if it ever scales. */
+.titleAnim {
+  position: relative;
+  display: block;
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 480 / 216;
+  margin: 0 auto;
+}
+
+.titleCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Plain-text stand-in shown until the canvas paints (or if the .riv is
+   absent), pinned where the word will land, inheriting the serif from .title.
+   (Reduced motion renders the SVG poster through .titleCanvas instead.) */
+.titleFallback {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Visually-hidden accessible name (the standard sr-only clip pattern), same
+   as TokenLabGuide's: the document outline keeps "Components" while the
+   visible heading is the aria-hidden canvas. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .lede {

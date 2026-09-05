@@ -73,6 +73,31 @@ test.describe('glossary', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible()
   })
 
+  test('reduced motion swaps both title canvases for their SVG posters', async ({ page }) => {
+    // page.emulateMedia, not test.use({ reducedMotion }): the latter silently
+    // no-ops in this suite (playwright-mcp-verification-quirks).
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+
+    await page.goto('/#/glossary')
+    await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('img[src^="/fallBacks/tokens"]')).toBeVisible()
+    // The poster must actually resolve (the HC-light file shipped under a
+    // singular-"token" filename once; a 404 here is exactly that class).
+    const posterOk = await page.evaluate(async () => {
+      const img = document.querySelector('img[src^="/fallBacks/"]')
+      const res = await fetch(img.src)
+      return res.ok
+    })
+    expect(posterOk).toBe(true)
+
+    await page.goto('/#/glossary/components')
+    await expect(page.getByRole('heading', { level: 2, name: 'Components' })).toBeVisible()
+    await expect(page.locator('img[src^="/fallBacks/components"]')).toBeVisible()
+    // No Rive canvas mounts under the preference — the posters replace them
+    // entirely, .riv unfetched.
+    await expect(page.locator('h2 canvas')).toHaveCount(0)
+  })
+
   test('a stale tail fails soft to the tokens view', async ({ page }) => {
     await page.goto('/#/glossary/nonsense')
     await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible({ timeout: 30_000 })
