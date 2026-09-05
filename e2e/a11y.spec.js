@@ -20,6 +20,11 @@ for (const theme of THEMES) {
   test.describe(`axe floors, ${theme}`, () => {
     for (const view of VIEWS) {
       test(view.name, async ({ browser }) => {
+        // An axe scan of a Rive-heavy view under six parallel workers brushes
+        // the default 30s timeout often enough to flake (it always passed on
+        // retry; recurring 2026-09-05). slow() triples the budget so a slow
+        // scan is a slow scan, not noise.
+        test.slow()
         const context = await browser.newContext()
         // Seed the theme (stored choice wins over OS) and mark the Principles
         // intro as seen so axe scans the grid, not the modal in front of it.

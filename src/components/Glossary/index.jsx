@@ -50,10 +50,23 @@ export function GlossarySection() {
       role="region"
       aria-label="Glossary"
     >
+      {/* Both views stay MOUNTED and the inactive one hides (David's bug
+          report, 2026-09-05): a conditional swap remounted the whole view on
+          every cycle, so each Rive title re-initialized and its until-paint
+          text fallback flashed on every toggle. With both mounted, each
+          title's Rive instance survives the cycle (the runtime pauses a
+          hidden canvas and resumes on reveal) and the swap is instant; the
+          text fallback goes back to being what it was designed for, cold
+          load and asset failure. Disclosure open/close state persisting
+          across cycles comes free. The hidden attribute keeps the inactive
+          view out of the a11y tree and out of visible-role queries. */}
       <article className={styles.page}>
-        {destination === GLOSSARY_COMPONENTS
-          ? <ComponentsView components={model.components} />
-          : <TokensView families={model.families} />}
+        <div hidden={destination === GLOSSARY_COMPONENTS}>
+          <TokensView families={model.families} />
+        </div>
+        <div hidden={destination !== GLOSSARY_COMPONENTS}>
+          <ComponentsView components={model.components} />
+        </div>
       </article>
     </div>
   )

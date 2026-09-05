@@ -98,6 +98,27 @@ test.describe('glossary', () => {
     await expect(page.locator('h2 canvas')).toHaveCount(0)
   })
 
+  test('cycling views never remounts the titles (the fallback-flash fix)', async ({ page }) => {
+    await page.goto('/#/glossary')
+    await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible({ timeout: 30_000 })
+
+    // Both views are mounted from the start; the inactive one hides. Two
+    // canvases exist regardless of which view shows.
+    await expect(page.locator('h2 canvas')).toHaveCount(2)
+
+    // Tag the tokens title's canvas, cycle away and back, and assert the SAME
+    // element survived: a remount (the old flash) would produce a fresh canvas
+    // without the tag.
+    await page.evaluate(() => { document.querySelector('h2 canvas').dataset.rivlintTag = 'survivor' })
+    await page.getByRole('button', { name: 'Components', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 2, name: 'Components' })).toBeVisible()
+    // Scoped to the nav: the railed tool bar is also a button named Tokens
+    // while the glossary is active.
+    await page.getByLabel('Tools and categories').getByRole('button', { name: 'Tokens', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible()
+    await expect(page.locator('canvas[data-rivlint-tag="survivor"]')).toHaveCount(1)
+  })
+
   test('a stale tail fails soft to the tokens view', async ({ page }) => {
     await page.goto('/#/glossary/nonsense')
     await expect(page.getByRole('heading', { level: 2, name: 'Tokens' })).toBeVisible({ timeout: 30_000 })
