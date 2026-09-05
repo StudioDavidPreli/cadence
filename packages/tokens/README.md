@@ -52,6 +52,7 @@ Each personality ships as a complete stylesheet of custom properties:
 | `dist/<preset>/cadence.motion.js` | One personality as a ready Framer Motion module. |
 | `dist/<preset>/cadence.tokens.jsx` | One personality as a runnable After Effects script: creates or updates the `TOKENS Motion` control layer in the active comp. Re-running a different preset's file retimes the comp. |
 | `dist/cadence.flow.txt` | The five named curves as an easing library for Flow, the After Effects plugin. One file, not per preset: presets re-point slots at the same curves. |
+| `dist/cadence.figma.json` | The interaction tokens as one Figma variable collection with the three personalities as modes, on Figma's native motion types: TIMING durations and delays (seconds), one EASING variable per curve carrying a real cubic-bezier, FLOAT scale and spring parameters. Shaped on Figma's own collection/modes/valuesByMode vocabulary so plugins and scripts map it one to one. |
 
 `cadence-tokens/tokens.json` and `cadence-tokens/rive.json` resolve as export paths if you prefer importing the documents to reading files.
 

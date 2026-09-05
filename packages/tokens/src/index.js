@@ -501,6 +501,86 @@ export function buildTokensDocument({ version = '0.0.0' } = {}) {
   }
 }
 
+// ─── Figma variables ──────────────────────────────────────────────────────────
+// buildFigmaVariables composes cadence.figma.json (build-order item 7, D7):
+// one collection, the three personalities as MODES, every interaction token
+// as a variable with per-mode values. Modes are the reason this format earns
+// its place: a Figma file bound to these variables flips through Snappy /
+// Standard / Cinematic with the mode switcher, which is the preset argument
+// in Figma's own native mechanism.
+//
+// D7 amendment (2026-09-05, discovered at build time): D7 was scoped on the
+// belief that Figma variables carry only FLOAT / COLOR / STRING / BOOLEAN,
+// forcing FLOAT-ms durations and four-FLOAT curve handles. Figma has since
+// shipped native motion variable types, and this emitter uses them:
+// durations and delays are TIMING variables (Figma's unit is SECONDS), each
+// easing curve is ONE EASING variable carrying a real cubic-bezier object,
+// and the spring's three physical parameters stay FLOATs with a note that
+// figma.motion.physicalSpringToNormalized() converts them to a native
+// CUSTOM_SPRING easing (lossy: three params to one bounce number). The shape
+// mirrors Figma's own API vocabulary (collection, modes, variables with
+// valuesByMode) so any import route — a plugin, a script, the Figma MCP —
+// maps fields one to one.
+//
+// The ambient vocabulary is deliberately absent: a Figma variable exists to
+// bind to something in a mock, and the field clock has no Figma consumer.
+// Same class of call as the scalar's exclusion from the Framer Motion module
+// — except the scalar IS here (identical across modes), because a complete
+// interaction document round-trips and a missing lone value reads as an
+// omission, not a decision.
+export function buildFigmaVariables() {
+  const modeIds = BUILT_IN_PRESETS.map(p => p.id)
+  const exports_ = Object.fromEntries(modeIds.map(id =>
+    [id, stateToExport(BUILT_IN_PRESETS.find(p => p.id === id).state)]
+  ))
+  const perMode = fn => Object.fromEntries(modeIds.map(id => [id, fn(exports_[id])]))
+
+  const variables = []
+  const addVar = (name, type, description, fn) =>
+    variables.push({ name, type, description, valuesByMode: perMode(fn) })
+
+  // TIMING values are seconds in Figma's own unit; the same /1000 conversion
+  // stateToTokens performs, so the emitted values equal what the demos run.
+  for (const key of Object.keys(exports_[modeIds[0]].duration)) {
+    addVar(`duration/${key}`, 'TIMING', 'seconds (Figma TIMING unit)', t => t.duration[key] / 1000)
+  }
+  addVar('duration/scalar', 'FLOAT', 'unitless multiplier (effective = base x scalar)', t => t.scalar)
+  for (const key of Object.keys(exports_[modeIds[0]].delay)) {
+    addVar(`delay/${key}`, 'TIMING', 'seconds (Figma TIMING unit)', t => t.delay[key] / 1000)
+  }
+  // One EASING variable per curve, carrying Figma's native cubic-bezier
+  // object. Slots re-point per mode (Snappy's standard slot carries the
+  // overshoot handles), so the handles genuinely vary by mode even though
+  // the named curves do not.
+  for (const key of Object.keys(exports_[modeIds[0]].easing)) {
+    addVar(`easing/${key}`, 'EASING', 'cubic-bezier', t => ({
+      type: 'CUSTOM_CUBIC_BEZIER',
+      easingFunctionCubicBezier: {
+        x1: t.easing[key][0], y1: t.easing[key][1],
+        x2: t.easing[key][2], y2: t.easing[key][3],
+      },
+    }))
+  }
+  for (const key of Object.keys(exports_[modeIds[0]].scale)) {
+    addVar(`scale/${key}`, 'FLOAT', 'unitless (1 = rest size)', t => t.scale[key])
+  }
+  for (const key of Object.keys(exports_[modeIds[0]].spring)) {
+    addVar(`spring/${key}`, 'FLOAT', 'unitless physics-spring parameter', t => t.spring[key])
+  }
+
+  return {
+    collection: 'Cadence Motion',
+    modes: BUILT_IN_PRESETS.map(p => ({ id: p.id, name: p.label })),
+    notes: [
+      'Durations and delays are TIMING variables in SECONDS (Figma’s unit); each easing curve is one EASING variable carrying a native cubic-bezier object.',
+      'The spring ships as its three physical FLOAT parameters; figma.motion.physicalSpringToNormalized({ mass, stiffness, damping }) converts them to a native CUSTOM_SPRING easing (lossy: three parameters become one bounce number).',
+      'Bind a motion duration to duration/base (or the token your gesture uses) and switching the collection mode retimes it through the three personalities.',
+      'The ambient (Motion Tiles) vocabulary is not included: a Figma variable exists to bind, and the field clock has no Figma consumer.',
+    ],
+    variables,
+  }
+}
+
 // ─── Rive VM defaults ─────────────────────────────────────────────────────────
 // buildRiveDefaults composes cadence.rive.json (build-order item 3): the three
 // personalities as PathEffectVM values, for a consumer wiring their own Rive

@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 import {
   buildTokensDocument,
   buildRiveDefaults,
+  buildFigmaVariables,
   toCssVars,
   toFramerMotion,
   toAfterEffects,
@@ -40,6 +41,8 @@ writeFileSync(join(outDir, 'cadence.tokens.json'), JSON.stringify(doc, null, 2) 
 
 const riveDefaults = buildRiveDefaults()
 writeFileSync(join(outDir, 'cadence.rive.json'), JSON.stringify(riveDefaults, null, 2) + '\n')
+
+writeFileSync(join(outDir, 'cadence.figma.json'), JSON.stringify(buildFigmaVariables(), null, 2) + '\n')
 
 // The Flow library: one file, not per-preset. Presets differ by slot POINTING
 // (Snappy's standard slot reads the overshoot curve), not by curve values, so

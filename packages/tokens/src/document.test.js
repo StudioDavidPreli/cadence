@@ -3,6 +3,7 @@ import {
   presets,
   stateToTokens,
   toFlow,
+  buildFigmaVariables,
   toDtcgDoc,
   toDtcgJson,
   toCssVars,
@@ -108,6 +109,49 @@ describe('buildTokensDocument', () => {
 
   it('is JSON-serializable without loss', () => {
     expect(JSON.parse(JSON.stringify(doc))).toEqual(doc)
+  })
+})
+
+describe('buildFigmaVariables (build-order item 7)', () => {
+  const doc = buildFigmaVariables()
+  const byName = Object.fromEntries(doc.variables.map(v => [v.name, v]))
+
+  it('one collection, the three personalities as modes', () => {
+    expect(doc.collection).toBe('Cadence Motion')
+    expect(doc.modes.map(m => m.id)).toEqual(BUILT_IN_PRESETS.map(p => p.id))
+  })
+
+  it('every variable carries a value per mode and a native type (the D7 amendment)', () => {
+    expect(doc.variables.length).toBeGreaterThan(0)
+    for (const v of doc.variables) {
+      expect(['TIMING', 'EASING', 'FLOAT']).toContain(v.type)
+      expect(Object.keys(v.valuesByMode).sort()).toEqual(BUILT_IN_PRESETS.map(p => p.id).sort())
+    }
+  })
+
+  it('durations are TIMING variables in seconds, the same /1000 the demos run', () => {
+    expect(byName['duration/base'].type).toBe('TIMING')
+    expect(byName['duration/base'].valuesByMode).toEqual({ standard: 0.2, snappy: 0.12, cinematic: 0.5 })
+    expect(byName['delay/short'].valuesByMode.standard).toBe(0.05)
+  })
+
+  it('each curve is one EASING variable with a native bezier, and slot re-pointing shows per mode', () => {
+    const std = byName['easing/standard']
+    expect(std.type).toBe('EASING')
+    expect(std.valuesByMode.standard).toEqual({
+      type: 'CUSTOM_CUBIC_BEZIER',
+      easingFunctionCubicBezier: { x1: 0.4, y1: 0, x2: 0.2, y2: 1 },
+    })
+    // Snappy's standard slot carries the overshoot handles.
+    expect(std.valuesByMode.snappy.easingFunctionCubicBezier.y1).toBe(1.56)
+    expect(byName['easing/overshoot'].type).toBe('EASING')
+  })
+
+  it('carries the complete interaction document and nothing ambient', () => {
+    expect(byName['duration/scalar'].valuesByMode.standard).toBe(1)
+    expect(byName['delay/none'].valuesByMode.cinematic).toBe(0)
+    expect(byName['spring/stiffness'].valuesByMode.snappy).toBe(600)
+    expect(doc.variables.some(v => v.name.startsWith('ambient'))).toBe(false)
   })
 })
 
