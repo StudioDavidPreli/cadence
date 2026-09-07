@@ -8,6 +8,7 @@ import {
   MOTION_TILES_GRID,
   GLOSSARY_TOKENS,
   GLOSSARY_COMPONENTS,
+  TOOLS_MEASURE,
 } from '../data/navigation'
 import { principleBySlug, principleById } from '../data/principles'
 
@@ -31,6 +32,8 @@ import { principleBySlug, principleById } from '../data/principles'
 //   #/glossary                      the glossary, Tokens view
 //   #/glossary/tokens               same (Tokens is the default view)
 //   #/glossary/components           the glossary, Components view
+//   #/tools                         Tools, Measure view (the default)
+//   #/tools/measure                 same
 //
 // The third principles segment is the deep-link entrance (designed 2026-07-21):
 // a direct link mounts the grid in its default state and opens the named
@@ -117,6 +120,19 @@ export function parseHash(hash) {
     }
   }
 
+  if (first === SECTIONS.TOOLS) {
+    // #/tools or #/tools/measure. Measure is the only tool so far (the linter,
+    // item 9, will add a tail); any other tail falls back to it, the same
+    // fail-soft posture as the Glossary.
+    return {
+      section: SECTIONS.TOOLS,
+      expandedSection: SECTIONS.TOOLS,
+      destination: TOOLS_MEASURE,
+      principleFilter: FILTERS.ALL,
+      principleId: null,
+    }
+  }
+
   if (first === SECTIONS.GLOSSARY) {
     // #/glossary, #/glossary/tokens, or #/glossary/components. Any other tail falls back
     // to the Tokens view, the same fail-soft posture as the other sections.
@@ -161,6 +177,11 @@ export function stateToHash(state) {
     return state.destination === MOTION_TILES_GRID
       ? `#/${SECTIONS.MOTION_TILES}/${MOTION_TILES_GRID}`
       : `#/${SECTIONS.MOTION_TILES}`
+  }
+  if (state.section === SECTIONS.TOOLS) {
+    // Measure is the default view and serializes to the bare route, the way
+    // the Glossary's Tokens view does; a second tool will fill the tail.
+    return `#/${SECTIONS.TOOLS}`
   }
   if (state.section === SECTIONS.GLOSSARY) {
     // Only Components fills the tail; the default Tokens view serializes to the

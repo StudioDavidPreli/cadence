@@ -785,6 +785,60 @@
       }
     ]
   },
+  "rive/measureTitles.riv": {
+    "artboards": [
+      {
+        "name": "measureTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "measureSM"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "MeasureTitleVM",
+        "instances": [
+          "darkMode",
+          "contrastLight",
+          "contrastDark",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "magGlassBG",
+            "type": "color"
+          },
+          {
+            "name": "tapeColor",
+            "type": "color"
+          },
+          {
+            "name": "toolFillColor",
+            "type": "color"
+          },
+          {
+            "name": "toolLineColor",
+            "type": "color"
+          },
+          {
+            "name": "lineColor",
+            "type": "color"
+          },
+          {
+            "name": "sideColor",
+            "type": "color"
+          },
+          {
+            "name": "faceColor",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
   "rive/pixelplant.riv": {
     "artboards": [
       {

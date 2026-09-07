@@ -12,6 +12,7 @@ import {
   MOTION_TILES_GRID,
   GLOSSARY_TOKENS,
   GLOSSARY_COMPONENTS,
+  TOOLS_MEASURE,
 } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
@@ -82,17 +83,20 @@ function NavAccordion({ onNavigate }) {
     selectCategory, toggleSection, setFilter,
     showMotionTilesLanding, enterMotionTilesGrid,
     showGlossaryTokens, showGlossaryComponents,
+    showToolsMeasure,
   } = useNavActions()
 
   const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
   const principlesOpen   = expandedSection === SECTIONS.PRINCIPLES
   const motionTilesOpen  = expandedSection === SECTIONS.MOTION_TILES
   const glossaryOpen        = expandedSection === SECTIONS.GLOSSARY
+  const toolsOpen           = expandedSection === SECTIONS.TOOLS
 
   const tokenLabBodyId    = 'nav-section-token-lab'
   const principlesBodyId  = 'nav-section-principles'
   const motionTilesBodyId = 'nav-section-motion-tiles'
   const glossaryBodyId       = 'nav-section-glossary'
+  const toolsBodyId          = 'nav-section-tools'
 
   const pickCategory    = id => { selectCategory(id); onNavigate?.() }
   const pickFilter      = f  => { setFilter(f); onNavigate?.() }
@@ -110,6 +114,10 @@ function NavAccordion({ onNavigate }) {
   // The Glossary opens like Motion Tiles: the header discloses its two leaves and
   // shows the Tokens view; the drawer stays open on toggle.
   const clickGlossary          = () => toggleSection(SECTIONS.GLOSSARY)
+  // Tools opens like the Glossary: the header discloses its leaves and shows
+  // Measure; the drawer stays open on toggle so the user can pick a leaf.
+  const clickTools             = () => toggleSection(SECTIONS.TOOLS)
+  const pickToolsMeasure       = () => { showToolsMeasure(); onNavigate?.() }
   const pickGlossaryTokens     = () => { showGlossaryTokens();     onNavigate?.() }
   const pickGlossaryComponents = () => { showGlossaryComponents(); onNavigate?.() }
 
@@ -215,6 +223,26 @@ function NavAccordion({ onNavigate }) {
           active={destination === GLOSSARY_COMPONENTS}
           tabbable={glossaryOpen}
           onClick={pickGlossaryComponents}
+        />
+      </AccordionBody>
+
+      {/* ── Tools ─────────────────────────────────────────────────────── */}
+      {/* The standalone utilities (David's call, 2026-09-05): Measure now,
+          the .riv linter (item 9) next. */}
+      <SectionHeader
+        label="Tools"
+        open={toolsOpen}
+        bodyId={toolsBodyId}
+        active={section === SECTIONS.TOOLS}
+        current={section === SECTIONS.TOOLS}
+        onClick={clickTools}
+      />
+      <AccordionBody id={toolsBodyId} open={toolsOpen}>
+        <NavRow
+          label="Measure"
+          active={destination === TOOLS_MEASURE}
+          tabbable={toolsOpen}
+          onClick={pickToolsMeasure}
         />
       </AccordionBody>
     </>

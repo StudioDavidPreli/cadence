@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseHash, stateToHash, principleHash, LANDING } from './useHashRoute'
+import { SECTIONS, FILTERS, TOOLS_MEASURE } from '../data/navigation'
 
 // The deep-link segment (#/principles/<filter>/<slug>) is the reason this hook
 // grew a third principles segment. State carries the numeric principleId; the URL
@@ -95,6 +96,23 @@ describe('deep-link round-trip', () => {
       expect(stateToHash(state)).toBe(hash)
       expect(state.principleId).toBe(id)
     }
+  })
+})
+
+describe('tools route', () => {
+  it('parses #/tools and #/tools/measure to the Measure view, and fails soft on a stale tail', () => {
+    for (const hash of ['#/tools', '#/tools/', '#/tools/measure', '#/tools/anything']) {
+      expect(parseHash(hash)).toEqual({
+        section: SECTIONS.TOOLS,
+        expandedSection: SECTIONS.TOOLS,
+        destination: TOOLS_MEASURE,
+        principleFilter: FILTERS.ALL,
+        principleId: null,
+      })
+    }
+  })
+  it('serializes the Measure view to the bare tools route', () => {
+    expect(stateToHash(parseHash('#/tools/measure'))).toBe('#/tools')
   })
 })
 

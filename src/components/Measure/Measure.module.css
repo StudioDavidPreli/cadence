@@ -1,0 +1,478 @@
+/* The Measure page. Document conventions follow the Glossary (left-aligned,
+   a bounded measure, mono labels over muted body, code chips on
+   accent-subtle), with the visualizers' plot register for the two charts
+   (axes on border2, the read on accent). The measure is wider than the
+   Glossary's 720 because the recording and its trace want the room.
+
+   Color pairings are all existing audited ones: text-base and text-muted on
+   surface-raised, chips on accent-subtle with text-base, accent as a graphical
+   stroke (3:1 bar). No new pairing. Every transition here is chrome on the
+   fixed --feedback-* constants; the recording preview never autoplays. */
+
+.scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: var(--color-surface-raised);
+}
+
+.scroll:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+  color: var(--color-text-base);
+}
+
+/* The title: an animated Rive scene (measureTitles.riv, David's, 2026-09-07)
+   following the Glossary titles' display-title convention. These type
+   properties style the plain-text fallback that shows until the canvas
+   paints. */
+.title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+/* The animated title's box: the artboard's natural 480x216, centered in the
+   page measure at 1:1 CSS pixels so the pixel-cell art stays crisp (same
+   reasoning as the Glossary titles). max-width covers narrow viewports;
+   Contain keeps the art whole if it ever scales. */
+.titleAnim {
+  position: relative;
+  display: block;
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 480 / 216;
+  margin: 0 auto;
+}
+
+.titleCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Plain-text stand-in until the canvas paints (or if the .riv is absent),
+   pinned where the word will land. Reduced motion renders the SVG poster
+   through .titleCanvas instead. */
+.titleFallback {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Visually-hidden accessible name: the document outline keeps "Measure"
+   while the visible heading is the aria-hidden canvas. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lede {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* ── Guidance ──────────────────────────────────────────────────────────────── */
+.guide {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.guideRow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.guideRow:last-child {
+  margin-bottom: 0;
+}
+
+.guideRow strong {
+  font-weight: 600;
+  color: var(--color-text-base);
+}
+
+/* ── Drop zone ─────────────────────────────────────────────────────────────── */
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 112px;
+  padding: 24px;
+  border: 1px dashed var(--color-border2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color var(--feedback-ui-duration) ease,
+    background-color var(--feedback-ui-duration) ease;
+}
+
+.drop:hover,
+.dropActive {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface);
+  color: var(--color-text-base);
+}
+
+.drop:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The real input stays in the tree for keyboard and assistive access; it is
+   visually hidden, not display:none, so it keeps its tab stop. */
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dropLabel {
+  composes: type-label from global;
+  color: var(--color-text-base);
+}
+
+.dropHint {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+/* ── Samples ───────────────────────────────────────────────────────────────── */
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.samplesLabel {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+.sampleButton,
+.selectButton,
+.download {
+  composes: type-button from global;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color var(--feedback-ui-duration) ease;
+}
+
+.sampleButton:hover,
+.selectButton:hover,
+.download:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.sampleButton:focus-visible,
+.selectButton:focus-visible,
+.download:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Status ────────────────────────────────────────────────────────────────── */
+.status {
+  min-height: 1.6em;
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* ── Results ───────────────────────────────────────────────────────────────── */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0 0;
+}
+
+.block,
+.card,
+.assign {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.cardSelected {
+  border-color: var(--color-border2);
+}
+
+.blockHead,
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+
+.blockTitle {
+  composes: type-label from global;
+  color: var(--color-text-base);
+}
+
+.blockMeta {
+  composes: type-value from global;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+/* The recording, with the measured region outlined over it. */
+.videoBox {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  background-color: var(--color-bg);
+}
+
+/* The region outline, on accent (active: this is what was measured). Its
+   four numbers arrive as custom properties from the component. Pointer events
+   off so the video controls stay reachable. */
+.regionOverlay {
+  position: absolute;
+  left: var(--rx);
+  top: var(--ry);
+  width: var(--rw);
+  height: var(--rh);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0;
+  pointer-events: none;
+}
+
+/* ── Charts ────────────────────────────────────────────────────────────────── */
+.chart {
+  display: block;
+  width: 100%;
+  height: 72px;
+  overflow: visible;
+}
+
+.progressChart {
+  display: block;
+  width: 160px;
+  height: 100px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.axis {
+  stroke: var(--color-border2);
+  stroke-width: 0.6;
+}
+
+.threshold {
+  stroke: var(--color-border2);
+  stroke-width: 0.5;
+  stroke-dasharray: 1.5 2;
+}
+
+.restLine {
+  stroke: var(--color-border2);
+  stroke-width: 0.5;
+  stroke-dasharray: 1.5 2;
+}
+
+.barQuiet {
+  fill: var(--color-border2);
+}
+
+.barMoving {
+  fill: var(--color-accent);
+}
+
+.curve {
+  stroke: var(--color-accent);
+  stroke-width: 1.4;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sample {
+  fill: var(--color-text-base);
+}
+
+/* ── Transition card ───────────────────────────────────────────────────────── */
+.cardBody {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.fact {
+  min-width: 0;
+}
+
+.factLabel {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.factValue {
+  margin: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-base);
+}
+
+.factNote {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.chip {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-size: 12px;
+}
+
+.small,
+.note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.selectButton {
+  margin: 10px 0 0;
+}
+
+/* ── Assignment ────────────────────────────────────────────────────────────── */
+.assignRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  margin: 0 0 12px;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldLabel {
+  composes: type-value from global;
+  color: var(--color-text-base);
+}
+
+.fieldValue {
+  composes: type-value from global;
+  color: var(--color-text-muted);
+}
+
+.select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border2);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.checkField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.checkField input {
+  accent-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop,
+  .sampleButton,
+  .selectButton,
+  .download {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 32px 20px 48px;
+  }
+
+  .cardBody {
+    flex-direction: column;
+  }
+}

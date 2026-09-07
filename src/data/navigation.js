@@ -10,6 +10,7 @@ export const SECTIONS = {
   PRINCIPLES: 'principles',
   MOTION_TILES: 'motion-tiles',
   GLOSSARY: 'glossary',
+  TOOLS: 'tools',
 }
 
 // The Token Lab guide is a destination, not a category. Opening the Token Lab
@@ -36,6 +37,13 @@ export const MOTION_TILES_GRID = 'grid'
 // pattern as Motion Tiles' two views.
 export const GLOSSARY_TOKENS = 'tokens'
 export const GLOSSARY_COMPONENTS = 'components'
+
+// Tools (David's call, 2026-09-05): the category for the standalone
+// utilities, each a leaf. Measure (build-order item 8) is the first; the
+// public .riv linter (item 9) joins it here. Same destination-constant
+// pattern as the Glossary's views; Measure is the default view for the bare
+// #/tools route.
+export const TOOLS_MEASURE = 'measure'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but

@@ -84,6 +84,12 @@ const GlossarySection = lazy(() =>
   import('../Glossary').then((m) => ({ default: m.GlossarySection })),
 )
 
+// Measure (build-order item 8) is lazy for the same reason: a page most
+// sessions never open, carrying its own decode and fit code.
+const MeasureSection = lazy(() =>
+  import('../Measure').then((m) => ({ default: m.MeasureSection })),
+)
+
 const PrinciplesLibrary = lazy(() =>
   importPrinciplesLibrary().then((m) => ({ default: m.PrinciplesLibrary })),
 )
@@ -1680,7 +1686,9 @@ export function TokenLab() {
   // reading surface, not a demo the sliders drive, so the bar reads as set
   // aside while the document gets the room.
   const isGlossary = section === SECTIONS.GLOSSARY
-  const controlsRailed = controlsCollapsed || isMotionTiles || isGlossary
+  // Tools rails it too: the sliders drive nothing on those pages.
+  const isTools = section === SECTIONS.TOOLS
+  const controlsRailed = controlsCollapsed || isMotionTiles || isGlossary || isTools
 
   // Which rail's drawer is open: 'tokens' | 'nav' | null. A single value makes
   // the two drawers mutually exclusive — opening one closes the other, which is
@@ -2262,7 +2270,20 @@ export function TokenLab() {
           tokens). Motion Tiles renders its own section instead: the landing, then
           the lazy grid on Enter. It sits outside MotionTokensProvider on purpose,
           it reads no --motion-* tokens and runs its own preset system. */}
-      {isGlossary ? (
+      {isTools ? (
+        // Tools replace the right region like the Glossary does, outside
+        // MotionTokensProvider: Measure's recording is the demonstration, and
+        // the page reads no --motion-* token. Measure is the only tool until the
+        // linter (item 9) arrives; the destination will pick between them then.
+        <ErrorBoundary
+          title="The measurement page hit a snag"
+          message="The measurement page ran into an unexpected error. Reloading usually clears it."
+        >
+          <Suspense fallback={<div className={styles.lazyFallback}>Loading the measurement page…</div>}>
+            <MeasureSection />
+          </Suspense>
+        </ErrorBoundary>
+      ) : isGlossary ? (
         // The Glossary replaces the right region like Motion Tiles does, and sits
         // outside MotionTokensProvider for the same reason: it documents the
         // shipped presets, not the live slider state.

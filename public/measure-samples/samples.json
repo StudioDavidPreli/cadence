@@ -1,0 +1,8 @@
+{
+  "note": "Recordings of this site's own Button (Token Lab, Press & State) in the high-contrast dark theme, captured 2026-09-05 at 59fps from the built site with the tokens below live. Each is a held press: press-down, hold, release. The truth is what the Measure page should recover from the press-down.",
+  "samples": [
+    { "id": "standard",  "label": "Standard",  "file": "/measure-samples/standard.webm",  "truth": { "durationFast": "100ms", "pressDown": "standard",  "release": "overshoot" } },
+    { "id": "snappy",    "label": "Snappy",    "file": "/measure-samples/snappy.webm",    "truth": { "durationFast": "60ms",  "pressDown": "overshoot", "release": "overshoot" } },
+    { "id": "cinematic", "label": "Cinematic", "file": "/measure-samples/cinematic.webm", "truth": { "durationFast": "200ms", "pressDown": "enter",     "release": "overshoot" } }
+  ]
+}

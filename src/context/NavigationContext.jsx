@@ -7,6 +7,7 @@ import {
   MOTION_TILES_GRID,
   GLOSSARY_TOKENS,
   GLOSSARY_COMPONENTS,
+  TOOLS_MEASURE,
 } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
@@ -89,6 +90,17 @@ function navReducer(state, action) {
           principleFilter: FILTERS.ALL,
         }
       }
+      // Tools opens like the Glossary: disclosure and destination in one,
+      // landing on Measure. A second tool (the linter) swaps the view via
+      // SET_TOOLS_VIEW.
+      if (action.id === SECTIONS.TOOLS) {
+        return {
+          section: SECTIONS.TOOLS,
+          expandedSection: SECTIONS.TOOLS,
+          destination: TOOLS_MEASURE,
+          principleFilter: FILTERS.ALL,
+        }
+      }
       // Opening Token Lab reveals the four categories AND shows the guide as
       // its destination, symmetric to Principles opening to the grid. The guide
       // is the Token Lab landing: a how-to that crossfades in from the hero. A
@@ -121,6 +133,15 @@ function navReducer(state, action) {
       return {
         section: SECTIONS.GLOSSARY,
         expandedSection: SECTIONS.GLOSSARY,
+        destination: action.view,
+        principleFilter: FILTERS.ALL,
+      }
+
+    // A Tools view selected. Same shape as SET_GLOSSARY_VIEW.
+    case 'SET_TOOLS_VIEW':
+      return {
+        section: SECTIONS.TOOLS,
+        expandedSection: SECTIONS.TOOLS,
         destination: action.view,
         principleFilter: FILTERS.ALL,
       }
@@ -186,6 +207,8 @@ export function NavigationProvider({ children }) {
         dispatch({ type: 'SET_GLOSSARY_VIEW', view: GLOSSARY_TOKENS }),
       showGlossaryComponents: () =>
         dispatch({ type: 'SET_GLOSSARY_VIEW', view: GLOSSARY_COMPONENTS }),
+      showToolsMeasure: () =>
+        dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_MEASURE }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
       // Flag the replaceState write, then clear the deep-link modal. Order
       // matters: the ref must be true before the dispatch that triggers the
