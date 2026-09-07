@@ -39,6 +39,11 @@ export function useRecording() {
   const [status, setStatus] = useState(STATUS.IDLE)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+  // True only while a video is being decoded (the file path), never for a
+  // sample, which runs no decoder. The page stills its title on this, not on
+  // status: the freeze exists to give the decoder the compositor, and a
+  // sample's fit needs nothing from it.
+  const [decoding, setDecoding] = useState(false)
   // A run id so a slow decode that finishes after the user dropped a second
   // file cannot overwrite the second file's result.
   const runRef = useRef(0)
@@ -57,6 +62,7 @@ export function useRecording() {
     setResult(null)
     setError(null)
     setStatus(STATUS.DECODING)
+    setDecoding(true)
     try {
       const { region: found, t, e, meta } = await traceRecording(nextFile, {
         region,
@@ -74,6 +80,8 @@ export function useRecording() {
       if (runRef.current !== run) return
       setError(describeError(err))
       setStatus(STATUS.ERROR)
+    } finally {
+      if (runRef.current === run) setDecoding(false)
     }
   }, [])
 
@@ -122,5 +130,5 @@ export function useRecording() {
     setStatus(STATUS.IDLE)
   }, [])
 
-  return { file, previewUrl, status, error, result, measure, measureSample, reset }
+  return { file, previewUrl, status, error, result, decoding, measure, measureSample, reset }
 }

@@ -92,6 +92,10 @@ test.describe('measure', () => {
     const requests = []
     page.on('request', r => requests.push(r.url()))
     await page.getByTestId('file').setInputFiles(join(process.cwd(), 'e2e', 'fixtures', 'standard-press.webm'))
+    // While the decoder runs the page says so, with the site's Spinner ahead
+    // of the words: the title above holds still and must not read as dead.
+    await expect(page.getByTestId('status')).toContainText('Just a moment')
+    await expect(page.getByTestId('status').locator('svg')).toBeVisible()
     await expect(page.locator(DONE)).toBeVisible({ timeout: MEASURE_TIMEOUT })
 
     // blob: is the video element reading its own object URL. Anything else
@@ -108,6 +112,38 @@ test.describe('measure', () => {
     expect(fit.indistinct).toContain('standard')
     expect(fit.lo).toBeLessThanOrEqual(100)
     expect(fit.hi).toBeGreaterThanOrEqual(100)
+  })
+
+  test('an indistinct fit offers its candidates with a Button on each, and the export records the choice', async ({ page }) => {
+    await openMeasure(page)
+    // Standard is five frames: the wide floor keeps two neighbors in, so the
+    // chooser appears.
+    await page.getByTestId('sample-standard').click()
+    await expect(page.locator(DONE)).toBeVisible({ timeout: MEASURE_TIMEOUT })
+    const fit = await pressDown(page)
+    expect(fit.indistinct.length).toBeGreaterThan(1)
+
+    const chooser = page.getByTestId('candidates')
+    await expect(chooser).toBeVisible()
+    // One card per indistinct curve, the winner checked, a real Button in each.
+    for (const name of fit.indistinct) await expect(page.getByTestId(`candidate-${name}`)).toBeVisible()
+    await expect(page.getByTestId(`candidate-${fit.curve}`).getByRole('radio')).toBeChecked()
+    expect(await chooser.getByRole('button', { name: 'Press me' }).count()).toBe(fit.indistinct.length)
+
+    // Choose a runner-up by eye; the file carries that curve and says so.
+    const other = fit.indistinct.find(n => n !== fit.curve)
+    await page.getByTestId(`candidate-${other}`).getByRole('radio').check()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('download').click(),
+    ])
+    const doc = JSON.parse(await new Response(await download.createReadStream()).text())
+    const slot = Object.keys(doc.easing)[0]
+    expect(doc.note).toContain(`${other} was chosen by eye`)
+    expect(doc.note).toContain(fit.curve)
+    // The chosen curve's numbers, not the winner's.
+    const NAMED = { linear: '0, 0, 1, 1', standard: '0.4, 0, 0.2, 1', enter: '0, 0, 0.2, 1', exit: '0.4, 0, 1, 1', overshoot: '0.34, 1.56, 0.64, 1' }
+    expect(doc.easing[slot]).toBe(`cubic-bezier(${NAMED[other]})`)
   })
 
   test('the export downloads a flat token file with only the two measured keys', async ({ page }) => {

@@ -333,6 +333,25 @@ function durationBand(yOf, pc, bestRms) {
   return [lo, hi]
 }
 
+// How much worse than the winner a named curve may fit and still not be
+// ruled out. Relative, not absolute: a curve that fits twice as badly as a
+// good winner is separable, and a flat 0.02 margin called a clean twelve-frame
+// Cinematic recovery ambiguous because 0.018 + 0.02 reached two curves that
+// fit at 0.034 (2026-09-07). Below eight frames the floor stays wide, because
+// at four to six frames a single stuttered frame moved the truth to second
+// place by a whisker in the fixtures, and a fit that short has no business
+// ruling anything out. David's call, 2026-09-07.
+export function indistinctMargin(bestRms, frames) {
+  return bestRms * 0.5 + (frames < 8 ? 0.02 : 0.005)
+}
+
+// The named curves the recording could not separate, winner first, with the
+// fit each one got: what the page offers the user to choose between when the
+// data alone cannot (the candidate chooser).
+export function candidatesFor(segment) {
+  return segment.named.filter(n => segment.indistinct.includes(n.name))
+}
+
 // Nearest named curve by shape (rms of sampled y), not by control points:
 // two handle sets far apart can draw nearly the same curve.
 export function nearestNamed(bezier) {
@@ -363,7 +382,9 @@ export function fitSegment(t, e, seg, floor) {
     const f = fitCurve(yOf, pc)
     return { name, bezier: b, ...f, band: durationBand(yOf, pc, f.rms) }
   }).sort((a, b) => a.rms - b.rms)
-  const indistinct = named.filter(n => n.rms <= named[0].rms + BAND_TOL).map(n => n.name)
+  const indistinct = named
+    .filter(n => n.rms <= named[0].rms + indistinctMargin(named[0].rms, seg.frames))
+    .map(n => n.name)
 
   // Family 2: a free cubic-bezier. Coarse grid over the handles (y free past
   // [0, 1] so overshoot shapes are reachable), then three rounds of coordinate

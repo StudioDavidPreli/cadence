@@ -15,18 +15,25 @@
 // Copy on this page is drafted against archive/voice/voice-analysis.md and
 // awaits David's voice pass. Em-dash count: zero.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
+import { INITIAL_STATE, stateToTokens } from 'cadence-tokens'
+import { MotionTokensProvider } from '../../context/MotionTokensContext'
+import { Button } from '../Button'
+import { Spinner } from '../Spinner'
 import { useRecording, STATUS } from './useRecording'
 import { MeasureTitle } from './MeasureTitle'
 import { TracePlot, ProgressPlot } from './TracePlot'
-import { NAMED_CURVES } from './measureModel'
+import { NAMED_CURVES, candidatesFor } from './measureModel'
 import {
   DURATION_SLOTS, CURVE_SLOTS, proposeDurationSlot, proposeCurveSlot,
-  buildMeasuredTokens, libraryBezier,
+  buildMeasuredTokens, libraryBezier, chosenCurveNote,
 } from './measureExport'
 import styles from './Measure.module.css'
 
 const SAMPLES_URL = '/measure-samples/samples.json'
+// The package's Standard values, for the working indicator's Spinner.
+const STANDARD_TOKENS = stateToTokens(INITIAL_STATE)
 const ms = s => Math.round(s * 1000)
 
 // The plain-language line per confidence label. Frames and separability decide
@@ -76,7 +83,10 @@ export function MeasureSection() {
   return (
     <div className={styles.scroll} tabIndex={0} role="region" aria-label="Measure">
       <article className={styles.page}>
-        <MeasureTitle still={rec.status === STATUS.DECODING || rec.status === STATUS.MEASURING} />
+        {/* The title holds only while a video decodes (never for a sample),
+            so the decoder has the compositor; the status line says the site is
+            working meanwhile (David's ask, 2026-09-07). */}
+        <MeasureTitle still={rec.decoding} />
         <p className={styles.lede}>
           Drop a screen recording of one transition and get its tokens back:
           the duration, the curve, and how far the recording can be trusted.
@@ -145,9 +155,17 @@ export function MeasureSection() {
 }
 
 // One live line under the drop zone. Errors read in plain text-base, no
-// accent, per the error-surfaces rule (2026-07-18).
+// accent, per the error-surfaces rule (2026-07-18). While the pipeline runs
+// the line leads with the site's Spinner and "Just a moment.", because the
+// title above holds still during a decode and a still page must not read as
+// a dead one (David's ask, 2026-09-07). The Spinner is the demo component,
+// so it gets a local provider on the package's Standard values: an
+// indicator that sped up with the lab's Explore sliders would be chrome
+// reading demonstration tokens. Under reduced motion the words stand alone.
 function StatusLine({ rec }) {
   const { status, error, result, file } = rec
+  const reduce = useReducedMotion()
+  const working = status === STATUS.DECODING || status === STATUS.MEASURING
   let text = ''
   if (status === STATUS.DECODING) text = 'Decoding the recording and finding what moves.'
   else if (status === STATUS.MEASURING) text = 'Measuring.'
@@ -179,6 +197,17 @@ function StatusLine({ rec }) {
       data-attempts={result?.meta?.attempts ? JSON.stringify(result.meta.attempts) : undefined}
       aria-live="polite"
     >
+      {working && (
+        <span className={styles.working}>
+          {!reduce && (
+            <MotionTokensProvider tokens={STANDARD_TOKENS} respectReducedMotion={false}>
+              <Spinner size="small" />
+            </MotionTokensProvider>
+          )}
+          <span>Just a moment.</span>
+        </span>
+      )}
+      {working && ' '}
       {text}
     </p>
   )
@@ -350,24 +379,34 @@ function TransitionCard({ index, segment, truth, selected, onSelect, selectable 
   )
 }
 
-// Where the two measured values land in a token document. The proposal is the
-// nearest slot by value and the fitted curve's own name; the user confirms or
-// changes both. The file carries only these two keys.
+// Where the two measured values land in a token document. Two decisions,
+// kept apart on purpose: the SLOT (which role the value fills: standard,
+// enter, exit, overshoot) is the user's, since a measured curve could belong
+// anywhere; the VALUE (which four numbers) is the fit's, unless the recording
+// could not separate the library, in which case the candidates are laid out
+// with the site's own Button pressing on each at the measured duration and
+// the user picks by eye (David's design, 2026-09-07). The file carries only
+// the two assigned keys, and says when the curve was a choice.
 function Assignment({ segment, index }) {
   const best = segment.named[0]
+  const candidates = useMemo(() => candidatesFor(segment), [segment])
   const [durationSlot, setDurationSlot] = useState(() => proposeDurationSlot(ms(best.D)))
   const [curveSlot, setCurveSlot] = useState(() => proposeCurveSlot(best.name))
   const [curveSource, setCurveSource] = useState('library')
+  const [curveChoice, setCurveChoice] = useState(best.name)
   useEffect(() => {
     setDurationSlot(proposeDurationSlot(ms(best.D)))
     setCurveSlot(proposeCurveSlot(best.name))
     setCurveSource('library')
+    setCurveChoice(best.name)
   }, [best.D, best.name])
 
-  const bezier = curveSource === 'free' ? segment.free.bezier : libraryBezier(best.name)
+  const chosen = candidates.find(c => c.name === curveChoice) ?? best
+  const bezier = curveSource === 'free' ? segment.free.bezier : libraryBezier(chosen.name)
   const download = () => {
     downloadTextFile('cadence.measured.json', buildMeasuredTokens({
       durationSlot, durationMs: ms(best.D), curveSlot, bezier,
+      note: candidates.length > 1 && curveSource !== 'free' ? chosenCurveNote(candidates, chosen.name) : undefined,
     }))
   }
 
@@ -377,6 +416,16 @@ function Assignment({ segment, index }) {
         <span className={styles.blockTitle}>Export transition {index + 1}</span>
         <span className={styles.blockMeta}>two measured values, into a Cadence token file</span>
       </div>
+
+      {candidates.length > 1 && (
+        <CandidateChooser
+          segment={segment}
+          candidates={candidates}
+          choice={curveChoice}
+          onChoose={name => { setCurveChoice(name); setCurveSource('library') }}
+        />
+      )}
+
       <div className={styles.assignRow}>
         <label className={styles.field}>
           <span className={styles.fieldLabel}>duration.</span>
@@ -391,7 +440,7 @@ function Assignment({ segment, index }) {
             {CURVE_SLOTS.map(slot => <option key={slot} value={slot}>{slot}</option>)}
           </select>
           <span className={styles.fieldValue}>
-            = {curveSource === 'free' ? 'the free-form curve' : `${best.name} (${NAMED_CURVES[best.name].join(', ')})`}
+            = {curveSource === 'free' ? 'the free-form curve' : `${chosen.name} (${NAMED_CURVES[chosen.name].join(', ')})`}
           </span>
         </label>
         {!segment.free.underdetermined && (
@@ -412,7 +461,77 @@ function Assignment({ segment, index }) {
         Only these two keys are in the file. Importing it in Token Lab fills the
         rest from Standard and lists them as filled, so the document says what
         was measured and what was not.
+        {candidates.length > 1 && curveSource !== 'free' && ' It also says the curve was chosen by eye, and from which candidates.'}
       </p>
     </section>
+  )
+}
+
+// The curves the recording could not separate, laid out to be told apart by
+// eye: each candidate gets the recorded dots against its own fitted line, its
+// residual, and the site's Button pressing on that curve at the measured
+// duration. Motion energy has no sign, so a curve that overshoots past rest
+// and one that only decelerates draw the same trace; a press shows the
+// difference the pixels could not. The Buttons read their tokens from a local
+// provider carrying the measured duration and the candidate curve in both the
+// press and release slots, so nothing here is a literal and each demo is the
+// real component. Under reduced motion the demos are skipped and the plots
+// and residuals carry the choice alone.
+function CandidateChooser({ segment, candidates, choice, onChoose }) {
+  const reduce = useReducedMotion()
+  const durationMs = ms(segment.named[0].D)
+  return (
+    <fieldset className={styles.candidates} data-testid="candidates">
+      <legend className={styles.candidatesLegend}>
+        The recording could not separate these {candidates.length} curves. Press each; export the one that looks like the recording.
+      </legend>
+      <div className={styles.candidateRow}>
+        {candidates.map(c => (
+          <label
+            key={c.name}
+            className={`${styles.candidate} ${choice === c.name ? styles.candidateChosen : ''}`}
+            data-testid={`candidate-${c.name}`}
+          >
+            <span className={styles.candidateHead}>
+              <input
+                type="radio"
+                name="curve-candidate"
+                value={c.name}
+                checked={choice === c.name}
+                onChange={() => onChoose(c.name)}
+              />
+              <code className={styles.chip}>{c.name}</code>
+              <span className={styles.candidateMeta}>{ms(c.D)} ms · fit {c.rms.toFixed(3)}</span>
+            </span>
+            <ProgressPlot segment={segment} curve={c} />
+            {!reduce && (
+              <span className={styles.candidateDemo}>
+                <CandidateButton durationMs={durationMs} bezier={c.bezier} />
+              </span>
+            )}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+// One Button on one candidate curve. The provider's state is the package's
+// INITIAL_STATE with the measured duration in the fast slot (the Button's
+// press and release both read duration.fast) and the candidate in both the
+// standard and overshoot slots (press and release), so what plays is the
+// candidate alone. respectReducedMotion is false because the chooser already
+// skips the demos under reduced motion; the provider must not flatten what
+// it does show.
+function CandidateButton({ durationMs, bezier }) {
+  const tokens = useMemo(() => stateToTokens({
+    ...INITIAL_STATE,
+    duration: { ...INITIAL_STATE.duration, fast: durationMs },
+    easing: { ...INITIAL_STATE.easing, standard: bezier, overshoot: bezier },
+  }), [durationMs, bezier])
+  return (
+    <MotionTokensProvider tokens={tokens} respectReducedMotion={false}>
+      <Button>Press me</Button>
+    </MotionTokensProvider>
   )
 }

@@ -55,6 +55,15 @@ export function buildMeasuredTokens({ durationSlot, durationMs, curveSlot, bezie
   return JSON.stringify(doc, null, 2)
 }
 
+// The note for a curve the user chose among candidates the recording could
+// not separate: the file says it was a choice, from which set, with the
+// residual each candidate fitted at, so the provenance is as honest as the
+// filled-from-Standard report is for the keys that were not measured.
+export function chosenCurveNote(candidates, chosen) {
+  const list = candidates.map(c => `${c.name} (${c.rms.toFixed(3)})`).join(', ')
+  return `Measured from a screen recording with Cadence. Only the keys below were measured; an import fills the rest from Standard. The recording could not separate ${candidates.length} curves, ${list}, and ${chosen} was chosen by eye against the site's Button at the measured duration.`
+}
+
 // The four numbers for a library curve by name, or null for anything else.
 export function libraryBezier(name) {
   return NAMED_CURVES[name] ?? EASING_CURVES[name]?.fm ?? null

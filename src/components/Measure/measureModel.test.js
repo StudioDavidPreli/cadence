@@ -13,7 +13,7 @@ import { parseMs, parseCubicBezier } from '../../tokens/parse'
 import {
   NAMED_CURVES, bezierY, kformY, unsignedProgress, meanAbsDiff, accumulateChanged,
   changedBounds, dominantRegion, despike, detectSegments, analyzeTrace, nearestNamed, confidenceFor,
-  FREE_FIT_MIN_SAMPLES,
+  FREE_FIT_MIN_SAMPLES, indistinctMargin, candidatesFor,
 } from './measureModel'
 
 const fixtureDir = path.join(__dirname, 'fixtures')
@@ -123,6 +123,24 @@ describe('segmentation', () => {
     const { segments } = detectSegments(e)
     expect(segments).toHaveLength(1)
     expect([segments[0].start, segments[0].end]).toEqual([2, 8])
+  })
+  it('the indistinct margin is relative to the winner, with a wide floor under eight frames', () => {
+    // A clean twelve-frame fit at 0.018 separates a curve at 0.034 (twice as bad)...
+    expect(0.034 <= 0.018 + indistinctMargin(0.018, 12)).toBe(false)
+    // ...but the same pair at five frames stays indistinct: too short to rule out.
+    expect(0.034 <= 0.018 + indistinctMargin(0.018, 5)).toBe(true)
+    // Below eight frames the floor alone is 0.02; above, 0.005.
+    expect(indistinctMargin(0, 4)).toBeCloseTo(0.02, 9)
+    expect(indistinctMargin(0, 8)).toBeCloseTo(0.005, 9)
+  })
+  it('candidatesFor lists the indistinct curves winner-first with their own fits', () => {
+    const fx = fixtures.find(f => f.label === 'cinematic-high-contrast-dark')
+    const down = analyses.get(fx.label).segments[0]
+    const cands = candidatesFor(down)
+    expect(cands.map(c => c.name)).toEqual(down.indistinct)
+    expect(cands[0].name).toBe(down.named[0].name)
+    for (let i = 1; i < cands.length; i++) expect(cands[i].rms).toBeGreaterThanOrEqual(cands[i - 1].rms)
+    for (const c of cands) expect(c.bezier).toHaveLength(4)
   })
   it('confidence is decided by frames and separability, never by residual', () => {
     expect(confidenceFor(12, 1)).toBe('high')

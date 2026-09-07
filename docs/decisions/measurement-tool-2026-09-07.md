@@ -78,6 +78,35 @@ needs ten frames and one named curve inside tolerance; `medium` five frames
 and at most two; everything else is `low`. A low residual on four samples
 means nothing, and the label must not reward it.
 
+**The indistinct margin is relative, with a floor under eight frames.** The
+spike's rule was absolute: a curve within 0.02 rms of the winner could not
+be ruled out. It never excluded the truth, and it called a clean
+twelve-frame Cinematic recovery ambiguous because 0.018 + 0.02 reached two
+curves that fit at 0.034, twice as badly. The rule is now half the
+winner's residual plus a floor: 0.02 below eight frames, 0.005 above.
+Across the eight fixtures the truth is still never excluded; Cinematic
+narrows to exactly the pair motion energy cannot tell apart, `enter` and
+`overshoot`; the short recordings keep their wide floor, because a single
+stuttered frame moved the truth to second place at six frames and a fit
+that short has no business ruling anything out.
+
+**When the data cannot choose, the user does, by eye, on the real Button.**
+The name exists so the value can be assigned as a token, and an indistinct
+name cannot be assigned. `enter` and `overshoot` share an envelope, a fast
+start and a slow finish, and differ in the sign of the tail, which the
+pixels do not carry; a press shows it. So when a fit is indistinct the
+export row lays the candidates out, winner first: each with the recorded
+dots against its own fitted line, its residual, and the site's own Button
+pressing on that curve at the measured duration, on a local token provider
+carrying the candidate in both the press and release slots. The user picks
+the one that looks like the recording; the dropdown of curve values is the
+candidates and the free-form curve, never the whole library, because a
+curve the data ruled out is not a measurement. The exported note says the
+curve was chosen by eye, from which set, with each candidate's residual.
+The slot (the role) stays the user's separate decision. David's design,
+2026-09-07. Under reduced motion the demos are skipped and the plots and
+residuals carry the choice.
+
 **The k-form is the null model.** It never won a fit on any capture:
 Cadence's curves are asymmetric (standard's handles are 0.4 and 0.2) and
 the k-form is symmetric about its midpoint. It stays as the question "can
@@ -167,7 +196,12 @@ invariant the tests pin is the weaker one that held everywhere.
   drops before it reads any fit. Two wrong explanations preceded the right
   one and were reverted: worker load, and a disk-backed File from the
   input; the second was ruled out by reading the file into memory first,
-  which changed nothing.
+  which changed nothing. The held title reads as a frozen page, so
+  the status line leads with the site's Spinner and "Just a moment." for
+  the duration (David's ask, 2026-09-07; the Spinner on a local provider
+  with the package's Standard values, so the lab's sliders cannot speed it
+  up), and the hold applies only while a video decodes, never to a sample,
+  which runs no decoder.
 - **The region is a cluster heuristic.** A cursor crossing the element, or
   a second element moving louder than the one recorded, wins the box. The
   guidance copy says to keep the frame tight; a manual override was scoped
