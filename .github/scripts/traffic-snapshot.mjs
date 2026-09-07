@@ -1,5 +1,5 @@
-// Weekly GitHub traffic snapshot for the post-launch ledger
-// (docs/case-studies/post-launch-capture.md).
+// Weekly GitHub traffic snapshot for the post-launch ledger (a local
+// working doc outside the repo).
 //
 // The traffic API retains only 14 days, so history must be accumulated here:
 // each run merges its daily buckets into metrics/traffic.json. A later run's

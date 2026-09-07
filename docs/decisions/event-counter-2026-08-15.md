@@ -1,6 +1,6 @@
 # The export/import event counter (2026-08-15)
 
-The pre-launch instrumentation from `docs/case-studies/post-launch-capture.md`: count how many times a token set leaves the tool (export, per format) or returns (import). Anonymous by construction. The counts frame the post-launch amendment; this document records how they are collected, why the storage is what it is, and how to read them back.
+The pre-launch instrumentation from the post-launch capture ledger (a local working doc, untracked 2026-08-24): count how many times a token set leaves the tool (export, per format) or returns (import). Anonymous by construction. The counts frame the post-launch amendment; this document records how they are collected, why the storage is what it is, and how to read them back.
 
 ## What is collected
 
@@ -80,7 +80,7 @@ Substitute the account ID and token; the dataset name `cadence_events` is fixed 
 
 One artifact worth recording: the browser's own network log showed every event twice while the server saw each once. `keepalive` fetches are reported by two processes in Chromium's devtools protocol; the duplication is in the observer, not the wire. The server log is the authority.
 
-Miniflare accepts `writeDataPoint` locally but stores nothing queryable, so the counts-actually-in-the-dataset check runs on production after merge: press each export button on the live site, then run the first curl above and watch the counts move. That step is already on the pre-launch checklist in `post-launch-capture.md`.
+Miniflare accepts `writeDataPoint` locally but stores nothing queryable, so the counts-actually-in-the-dataset check runs on production after merge: press each export button on the live site, then run the first curl above and watch the counts move. That step is already on the pre-launch checklist in the capture ledger.
 
 ## The disclosure (moved to the tool bar, 2026-08-16)
 

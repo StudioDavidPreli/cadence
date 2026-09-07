@@ -1,6 +1,6 @@
 # The launch trace links (2026-08-17)
 
-The channel-attribution half of the pre-launch instrumentation in `docs/case-studies/post-launch-capture.md`. The posting plan's daily ledger has one column with no reliable source: which channel a visitor came from. This document records why the standard answer (UTM parameters) was dead on arrival here, what shipped instead, and how to read the counts back.
+The channel-attribution half of the pre-launch instrumentation in the post-launch capture ledger (a local working doc, untracked 2026-08-24; nothing in it is published until the amendment is). The posting plan's daily ledger has one column with no reliable source: which channel a visitor came from. This document records why the standard answer (UTM parameters) was dead on arrival here, what shipped instead, and how to read the counts back.
 
 ## Why not UTM
 
