@@ -14,6 +14,7 @@ const VIEWS = [
   { name: 'motion-tiles landing', path: '/#/motion-tiles' },
   { name: 'glossary tokens', path: '/#/glossary' },
   { name: 'glossary components', path: '/#/glossary/components' },
+  { name: 'tools measure', path: '/#/tools' },
 ]
 
 for (const theme of THEMES) {

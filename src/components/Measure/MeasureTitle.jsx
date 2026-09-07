@@ -19,6 +19,15 @@
 // Reduced motion renders the per-theme SVG poster (/fallBacks/measure*.svg)
 // instead of mounting the canvas, so the .riv is never fetched for a user
 // who will not see it play.
+//
+// `still` pauses the scene while the page is measuring. The video decoder
+// reads presented frames, and a canvas redrawing at 60fps competes with the
+// presenter for the compositor: under software WebGL (headless Chromium,
+// and any machine without a usable GPU) the running title dropped nearly
+// half the frames of a 17 kB recording, and its poster dropped none. A
+// measurement tool that animates during a measurement would be measuring
+// itself; the title holds while the work runs and resumes after.
+import { useEffect } from 'react'
 import {
   useRive,
   useViewModel,
@@ -48,7 +57,7 @@ const themeToInstanceName = {
   'high-contrast-dark': 'contrastDark',
 }
 
-export function MeasureTitle() {
+export function MeasureTitle({ still = false }) {
   const { theme } = useTheme()
   const reduce = useReducedMotion()
 
@@ -63,7 +72,7 @@ export function MeasureTitle() {
             alt=""
           />
         ) : (
-          <TitleRive theme={theme} />
+          <TitleRive theme={theme} still={still} />
         )}
       </span>
     </h2>
@@ -71,7 +80,7 @@ export function MeasureTitle() {
 }
 
 // The Rive half, isolated so its hooks only run when motion is allowed.
-function TitleRive({ theme }) {
+function TitleRive({ theme, still }) {
   const { rive, RiveComponent } = useRive({
     src: TITLE.src,
     artboard: TITLE.artboard,
@@ -86,6 +95,15 @@ function TitleRive({ theme }) {
     name: themeToInstanceName[theme],
     rive,
   })
+
+  // Hold the scene while a measurement runs; resume when it is done. The
+  // runtime keeps the last frame on the canvas while paused, so the title
+  // stays visible, just still.
+  useEffect(() => {
+    if (!rive) return
+    if (still) rive.pause()
+    else rive.play()
+  }, [rive, still])
 
   return (
     <>

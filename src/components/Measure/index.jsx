@@ -15,7 +15,7 @@
 // Copy on this page is drafted against archive/voice/voice-analysis.md and
 // awaits David's voice pass. Em-dash count: zero.
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRecording, STATUS } from './useRecording'
 import { MeasureTitle } from './MeasureTitle'
 import { TracePlot, ProgressPlot } from './TracePlot'
@@ -76,7 +76,7 @@ export function MeasureSection() {
   return (
     <div className={styles.scroll} tabIndex={0} role="region" aria-label="Measure">
       <article className={styles.page}>
-        <MeasureTitle />
+        <MeasureTitle still={rec.status === STATUS.DECODING || rec.status === STATUS.MEASURING} />
         <p className={styles.lede}>
           Drop a screen recording of one transition and get its tokens back:
           the duration, the curve, and how far the recording can be trusted.
@@ -138,7 +138,7 @@ export function MeasureSection() {
 
         <StatusLine rec={rec} />
 
-        {rec.result && <Results rec={rec} samples={samples} />}
+        {rec.result && <Results rec={rec} />}
       </article>
     </div>
   )
@@ -154,39 +154,57 @@ function StatusLine({ rec }) {
   else if (status === STATUS.EMPTY) text = 'Nothing moved in that recording, so there is nothing to measure.'
   else if (status === STATUS.ERROR) text = `That file could not be read. ${error ?? ''}`.trim()
   else if (status === STATUS.DONE && result) {
-    const { meta, fps, segments } = result
-    const dropped = meta.dropped ? `, ${meta.dropped} dropped by the decoder` : ''
-    text = `${file?.name ?? 'Recording'}: ${meta.frames} frames at ${fps.toFixed(0)} per second${dropped}. ${segments.length} ${segments.length === 1 ? 'transition' : 'transitions'} found.`
+    const { meta, fps, segments, sample } = result
+    const found = `${segments.length} ${segments.length === 1 ? 'transition' : 'transitions'} found.`
+    if (sample) {
+      // A stored trace: recorded once, fitted now. Said that way, so the
+      // page never implies it decoded a video it did not.
+      text = `${sample.label}, recorded ${sample.recorded} from this site's Button: a trace of ${meta.frames} frames at ${fps.toFixed(0)} per second, fitted now. ${found}`
+    } else {
+      // The decoder retries at slower rates until no frame drops; if drops
+      // remain the fit ran on a partial recording and must not read as a
+      // measurement.
+      const dropped = meta.dropped
+        ? ` The decoder dropped ${meta.dropped} frames even at its slowest, so this machine was too busy for a reliable read; try again with less running.`
+        : ''
+      text = `${file?.name ?? 'Recording'}: ${meta.frames} frames at ${fps.toFixed(0)} per second. ${found}${dropped}`
+    }
   }
   return (
-    <p className={styles.status} data-testid="status" data-state={status} aria-live="polite">
+    <p
+      className={styles.status}
+      data-testid="status"
+      data-state={status}
+      data-dropped={result?.meta?.dropped ?? 0}
+      data-attempts={result?.meta?.attempts ? JSON.stringify(result.meta.attempts) : undefined}
+      aria-live="polite"
+    >
       {text}
     </p>
   )
 }
 
-function Results({ rec, samples }) {
-  const { result, previewUrl, file } = rec
-  const { region, meta, t, e, thr, segments } = result
+function Results({ rec }) {
+  const { result, previewUrl } = rec
+  const { region, meta, t, e, thr, segments, sample } = result
   const [selected, setSelected] = useState(0)
   useEffect(() => { setSelected(0) }, [result])
 
-  // If this is one of the site's samples, its truth is known and shown beside
-  // the fit: the self-test, in the open.
-  const truth = useMemo(
-    () => samples.find(s => s.file.split('/').pop() === file?.name)?.truth ?? null,
-    [samples, file],
-  )
+  // A sample carries the truth it was recorded at, shown beside the fit: the
+  // self-test, in the open. A dropped file has none.
+  const truth = sample?.truth ?? null
 
-  // The region overlay is placed in percentages of the video box, so it holds
-  // at any display width. Set as custom properties rather than a computed
-  // style object: the stylesheet still owns the drawing, JS only supplies
-  // the four numbers it cannot know.
+  // The region overlay is placed in percentages of the frame, so it holds at
+  // any display width. Set as custom properties rather than a computed style
+  // object: the stylesheet still owns the drawing, JS only supplies the four
+  // numbers it cannot know. A sample's frame is its still; a file's is the
+  // video.
+  const frame = sample ? sample.still : meta
   const overlayVars = {
-    '--rx': `${(region.left / meta.width) * 100}%`,
-    '--ry': `${(region.top / meta.height) * 100}%`,
-    '--rw': `${(region.width / meta.width) * 100}%`,
-    '--rh': `${(region.height / meta.height) * 100}%`,
+    '--rx': `${(region.left / frame.width) * 100}%`,
+    '--ry': `${(region.top / frame.height) * 100}%`,
+    '--rw': `${(region.width / frame.width) * 100}%`,
+    '--rh': `${(region.height / frame.height) * 100}%`,
   }
 
   return (
@@ -195,15 +213,22 @@ function Results({ rec, samples }) {
         <div className={styles.blockHead}>
           <span className={styles.blockTitle}>Recording</span>
           <span className={styles.blockMeta}>
-            measured region {region.width} × {region.height} px, found automatically
+            {sample
+              ? `one frame of the recording; measured region ${region.width} × ${region.height} px`
+              : `measured region ${region.width} × ${region.height} px, found automatically`}
           </span>
         </div>
         <div className={styles.videoBox}>
-          {/* No autoplay, no loop: the preview plays only when asked, so
-              reduced motion has nothing to suppress here. */}
-          <video className={styles.video} src={previewUrl} controls muted playsInline preload="metadata" />
+          {sample ? (
+            <img className={styles.video} src={sample.still.src} width={sample.still.width} height={sample.still.height} alt="" />
+          ) : (
+            // No autoplay, no loop: the preview plays only when asked, so
+            // reduced motion has nothing to suppress here.
+            <video className={styles.video} src={previewUrl} controls muted playsInline preload="metadata" />
+          )}
           <div className={styles.regionOverlay} style={overlayVars} aria-hidden="true" />
         </div>
+        {sample && <p className={styles.small}>{sample.source}</p>}
       </section>
 
       <section className={styles.block} aria-label="Motion energy">

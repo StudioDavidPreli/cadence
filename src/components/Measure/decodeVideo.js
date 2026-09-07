@@ -25,9 +25,43 @@ export function supportsVideoFrameCallback() {
 
 // Decodes `file` (a File or Blob) and calls onFrame({ data, width, height,
 // time }) for each frame, in order. Resolves with { width, height, frames,
-// timing } when the video ends. `seekStep` is the fallback interval in
-// seconds when frame callbacks are unavailable.
-export async function decodeVideoFrames(file, onFrame, { seekStep = 1 / 60, playbackRate = 0.25 } = {}) {
+// timing, decoded, dropped } when the video ends.
+//
+// Presented frames are the only frames a frame callback sees, and a busy
+// compositor drops them. The first cause found was the page's own animated
+// title: under headless Chromium's software WebGL its canvas starved the
+// presenter of the same 17 kB file down to 57 of 104 frames at 0.25x, and
+// the poster in its place presented all 104. The page now stills the title
+// while it measures (MeasureTitle's `still` prop). This retry loop over
+// slower rates is the safety net for everything else a machine can be busy
+// with. Each attempt replays the whole
+// file; the first attempt with no drops wins, and if every rate drops, the
+// attempt that dropped least is kept and its count reported, so the page
+// can say the fit is unreliable rather than pretend. `seekStep` is the
+// fallback interval when frame callbacks are unavailable.
+// 0.0625 is the slowest rate Chrome accepts (a lower one throws).
+const PLAYBACK_RATES = [0.25, 0.1, 0.0625]
+
+export async function decodeVideoFrames(file, onFrame, { seekStep = 1 / 60, playbackRates = PLAYBACK_RATES } = {}) {
+  if (!supportsVideoFrameCallback()) return decodeOnce(file, onFrame, { seekStep })
+  let best = null
+  const attempts = []
+  for (const playbackRate of playbackRates) {
+    const frames = []
+    const meta = await decodeOnce(file, f => frames.push(f), { seekStep, playbackRate })
+    attempts.push({ playbackRate, frames: meta.frames, decoded: meta.decoded, dropped: meta.dropped })
+    if (!best || (meta.dropped ?? 0) < (best.meta.dropped ?? 0)) best = { meta, frames }
+    if (!meta.dropped) break
+  }
+  best.meta.attempts = attempts
+  // Deliver in order, releasing each 4 MB frame as it goes (a two-second
+  // 1280x800 recording is ~400 MB buffered per attempt; the caller keeps
+  // only what it needs).
+  while (best.frames.length) onFrame(best.frames.shift())
+  return best.meta
+}
+
+async function decodeOnce(file, onFrame, { seekStep, playbackRate = 0.25 }) {
   const url = URL.createObjectURL(file)
   const video = document.createElement('video')
   video.muted = true
@@ -52,7 +86,7 @@ export async function decodeVideoFrames(file, onFrame, { seekStep = 1 / 60, play
     if (supportsVideoFrameCallback()) {
       // Presented frames only: at real-time speed the presenter skips frames
       // it cannot paint in time (a 1280x800 VP9 recording lost one frame in
-      // five in the session-one round trip). Quarter speed gives it the time,
+      // five in the session-one round trip). A slow rate gives it the time,
       // and mediaTime is the file's clock, so nothing about the timing
       // changes. What was still dropped is reported, not hidden.
       video.playbackRate = playbackRate

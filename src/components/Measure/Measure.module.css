@@ -273,6 +273,9 @@
   height: auto;
   border-radius: 4px;
   background-color: var(--color-bg);
+  /* A sample's still is 176x102 shown at up to 640 wide; the capture is
+     pixel art at 1x and should scale as such. */
+  image-rendering: pixelated;
 }
 
 /* The region outline, on accent (active: this is what was measured). Its
