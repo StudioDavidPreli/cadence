@@ -2,8 +2,8 @@
 //
 // Every shipped .riv is enumerated through the real webgl2 runtime in the
 // browser and compared against a committed baseline (e2e/rivlint/manifest.json):
-// artboard names, animation names, state machine names, view models with their
-// properties and named instances. The baseline was generated from the current,
+// artboard names, animation names, state machine names, each artboard's default
+// view model, view models with their properties and named instances. The baseline was generated from the current,
 // David-verified files, so the check is a regression gate, not a convention
 // oracle: the class of failure it exists to catch is a re-export silently
 // losing structure (r4c1 shipped blank once because its VM binding did not
@@ -17,6 +17,17 @@
 //   RIVLINT_UPDATE=1 npx playwright test rivlint
 //
 // then review the manifest diff like source, because it is.
+//
+// Per-artboard default view model (added 2026-09-08). The r4c1 failure was
+// reproduced on purpose (archive/riveLintTest/r4c1_bt.riv) and read through
+// this runtime: every key above was identical to a healthy tile, so this gate
+// passed it. What the export had lost was the artboard's default view model
+// assignment (defaultViewModel() null where a healthy export names
+// PathEffectVM); the VM, its instances and its shape bindings all survived.
+// That pointer is what autoBind follows, so without it the tile draws with no
+// instance and the canvas is blank. It is only readable from a load of that
+// artboard, so each artboard costs one extra load. Probe record:
+// docs/briefings/ITEM9_RIV_LINTER_KICKOFF.md, "Probe results".
 //
 // Scope limit, documented rather than implied: the runtime enumerates file
 // structure, not wiring. A property-to-shape binding that breaks while the VM
@@ -105,7 +116,30 @@ function enumerateFile(page, urlPath) {
         name: a.name,
         animations: a.animations,
         stateMachines: a.stateMachines.map(s => s.name),
+        defaultViewModel: null,
       }))
+      // defaultViewModel() answers for the loaded artboard only, so each
+      // artboard is loaded once more by name. The runtime resolves the
+      // artboard name to the first match; two artboards sharing a name (hero3
+      // has "dancers" and "dancers 2", distinct) would read the same answer.
+      for (const a of artboards) {
+        const perArtboard = await new Promise((resolve, reject) => {
+          const r = new window.rive.Rive({
+            src,
+            canvas,
+            artboard: a.name,
+            autoplay: false,
+            useOffscreenRenderer: true,
+            onLoad: () => resolve(r),
+            onLoadError: () => reject(new Error(`runtime failed to load ${src} artboard ${a.name}`)),
+          })
+        })
+        try {
+          a.defaultViewModel = perArtboard.defaultViewModel()?.name ?? null
+        } finally {
+          perArtboard.cleanup()
+        }
+      }
       const viewModels = []
       for (let i = 0; i < instance.viewModelCount; i++) {
         const vm = instance.viewModelByIndex(i)

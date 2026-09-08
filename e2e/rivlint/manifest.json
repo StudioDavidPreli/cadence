@@ -10,7 +10,8 @@
         ],
         "stateMachines": [
           "anticipationSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "active",
@@ -19,7 +20,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -30,7 +32,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "anticipationIdle",
@@ -39,7 +42,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -74,7 +78,8 @@
         ],
         "stateMachines": [
           "appealSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -85,7 +90,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "appealAction",
@@ -94,7 +100,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "appealIdle",
@@ -103,7 +110,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -138,7 +146,8 @@
         ],
         "stateMachines": [
           "arcSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "arcActive2",
@@ -147,7 +156,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -158,7 +168,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "arcIDLE",
@@ -167,7 +178,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -200,7 +212,8 @@
         ],
         "stateMachines": [
           "followThrough_staticSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -233,7 +246,8 @@
         ],
         "stateMachines": [
           "imitationOfLife_staticSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -266,7 +280,8 @@
         ],
         "stateMachines": [
           "slowInSlowOut_staticSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -299,7 +314,8 @@
         ],
         "stateMachines": [
           "squash&stretch_staticSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -332,7 +348,8 @@
         ],
         "stateMachines": [
           "componentsSM"
-        ]
+        ],
+        "defaultViewModel": "ComponentsTitleVM"
       }
     ],
     "viewModels": [
@@ -384,7 +401,8 @@
         ],
         "stateMachines": [
           "economySM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "economyActive",
@@ -393,7 +411,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "economyIdle2",
@@ -402,7 +421,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -413,7 +433,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -448,7 +469,8 @@
         ],
         "stateMachines": [
           "exaggerationSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -459,7 +481,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "exaggerationIdle",
@@ -468,7 +491,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "exaggerationAction",
@@ -477,7 +501,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -512,7 +537,8 @@
         ],
         "stateMachines": [
           "followThroughSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "followAction",
@@ -521,7 +547,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -532,7 +559,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "followIdle",
@@ -541,7 +569,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -576,7 +605,8 @@
         ],
         "stateMachines": [
           "hero3SM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "bike1",
@@ -585,7 +615,8 @@
         ],
         "stateMachines": [
           "bike1SM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "conductor",
@@ -594,7 +625,8 @@
         ],
         "stateMachines": [
           "conductorSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "crew",
@@ -603,7 +635,8 @@
         ],
         "stateMachines": [
           "crewSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "marching",
@@ -612,7 +645,8 @@
         ],
         "stateMachines": [
           "marchingSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "bike2",
@@ -621,7 +655,8 @@
         ],
         "stateMachines": [
           "bike2"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "dancers",
@@ -630,7 +665,8 @@
         ],
         "stateMachines": [
           "dancersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "titles",
@@ -639,7 +675,8 @@
         ],
         "stateMachines": [
           "titlesSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "dancers 2",
@@ -648,7 +685,8 @@
         ],
         "stateMachines": [
           "dancersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "runners",
@@ -657,7 +695,8 @@
         ],
         "stateMachines": [
           "runnersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "horse",
@@ -666,7 +705,8 @@
         ],
         "stateMachines": [
           "horseSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "subTitles",
@@ -675,7 +715,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "birds",
@@ -684,7 +725,8 @@
         ],
         "stateMachines": [
           "birdsSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       }
     ],
     "viewModels": [
@@ -732,7 +774,8 @@
         ],
         "stateMachines": [
           "hierarchyOfMotionSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "homACTIVE",
@@ -741,7 +784,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "homIDLE",
@@ -750,7 +794,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -761,7 +806,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -794,7 +840,8 @@
         ],
         "stateMachines": [
           "measureSM"
-        ]
+        ],
+        "defaultViewModel": "MeasureTitleVM"
       }
     ],
     "viewModels": [
@@ -859,7 +906,8 @@
         ],
         "stateMachines": [
           "pixelPlantSM"
-        ]
+        ],
+        "defaultViewModel": "PixelPlantVM"
       },
       {
         "name": "Flowers",
@@ -870,7 +918,8 @@
         ],
         "stateMachines": [
           "flowersSM"
-        ]
+        ],
+        "defaultViewModel": "PixelPlantVM"
       }
     ],
     "viewModels": [
@@ -1020,7 +1069,8 @@
         ],
         "stateMachines": [
           "pose2poseSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1031,7 +1081,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "p2pOUT",
@@ -1040,7 +1091,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "p2pIDLE",
@@ -1049,7 +1101,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "p2pACTIVE",
@@ -1058,7 +1111,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "p2pIN",
@@ -1067,7 +1121,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1100,7 +1155,8 @@
         ],
         "stateMachines": [
           "squash&stretchIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1111,7 +1167,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "squash&strechIcon",
@@ -1121,7 +1178,8 @@
         ],
         "stateMachines": [
           "state machine"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1154,7 +1212,8 @@
         ],
         "stateMachines": [
           "anticipationIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1165,7 +1224,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "anticipationIcon2",
@@ -1174,7 +1234,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1207,7 +1268,8 @@
         ],
         "stateMachines": [
           "stagingIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1218,7 +1280,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "staggingIcon",
@@ -1227,7 +1290,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1260,7 +1324,8 @@
         ],
         "stateMachines": [
           "pose2poseIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "pose2poseIcon",
@@ -1269,7 +1334,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1280,7 +1346,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "pose2poseOutline",
@@ -1289,7 +1356,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1326,7 +1394,8 @@
         ],
         "stateMachines": [
           "followThroughIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "followICON",
@@ -1335,7 +1404,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1372,7 +1442,8 @@
         ],
         "stateMachines": [
           "slowInSlowOutIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "slowIcon",
@@ -1381,7 +1452,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1418,7 +1490,8 @@
         ],
         "stateMachines": [
           "arcIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1429,7 +1502,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "arcIcon",
@@ -1438,7 +1512,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1475,7 +1550,8 @@
         ],
         "stateMachines": [
           "secondaryActionIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1486,7 +1562,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "secondaryICON",
@@ -1495,7 +1572,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1532,7 +1610,8 @@
         ],
         "stateMachines": [
           "timingSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "timingIcon",
@@ -1541,7 +1620,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1552,7 +1632,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1589,7 +1670,8 @@
         ],
         "stateMachines": [
           "exaggerationIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "exaggerationIcon",
@@ -1598,7 +1680,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1635,7 +1718,8 @@
         ],
         "stateMachines": [
           "solidDrawingIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "eyeMask",
@@ -1644,7 +1728,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "solidDrawingIcon",
@@ -1653,7 +1738,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1690,7 +1776,8 @@
         ],
         "stateMachines": [
           "appealIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1701,7 +1788,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "appealIcon",
@@ -1710,7 +1798,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1747,7 +1836,8 @@
         ],
         "stateMachines": [
           "systematizationIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1758,7 +1848,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "systematizedICON",
@@ -1767,7 +1858,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1804,7 +1896,8 @@
         ],
         "stateMachines": [
           "hierarchyOfMotionSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1815,7 +1908,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "homICON",
@@ -1824,7 +1918,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1861,7 +1956,8 @@
         ],
         "stateMachines": [
           "economyIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "economyIcon10",
@@ -1870,7 +1966,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -1907,7 +2004,8 @@
         ],
         "stateMachines": [
           "tokenFidelityIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1918,7 +2016,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "tokenfidelityIcon",
@@ -1927,7 +2026,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -1964,7 +2064,8 @@
         ],
         "stateMachines": [
           "reducedMotionIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -1975,7 +2076,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "reducedMotionIcon",
@@ -1984,7 +2086,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -2021,7 +2124,8 @@
         ],
         "stateMachines": [
           "sharedVocabularyIconSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "sharedVocabularyClrIcon",
@@ -2030,7 +2134,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -2041,7 +2146,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "sharedVocabularyBlkIcon",
@@ -2050,7 +2156,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2089,7 +2196,8 @@
         ],
         "stateMachines": [
           "reducedMotionSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "reducedMotionIdle",
@@ -2098,7 +2206,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2109,7 +2218,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "reducedMotionAction",
@@ -2118,7 +2228,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -2153,7 +2264,8 @@
         ],
         "stateMachines": [
           "secondaryActionSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2164,7 +2276,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "secondaryIDLE",
@@ -2173,7 +2286,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "secondaryActive",
@@ -2182,7 +2296,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2217,7 +2332,8 @@
         ],
         "stateMachines": [
           "sharedVocabularySM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "sharedVocabularyAction",
@@ -2226,7 +2342,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -2237,7 +2354,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "sharedVocabularyIdle",
@@ -2246,7 +2364,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2281,7 +2400,8 @@
         ],
         "stateMachines": [
           "slowInSlowOutSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "slowIdle",
@@ -2290,7 +2410,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -2301,7 +2422,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "slowActive",
@@ -2310,7 +2432,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2345,7 +2468,8 @@
         ],
         "stateMachines": [
           "solidDrawingSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2356,7 +2480,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "solidDrawingIdle",
@@ -2366,7 +2491,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "solidDrawingAction",
@@ -2376,7 +2502,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2411,7 +2538,8 @@
         ],
         "stateMachines": [
           "squash&stretchSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "idle_v2",
@@ -2421,7 +2549,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2432,7 +2561,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "active_v2",
@@ -2442,7 +2572,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -2477,7 +2608,8 @@
         ],
         "stateMachines": [
           "stagingSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "staggingIdle",
@@ -2486,7 +2618,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2497,7 +2630,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "action",
@@ -2506,7 +2640,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       }
     ],
     "viewModels": [
@@ -2542,7 +2677,8 @@
         ],
         "stateMachines": [
           "systematizationSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "systematizedIDLE",
@@ -2551,7 +2687,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -2562,7 +2699,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "systematizedACTION",
@@ -2571,7 +2709,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2606,7 +2745,8 @@
         ],
         "stateMachines": [
           "timingSM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "timingIdle",
@@ -2615,7 +2755,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "PAUSE/PLAY",
@@ -2626,7 +2767,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       },
       {
         "name": "timingActive",
@@ -2635,7 +2777,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2670,7 +2813,8 @@
         ],
         "stateMachines": [
           "tokenFidelitySM"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "tokenFidelity2idle",
@@ -2679,7 +2823,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "tokenFidelity2action",
@@ -2688,7 +2833,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "ViewModel1"
       },
       {
         "name": "PAUSE/PLAY",
@@ -2699,7 +2845,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -2732,7 +2879,8 @@
         ],
         "stateMachines": [
           "tokenLab2SM"
-        ]
+        ],
+        "defaultViewModel": "TokenLabVM"
       }
     ],
     "viewModels": [
@@ -2786,7 +2934,8 @@
         ],
         "stateMachines": [
           "tokensSM"
-        ]
+        ],
+        "defaultViewModel": "TokensTitleVM"
       }
     ],
     "viewModels": [
@@ -2842,7 +2991,8 @@
         "animations": [],
         "stateMachines": [
           "waterWiltSM"
-        ]
+        ],
+        "defaultViewModel": "WaterWiltVM"
       },
       {
         "name": "Plant",
@@ -2854,7 +3004,8 @@
         ],
         "stateMachines": [
           "plantSM"
-        ]
+        ],
+        "defaultViewModel": "WaterWiltVM"
       },
       {
         "name": "Flowers",
@@ -2865,7 +3016,8 @@
         ],
         "stateMachines": [
           "flowersSM"
-        ]
+        ],
+        "defaultViewModel": "WaterWiltVM"
       },
       {
         "name": "Rain",
@@ -2877,7 +3029,8 @@
         ],
         "stateMachines": [
           "rainSM"
-        ]
+        ],
+        "defaultViewModel": "WaterWiltVM"
       }
     ],
     "viewModels": [
@@ -3011,7 +3164,8 @@
         ],
         "stateMachines": [
           "clawdSM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "jumpy3",
@@ -3020,7 +3174,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "looking2",
@@ -3029,7 +3184,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "confetti_iso",
@@ -3038,7 +3194,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "confetti_body",
@@ -3047,7 +3204,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "flag3",
@@ -3056,7 +3214,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "weights2",
@@ -3065,7 +3224,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "walking2",
@@ -3074,7 +3234,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "confettiFix",
@@ -3083,7 +3244,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "walkingFix",
@@ -3092,7 +3254,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "tippytap",
@@ -3101,7 +3264,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": null
       }
     ],
     "viewModels": [
@@ -3162,7 +3326,8 @@
         ],
         "stateMachines": [
           "enterTheGridSM"
-        ]
+        ],
+        "defaultViewModel": "EnterButtonVM"
       }
     ],
     "viewModels": [
@@ -3200,7 +3365,8 @@
         ],
         "stateMachines": [
           "r1c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3321,7 +3487,8 @@
         ],
         "stateMachines": [
           "r1c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3402,7 +3569,8 @@
         ],
         "stateMachines": [
           "r1c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3479,7 +3647,8 @@
         ],
         "stateMachines": [
           "r1c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3552,7 +3721,8 @@
         ],
         "stateMachines": [
           "r1c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3625,7 +3795,8 @@
         ],
         "stateMachines": [
           "r1c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3698,7 +3869,8 @@
         ],
         "stateMachines": [
           "r2c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3795,7 +3967,8 @@
         ],
         "stateMachines": [
           "r2c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3884,7 +4057,8 @@
         ],
         "stateMachines": [
           "r2c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -3969,7 +4143,8 @@
         ],
         "stateMachines": [
           "r2c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4046,7 +4221,8 @@
         ],
         "stateMachines": [
           "r2c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4127,7 +4303,8 @@
         ],
         "stateMachines": [
           "r2c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4200,7 +4377,8 @@
         ],
         "stateMachines": [
           "r3c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4277,7 +4455,8 @@
         ],
         "stateMachines": [
           "r3c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4354,7 +4533,8 @@
         ],
         "stateMachines": [
           "r3c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4431,7 +4611,8 @@
         ],
         "stateMachines": [
           "r3c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4528,7 +4709,8 @@
         ],
         "stateMachines": [
           "r1c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c3",
@@ -4537,7 +4719,8 @@
         ],
         "stateMachines": [
           "r4c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c3",
@@ -4546,7 +4729,8 @@
         ],
         "stateMachines": [
           "r1c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c6",
@@ -4555,7 +4739,8 @@
         ],
         "stateMachines": [
           "r3c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c4",
@@ -4564,7 +4749,8 @@
         ],
         "stateMachines": [
           "r6c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c3",
@@ -4573,7 +4759,8 @@
         ],
         "stateMachines": [
           "r2c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c4",
@@ -4582,7 +4769,8 @@
         ],
         "stateMachines": [
           "r1c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c6",
@@ -4591,7 +4779,8 @@
         ],
         "stateMachines": [
           "r1c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c6",
@@ -4600,7 +4789,8 @@
         ],
         "stateMachines": [
           "r4c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c3",
@@ -4609,7 +4799,8 @@
         ],
         "stateMachines": [
           "r3c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c5",
@@ -4618,7 +4809,8 @@
         ],
         "stateMachines": [
           "r2c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c6",
@@ -4627,7 +4819,8 @@
         ],
         "stateMachines": [
           "r2c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c5",
@@ -4636,7 +4829,8 @@
         ],
         "stateMachines": [
           "r1c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c1",
@@ -4645,7 +4839,8 @@
         ],
         "stateMachines": [
           "r2c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c5",
@@ -4654,7 +4849,8 @@
         ],
         "stateMachines": [
           "r4c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c5",
@@ -4663,7 +4859,8 @@
         ],
         "stateMachines": [
           "r3c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c1",
@@ -4672,7 +4869,8 @@
         ],
         "stateMachines": [
           "r5c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c2",
@@ -4681,7 +4879,8 @@
         ],
         "stateMachines": [
           "r3c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c2",
@@ -4690,7 +4889,8 @@
         ],
         "stateMachines": [
           "r6c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c2",
@@ -4699,7 +4899,8 @@
         ],
         "stateMachines": [
           "r2c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c1",
@@ -4708,7 +4909,8 @@
         ],
         "stateMachines": [
           "r3c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c4",
@@ -4717,7 +4919,8 @@
         ],
         "stateMachines": [
           "r4c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c2",
@@ -4726,7 +4929,8 @@
         ],
         "stateMachines": [
           "r5c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c3",
@@ -4735,7 +4939,8 @@
         ],
         "stateMachines": [
           "r6c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c2",
@@ -4744,7 +4949,8 @@
         ],
         "stateMachines": [
           "r4c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c6",
@@ -4753,7 +4959,8 @@
         ],
         "stateMachines": [
           "r6c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c5",
@@ -4762,7 +4969,8 @@
         ],
         "stateMachines": [
           "r5c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c1",
@@ -4771,7 +4979,8 @@
         ],
         "stateMachines": [
           "r6c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c6",
@@ -4780,7 +4989,8 @@
         ],
         "stateMachines": [
           "r5c6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c4",
@@ -4789,7 +4999,8 @@
         ],
         "stateMachines": [
           "r5c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r6c5",
@@ -4798,7 +5009,8 @@
         ],
         "stateMachines": [
           "r6c5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r5c3",
@@ -4807,7 +5019,8 @@
         ],
         "stateMachines": [
           "r5c3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c4",
@@ -4816,7 +5029,8 @@
         ],
         "stateMachines": [
           "r2c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c1",
@@ -4825,7 +5039,8 @@
         ],
         "stateMachines": [
           "r4c1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c2",
@@ -4834,7 +5049,8 @@
         ],
         "stateMachines": [
           "r1c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r3c4",
@@ -4843,7 +5059,8 @@
         ],
         "stateMachines": [
           "r3c4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -4926,7 +5143,8 @@
         ],
         "stateMachines": [
           "motionTilesLogoSM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "mouse",
@@ -4935,7 +5153,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c6",
@@ -4944,7 +5163,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c2",
@@ -4953,14 +5173,16 @@
         ],
         "stateMachines": [
           "r4c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c4",
         "animations": [],
         "stateMachines": [
           "State Machine 2"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "walking2",
@@ -4969,7 +5191,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "flag3",
@@ -4978,7 +5201,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -5103,7 +5327,8 @@
         ],
         "stateMachines": [
           "motionTilesLogoOverviewSM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "mouse",
@@ -5112,7 +5337,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "flag3",
@@ -5121,7 +5347,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "walking2",
@@ -5130,7 +5357,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r4c2",
@@ -5139,14 +5367,16 @@
         ],
         "stateMachines": [
           "r4c2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r2c4",
         "animations": [],
         "stateMachines": [
           "State Machine 2"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "r1c6",
@@ -5155,7 +5385,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -5269,7 +5500,8 @@
         ],
         "stateMachines": [
           "a1SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset31",
@@ -5278,7 +5510,8 @@
         ],
         "stateMachines": [
           "a31SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset28",
@@ -5287,7 +5520,8 @@
         ],
         "stateMachines": [
           "a28SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset29",
@@ -5296,7 +5530,8 @@
         ],
         "stateMachines": [
           "a29SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset26",
@@ -5305,7 +5540,8 @@
         ],
         "stateMachines": [
           "a26SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset2",
@@ -5314,7 +5550,8 @@
         ],
         "stateMachines": [
           "a2SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset24",
@@ -5323,7 +5560,8 @@
         ],
         "stateMachines": [
           "a24SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset4",
@@ -5332,7 +5570,8 @@
         ],
         "stateMachines": [
           "a4SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset27",
@@ -5341,7 +5580,8 @@
         ],
         "stateMachines": [
           "a27SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset22",
@@ -5350,7 +5590,8 @@
         ],
         "stateMachines": [
           "a22SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset6",
@@ -5359,7 +5600,8 @@
         ],
         "stateMachines": [
           "a6SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset25",
@@ -5368,7 +5610,8 @@
         ],
         "stateMachines": [
           "a25SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset20",
@@ -5377,7 +5620,8 @@
         ],
         "stateMachines": [
           "a20SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset3",
@@ -5386,7 +5630,8 @@
         ],
         "stateMachines": [
           "a3SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset8",
@@ -5395,7 +5640,8 @@
         ],
         "stateMachines": [
           "a8SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset18",
@@ -5404,7 +5650,8 @@
         ],
         "stateMachines": [
           "a18SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset10",
@@ -5413,7 +5660,8 @@
         ],
         "stateMachines": [
           "a10SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset16",
@@ -5422,7 +5670,8 @@
         ],
         "stateMachines": [
           "a16SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset32",
@@ -5431,7 +5680,8 @@
         ],
         "stateMachines": [
           "a32SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset12",
@@ -5440,7 +5690,8 @@
         ],
         "stateMachines": [
           "a12SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset23",
@@ -5449,7 +5700,8 @@
         ],
         "stateMachines": [
           "a23SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset14",
@@ -5458,7 +5710,8 @@
         ],
         "stateMachines": [
           "a14SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset5",
@@ -5467,7 +5720,8 @@
         ],
         "stateMachines": [
           "a5SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset21",
@@ -5476,7 +5730,8 @@
         ],
         "stateMachines": [
           "a21SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset7",
@@ -5485,7 +5740,8 @@
         ],
         "stateMachines": [
           "a7SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset19",
@@ -5494,7 +5750,8 @@
         ],
         "stateMachines": [
           "a19SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset9",
@@ -5503,7 +5760,8 @@
         ],
         "stateMachines": [
           "a9SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset30",
@@ -5512,7 +5770,8 @@
         ],
         "stateMachines": [
           "a30SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset17",
@@ -5521,7 +5780,8 @@
         ],
         "stateMachines": [
           "a17SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset11",
@@ -5530,7 +5790,8 @@
         ],
         "stateMachines": [
           "a11SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset15",
@@ -5539,7 +5800,8 @@
         ],
         "stateMachines": [
           "a15SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       },
       {
         "name": "asset13",
@@ -5548,7 +5810,8 @@
         ],
         "stateMachines": [
           "a13SM"
-        ]
+        ],
+        "defaultViewModel": "PathEffectVM"
       }
     ],
     "viewModels": [
@@ -5617,7 +5880,8 @@
         ],
         "stateMachines": [
           "heroMobileSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "bike1",
@@ -5626,7 +5890,8 @@
         ],
         "stateMachines": [
           "bike1SM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "conductor",
@@ -5635,7 +5900,8 @@
         ],
         "stateMachines": [
           "conductorSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "crew",
@@ -5644,7 +5910,8 @@
         ],
         "stateMachines": [
           "crewSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "marching",
@@ -5653,7 +5920,8 @@
         ],
         "stateMachines": [
           "marchingSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "bike2",
@@ -5662,7 +5930,8 @@
         ],
         "stateMachines": [
           "bike2"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "dancers",
@@ -5671,7 +5940,8 @@
         ],
         "stateMachines": [
           "dancersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "titles",
@@ -5680,7 +5950,8 @@
         ],
         "stateMachines": [
           "titlesSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "dancers 2",
@@ -5689,7 +5960,8 @@
         ],
         "stateMachines": [
           "dancersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "runners",
@@ -5698,7 +5970,8 @@
         ],
         "stateMachines": [
           "runnersSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "horse",
@@ -5707,7 +5980,8 @@
         ],
         "stateMachines": [
           "horseSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "subTitles",
@@ -5716,7 +5990,8 @@
         ],
         "stateMachines": [
           "State Machine 1"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       },
       {
         "name": "birds",
@@ -5725,7 +6000,8 @@
         ],
         "stateMachines": [
           "birdsSM"
-        ]
+        ],
+        "defaultViewModel": "Hero3ViewModel"
       }
     ],
     "viewModels": [
@@ -5772,7 +6048,8 @@
         ],
         "stateMachines": [
           "problemSM"
-        ]
+        ],
+        "defaultViewModel": "ProblemVM"
       }
     ],
     "viewModels": [
@@ -5823,7 +6100,8 @@
         ],
         "stateMachines": [
           "problemSM"
-        ]
+        ],
+        "defaultViewModel": "ProblemVM"
       }
     ],
     "viewModels": [
@@ -5905,7 +6183,8 @@
         ],
         "stateMachines": [
           "singleLineLogoSM"
-        ]
+        ],
+        "defaultViewModel": "SingleLineLogoVM"
       },
       {
         "name": "flagWavingOppo",
@@ -5914,7 +6193,8 @@
         ],
         "stateMachines": [
           "oppoSM"
-        ]
+        ],
+        "defaultViewModel": "SingleLineLogoVM"
       }
     ],
     "viewModels": [
