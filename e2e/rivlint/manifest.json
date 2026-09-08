@@ -1,5 +1,6 @@
 {
   "rive/anticipation.riv": {
+    "defaultArtboard": "Anticipation",
     "artboards": [
       {
         "name": "Anticipation",
@@ -68,6 +69,7 @@
     ]
   },
   "rive/appeal.riv": {
+    "defaultArtboard": "appeal",
     "artboards": [
       {
         "name": "appeal",
@@ -136,6 +138,7 @@
     ]
   },
   "rive/arc.riv": {
+    "defaultArtboard": "Arc",
     "artboards": [
       {
         "name": "Arc",
@@ -204,6 +207,7 @@
     ]
   },
   "rive/carouselStatics/followthrough_static.riv": {
+    "defaultArtboard": "frame_followThrough",
     "artboards": [
       {
         "name": "frame_followThrough",
@@ -238,6 +242,7 @@
     ]
   },
   "rive/carouselStatics/imitationoflife_static.riv": {
+    "defaultArtboard": "frame_imitationOfLife",
     "artboards": [
       {
         "name": "frame_imitationOfLife",
@@ -272,6 +277,7 @@
     ]
   },
   "rive/carouselStatics/slowinslowout_static.riv": {
+    "defaultArtboard": "frame_slowINslowOut",
     "artboards": [
       {
         "name": "frame_slowINslowOut",
@@ -306,6 +312,7 @@
     ]
   },
   "rive/carouselStatics/squash&stretch_static.riv": {
+    "defaultArtboard": "frame_squash&stretch",
     "artboards": [
       {
         "name": "frame_squash&stretch",
@@ -340,6 +347,7 @@
     ]
   },
   "rive/componentsTitles.riv": {
+    "defaultArtboard": "componentsTitles",
     "artboards": [
       {
         "name": "componentsTitles",
@@ -391,6 +399,7 @@
     ]
   },
   "rive/economy.riv": {
+    "defaultArtboard": "economy",
     "artboards": [
       {
         "name": "economy",
@@ -459,6 +468,7 @@
     ]
   },
   "rive/exaggeration.riv": {
+    "defaultArtboard": "exaggeration",
     "artboards": [
       {
         "name": "exaggeration",
@@ -527,6 +537,7 @@
     ]
   },
   "rive/follow-through.riv": {
+    "defaultArtboard": "FollowThrough",
     "artboards": [
       {
         "name": "FollowThrough",
@@ -595,6 +606,7 @@
     ]
   },
   "rive/hero3.riv": {
+    "defaultArtboard": "Hero3",
     "artboards": [
       {
         "name": "Hero3",
@@ -764,6 +776,7 @@
     ]
   },
   "rive/hierarchyofmotion.riv": {
+    "defaultArtboard": "hierarchyOfMotion",
     "artboards": [
       {
         "name": "hierarchyOfMotion",
@@ -832,6 +845,7 @@
     ]
   },
   "rive/measureTitles.riv": {
+    "defaultArtboard": "measureTitles",
     "artboards": [
       {
         "name": "measureTitles",
@@ -887,6 +901,7 @@
     ]
   },
   "rive/pixelplant.riv": {
+    "defaultArtboard": "pixelPlant",
     "artboards": [
       {
         "name": "pixelPlant",
@@ -1057,6 +1072,7 @@
     ]
   },
   "rive/pose2pose.riv": {
+    "defaultArtboard": "Staging",
     "artboards": [
       {
         "name": "Staging",
@@ -1147,6 +1163,7 @@
     ]
   },
   "rive/principles_icon01.riv": {
+    "defaultArtboard": "Squash&StretchIcon",
     "artboards": [
       {
         "name": "Squash&StretchIcon",
@@ -1204,6 +1221,7 @@
     ]
   },
   "rive/principles_icon02.riv": {
+    "defaultArtboard": "AnticipationIcon",
     "artboards": [
       {
         "name": "AnticipationIcon",
@@ -1260,6 +1278,7 @@
     ]
   },
   "rive/principles_icon03.riv": {
+    "defaultArtboard": "StagingIcon",
     "artboards": [
       {
         "name": "StagingIcon",
@@ -1316,6 +1335,7 @@
     ]
   },
   "rive/principles_icon04.riv": {
+    "defaultArtboard": "Pose2PoseIcon",
     "artboards": [
       {
         "name": "Pose2PoseIcon",
@@ -1386,6 +1406,7 @@
     ]
   },
   "rive/principles_icon05.riv": {
+    "defaultArtboard": "FollowThroughIcon",
     "artboards": [
       {
         "name": "FollowThroughIcon",
@@ -1434,6 +1455,7 @@
     ]
   },
   "rive/principles_icon06.riv": {
+    "defaultArtboard": "SlowInSlowOut",
     "artboards": [
       {
         "name": "SlowInSlowOut",
@@ -1482,6 +1504,7 @@
     ]
   },
   "rive/principles_icon07.riv": {
+    "defaultArtboard": "Arc",
     "artboards": [
       {
         "name": "Arc",
@@ -1542,6 +1565,7 @@
     ]
   },
   "rive/principles_icon08.riv": {
+    "defaultArtboard": "SecondaryAction",
     "artboards": [
       {
         "name": "SecondaryAction",
@@ -1602,6 +1626,7 @@
     ]
   },
   "rive/principles_icon09.riv": {
+    "defaultArtboard": "Timing",
     "artboards": [
       {
         "name": "Timing",
@@ -1662,6 +1687,7 @@
     ]
   },
   "rive/principles_icon10.riv": {
+    "defaultArtboard": "Exaggeration",
     "artboards": [
       {
         "name": "Exaggeration",
@@ -1710,6 +1736,7 @@
     ]
   },
   "rive/principles_icon11.riv": {
+    "defaultArtboard": "SolidDrawing",
     "artboards": [
       {
         "name": "SolidDrawing",
@@ -1768,6 +1795,7 @@
     ]
   },
   "rive/principles_icon12.riv": {
+    "defaultArtboard": "Appeal",
     "artboards": [
       {
         "name": "Appeal",
@@ -1828,6 +1856,7 @@
     ]
   },
   "rive/principles_icon13.riv": {
+    "defaultArtboard": "systematization",
     "artboards": [
       {
         "name": "systematization",
@@ -1888,6 +1917,7 @@
     ]
   },
   "rive/principles_icon14.riv": {
+    "defaultArtboard": "HierarchyOfMotion",
     "artboards": [
       {
         "name": "HierarchyOfMotion",
@@ -1948,6 +1978,7 @@
     ]
   },
   "rive/principles_icon15.riv": {
+    "defaultArtboard": "Economy",
     "artboards": [
       {
         "name": "Economy",
@@ -1996,6 +2027,7 @@
     ]
   },
   "rive/principles_icon16.riv": {
+    "defaultArtboard": "tokenFidelity",
     "artboards": [
       {
         "name": "tokenFidelity",
@@ -2056,6 +2088,7 @@
     ]
   },
   "rive/principles_icon17.riv": {
+    "defaultArtboard": "redeucedMotion",
     "artboards": [
       {
         "name": "redeucedMotion",
@@ -2116,6 +2149,7 @@
     ]
   },
   "rive/principles_icon18.riv": {
+    "defaultArtboard": "shardVocabulary",
     "artboards": [
       {
         "name": "shardVocabulary",
@@ -2186,6 +2220,7 @@
     ]
   },
   "rive/reducedMotion.riv": {
+    "defaultArtboard": "reducedMotion",
     "artboards": [
       {
         "name": "reducedMotion",
@@ -2254,6 +2289,7 @@
     ]
   },
   "rive/secondaryaction.riv": {
+    "defaultArtboard": "Secondary Action",
     "artboards": [
       {
         "name": "Secondary Action",
@@ -2322,6 +2358,7 @@
     ]
   },
   "rive/sharedvocabulary.riv": {
+    "defaultArtboard": "shardVocabulary",
     "artboards": [
       {
         "name": "shardVocabulary",
@@ -2390,6 +2427,7 @@
     ]
   },
   "rive/slowinslowout.riv": {
+    "defaultArtboard": "SlowInSlowOut",
     "artboards": [
       {
         "name": "SlowInSlowOut",
@@ -2458,6 +2496,7 @@
     ]
   },
   "rive/solid-drawing.riv": {
+    "defaultArtboard": "solidDrawing",
     "artboards": [
       {
         "name": "solidDrawing",
@@ -2528,6 +2567,7 @@
     ]
   },
   "rive/squash-stretch.riv": {
+    "defaultArtboard": "Squash&Stretch",
     "artboards": [
       {
         "name": "Squash&Stretch",
@@ -2598,6 +2638,7 @@
     ]
   },
   "rive/staging.riv": {
+    "defaultArtboard": "Staging",
     "artboards": [
       {
         "name": "Staging",
@@ -2666,6 +2707,7 @@
     ]
   },
   "rive/systematization.riv": {
+    "defaultArtboard": "systematization",
     "artboards": [
       {
         "name": "systematization",
@@ -2735,6 +2777,7 @@
     ]
   },
   "rive/timing.riv": {
+    "defaultArtboard": "Timing",
     "artboards": [
       {
         "name": "Timing",
@@ -2803,6 +2846,7 @@
     ]
   },
   "rive/tokenfidelity.riv": {
+    "defaultArtboard": "tokenFidelity",
     "artboards": [
       {
         "name": "tokenFidelity",
@@ -2871,6 +2915,7 @@
     ]
   },
   "rive/tokenlabhero2.riv": {
+    "defaultArtboard": "tokenLab2",
     "artboards": [
       {
         "name": "tokenLab2",
@@ -2926,6 +2971,7 @@
     ]
   },
   "rive/tokensTitles.riv": {
+    "defaultArtboard": "tokensTitles",
     "artboards": [
       {
         "name": "tokensTitles",
@@ -2985,6 +3031,7 @@
     ]
   },
   "rive/waterwiltreact.riv": {
+    "defaultArtboard": "waterWilt",
     "artboards": [
       {
         "name": "waterWilt",
@@ -3156,6 +3203,7 @@
     ]
   },
   "riveTiles/clawd.riv": {
+    "defaultArtboard": "clawd",
     "artboards": [
       {
         "name": "clawd",
@@ -3318,6 +3366,7 @@
     ]
   },
   "riveTiles/enterthegrid.riv": {
+    "defaultArtboard": "enterTheGrid",
     "artboards": [
       {
         "name": "enterTheGrid",
@@ -3357,6 +3406,7 @@
     ]
   },
   "riveTiles/group2/r1c1.riv": {
+    "defaultArtboard": "r1c1",
     "artboards": [
       {
         "name": "r1c1",
@@ -3479,6 +3529,7 @@
     ]
   },
   "riveTiles/group2/r1c2.riv": {
+    "defaultArtboard": "r1c2",
     "artboards": [
       {
         "name": "r1c2",
@@ -3561,6 +3612,7 @@
     ]
   },
   "riveTiles/group2/r1c3.riv": {
+    "defaultArtboard": "r1c3",
     "artboards": [
       {
         "name": "r1c3",
@@ -3639,6 +3691,7 @@
     ]
   },
   "riveTiles/group2/r1c4.riv": {
+    "defaultArtboard": "r1c4",
     "artboards": [
       {
         "name": "r1c4",
@@ -3713,6 +3766,7 @@
     ]
   },
   "riveTiles/group2/r1c5.riv": {
+    "defaultArtboard": "r1c5",
     "artboards": [
       {
         "name": "r1c5",
@@ -3787,6 +3841,7 @@
     ]
   },
   "riveTiles/group2/r1c6.riv": {
+    "defaultArtboard": "r1c6",
     "artboards": [
       {
         "name": "r1c6",
@@ -3861,6 +3916,7 @@
     ]
   },
   "riveTiles/group2/r2c1.riv": {
+    "defaultArtboard": "r2c1",
     "artboards": [
       {
         "name": "r2c1",
@@ -3959,6 +4015,7 @@
     ]
   },
   "riveTiles/group2/r2c2.riv": {
+    "defaultArtboard": "r2c2",
     "artboards": [
       {
         "name": "r2c2",
@@ -4049,6 +4106,7 @@
     ]
   },
   "riveTiles/group2/r2c3.riv": {
+    "defaultArtboard": "r2c3",
     "artboards": [
       {
         "name": "r2c3",
@@ -4135,6 +4193,7 @@
     ]
   },
   "riveTiles/group2/r2c4.riv": {
+    "defaultArtboard": "r2c4",
     "artboards": [
       {
         "name": "r2c4",
@@ -4213,6 +4272,7 @@
     ]
   },
   "riveTiles/group2/r2c5.riv": {
+    "defaultArtboard": "r2c5",
     "artboards": [
       {
         "name": "r2c5",
@@ -4295,6 +4355,7 @@
     ]
   },
   "riveTiles/group2/r2c6.riv": {
+    "defaultArtboard": "r2c6",
     "artboards": [
       {
         "name": "r2c6",
@@ -4369,6 +4430,7 @@
     ]
   },
   "riveTiles/group2/r3c1.riv": {
+    "defaultArtboard": "r3c1",
     "artboards": [
       {
         "name": "r3c1",
@@ -4447,6 +4509,7 @@
     ]
   },
   "riveTiles/group2/r3c2.riv": {
+    "defaultArtboard": "r3c2",
     "artboards": [
       {
         "name": "r3c2",
@@ -4525,6 +4588,7 @@
     ]
   },
   "riveTiles/group2/r3c3.riv": {
+    "defaultArtboard": "r3c3",
     "artboards": [
       {
         "name": "r3c3",
@@ -4603,6 +4667,7 @@
     ]
   },
   "riveTiles/group2/r3c4.riv": {
+    "defaultArtboard": "r3c4",
     "artboards": [
       {
         "name": "r3c4",
@@ -4701,6 +4766,7 @@
     ]
   },
   "riveTiles/ingredients_v8.riv": {
+    "defaultArtboard": "r1c1",
     "artboards": [
       {
         "name": "r1c1",
@@ -5133,6 +5199,7 @@
     ]
   },
   "riveTiles/motiontileslogo.riv": {
+    "defaultArtboard": "motionTilesLogo",
     "artboards": [
       {
         "name": "motionTilesLogo",
@@ -5319,6 +5386,7 @@
     ]
   },
   "riveTiles/motiontileslogooverview.riv": {
+    "defaultArtboard": "motionTilesLogoOverview",
     "artboards": [
       {
         "name": "motionTilesLogoOverview",
@@ -5492,6 +5560,7 @@
     ]
   },
   "riveTiles/motiontilesstatics_v3.riv": {
+    "defaultArtboard": "asset1",
     "artboards": [
       {
         "name": "asset1",
@@ -5872,6 +5941,7 @@
     ]
   },
   "titleSVGS/heromobile.riv": {
+    "defaultArtboard": "heroMobile",
     "artboards": [
       {
         "name": "heroMobile",
@@ -6039,6 +6109,7 @@
     ]
   },
   "titleSVGS/problembutton.riv": {
+    "defaultArtboard": "problemButton",
     "artboards": [
       {
         "name": "problemButton",
@@ -6090,6 +6161,7 @@
     ]
   },
   "titleSVGS/problembutton2.riv": {
+    "defaultArtboard": "problemButton2",
     "artboards": [
       {
         "name": "problemButton2",
@@ -6175,6 +6247,7 @@
     ]
   },
   "titleSVGS/singlelinelogo.riv": {
+    "defaultArtboard": "singleLineLogo",
     "artboards": [
       {
         "name": "singleLineLogo",

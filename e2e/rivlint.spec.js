@@ -2,8 +2,9 @@
 //
 // Every shipped .riv is enumerated through the real webgl2 runtime in the
 // browser and compared against a committed baseline (e2e/rivlint/manifest.json):
-// artboard names, animation names, state machine names, each artboard's default
-// view model, view models with their properties and named instances. The baseline was generated from the current,
+// the file's default artboard, artboard names, animation names, state machine
+// names, each artboard's default view model, view models with their properties
+// and named instances. The baseline was generated from the current,
 // David-verified files, so the check is a regression gate, not a convention
 // oracle: the class of failure it exists to catch is a re-export silently
 // losing structure (r4c1 shipped blank once because its VM binding did not
@@ -17,6 +18,12 @@
 //   RIVLINT_UPDATE=1 npx playwright test rivlint
 //
 // then review the manifest diff like source, because it is.
+//
+// The file's default artboard (added 2026-09-08, David's correction: it is a
+// property of the file, the editor's "set as default", not a position in the
+// list). A load that names no artboard gets it, and activeArtboard reports its
+// name. It is the artboard a bare `new Rive({ src })` draws, so a re-export
+// that moves it is a contract change.
 //
 // Per-artboard default view model (added 2026-09-08). The r4c1 failure was
 // reproduced on purpose (archive/riveLintTest/r4c1_bt.riv) and read through
@@ -149,7 +156,7 @@ function enumerateFile(page, urlPath) {
           properties: vm.properties.map(p => ({ name: p.name, type: String(p.type) })),
         })
       }
-      return { artboards, viewModels }
+      return { defaultArtboard: instance.activeArtboard, artboards, viewModels }
     } finally {
       instance.cleanup()
     }
