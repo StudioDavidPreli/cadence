@@ -18,7 +18,9 @@
 //
 // Reduced motion renders the per-theme SVG poster (/fallBacks/measure*.svg)
 // instead of mounting the canvas, so the .riv is never fetched for a user
-// who will not see it play.
+// who will not see it play. On the motion path the same poster shows until
+// the canvas has painted once, and stays if the file never loads (David's
+// call, 2026-09-08; the plain word was the stand-in before).
 //
 // `still` pauses the scene while the page is measuring. The video decoder
 // reads presented frames, and a canvas redrawing at 60fps competes with the
@@ -37,6 +39,7 @@ import {
   Alignment,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
+import { useRivePainted } from '../../hooks/useRivePainted'
 import { useTheme } from '../../context/ThemeContext'
 import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './Measure.module.css'
@@ -104,11 +107,13 @@ function TitleRive({ theme, still }) {
     if (still) rive.pause()
     else rive.play()
   }, [rive, still])
+  const painted = useRivePainted(rive)
 
   return (
     <>
-      {/* The plain word until the canvas paints, or if the file is absent. */}
-      {!rive && <span className={styles.titleFallback}>{TITLE.word}</span>}
+      {/* The poster until the canvas has painted, or for good if the file
+          never loads. */}
+      {!painted && <img className={styles.titlePoster} src={riveFallbackSrc(TITLE.surface, theme)} alt="" />}
       <RiveComponent className={styles.titleCanvas} />
     </>
   )

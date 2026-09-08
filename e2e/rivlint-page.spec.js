@@ -38,6 +38,24 @@ test.describe('rivLint', () => {
     await expect(page).toHaveURL(/#\/tools\/rivlint$/)
   })
 
+  test('switching leaves never remounts the titles (the fallback-flash fix)', async ({ page }) => {
+    await openLint(page)
+    await expect(page.locator('h2 canvas')).toHaveCount(1)
+    // Tag rivLint's title canvas, switch to Measure and back, and assert the
+    // SAME element survived: a remount (the flash David caught 2026-09-08,
+    // the Glossary's 2026-09-05 bug again) would produce a fresh canvas
+    // without the tag. Both leaves stay mounted once visited, so two title
+    // canvases exist afterwards regardless of which leaf shows.
+    await page.evaluate(() => { document.querySelector('h2 canvas').dataset.rivlintTag = 'survivor' })
+    await page.getByRole('button', { name: 'Measure', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 2, name: 'Measure' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { level: 2, name: 'rivLint' })).toBeHidden()
+    await page.getByRole('button', { name: 'rivLint', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 2, name: 'rivLint' })).toBeVisible()
+    await expect(page.locator('canvas[data-rivlint-tag="survivor"]')).toHaveCount(1)
+    await expect(page.locator('h2 canvas')).toHaveCount(2)
+  })
+
   test('a sample reads one of the site\'s own files and matches its earlier report', async ({ page }) => {
     await openLint(page)
     await page.getByTestId('sample-icon').click()
@@ -143,6 +161,23 @@ test.describe('rivLint', () => {
     // The scene mounts a canvas inside the h2; the plain-word fallback is
     // gone once the runtime has loaded and the view model is bound.
     await expect(page.locator('h2 canvas')).toHaveCount(1)
+    await expect(page.locator('h2').getByText('rivLint', { exact: true })).toHaveCount(1)
+    // The poster stood in until the first paint and has handed off: no
+    // image left in the heading on the motion path (David's call,
+    // 2026-09-08; before that the stand-in was the plain word).
+    await expect(page.locator('h2 img')).toHaveCount(0)
+  })
+
+  test('if the title file never loads, the poster stays and no plain word appears', async ({ page }) => {
+    await page.route('**/rive/rivlintTitles.riv', route => route.abort())
+    await page.goto('/#/tools/rivlint')
+    await expect(page.getByRole('heading', { level: 2, name: 'rivLint' })).toBeVisible({ timeout: 30_000 })
+    const poster = page.locator('h2 img[src^="/fallBacks/lint"]')
+    await expect(poster).toBeVisible()
+    // The runtime never reports a load, so the poster is the title for good;
+    // the accessible name is the only text in the heading.
+    await page.waitForTimeout(1500)
+    await expect(poster).toBeVisible()
     await expect(page.locator('h2').getByText('rivLint', { exact: true })).toHaveCount(1)
   })
 })

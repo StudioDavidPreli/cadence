@@ -1344,3 +1344,13 @@
   border-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
+
+/* A Tools leaf's mount point. Both leaves stay mounted once visited and the
+   inactive one carries `hidden`; the visible one contributes no box of its
+   own (display: contents) so the page's own .scroll is the right region's
+   child, exactly as it was when the leaf was the direct child. The :not()
+   guard keeps the UA's display: none for [hidden] in force: an unguarded
+   author rule would win over it and un-hide the pane. */
+.toolPane:not([hidden]) {
+  display: contents;
+}

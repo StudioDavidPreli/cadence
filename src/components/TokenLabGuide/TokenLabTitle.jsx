@@ -23,6 +23,7 @@ import {
   Alignment,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
+import { useRivePainted } from '../../hooks/useRivePainted'
 import { useTheme } from '../../context/ThemeContext'
 import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './TokenLabGuide.module.css'
@@ -94,13 +95,15 @@ function TitleRive({ theme }) {
     name: themeToInstanceName[theme],
     rive,
   })
+  const painted = useRivePainted(rive)
 
   return (
     <>
-      {/* Fallback: until rive loads (or if the file is absent) the plain
-          title text shows, so the guide is legible before the canvas paints
-          and a missing asset degrades to text rather than an empty box. */}
-      {!rive && <span className={styles.titleFallback}>Token Lab</span>}
+      {/* The poster until the canvas has painted, or for good if the file
+          never loads (David's call, 2026-09-08; the plain word was the
+          stand-in before). Same left-aligned fit as the reduced-motion
+          poster, so the still sits where the art lands. */}
+      {!painted && <img className={`${styles.titlePoster} ${styles.fallbackImg}`} src={riveFallbackSrc('tokenLab', theme)} alt="" />}
       <RiveComponent className={styles.titleCanvas} />
     </>
   )

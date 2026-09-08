@@ -41,14 +41,16 @@
   height: 100%;
 }
 
-/* Plain-text stand-in shown until the canvas paints (or if the .riv is absent).
-   Pinned to the left edge and vertically centered so it sits where the animated
-   word lands, inheriting the serif type from .title. */
-.titleFallback {
+/* The SVG poster, shown until the canvas has painted once (or for good if
+   the .riv never loads): the same per-theme file reduced motion renders,
+   laid over the canvas's box so the handoff is poster to art with nothing
+   empty between (David's call, 2026-09-08; timing in useRivePainted). */
+.titlePoster {
   position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Visually-hidden accessible name: keeps "Token Lab" in the document outline and

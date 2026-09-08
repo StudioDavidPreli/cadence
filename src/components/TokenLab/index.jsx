@@ -5,7 +5,7 @@ import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
-import { SECTIONS, TOOLS_RIVLINT } from '../../data/navigation'
+import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT } from '../../data/navigation'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { auditTokens, auditToMarkdown } from '../../tokens/tokenAudit'
@@ -1694,6 +1694,13 @@ export function TokenLab() {
   // Tools rails it too: the sliders drive nothing on those pages.
   const isTools = section === SECTIONS.TOOLS
   const controlsRailed = controlsCollapsed || isMotionTiles || isGlossary || isTools
+  // Which Tools leaves have been visited this session. A ref, not state: it
+  // is read during render and only ever grows, so adding to it here is
+  // idempotent (Strict Mode's double render adds the same key twice) and
+  // needs no re-render of its own. Once a leaf is in the set it stays
+  // mounted; see the Tools branch below for why.
+  const toolsSeen = useRef(new Set())
+  if (isTools && destination) toolsSeen.current.add(destination)
 
   // Which rail's drawer is open: 'tokens' | 'nav' | null. A single value makes
   // the two drawers mutually exclusive — opening one closes the other, which is
@@ -2277,27 +2284,45 @@ export function TokenLab() {
           it reads no --motion-* tokens and runs its own preset system. */}
       {isTools ? (
         // Tools replace the right region like the Glossary does, outside
-        // MotionTokensProvider: neither page reads a --motion-* token. The
-        // destination picks the leaf: Measure by default, rivLint at #/tools/rivlint.
-        destination === TOOLS_RIVLINT ? (
-          <ErrorBoundary
-            title="rivLint hit a snag"
-            message="rivLint ran into an unexpected error. Reloading usually clears it."
-          >
-            <Suspense fallback={<div className={styles.lazyFallback}>Loading rivLint…</div>}>
-              <RivLintSection />
-            </Suspense>
-          </ErrorBoundary>
-        ) : (
-          <ErrorBoundary
-            title="The measurement page hit a snag"
-            message="The measurement page ran into an unexpected error. Reloading usually clears it."
-          >
-            <Suspense fallback={<div className={styles.lazyFallback}>Loading the measurement page…</div>}>
-              <MeasureSection />
-            </Suspense>
-          </ErrorBoundary>
-        )
+        // MotionTokensProvider: neither page reads a --motion-* token.
+        //
+        // Both leaves stay MOUNTED once visited and the inactive one hides
+        // (the Glossary's fallback-flash fix, 2026-09-05; David caught the
+        // same flash here 2026-09-08 after this branch shipped as a ternary).
+        // A conditional swap is a teardown: every leaf change re-ran the
+        // other page's useRive, and its until-paint text stand-in showed as
+        // a transition frame on every toggle. With both mounted, each title's
+        // Rive instance survives the switch (the runtime pauses a hidden
+        // canvas and resumes it on reveal) and the swap is instant. `hidden`
+        // keeps the inactive page out of the a11y tree. Each leaf still
+        // mounts lazily on its FIRST visit, so a session that never opens
+        // rivLint never loads its chunk; after that it stays.
+        <>
+          {toolsSeen.current.has(TOOLS_MEASURE) && (
+            <div className={styles.toolPane} hidden={destination !== TOOLS_MEASURE}>
+              <ErrorBoundary
+                title="The measurement page hit a snag"
+                message="The measurement page ran into an unexpected error. Reloading usually clears it."
+              >
+                <Suspense fallback={<div className={styles.lazyFallback}>Loading the measurement page…</div>}>
+                  <MeasureSection />
+                </Suspense>
+              </ErrorBoundary>
+            </div>
+          )}
+          {toolsSeen.current.has(TOOLS_RIVLINT) && (
+            <div className={styles.toolPane} hidden={destination !== TOOLS_RIVLINT}>
+              <ErrorBoundary
+                title="rivLint hit a snag"
+                message="rivLint ran into an unexpected error. Reloading usually clears it."
+              >
+                <Suspense fallback={<div className={styles.lazyFallback}>Loading rivLint…</div>}>
+                  <RivLintSection />
+                </Suspense>
+              </ErrorBoundary>
+            </div>
+          )}
+        </>
       ) : isGlossary ? (
         // The Glossary replaces the right region like Motion Tiles does, and sits
         // outside MotionTokensProvider for the same reason: it documents the

@@ -17,10 +17,13 @@
 //
 // Reduced motion renders the per-theme SVG poster (/fallBacks/lint*.svg)
 // instead of mounting the canvas, so the .riv is never fetched for a user
-// who will not see it play. Unlike Measure's title there is no `still`: the
-// page reads a file inside the WASM runtime on the main thread, which holds
-// every canvas for the same milliseconds anyway, and nothing here presents
-// video frames the title could compete with.
+// who will not see it play. On the motion path the same poster shows until
+// the canvas has painted once, and stays if the file never loads (David's
+// call, 2026-09-08; the plain word was the stand-in before). Unlike
+// Measure's title there is no `still`: the page reads a file inside the WASM
+// runtime on the main thread, which holds every canvas for the same
+// milliseconds anyway, and nothing here presents video frames the title
+// could compete with.
 import {
   useRive,
   useViewModel,
@@ -30,6 +33,7 @@ import {
   Alignment,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
+import { useRivePainted } from '../../hooks/useRivePainted'
 import { useTheme } from '../../context/ThemeContext'
 import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './RivLint.module.css'
@@ -88,11 +92,13 @@ function TitleRive({ theme }) {
     name: themeToInstanceName[theme],
     rive,
   })
+  const painted = useRivePainted(rive)
 
   return (
     <>
-      {/* The plain word until the canvas paints, or if the file is absent. */}
-      {!rive && <span className={styles.titleFallback}>{TITLE.word}</span>}
+      {/* The poster until the canvas has painted, or for good if the file
+          never loads. */}
+      {!painted && <img className={styles.titlePoster} src={riveFallbackSrc(TITLE.surface, theme)} alt="" />}
       <RiveComponent className={styles.titleCanvas} />
     </>
   )

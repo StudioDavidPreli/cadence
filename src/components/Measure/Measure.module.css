@@ -30,8 +30,8 @@
 
 /* The title: an animated Rive scene (measureTitles.riv, David's, 2026-09-07)
    following the Glossary titles' display-title convention. These type
-   properties style the plain-text fallback that shows until the canvas
-   paints. */
+   properties style the heading's accessible name; the visible title is the
+   canvas, with the SVG poster until it paints. */
 .title {
   margin: 0 0 16px;
   font-family: var(--font-serif);
@@ -60,14 +60,16 @@
   height: 100%;
 }
 
-/* Plain-text stand-in until the canvas paints (or if the .riv is absent),
-   pinned where the word will land. Reduced motion renders the SVG poster
-   through .titleCanvas instead. */
-.titleFallback {
+/* The SVG poster, shown until the canvas has painted once (or for good if
+   the .riv never loads): the same per-theme file reduced motion renders,
+   laid over the canvas's box so the handoff is poster to art with nothing
+   empty between (David's call, 2026-09-08; timing in useRivePainted). */
+.titlePoster {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Visually-hidden accessible name: the document outline keeps "Measure"

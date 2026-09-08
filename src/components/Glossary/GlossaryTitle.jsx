@@ -21,7 +21,9 @@
 //
 // Reduced motion renders the per-theme static SVG poster instead of mounting
 // the canvas, so the .riv is never fetched for users who will never see it
-// play. The pinball posters were exported before the originX fix and carry
+// play. On the motion path the same poster shows until the canvas has
+// painted once, and stays if the file never loads (David's call,
+// 2026-09-08; the plain word was the stand-in before). The pinball posters were exported before the originX fix and carry
 // the same +14 shift, applied to their translate transforms directly.
 import {
   useRive,
@@ -32,6 +34,7 @@ import {
   Alignment,
 } from '@rive-app/react-webgl2'
 import { useReducedMotion } from 'framer-motion'
+import { useRivePainted } from '../../hooks/useRivePainted'
 import { useTheme } from '../../context/ThemeContext'
 import { riveFallbackSrc } from '../../utils/riveFallbacks'
 import styles from './Glossary.module.css'
@@ -114,13 +117,13 @@ function TitleRive({ config, theme }) {
     name: themeToInstanceName[theme],
     rive,
   })
+  const painted = useRivePainted(rive)
 
   return (
     <>
-      {/* Until rive loads (or if the file is absent) the plain word shows,
-          centered where the art will land, so the view is legible before the
-          canvas paints and a missing asset degrades to text. */}
-      {!rive && <span className={styles.titleFallback}>{config.word}</span>}
+      {/* The poster until the canvas has painted, or for good if the file
+          never loads; a missing asset degrades to the still, not to text. */}
+      {!painted && <img className={styles.titlePoster} src={riveFallbackSrc(config.surface, theme)} alt="" />}
       <RiveComponent className={styles.titleCanvas} />
     </>
   )
