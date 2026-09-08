@@ -8,6 +8,7 @@ import {
   GLOSSARY_TOKENS,
   GLOSSARY_COMPONENTS,
   TOOLS_MEASURE,
+  TOOLS_RIVLINT,
 } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
@@ -209,6 +210,8 @@ export function NavigationProvider({ children }) {
         dispatch({ type: 'SET_GLOSSARY_VIEW', view: GLOSSARY_COMPONENTS }),
       showToolsMeasure: () =>
         dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_MEASURE }),
+      showToolsRivLint: () =>
+        dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_RIVLINT }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
       // Flag the replaceState write, then clear the deep-link modal. Order
       // matters: the ref must be true before the dispatch that triggers the

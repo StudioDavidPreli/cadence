@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseHash, stateToHash, principleHash, LANDING } from './useHashRoute'
-import { SECTIONS, FILTERS, TOOLS_MEASURE } from '../data/navigation'
+import { SECTIONS, FILTERS, TOOLS_MEASURE, TOOLS_RIVLINT } from '../data/navigation'
 
 // The deep-link segment (#/principles/<filter>/<slug>) is the reason this hook
 // grew a third principles segment. State carries the numeric principleId; the URL
@@ -111,6 +111,17 @@ describe('tools route', () => {
       })
     }
   })
+  it('parses #/tools/rivlint to the rivLint view and serializes it back with the tail', () => {
+    expect(parseHash('#/tools/rivlint')).toEqual({
+      section: SECTIONS.TOOLS,
+      expandedSection: SECTIONS.TOOLS,
+      destination: TOOLS_RIVLINT,
+      principleFilter: FILTERS.ALL,
+      principleId: null,
+    })
+    expect(stateToHash(parseHash('#/tools/rivlint'))).toBe('#/tools/rivlint')
+  })
+
   it('serializes the Measure view to the bare tools route', () => {
     expect(stateToHash(parseHash('#/tools/measure'))).toBe('#/tools')
   })

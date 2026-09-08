@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "format": "cadence-riv-report/1",
+    "file": "principles_icon11.riv",
+    "size": 447153,
+    "runtime": "2.38.4",
+    "date": "2026-09-08"
+  },
+  "inventory": {
+    "defaultArtboard": "SolidDrawing",
+    "artboards": [
+      {
+        "name": "SolidDrawing",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          {
+            "name": "solidDrawingIconSM",
+            "inputs": [
+              {
+                "name": "Trigger 1",
+                "type": "trigger"
+              }
+            ]
+          }
+        ],
+        "defaultViewModel": "ViewModel1"
+      },
+      {
+        "name": "eyeMask",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          {
+            "name": "State Machine 1",
+            "inputs": []
+          }
+        ],
+        "defaultViewModel": "ViewModel1"
+      },
+      {
+        "name": "solidDrawingIcon",
+        "animations": [
+          "PNG Sequence"
+        ],
+        "stateMachines": [
+          {
+            "name": "State Machine 1",
+            "inputs": []
+          }
+        ],
+        "defaultViewModel": "ViewModel1"
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ViewModel1",
+        "instances": [
+          "Dark",
+          "Light",
+          "Contrast"
+        ],
+        "properties": [
+          {
+            "name": "colorPropertyFill",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyOutline",
+            "type": "color"
+          },
+          {
+            "name": "colorPropertyStroke",
+            "type": "color"
+          }
+        ]
+      }
+    ],
+    "enums": [],
+    "assets": []
+  }
+}

@@ -1,0 +1,704 @@
+/* The rivLint page. Document conventions follow Measure and the Glossary
+   (left-aligned, a bounded measure, mono labels over muted body, code chips
+   on accent-subtle). Findings carry their severity as a mono label in text
+   color, never accent: accent means active, and a failure is not a success
+   signal; errors read plain text-base per the error-surfaces rule.
+
+   Color pairings are all existing audited ones. Every transition here is
+   chrome on the fixed --feedback-* constants. The preview canvas never
+   autoplays under reduced motion. */
+
+.scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: var(--color-surface-raised);
+}
+
+.scroll:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+  color: var(--color-text-base);
+}
+
+/* The title: an animated Rive scene (rivlintTitles.riv, David's, 2026-09-08)
+   on the display-title convention Measure and the Glossary titles follow.
+   These type properties style the plain-text fallback that shows until the
+   canvas paints. */
+.title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+/* The animated title's box: the artboard's natural 480x216, centered in the
+   page measure at 1:1 CSS pixels so the pixel-cell art stays crisp (the
+   Glossary titles' reasoning). max-width covers narrow viewports; Contain
+   keeps the art whole if it ever scales. */
+.titleAnim {
+  position: relative;
+  display: block;
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 480 / 216;
+  margin: 0 auto;
+}
+
+.titleCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Plain-text stand-in until the canvas paints (or if the .riv is absent),
+   pinned where the word will land. Reduced motion renders the SVG poster
+   through .titleCanvas instead. */
+.titleFallback {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lede {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* ── Drop zones ────────────────────────────────────────────────────────────── */
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 112px;
+  padding: 24px;
+  border: 1px dashed var(--color-border2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color var(--feedback-ui-duration) ease,
+    background-color var(--feedback-ui-duration) ease;
+}
+
+.dropSmall {
+  min-height: 64px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.drop:hover,
+.dropActive {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface);
+  color: var(--color-text-base);
+}
+
+.drop:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dropLabel {
+  composes: type-label from global;
+  color: var(--color-text-base);
+}
+
+.dropHint {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+/* ── Samples, buttons ──────────────────────────────────────────────────────── */
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.samplesLabel {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+.sampleButton,
+.download {
+  composes: type-button from global;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color var(--feedback-ui-duration) ease;
+}
+
+.sampleButton:hover,
+.download:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.sampleButton:focus-visible,
+.download:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Status ────────────────────────────────────────────────────────────────── */
+.status {
+  min-height: 1.6em;
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+.working {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+/* ── Report blocks ─────────────────────────────────────────────────────────── */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0 0;
+}
+
+.block {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+
+.blockTitle {
+  composes: type-label from global;
+  color: var(--color-text-base);
+}
+
+.blockMeta {
+  composes: type-value from global;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.fact {
+  min-width: 0;
+}
+
+.factWide {
+  grid-column: 1 / -1;
+}
+
+.factLabel {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.factValue {
+  margin: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-base);
+}
+
+.factNote {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.machine {
+  margin: 0 0 6px;
+}
+
+.machine .factNote,
+.chips .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.chip {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text-base);
+  font-size: 12px;
+}
+
+.chipQuiet {
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-base);
+  font-size: 12px;
+}
+
+.chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+
+.vmList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.vmRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vmHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.vmHead .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.small {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.cannotSee {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 2px solid var(--color-border2);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+/* ── Findings ──────────────────────────────────────────────────────────────── */
+.findingList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.finding {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.severity {
+  composes: type-microcopy from global;
+  padding: 2px 0;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+}
+
+.sev_fail {
+  color: var(--color-text-base);
+  border-bottom: 2px solid var(--color-text-base);
+}
+
+.sev_warn {
+  color: var(--color-text-base);
+  border-bottom: 1px solid var(--color-border2);
+}
+
+.sev_note {
+  color: var(--color-text-muted);
+}
+
+.findingBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.findingPath {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  color: var(--color-text-base);
+  overflow-wrap: anywhere;
+}
+
+.findingMessage {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* ── Disclosures (the Glossary's pattern) ──────────────────────────────────── */
+.disclosure {
+  border-top: 1px solid var(--color-border);
+}
+
+.disclosure:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.headingButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 4px;
+  border: 0;
+  background: none;
+  color: var(--color-text-base);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.headingButton:hover {
+  color: var(--color-text-primary);
+}
+
+.headingButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.caret {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform var(--feedback-nav-duration) ease;
+}
+
+.caret[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+.headingLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.count {
+  composes: type-value from global;
+  color: var(--color-text-muted);
+}
+
+.body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--feedback-nav-duration) ease;
+}
+
+.bodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.bodyInner {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  transition: visibility 0s var(--feedback-nav-duration);
+}
+
+.bodyOpen .bodyInner {
+  visibility: visible;
+  transition: visibility 0s;
+}
+
+.bodyInner > :first-child {
+  margin-top: 8px;
+}
+
+.bodyInner > :last-child {
+  margin-bottom: 12px;
+}
+
+.row {
+  margin: 0 0 12px;
+  padding: 0 4px;
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0 0 4px;
+}
+
+.rowHead .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.rowLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 4px 0 0 12px;
+}
+
+.rowLine .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.rowLabel {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+  min-width: 96px;
+}
+
+.tag {
+  composes: type-microcopy from global;
+  padding: 0 5px;
+  border: 1px solid var(--color-border2);
+  border-radius: 4px;
+  color: var(--color-text-muted);
+}
+
+/* ── Preview ───────────────────────────────────────────────────────────────── */
+.previewRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.previewBox {
+  flex: 1 1 320px;
+  min-width: 0;
+  border-radius: 4px;
+  background-color: var(--color-bg2);
+}
+
+.previewCanvas {
+  display: block;
+  width: 100%;
+  height: 240px;
+}
+
+.previewControls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 0 1 260px;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldLabel {
+  composes: type-value from global;
+  color: var(--color-text-base);
+}
+
+.select {
+  padding: 4px 8px;
+  max-width: 180px;
+  border: 1px solid var(--color-border2);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Compare ───────────────────────────────────────────────────────────────── */
+.compareHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.compareHead .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.compareHead strong {
+  font-weight: 600;
+  color: var(--color-text-base);
+}
+
+.modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 10px 0;
+  padding: 0;
+  border: 0;
+}
+
+.checkField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.checkField input {
+  accent-color: var(--color-accent);
+}
+
+.verdict {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-base);
+}
+
+.changeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.change .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.changeKind {
+  composes: type-microcopy from global;
+  min-width: 64px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+}
+
+.changeListQuiet .changeKind {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop,
+  .sampleButton,
+  .download,
+  .caret,
+  .body,
+  .bodyInner {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 32px 20px 48px;
+  }
+
+  .previewRow {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "defaultArtboard": "New Artboard",
+  "artboards": [
+    {
+      "name": "New Artboard",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    }
+  ],
+  "viewModels": [],
+  "enums": [],
+  "defaultViewModel": null,
+  "perArtboardDefaultVM": {
+    "New Artboard": null
+  },
+  "assets": [
+    {
+      "name": "Kenia",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 0
+    },
+    {
+      "name": "Copse",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 72252
+    },
+    {
+      "name": "cat.jpg",
+      "fileExtension": "png",
+      "cdnUuid": "",
+      "isImage": true,
+      "isFont": false,
+      "isAudio": false,
+      "bytes": 120430
+    },
+    {
+      "name": "flower.jpeg",
+      "fileExtension": "png",
+      "cdnUuid": "",
+      "isImage": true,
+      "isFont": false,
+      "isAudio": false,
+      "bytes": 0
+    },
+    {
+      "name": "Kite One",
+      "fileExtension": "ttf",
+      "cdnUuid": "bb90b5f5-279f-4ed9-91c1-ba7667b79a69",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 0
+    },
+    {
+      "name": "sloth.jpg",
+      "fileExtension": "png",
+      "cdnUuid": "c2efe187-39f2-4e86-a651-9375dad83d2a",
+      "isImage": true,
+      "isFont": false,
+      "isAudio": false,
+      "bytes": 0
+    }
+  ],
+  "size": 194243,
+  "runtimeVersion": "2.38.4",
+  "source": "community/asset_load_check.riv"
+}

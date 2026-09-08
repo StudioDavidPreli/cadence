@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "format": "cadence-riv-report/1",
+    "file": "tokensTitles.riv",
+    "size": 22618,
+    "runtime": "2.38.4",
+    "date": "2026-09-08"
+  },
+  "inventory": {
+    "defaultArtboard": "tokensTitles",
+    "artboards": [
+      {
+        "name": "tokensTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          {
+            "name": "tokensSM",
+            "inputs": []
+          }
+        ],
+        "defaultViewModel": "TokensTitleVM"
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "TokensTitleVM",
+        "instances": [
+          "darkMode",
+          "contrastLight",
+          "contrastDark",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "bumperColor",
+            "type": "color"
+          },
+          {
+            "name": "lightColor",
+            "type": "color"
+          },
+          {
+            "name": "clawColor",
+            "type": "color"
+          },
+          {
+            "name": "clawColor2",
+            "type": "color"
+          },
+          {
+            "name": "faceColor",
+            "type": "color"
+          },
+          {
+            "name": "lineColor",
+            "type": "color"
+          },
+          {
+            "name": "rampColor",
+            "type": "color"
+          },
+          {
+            "name": "sideColor",
+            "type": "color"
+          }
+        ]
+      }
+    ],
+    "enums": [],
+    "assets": []
+  }
+}

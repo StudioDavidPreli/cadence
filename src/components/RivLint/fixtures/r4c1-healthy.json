@@ -1,0 +1,91 @@
+{
+  "defaultArtboard": "r4c1",
+  "artboards": [
+    {
+      "name": "r4c1",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "r4c1SM",
+          "inputs": []
+        }
+      ]
+    }
+  ],
+  "viewModels": [
+    {
+      "name": "PathEffectVM",
+      "instances": [
+        "standard",
+        "cinematic",
+        "snappy"
+      ],
+      "instanceCount": 3,
+      "properties": [
+        {
+          "name": "cellSize",
+          "type": "number"
+        },
+        {
+          "name": "gapSize",
+          "type": "number"
+        },
+        {
+          "name": "bg",
+          "type": "color"
+        },
+        {
+          "name": "darkBlue",
+          "type": "color"
+        },
+        {
+          "name": "green",
+          "type": "color"
+        },
+        {
+          "name": "lightBlue",
+          "type": "color"
+        },
+        {
+          "name": "magenta",
+          "type": "color"
+        },
+        {
+          "name": "orange",
+          "type": "color"
+        },
+        {
+          "name": "red",
+          "type": "color"
+        },
+        {
+          "name": "yellow",
+          "type": "color"
+        },
+        {
+          "name": "easing",
+          "type": "number"
+        },
+        {
+          "name": "speed",
+          "type": "number"
+        },
+        {
+          "name": "progress",
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "defaultViewModel": "PathEffectVM",
+  "perArtboardDefaultVM": {
+    "r4c1": "PathEffectVM"
+  },
+  "assets": [],
+  "size": 11458,
+  "runtimeVersion": "2.38.4",
+  "source": "local/r4c1_36tiles.riv"
+}

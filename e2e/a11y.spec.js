@@ -15,6 +15,7 @@ const VIEWS = [
   { name: 'glossary tokens', path: '/#/glossary' },
   { name: 'glossary components', path: '/#/glossary/components' },
   { name: 'tools measure', path: '/#/tools' },
+  { name: 'tools rivlint', path: '/#/tools/rivlint' },
 ]
 
 for (const theme of THEMES) {

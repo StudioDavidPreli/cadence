@@ -1,0 +1,70 @@
+{
+  "defaultArtboard": "Start",
+  "artboards": [
+    {
+      "name": "Start",
+      "animations": [
+        "Animation 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    },
+    {
+      "name": "Star",
+      "animations": [
+        "Out",
+        "Click",
+        "Hover"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": [
+            {
+              "name": "Hover",
+              "type": "59"
+            },
+            {
+              "name": "Click",
+              "type": "58"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Little",
+      "animations": [
+        "Off",
+        "Hover"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": [
+            {
+              "name": "Hovered",
+              "type": "59"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "viewModels": [],
+  "enums": [],
+  "defaultViewModel": null,
+  "perArtboardDefaultVM": {
+    "Start": null,
+    "Star": null,
+    "Little": null
+  },
+  "assets": [],
+  "size": 1172,
+  "runtimeVersion": "2.38.4",
+  "source": "community/nested_default.riv"
+}

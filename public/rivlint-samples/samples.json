@@ -1,0 +1,16 @@
+{
+  "samples": [
+    {
+      "id": "icon",
+      "label": "A principle icon",
+      "riv": "/rive/principles_icon11.riv",
+      "report": "/rivlint-samples/icon.report.json"
+    },
+    {
+      "id": "title",
+      "label": "A Glossary title",
+      "riv": "/rive/tokensTitles.riv",
+      "report": "/rivlint-samples/title.report.json"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "defaultArtboard": "Artboard",
+  "artboards": [
+    {
+      "name": "Artboard",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    }
+  ],
+  "viewModels": [
+    {
+      "name": "ViewModel1",
+      "instances": [
+        "Instance"
+      ],
+      "instanceCount": 1,
+      "properties": []
+    }
+  ],
+  "enums": [],
+  "defaultViewModel": "ViewModel1",
+  "perArtboardDefaultVM": {
+    "Artboard": "ViewModel1"
+  },
+  "assets": [
+    {
+      "name": "Inter",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 876576
+    },
+    {
+      "name": "Inter",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 876576
+    },
+    {
+      "name": "Inter",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 876576
+    }
+  ],
+  "size": 2706389,
+  "runtimeVersion": "2.38.4",
+  "source": "community/ore.riv"
+}

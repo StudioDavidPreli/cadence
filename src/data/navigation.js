@@ -40,10 +40,11 @@ export const GLOSSARY_COMPONENTS = 'components'
 
 // Tools (David's call, 2026-09-05): the category for the standalone
 // utilities, each a leaf. Measure (build-order item 8) is the first; the
-// public .riv linter (item 9) joins it here. Same destination-constant
-// pattern as the Glossary's views; Measure is the default view for the bare
-// #/tools route.
+// public .riv linter, rivLint (item 9, 2026-09-08), is the second. Same
+// destination-constant pattern as the Glossary's views; Measure is the
+// default view for the bare #/tools route and rivLint fills #/tools/rivlint.
 export const TOOLS_MEASURE = 'measure'
+export const TOOLS_RIVLINT = 'rivlint'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but

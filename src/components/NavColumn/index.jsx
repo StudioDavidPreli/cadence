@@ -13,6 +13,7 @@ import {
   GLOSSARY_TOKENS,
   GLOSSARY_COMPONENTS,
   TOOLS_MEASURE,
+  TOOLS_RIVLINT,
 } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
@@ -83,7 +84,7 @@ function NavAccordion({ onNavigate }) {
     selectCategory, toggleSection, setFilter,
     showMotionTilesLanding, enterMotionTilesGrid,
     showGlossaryTokens, showGlossaryComponents,
-    showToolsMeasure,
+    showToolsMeasure, showToolsRivLint,
   } = useNavActions()
 
   const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
@@ -118,6 +119,7 @@ function NavAccordion({ onNavigate }) {
   // Measure; the drawer stays open on toggle so the user can pick a leaf.
   const clickTools             = () => toggleSection(SECTIONS.TOOLS)
   const pickToolsMeasure       = () => { showToolsMeasure(); onNavigate?.() }
+  const pickToolsRivLint       = () => { showToolsRivLint(); onNavigate?.() }
   const pickGlossaryTokens     = () => { showGlossaryTokens();     onNavigate?.() }
   const pickGlossaryComponents = () => { showGlossaryComponents(); onNavigate?.() }
 
@@ -227,8 +229,8 @@ function NavAccordion({ onNavigate }) {
       </AccordionBody>
 
       {/* ── Tools ─────────────────────────────────────────────────────── */}
-      {/* The standalone utilities (David's call, 2026-09-05): Measure now,
-          the .riv linter (item 9) next. */}
+      {/* The standalone utilities (David's call, 2026-09-05): Measure and
+          rivLint, the .riv linter (item 9, 2026-09-08). */}
       <SectionHeader
         label="Tools"
         open={toolsOpen}
@@ -243,6 +245,12 @@ function NavAccordion({ onNavigate }) {
           active={destination === TOOLS_MEASURE}
           tabbable={toolsOpen}
           onClick={pickToolsMeasure}
+        />
+        <NavRow
+          label="rivLint"
+          active={destination === TOOLS_RIVLINT}
+          tabbable={toolsOpen}
+          onClick={pickToolsRivLint}
         />
       </AccordionBody>
     </>

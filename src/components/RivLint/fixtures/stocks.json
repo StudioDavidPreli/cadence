@@ -1,0 +1,195 @@
+{
+  "defaultArtboard": "Main",
+  "artboards": [
+    {
+      "name": "Main",
+      "animations": [
+        "rotateLogo",
+        "circle",
+        "square",
+        "triangle",
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    },
+    {
+      "name": "Nested",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    },
+    {
+      "name": "Stock",
+      "animations": [
+        "red",
+        "green"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    }
+  ],
+  "viewModels": [
+    {
+      "name": "Dashboard",
+      "instances": [
+        ""
+      ],
+      "instanceCount": 1,
+      "properties": [
+        {
+          "name": "triggerButton",
+          "type": "trigger"
+        },
+        {
+          "name": "triggerSpinLogo",
+          "type": "trigger"
+        },
+        {
+          "name": "logoShape",
+          "type": "enumType"
+        },
+        {
+          "name": "rootColor",
+          "type": "color"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "apple",
+          "type": "viewModel"
+        },
+        {
+          "name": "microsoft",
+          "type": "viewModel"
+        },
+        {
+          "name": "tesla",
+          "type": "viewModel"
+        }
+      ],
+      "children": [
+        {
+          "property": "apple",
+          "childProperties": [
+            {
+              "name": "currentColor",
+              "type": "color"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "stockChange",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "property": "microsoft",
+          "childProperties": [
+            {
+              "name": "currentColor",
+              "type": "color"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "stockChange",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "property": "tesla",
+          "childProperties": [
+            {
+              "name": "currentColor",
+              "type": "color"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "stockChange",
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stock",
+      "instances": [
+        "Apple ins",
+        "Microsoft ins",
+        "Tesla Ins"
+      ],
+      "instanceCount": 3,
+      "properties": [
+        {
+          "name": "currentColor",
+          "type": "color"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "stockChange",
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "shape",
+      "values": [
+        "triangle",
+        "square",
+        "circle"
+      ]
+    }
+  ],
+  "defaultViewModel": "Dashboard",
+  "perArtboardDefaultVM": {
+    "Main": "Dashboard",
+    "Nested": null,
+    "Stock": "Stock"
+  },
+  "assets": [
+    {
+      "name": "Inter",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 805528
+    }
+  ],
+  "size": 808511,
+  "runtimeVersion": "2.38.4",
+  "source": "community/stocks.riv"
+}

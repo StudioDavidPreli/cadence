@@ -2288,6 +2288,102 @@
       }
     ]
   },
+  "rive/rivlintTitles.riv": {
+    "defaultArtboard": "rivLintTitles",
+    "artboards": [
+      {
+        "name": "rivLintTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "rivLintSM"
+        ],
+        "defaultViewModel": "RivLintTitleVM"
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "RivLintTitleVM",
+        "instances": [
+          "darkMode",
+          "contrastLight",
+          "contrastDark",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "eye",
+            "type": "color"
+          },
+          {
+            "name": "body",
+            "type": "color"
+          },
+          {
+            "name": "highlight",
+            "type": "color"
+          },
+          {
+            "name": "limbShade",
+            "type": "color"
+          },
+          {
+            "name": "mid",
+            "type": "color"
+          },
+          {
+            "name": "shade",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "vacCord",
+            "type": "color"
+          },
+          {
+            "name": "vacHandle",
+            "type": "color"
+          },
+          {
+            "name": "vacLine",
+            "type": "color"
+          },
+          {
+            "name": "vacTrim",
+            "type": "color"
+          },
+          {
+            "name": "vacBag",
+            "type": "color"
+          },
+          {
+            "name": "vacHead",
+            "type": "color"
+          },
+          {
+            "name": "dustColor",
+            "type": "color"
+          },
+          {
+            "name": "lineColor",
+            "type": "color"
+          },
+          {
+            "name": "sideColor",
+            "type": "color"
+          },
+          {
+            "name": "faceColor",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
   "rive/secondaryaction.riv": {
     "defaultArtboard": "Secondary Action",
     "artboards": [

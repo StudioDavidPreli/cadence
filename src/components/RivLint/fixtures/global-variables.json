@@ -1,0 +1,173 @@
+{
+  "defaultArtboard": "Main",
+  "artboards": [
+    {
+      "name": "Main",
+      "animations": [
+        "totalChildrenToFive",
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    },
+    {
+      "name": "IntermediateList",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    },
+    {
+      "name": "Child",
+      "animations": [
+        "Timeline 1"
+      ],
+      "stateMachines": [
+        {
+          "name": "State Machine 1",
+          "inputs": []
+        }
+      ]
+    }
+  ],
+  "viewModels": [
+    {
+      "name": "IntermediateList",
+      "instances": [
+        "Instance",
+        "IntermediateList Instance"
+      ],
+      "instanceCount": 2,
+      "properties": [
+        {
+          "name": "totalChildren",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Sizes",
+      "instances": [
+        "Instance",
+        "Sizes Override"
+      ],
+      "instanceCount": 2,
+      "properties": [
+        {
+          "name": "gaps",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Colors",
+      "instances": [
+        "Instance",
+        "Colors Override",
+        "Colors Override"
+      ],
+      "instanceCount": 3,
+      "properties": [
+        {
+          "name": "secondaryTextColor",
+          "type": "color"
+        },
+        {
+          "name": "secondaryBackgroundColor",
+          "type": "color"
+        },
+        {
+          "name": "textColor",
+          "type": "color"
+        },
+        {
+          "name": "backgroundColor",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "name": "Labels",
+      "instances": [
+        "EU",
+        "UK",
+        "US",
+        "CH",
+        "Labels Override",
+        "Labels Override"
+      ],
+      "instanceCount": 6,
+      "properties": [
+        {
+          "name": "alternateCurrency",
+          "type": "string"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "Child",
+      "instances": [
+        "Child1",
+        "Child3",
+        "Child2",
+        "Child Instance",
+        "Child Instance",
+        "Child Instance"
+      ],
+      "instanceCount": 6,
+      "properties": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "Main",
+      "instances": [
+        "Instance"
+      ],
+      "instanceCount": 1,
+      "properties": [
+        {
+          "name": "listProperty",
+          "type": "list"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "defaultViewModel": "Main",
+  "perArtboardDefaultVM": {
+    "Main": "Main",
+    "IntermediateList": "IntermediateList",
+    "Child": "Child"
+  },
+  "assets": [
+    {
+      "name": "Inter",
+      "fileExtension": "ttf",
+      "cdnUuid": "",
+      "isImage": false,
+      "isFont": true,
+      "isAudio": false,
+      "bytes": 876576
+    }
+  ],
+  "size": 879567,
+  "runtimeVersion": "2.38.4",
+  "source": "community/global_variables_test.riv"
+}

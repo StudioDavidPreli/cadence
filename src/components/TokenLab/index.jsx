@@ -5,7 +5,7 @@ import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
-import { SECTIONS } from '../../data/navigation'
+import { SECTIONS, TOOLS_RIVLINT } from '../../data/navigation'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { auditTokens, auditToMarkdown } from '../../tokens/tokenAudit'
@@ -88,6 +88,11 @@ const GlossarySection = lazy(() =>
 // sessions never open, carrying its own decode and fit code.
 const MeasureSection = lazy(() =>
   import('../Measure').then((m) => ({ default: m.MeasureSection })),
+)
+
+// rivLint, the .riv linter (build-order item 9): its own chunk, for the same reason.
+const RivLintSection = lazy(() =>
+  import('../RivLint').then((m) => ({ default: m.RivLintSection })),
 )
 
 const PrinciplesLibrary = lazy(() =>
@@ -1665,7 +1670,7 @@ export function TokenLab() {
   // column owns it). TokenLab only needs it to pass through to PrinciplesLibrary.
   // The destination itself is read by DemoArea, not here. principleId carries the
   // deep-link route's open principle; closePrinciple is the route-level dismiss.
-  const { principleFilter, principleId, section } = useNavState()
+  const { principleFilter, principleId, section, destination } = useNavState()
   const { closePrinciple } = useNavActions()
   // NavItem demo selection — local to the Press & State category.
   const [activeNav, setActiveNav] = useState('Token Lab')
@@ -2272,17 +2277,27 @@ export function TokenLab() {
           it reads no --motion-* tokens and runs its own preset system. */}
       {isTools ? (
         // Tools replace the right region like the Glossary does, outside
-        // MotionTokensProvider: Measure's recording is the demonstration, and
-        // the page reads no --motion-* token. Measure is the only tool until the
-        // linter (item 9) arrives; the destination will pick between them then.
-        <ErrorBoundary
-          title="The measurement page hit a snag"
-          message="The measurement page ran into an unexpected error. Reloading usually clears it."
-        >
-          <Suspense fallback={<div className={styles.lazyFallback}>Loading the measurement page…</div>}>
-            <MeasureSection />
-          </Suspense>
-        </ErrorBoundary>
+        // MotionTokensProvider: neither page reads a --motion-* token. The
+        // destination picks the leaf: Measure by default, rivLint at #/tools/rivlint.
+        destination === TOOLS_RIVLINT ? (
+          <ErrorBoundary
+            title="rivLint hit a snag"
+            message="rivLint ran into an unexpected error. Reloading usually clears it."
+          >
+            <Suspense fallback={<div className={styles.lazyFallback}>Loading rivLint…</div>}>
+              <RivLintSection />
+            </Suspense>
+          </ErrorBoundary>
+        ) : (
+          <ErrorBoundary
+            title="The measurement page hit a snag"
+            message="The measurement page ran into an unexpected error. Reloading usually clears it."
+          >
+            <Suspense fallback={<div className={styles.lazyFallback}>Loading the measurement page…</div>}>
+              <MeasureSection />
+            </Suspense>
+          </ErrorBoundary>
+        )
       ) : isGlossary ? (
         // The Glossary replaces the right region like Motion Tiles does, and sits
         // outside MotionTokensProvider for the same reason: it documents the
