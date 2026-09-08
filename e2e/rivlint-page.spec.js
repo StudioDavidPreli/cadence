@@ -73,7 +73,7 @@ test.describe('rivLint', () => {
     const result = page.getByTestId('compare-result')
     await expect(result).toHaveAttribute('data-pass', 'true')
     await expect(result).toHaveAttribute('data-failures', '0')
-    await expect(page.getByTestId('cannot-see')).toContainText('not readable')
+    await expect(page.getByTestId('cannot-see')).toContainText('does not expose')
   })
 
   test('a dropped file never leaves the browser', async ({ page }) => {

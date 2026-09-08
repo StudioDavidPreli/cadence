@@ -15,8 +15,9 @@
 // own earlier report as the definition. The site's own conventions live only
 // in the e2e manifest.
 //
-// Copy on this page is drafted against archive/voice/voice-analysis.md and
-// awaits David's voice pass. Em-dash count: zero.
+// Copy on this page had David's voice pass 2026-09-08 (the david-voice
+// skill's professional register; serial comma throughout). Em-dash count:
+// zero.
 
 import { useEffect, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
@@ -75,11 +76,11 @@ export function RivLintSection() {
         <RivLintTitle />
         <p className={styles.lede}>
           Drop a .riv and read what a runtime will find in it: the artboard
-          it draws by default, the state machines and inputs, the view models
-          and their properties, and the assets it will need. Then the
-          findings, and a comparison with an earlier export or an earlier
-          report. The file is read inside this page by the same runtime the
-          site runs on. It is never uploaded.
+          it draws by default, the state machines and their inputs, the view
+          models and their properties, and the assets it will ask for. Under
+          those, the findings, and a comparison against an earlier export or
+          the report this page made from one. The file is read inside this
+          page, by the runtime the site itself runs on. It is never uploaded.
         </p>
 
         <label
@@ -141,7 +142,7 @@ function StatusLine({ l }) {
       ? 'No findings.'
       : `${counts[0]} ${counts[0] === 1 ? 'failure' : 'failures'}, ${counts[1]} ${counts[1] === 1 ? 'warning' : 'warnings'}, ${counts[2]} ${counts[2] === 1 ? 'note' : 'notes'}.`
     const unread = subject.raw.unreadArtboards?.length
-      ? ` ${subject.raw.unreadArtboards.length} artboards past the first ${inventory.artboards.length - subject.raw.unreadArtboards.length} were not opened for their default view model.`
+      ? ` ${subject.raw.unreadArtboards.length} artboards past the first ${inventory.artboards.length - subject.raw.unreadArtboards.length} were not opened, so their default view models are unread.`
       : ''
     text = `${subject.name}, ${fmtBytes(subject.report.meta.size)}: ${inventory.artboards.length} ${inventory.artboards.length === 1 ? 'artboard' : 'artboards'}, ${inventory.viewModels.length} ${inventory.viewModels.length === 1 ? 'view model' : 'view models'}, ${inventory.assets.length} ${inventory.assets.length === 1 ? 'asset' : 'assets'}. ${summary}${unread}`
   }
@@ -179,10 +180,10 @@ function Report({ l }) {
       <Handoff facts={facts} inventory={inventory} />
       <Findings findings={findings} />
       <p className={styles.cannotSee} data-testid="cannot-see">
-        Text runs, nesting, scripts, listeners, converters and shape bindings
-        are not readable from a .riv through the web runtime, nor the bytes of
-        referenced or hosted assets. A property-to-shape binding that broke
-        while the view model survived is invisible here. Read with runtime {RUNTIME_VERSION}.
+        The web runtime does not expose text runs, nesting, scripts,
+        listeners, converters, or shape bindings, and it does not carry the
+        bytes of referenced or hosted assets. A binding that broke while its
+        view model survived is invisible here. Read with runtime {RUNTIME_VERSION}.
       </p>
       <Inventory inventory={inventory} />
       <Preview buffer={subject.buffer} inventory={inventory} />
@@ -192,10 +193,10 @@ function Report({ l }) {
           Download {subject.name.replace(/\.riv$/i, '')}.report.json
         </button>
         <p className={styles.small}>
-          The report is this inventory with the file name, size, runtime and
-          date on top. Drop it back here later, with a re-export, to check the
-          new file against it. Projected onto its artboards and view models it
-          is also a row for a contract test like this site&apos;s own.
+          The report is this inventory with the file name, size, runtime, and
+          date on top. Keep it. When the file is exported again, drop the report
+          here beside the new export and read what changed. It is also a row
+          for a contract test like the one this site runs on its own files.
         </p>
       </section>
     </div>
@@ -225,9 +226,9 @@ function Handoff({ facts, inventory }) {
             <dt className={styles.factLabel}>Default artboard</dt>
             <dd className={styles.factValue}>
               <code className={styles.chip}>{a.name}</code>
-              {a.assumed && <span className={styles.factNote}>assumed from list order; the file was not asked</span>}
+              {a.assumed && <span className={styles.factNote}>assumed from list order, not read from the file</span>}
               {inventory.artboards.length > 1 && !a.assumed && (
-                <span className={styles.factNote}>the one a load that names no artboard draws; {inventory.artboards.length - 1} more below</span>
+                <span className={styles.factNote}>what a load that names no artboard draws; {inventory.artboards.length - 1} more in the inventory</span>
               )}
             </dd>
           </div>
@@ -379,7 +380,7 @@ function Inventory({ inventory }) {
         ))}
       </Disclosure>
       <Disclosure id="view-models" title="View models" count={viewModels.length}>
-        {viewModels.length === 0 && <p className={styles.small}>None. The file is driven by state machine inputs or timelines alone.</p>}
+        {viewModels.length === 0 && <p className={styles.small}>None. Inputs and timelines drive this file.</p>}
         {viewModels.map(v => (
           <div key={v.name} className={styles.row}>
             <div className={styles.rowHead}>
@@ -396,8 +397,8 @@ function Inventory({ inventory }) {
                 <span className={styles.chips}>
                   {c.properties
                     ? c.properties.map(p => <code key={p.name} className={styles.chipQuiet}>{p.name}: {p.type}</code>)
-                    : <span className={styles.factNote}>a nested view model; its name is not readable, and its properties could not be reached</span>}
-                  {c.properties && <span className={styles.factNote}>a nested view model; its own name is not readable</span>}
+                    : <span className={styles.factNote}>a nested view model; the runtime exposes neither its name nor its properties</span>}
+                  {c.properties && <span className={styles.factNote}>a nested view model; the runtime does not expose its name</span>}
                 </span>
               </div>
             ))}
@@ -442,9 +443,9 @@ function Compare({ l }) {
         <span className={styles.blockMeta}>an earlier export, or a report this page made</span>
       </div>
       <p className={styles.small}>
-        This is the question a re-export raises too late: is the structure I
-        bound to still in the file. Drop the earlier .riv, or the report you
-        downloaded from it, and read what appeared, vanished, or changed type.
+        A re-export raises this question too late: is the structure I bound
+        to still in the file. Drop the earlier .riv, or the report this page
+        made from it, and read what appeared, vanished, or changed type.
       </p>
       {!compare && (
         <label
@@ -496,8 +497,8 @@ function CompareResult({ comparison }) {
       <div data-testid="compare-result" data-pass={pass} data-failures={failures.length} data-additions={additions.length}>
         <p className={styles.verdict}>
           {pass
-            ? `Everything the contract names is still here${additions.length ? `, and the file gained ${additions.length} ${additions.length === 1 ? 'thing' : 'things'} it did not name` : ''}.`
-            : `${failures.length} ${failures.length === 1 ? 'thing' : 'things'} the contract names ${failures.length === 1 ? 'is' : 'are'} missing or changed.`}
+            ? `Everything the contract names is still here${additions.length ? `, and the file carries ${additions.length} ${additions.length === 1 ? 'entry' : 'entries'} the contract does not name` : ''}.`
+            : `${failures.length} of the contract's entries ${failures.length === 1 ? 'is' : 'are'} missing or changed.`}
         </p>
         {failures.length > 0 && <ChangeList entries={failures} />}
         {additions.length > 0 && <ChangeList entries={additions} quiet />}
