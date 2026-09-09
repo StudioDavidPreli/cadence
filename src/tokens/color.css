@@ -147,6 +147,14 @@ body {
   --color-accent2:        #b9b0ff;  /* purple — easing curve, secondary */
   --color-accent2-subtle: rgba(185, 176, 255, 0.12); /* extended principle badge background */
   --color-accent3:        #e8b86d;  /* amber — warnings, no-demo indicator */
+  /* The off-system edit's two text actions in the code views (2026-09-09):
+     [RECONNECT] red, [ADOPT] green, the same two hues in every theme (David's
+     spec), so these are their own roles, not reads of the per-theme accent.
+     Text on --color-bg, so the 4.5:1 bar; AAA in the HC themes. Dark green
+     shares the accent's hex on purpose: same pixel, separate token, so an
+     accent change can never move ADOPT. */
+  --color-reconnect:      #e5766a;  /* 6.3:1 on bg */
+  --color-adopt:          #76c17d;  /* 8.5:1 on bg */
 
   /* Code-view syntax colors (2026-07-19, expanded to VS Code-style scopes the
      same day). Five hues following VS Code Dark+'s distribution — blue
@@ -234,6 +242,8 @@ body {
   /* #905e18 replaces #c4882a — old value was 3.1:1 on white, failing the
      4.5:1 AA requirement for 11px noDemoNote text. New value: 5.5:1. */
   --color-accent3:        #905e18;  /* amber — warnings, no-demo indicator */
+  --color-reconnect:      #b8322a;  /* 5.5:1 on bg */
+  --color-adopt:          #2a6e34;  /* 5.7:1 on bg */
 
   /* Code-view syntax — VS Code Light's distribution (blue keywords, red
      strings, navy properties, teal entities), darkened for the light bg and
@@ -310,6 +320,8 @@ body {
   --color-accent2:        #5a4fcf;  /* 6.1:1 AA — SVG stroke only */
   --color-accent2-subtle: rgba(90, 79, 207, 0.10);  /* extended principle badge background */
   --color-accent3:        #6b4400;  /* 8.6:1 AAA */
+  --color-reconnect:      #9a2418;  /* 8.0:1 AAA; kept off the HC-light string rust */
+  --color-adopt:          #1f5f2a;  /* 7.7:1 AAA */
 
   /* Code-view syntax carries real hues in high contrast (David, 2026-07-19:
      function defeats form — editors' HC modes color code, and legible beats
@@ -389,6 +401,8 @@ body {
   --color-accent2:        #c2b6ff;  /* 11.4:1 AAA — SVG stroke */
   --color-accent2-subtle: rgba(194, 182, 255, 0.12);  /* extended principle badge background */
   --color-accent3:        #f5c563;  /* 13.0:1 AAA */
+  --color-reconnect:      #ff8a80;  /* 9.2:1 AAA; kept off the HC-dark keyword salmon */
+  --color-adopt:          #7ee88a;  /* 13.8:1 AAA; kept off the HC-dark string mint */
 
   /* Code-view syntax, brightened for black the same way the accents are.
      HC-dark is the one theme that cannot follow VS Code's keyword-blue

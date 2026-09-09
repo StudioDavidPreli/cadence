@@ -346,3 +346,28 @@ The selector is written twice, `.button:focus-visible` and
 `:root[data-theme^="high-contrast"] .button:focus-visible`. The HC hover rule
 outranks the bare form, so without the second selector a focused *and* hovered
 button in high contrast would drop its ring back to the hover treatment.
+
+
+## Addendum 2026-09-09: two new text roles, red and green in every theme
+
+The off-system edit (`docs/decisions/off-system-edits-2026-09-09.md`) adds two
+text actions to the Token Lab code views, `[RECONNECT]` and `[ADOPT]`, and
+David's spec holds them red and green in all four themes. The accent cannot
+carry that (green only in dark), so they are their own roles,
+`--color-reconnect` and `--color-adopt`, text at 12px on `--color-bg`, the
+4.5:1 bar, AAA in the HC themes:
+
+| Theme | Reconnect | Ratio | Adopt | Ratio |
+|---|---|---|---|---|
+| dark (`#141414`) | `#e5766a` | 6.3:1 | `#76c17d` | 8.5:1 |
+| light (`#f5f5f5`) | `#b8322a` | 5.5:1 | `#2a6e34` | 5.7:1 |
+| high-contrast-light (`#ffffff`) | `#9a2418` | 8.0:1 | `#1f5f2a` | 7.7:1 |
+| high-contrast-dark (`#000000`) | `#ff8a80` | 9.2:1 | `#7ee88a` | 13.8:1 |
+
+The HC values were chosen away from those themes' syntax hues (HC-dark's salmon
+keywords `#f4a99a` and mint strings `#8fdf9b`; HC-light's rust strings
+`#8a2a1c`) so the brackets never read as source. The dark green is the accent's
+hex under a separate token on purpose. Ratios computed from the token values
+and confirmed against computed styles on built output, cycling all four themes.
+These rows do not change the accent rule: neither role means active or
+connected, and neither is used anywhere but the two actions.

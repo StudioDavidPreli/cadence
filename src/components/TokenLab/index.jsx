@@ -3,10 +3,12 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MotionTokensProvider } from '../../context/MotionTokensContext'
 import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../context/ActiveTokenContext'
+import { DemoOverridesProvider, useDemoOverrides } from '../../context/DemoOverridesContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
 import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT } from '../../data/navigation'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
 import { auditTokens, auditToMarkdown } from '../../tokens/tokenAudit'
 import { TokenAuditReport } from '../TokenAuditReport'
@@ -20,6 +22,8 @@ import { MotionPresetEpochProvider } from '../../context/MotionPresetContext'
 import { DemoArea } from '../DemoArea'
 import { useDemoOverlay } from '../DemoArea/overlayContext'
 import { CodeBlock } from '../CodeBlock'
+import { patchTokens, adoptAction, deviationsFromOverrides, overridesFromDeviations } from '../CodeBlock/offSystem'
+import { tokenPathMatchesActive } from '../CodeBlock/resolveToken'
 import { DEMO_SNIPPETS } from './demoSnippets'
 import { HeroAnimation } from '../HeroAnimation'
 import { TokenLabGuide } from '../TokenLabGuide'
@@ -660,7 +664,7 @@ const EXPORT_EVENT_FORMAT = {
   fm:   'framer-motion',
 }
 
-export function ExportSection({ rawState, format, onFormatChange, onOpenAudit }) {
+export function ExportSection({ rawState, deviations = [], format, onFormatChange, onOpenAudit }) {
   // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
   // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
   // serialize from the same stateToExport object, so the toggle only selects
@@ -700,11 +704,15 @@ export function ExportSection({ rawState, format, onFormatChange, onOpenAudit })
 
   // The current token state serialized in the selected format. Computed on
   // demand (export and copy both call it) rather than held in state.
+  // Off-system deviations (a demo running a literal in place of a token) ride
+  // every format as an appendix in its own idiom; the token blocks never change
+  // for them. Empty list, identical file.
   function exportText() {
-    if (exportFormat === 'dtcg') return toDtcgJson(rawState)
-    if (exportFormat === 'css')  return toCssVars(rawState)
-    if (exportFormat === 'fm')   return toFramerMotion(rawState)
-    return toFlatJson(rawState)
+    const opts = { deviations }
+    if (exportFormat === 'dtcg') return toDtcgJson(rawState, opts)
+    if (exportFormat === 'css')  return toCssVars(rawState, opts)
+    if (exportFormat === 'fm')   return toFramerMotion(rawState, opts)
+    return toFlatJson(rawState, opts)
   }
 
   function handleExport() {
@@ -818,7 +826,7 @@ function ImportReport({ result }) {
     return <p className={styles.importError}>{result.error}</p>
   }
 
-  const { format, total, clamped, filled, renamed, ignored, curvesOutOfRange } = result.report
+  const { format, total, clamped, filled, renamed, ignored, curvesOutOfRange, deviations = 0 } = result.report
   const loaded = total - filled.length
   const formatLabel = format === 'dtcg' ? 'DTCG' : 'flat'
 
@@ -842,6 +850,22 @@ function ImportReport({ result }) {
           ? 'Nothing in the imported set contradicts itself.'
           : `The imported set has ${auditCounts.finding} ${auditCounts.finding === 1 ? 'finding' : 'findings'} and ${auditCounts.note} ${auditCounts.note === 1 ? 'note' : 'notes'}. Open the audit report under Export to read them.`}
       </p>
+
+      {deviations > 0 && (
+        <p className={styles.importSummary}>
+          Restored {deviations} off-system {deviations === 1 ? 'value' : 'values'}: the
+          {' '}{deviations === 1 ? 'demo it names runs its literal' : 'demos they name run their literals'} again.
+          Each code view shows where.
+        </p>
+      )}
+
+      {(result.unmatchedComponents?.length ?? 0) > 0 && (
+        <p className={styles.importSummary}>
+          {result.unmatchedComponents.length === 1 ? 'One of them names' : 'Some of them name'} a
+          component this lab does not carry ({result.unmatchedComponents.map(c => <code key={c}>{c}</code>).reduce((acc, el, i) => i === 0 ? [el] : [...acc, ', ', el], [])}).
+          Loaded, and nothing here reads it; check the name against the demo labels.
+        </p>
+      )}
 
       {renamed.length > 0 && (
         <ImportReportSection title="Renamed to current keys, values kept">
@@ -988,13 +1012,34 @@ function SliderRow({ name, value, config, onChange, tokenKey, label = name }) {
 function DemoWrapper({ componentName, instruction, children, code, instructionClass, mainClass, groupClass, springCapable = false }) {
   const activeToken = useActiveToken()
   const [showCode, setShowCode] = useState(false)
+  // Off-system edits (2026-09-09): the token reads this demo runs a literal in
+  // place of, keyed by runtime path. Set from the code view's inline editor
+  // through DemoOverridesContext; cleared by [RECONNECT], by [ADOPT], and by
+  // every preset load. When any exist, the demo body is re-wrapped in its own
+  // MotionTokensProvider carrying the live tokens with the literals written
+  // over them, so the component, whose source reads tokens.duration.fast like
+  // any other, resolves this demo's value without knowing it is off-system.
+  // respectReducedMotion={false} matches the column's provider (the user is here
+  // to perceive motion). No overrides means no extra provider: the body renders
+  // exactly as before.
+  const overridesCtx = useDemoOverrides()
+  const liveTokens = useMotionTokens()
+  const demoOverrides = overridesCtx?.overrides[componentName]
+  const hasOverrides = Boolean(demoOverrides && Object.keys(demoOverrides).length > 0)
+  const demoTokens = useMemo(
+    () => patchTokens(liveTokens, demoOverrides),
+    [liveTokens, demoOverrides],
+  )
   // springCapable demos carry a spring toggle in the label row (left of the </>
   // button). It flips the demo's components between ease.overshoot and the real
   // spring in place. children is a render prop for those demos, receiving the
   // mode; a plain-node child (every other demo) is rendered as-is.
   const [springOn, setSpringOn] = useState(false)
   const springMode = springOn ? 'spring' : 'bezier'
-  const body = typeof children === 'function' ? children(springMode) : children
+  const rendered = typeof children === 'function' ? children(springMode) : children
+  const body = hasOverrides
+    ? <MotionTokensProvider tokens={demoTokens} respectReducedMotion={false}>{rendered}</MotionTokensProvider>
+    : rendered
   const chrome = useChromeTransition()
   // ≥1280px an open code view sits in a column beside the demo (.demoGroupSplit)
   // instead of revealing beneath it, so the component and its source are visible
@@ -1003,10 +1048,17 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
   // @media rule in TokenLab.module.css.
   const codeAside = useMediaQuery('(min-width: 1280px)')
 
+  // A fourth state, 'detached': the dragged token is one this demo has replaced
+  // with a literal. The slider no longer drives it, so the connection border
+  // stays down and the note says why. The consumption map still lists the
+  // component (its source does read the token); the override is what severs it.
   let state = 'idle'
   if (activeToken !== null) {
     const affected = TOKEN_COMPONENT_MAP[activeToken] ?? []
-    if (affected.includes(componentName)) {
+    const detached = hasOverrides && Object.keys(demoOverrides).some(path => tokenPathMatchesActive(path, activeToken))
+    if (detached) {
+      state = 'detached'
+    } else if (affected.includes(componentName)) {
       state = 'highlighted'
     } else {
       state = 'no-demo'
@@ -1057,11 +1109,14 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
           </div>
         </div>
         {body}
-        {state !== 'no-demo' && instruction && (
+        {state !== 'no-demo' && state !== 'detached' && instruction && (
           <p className={`${styles.demoInstruction} ${instructionClass ?? ''}`}>{instruction}</p>
         )}
         {state === 'no-demo' && (
           <p className={styles.noDemoNote}>Token unused by present components.</p>
+        )}
+        {state === 'detached' && (
+          <p className={styles.detachedNote}>Off-system in this demo. The slider no longer drives it.</p>
         )}
       </div>
       {codeAside ? (
@@ -1076,7 +1131,7 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
             animate={{ opacity: 1, x: 0 }}
             transition={chrome.ui}
           >
-            <CodeBlock code={code} />
+            <CodeBlock code={code} demoKey={componentName} />
           </motion.div>
         )
       ) : (
@@ -1092,7 +1147,7 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
               transition={chrome.ui}
               style={{ overflow: 'hidden' }}
             >
-              <CodeBlock code={code} />
+              <CodeBlock code={code} demoKey={componentName} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -1654,6 +1709,13 @@ const DEMO_NAV_ITEMS = ['Overview', 'Token Lab', 'Principles']
 export function TokenLab() {
   const [rawState, rawDispatch] = useReducer(reducer, INITIAL_STATE)
 
+  // Off-system edits (2026-09-09): { [componentName]: { [runtimePath]: value } }.
+  // Held here, beside the token state but never inside it, so stateToTokens,
+  // the presets, and the drift guard know nothing about them. The dispatch
+  // wrapper clears the set on a preset load or reset (a preset is a whole
+  // system), import fills it from a file's deviations, and export flattens it.
+  const [overrides, setOverrides] = useState({})
+
   // Bumped by the dispatch wrapper below on LOAD_PRESET and RESET_TO_DEFAULTS
   // only, and read by the nav background so it can re-reveal on a deliberate
   // preset change without re-timing on every slider frame. See
@@ -1777,8 +1839,50 @@ export function TokenLab() {
     rawDispatch(action)
     if (action.type === 'LOAD_PRESET' || action.type === 'RESET_TO_DEFAULTS') {
       setPresetEpoch((n) => n + 1)
+      // A preset load resets every demo (David's call, 2026-09-09): every
+      // off-system literal goes back to its token read.
+      setOverrides({})
     }
   }
+
+  // The three verbs of the off-system edit, handed down through
+  // DemoOverridesContext to the code views and DemoWrapper.
+  function setOverride(demo, path, value) {
+    setOverrides(prev => ({ ...prev, [demo]: { ...(prev[demo] ?? {}), [path]: value } }))
+  }
+  function clearOverride(demo, path) {
+    setOverrides(prev => {
+      const rest = { ...(prev[demo] ?? {}) }
+      delete rest[path]
+      const next = { ...prev }
+      if (Object.keys(rest).length === 0) delete next[demo]
+      else next[demo] = rest
+      return next
+    })
+  }
+  // [ADOPT]: the system moves to the literal. One reducer action sets the token
+  // (every consumer follows through the column's provider), and the override is
+  // dropped so this demo reads the token again, at the value it was running. If
+  // the value sits outside the constrained slider range, Explore mode comes on,
+  // the same way import does, so the slider can show where the token went.
+  function adoptOverride(demo, path) {
+    const value = overrides[demo]?.[path]
+    if (value === undefined) return
+    const action = adoptAction(path, value)
+    if (!Array.isArray(action.value)) {
+      const config = { SET_DURATION: DURATION_CONFIG, SET_DELAY: DELAY_CONFIG, SET_SCALE: SCALE_CONFIG, SET_SPRING: SPRING_CONFIG }[action.type]?.[action.key]
+      if (config && (action.value < config.min || action.value > config.max)) setExploreMode(true)
+    }
+    dispatch(action)
+    clearOverride(demo, path)
+  }
+  const overridesApi = useMemo(
+    () => ({ overrides, setOverride, clearOverride, adoptOverride }),
+    // The three functions close over `overrides` (adopt) and setters; a new
+    // object per overrides change is exactly the re-render the consumers need.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [overrides],
+  )
 
   function toggleSection(key) {
     setOpenSections(prev => {
@@ -1851,6 +1955,18 @@ export function TokenLab() {
       localStorage.setItem('cadence-presets', JSON.stringify(next))
       // LOAD_PRESET fires both channels: CSS variables and the reducer state.
       dispatch({ type: 'LOAD_PRESET', payload: result.state })
+      // The load above cleared the off-system set; the file's deviations, if
+      // any, become this session's overrides so the demos they name run their
+      // literals again. After the dispatch on purpose: order is the round trip.
+      setOverrides(overridesFromDeviations(result.deviations))
+      // A deviation names a component by its demo label. One that names a
+      // component this lab does not carry still loads (nothing reads it, so it
+      // is harmless), but a hand-edited file with a typo would otherwise land
+      // silently. The consumption map's values are the objective list of demo
+      // labels, so the report can say which names matched nothing.
+      const known = new Set(Object.values(TOKEN_COMPONENT_MAP).flat())
+      const unmatched = [...new Set(result.deviations.map(d => d.component).filter(c => !known.has(c)))]
+      result = { ...result, unmatchedComponents: unmatched }
       // Count the round-trip (fire-and-forget; see trackEvent). Only a
       // successful import counts: a file that failed validation never became
       // a token set, so it is not the loop closing.
@@ -2033,6 +2149,7 @@ export function TokenLab() {
         >
           <Stepper />
         </DemoWrapper>
+
       </div>
     ),
 
@@ -2226,7 +2343,7 @@ export function TokenLab() {
         info={<PrivacyInfoGlyph />}
         infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
-        <ExportSection rawState={rawState} onOpenAudit={() => setAuditOpen(true)} />
+        <ExportSection rawState={rawState} deviations={deviationsFromOverrides(overrides)} onOpenAudit={() => setAuditOpen(true)} />
       </ControlSection>
     </>
   )
@@ -2234,6 +2351,7 @@ export function TokenLab() {
   return (
     <MotionPresetEpochProvider value={presetEpoch}>
     <ActiveTokenProvider>
+    <DemoOverridesProvider value={overridesApi}>
     <TitlePulseProvider>
     <div className={`${styles.tokenLab} ${controlsRailed ? styles.controlsRailed : ''}`}>
 
@@ -2407,6 +2525,7 @@ export function TokenLab() {
 
     </div>
     </TitlePulseProvider>
+    </DemoOverridesProvider>
     </ActiveTokenProvider>
     </MotionPresetEpochProvider>
   )

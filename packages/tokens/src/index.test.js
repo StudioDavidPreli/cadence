@@ -485,3 +485,91 @@ describe('importTokens', () => {
     expect(res.report.filled).toContainEqual({ path: 'scalar', to: 1 })
   })
 })
+
+// ─── Off-system deviations ────────────────────────────────────────────────────
+// A deviation is one demo component running a literal in place of the token it
+// names (the Token Lab off-system edit, 2026-09-09). It never enters state; each
+// export carries it as an appendix in its own idiom, and import hands it back
+// beside the state. These pin the translation both ways and the "absent when
+// empty" rule that keeps a clean export byte-identical to before.
+describe('deviations', () => {
+  const deviations = [
+    { component: 'Button', token: 'duration.fast', value: 0.25 },
+    { component: 'Card', token: 'ease.overshoot', value: [0.3, 1.4, 0.6, 1] },
+    { component: 'Toggle', token: 'spring.stiffness', value: 420 },
+  ]
+
+  it('leaves every format unchanged when there are none', () => {
+    expect(toDtcgJson(INITIAL_STATE, { deviations: [] })).toBe(toDtcgJson(INITIAL_STATE))
+    expect(toFlatJson(INITIAL_STATE, { deviations: [] })).toBe(toFlatJson(INITIAL_STATE))
+    expect(toCssVars(INITIAL_STATE, { deviations: [] })).toBe(toCssVars(INITIAL_STATE))
+    expect(toFramerMotion(INITIAL_STATE, { deviations: [] })).toBe(toFramerMotion(INITIAL_STATE))
+    expect(toDtcgJson(INITIAL_STATE)).not.toContain('$extensions')
+    expect(toFlatJson(INITIAL_STATE)).not.toContain('deviations')
+  })
+
+  it('does not touch the token blocks', () => {
+    const plain = JSON.parse(toDtcgJson(INITIAL_STATE))
+    const withDev = JSON.parse(toDtcgJson(INITIAL_STATE, { deviations }))
+    expect(withDev.motion).toEqual(plain.motion)
+    const flat = JSON.parse(toFlatJson(INITIAL_STATE, { deviations }))
+    expect(flat.duration.fast).toBe('100ms')
+  })
+
+  it('serializes in each format\'s own units and family spelling', () => {
+    const dtcg = JSON.parse(toDtcgJson(INITIAL_STATE, { deviations }))
+    const list = dtcg.$extensions['com.davidpreli.cadence'].deviations
+    expect(list[0]).toEqual({ component: 'Button', token: 'duration.fast', $type: 'duration', $value: '250ms' })
+    expect(list[1]).toEqual({ component: 'Card', token: 'easing.overshoot', $type: 'cubicBezier', $value: [0.3, 1.4, 0.6, 1] })
+    expect(list[2]).toEqual({ component: 'Toggle', token: 'spring.stiffness', $type: 'number', $value: 420 })
+
+    const flat = JSON.parse(toFlatJson(INITIAL_STATE, { deviations }))
+    expect(flat.deviations[0]).toEqual({ component: 'Button', token: 'duration.fast', value: '250ms' })
+    expect(flat.deviations[1].value).toBe('cubic-bezier(0.3, 1.4, 0.6, 1)')
+
+    const css = toCssVars(INITIAL_STATE, { deviations })
+    expect(css).toContain('--motion-duration-fast: 100ms;')
+    expect(css).toContain('Button reads duration.fast as 250ms')
+    expect(css).toContain('Card reads easing.overshoot as cubic-bezier(0.3, 1.4, 0.6, 1)')
+
+    const fm = toFramerMotion(INITIAL_STATE, { deviations })
+    expect(fm).toContain('export const deviations = [')
+    expect(fm).toContain("{ component: 'Button', token: 'duration.fast', value: 0.25 },")
+    expect(fm).toContain("{ component: 'Card', token: 'ease.overshoot', value: [0.3, 1.4, 0.6, 1] },")
+  })
+
+  it('round-trips through DTCG and flat, back in runtime units', () => {
+    for (const text of [toDtcgJson(INITIAL_STATE, { deviations }), toFlatJson(INITIAL_STATE, { deviations })]) {
+      const result = importTokens(text)
+      expect(result.ok).toBe(true)
+      expect(result.state).toEqual(INITIAL_STATE)
+      expect(result.deviations).toEqual(deviations)
+      expect(result.report.deviations).toBe(3)
+      expect(result.report.ignored).toEqual([])
+    }
+  })
+
+  it('reports zero deviations on a file without any', () => {
+    const result = importTokens(toFlatJson(INITIAL_STATE))
+    expect(result.deviations).toEqual([])
+    expect(result.report.deviations).toBe(0)
+  })
+
+  it('rejects a deviation naming a token the editor cannot hold', () => {
+    const flat = JSON.parse(toFlatJson(INITIAL_STATE))
+    flat.deviations = [{ component: 'Button', token: 'duration.glacial', value: '250ms' }]
+    const result = importTokens(JSON.stringify(flat))
+    expect(result.ok).toBe(false)
+    expect(result.error).toContain('not an editable token')
+  })
+
+  it('rejects a deviation with no component and clamps a scalar to the Explore bounds', () => {
+    const flat = JSON.parse(toFlatJson(INITIAL_STATE))
+    flat.deviations = [{ token: 'duration.fast', value: '250ms' }]
+    expect(importTokens(JSON.stringify(flat)).ok).toBe(false)
+    flat.deviations = [{ component: 'Button', token: 'duration.fast', value: '9000ms' }]
+    const result = importTokens(JSON.stringify(flat))
+    expect(result.ok).toBe(true)
+    expect(result.deviations[0].value).toBe(2)   // 2000ms cap, back to seconds
+  })
+})

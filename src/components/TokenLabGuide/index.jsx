@@ -123,6 +123,17 @@ export function TokenLabGuide() {
           anchors. A slider that could rename them would erase the shared word they
           stand for.
         </p>
+        <p className={styles.body}>
+          The code view is also an input. Click a token read, type a value in its
+          place, and press Enter. That component runs your number instead of the
+          token; the others keep following the slider. The comment under the read
+          says what the system sees, off-system and the nearest named value, and
+          the green never comes on for it. Two words follow.{' '}
+          <code>[RECONNECT]</code> puts the token back. <code>[ADOPT]</code> moves
+          the token to your value, so every component that reads it follows. A
+          value that happens to equal a token today is still not the token, and
+          the comment says so. Loading a preset resets every demo.
+        </p>
       </section>
 
       <section className={styles.section}>
@@ -167,6 +178,15 @@ export function TokenLabGuide() {
           the system. A handle turns green as you drag it. A demo signals green when
           the token you are touching reaches it. Same color, same meaning, in both
           places.
+        </p>
+
+        <p className={styles.question}>Why would I take a component off the system?</p>
+        <p className={styles.body}>
+          To see the cost. One demo drifts while the rest retime together, which is
+          what a hardcoded value looks like six months in. The comment names the
+          nearest token, so the way back is one word. Off-system values survive
+          export: each format lists them at the end, beside the tokens they left,
+          and import brings them back.
         </p>
 
         <p className={styles.question}>Why does the spinner reset when I change its duration?</p>

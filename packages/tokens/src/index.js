@@ -292,12 +292,28 @@ export function tokenKeyToCssSuffix(key) {
 // split exists for the package's generator (buildTokensDocument), which embeds
 // the DTCG tree of each preset inside cadence.tokens.json and must not embed a
 // pre-stringified blob. The in-app export button still downloads the string.
-export function toDtcgDoc(state) {
+export function toDtcgDoc(state, { deviations = [] } = {}) {
   const t = stateToExport(state)
   const duration = ms => ({ $type: 'duration', $value: `${ms}ms` })
   const bezier   = arr => ({ $type: 'cubicBezier', $value: arr })
   const number   = n => ({ $type: 'number', $value: n })
+  // Off-system deviations ride in the root group's $extensions, under the
+  // package's reverse-DNS key, as typed leaves that name their component. A
+  // DTCG consumer that does not know the key ignores the block, which is what
+  // $extensions is for; importTokens reads it back. Absent when empty.
+  const extensions = deviations.length === 0 ? {} : {
+    $extensions: {
+      [DTCG_EXTENSION_KEY]: {
+        deviations: deviations.map(deviationToExport).map(d => ({
+          component: d.component,
+          token: d.token,
+          ...deviationLeafDtcg(d),
+        })),
+      },
+    },
+  }
   return {
+    ...extensions,
     motion: {
       duration: mapGroup(t.duration, duration),
       easing:   mapGroup(t.easing, bezier),
@@ -311,15 +327,15 @@ export function toDtcgDoc(state) {
   }
 }
 
-export function toDtcgJson(state) {
-  return JSON.stringify(toDtcgDoc(state), null, 2)
+export function toDtcgJson(state, options) {
+  return JSON.stringify(toDtcgDoc(state, options), null, 2)
 }
 
 // Flat JSON mirroring the CSS variable names and units: ms strings for
 // duration / delay, cubic-bezier() strings for easing, bare numbers for the
 // unitless scale tokens. Easy to read and hand-edit; not a recognized
 // interchange standard.
-export function toFlatJson(state) {
+export function toFlatJson(state, { deviations = [] } = {}) {
   const t = stateToExport(state)
   const doc = {
     duration: mapGroup(t.duration, ms => `${ms}ms`),
@@ -329,6 +345,16 @@ export function toFlatJson(state) {
     spring:   { ...t.spring },
     // Lone unitless multiplier, emitted as a bare top-level number.
     scalar:   t.scalar,
+  }
+  // Off-system deviations as a top-level list in the flat conventions, present
+  // only when there are any (collectForeign knows the key, so a round trip stays
+  // clean).
+  if (deviations.length > 0) {
+    doc.deviations = deviations.map(deviationToExport).map(d => ({
+      component: d.component,
+      token: d.token,
+      value: deviationLeafFlat(d),
+    }))
   }
   return JSON.stringify(doc, null, 2)
 }
@@ -346,7 +372,7 @@ export function toFlatJson(state) {
 // '--cadence-' instead, because in a stranger's codebase a bare '--motion-'
 // namespace is a collision waiting to happen and 'cadence' says whose tokens
 // these are. One emitter, two call sites, no fork to drift.
-export function toCssVars(state, { prefix = '--motion-' } = {}) {
+export function toCssVars(state, { prefix = '--motion-', deviations = [] } = {}) {
   const t = stateToExport(state)
   // Each family becomes a run of `  <prefix><family>-<key>: <value>;` lines.
   // The families are separated by a blank line, matching motion.css's grouping.
@@ -369,7 +395,70 @@ export function toCssVars(state, { prefix = '--motion-' } = {}) {
     // shorter `scalar`.
     `  ${prefix}duration-scalar: ${t.scalar};`,
   ]
-  return `:root {\n${lines.join('\n')}\n}`
+  const rootBlock = `:root {\n${lines.join('\n')}\n}`
+  // CSS has no place for a per-component value, so deviations trail the block
+  // as a comment: recorded, never a custom property.
+  return deviations.length === 0 ? rootBlock : `${rootBlock}\n\n${deviationCssComment(deviations)}`
+}
+
+// ─── Off-system deviations ────────────────────────────────────────────────────
+// A deviation is a value one demo component runs INSTEAD of the token it names:
+// the reader clicked a token read in a Token Lab code view and typed a literal
+// (2026-09-09, the off-system edit). It belongs to a component, not to the token
+// set, so it never enters state and none of the stringifiers above change their
+// token blocks for it. Each format carries deviations as an appendix in its own
+// idiom, only when there are any, so a clean export is byte-identical to before.
+//
+// In the app a deviation is { component, token, value } in RUNTIME units (the
+// shape the demo actually runs: seconds, four-number arrays, unitless numbers),
+// with the token path spelled the way the code views read it (`ease.overshoot`).
+// The export files spell the path the way the token documents do
+// (`easing.overshoot`, the control-layer family names) and use each file's own
+// leaf conventions, so a deviation sits beside the token it deviates from in
+// the same units. deviationToExport is that translation; importDeviations is its
+// inverse.
+const RUNTIME_TO_CONTROL_FAMILY = { duration: 'duration', ease: 'easing', delay: 'delay', scale: 'scale', spring: 'spring' }
+const CONTROL_TO_RUNTIME_FAMILY = { duration: 'duration', easing: 'ease', delay: 'delay', scale: 'scale', spring: 'spring' }
+
+// Seconds -> ms without float noise (0.123 * 1000 is 123.00000000000001 in JS).
+const secondsToMs = s => +(s * 1000).toFixed(3)
+
+// The `$extensions` key DTCG reserves for tool-specific data, reverse-DNS
+// namespaced per the spec so it cannot collide with another tool's block.
+export const DTCG_EXTENSION_KEY = 'com.davidpreli.cadence'
+
+export function deviationToExport({ component, token, value }) {
+  const [runtimeFamily, key] = token.split('.')
+  const family = RUNTIME_TO_CONTROL_FAMILY[runtimeFamily]
+  const exportValue = (family === 'duration' || family === 'delay') ? secondsToMs(value) : value
+  return { component, token: `${family}.${key}`, value: exportValue }
+}
+
+// Per-format leaf: DTCG types the value the way its token leaves are typed; the
+// flat file uses the flat conventions (ms strings, cubic-bezier() strings).
+function deviationLeafDtcg(d) {
+  const [family] = d.token.split('.')
+  if (family === 'duration' || family === 'delay') return { $type: 'duration', $value: `${d.value}ms` }
+  if (family === 'easing') return { $type: 'cubicBezier', $value: d.value }
+  return { $type: 'number', $value: d.value }
+}
+
+function deviationLeafFlat(d) {
+  const [family] = d.token.split('.')
+  if (family === 'duration' || family === 'delay') return `${d.value}ms`
+  if (family === 'easing') return bezierCss(d.value)
+  return d.value
+}
+
+// The CSS appendix is prose, so each line says what the deviation IS: a
+// component reading a token as a value it is not.
+function deviationCssComment(deviations) {
+  const rows = deviations.map(deviationToExport).map(d =>
+    `   ${d.component} reads ${d.token} as ${deviationLeafFlat(d)}`)
+  return ['/* Off-system values, recorded as found. Not tokens: each is one',
+          '   component running a literal in place of the token it names.',
+          ...rows,
+          '*/'].join('\n')
 }
 
 // ─── Flow export ──────────────────────────────────────────────────────────────
@@ -425,7 +514,7 @@ const FM_HEADER = `// Cadence motion tokens, as Framer Motion configuration.
 // ease.overshoot is the bezier fallback for contexts that cannot run a spring
 // (CSS, reduced motion). Import what you need and spread it into a transition.`
 
-export function toFramerMotion(state) {
+export function toFramerMotion(state, { deviations = [] } = {}) {
   const t = stateToExport(state)
   // The same ms → seconds conversion stateToTokens uses. Framer Motion measures
   // transition.duration in seconds, so this is the format's unit, not a rewrite.
@@ -453,6 +542,19 @@ export function toFramerMotion(state) {
     '  spring,\n' +
     '}'
 
+  // Off-system deviations, in this file's own units (seconds, arrays), as a
+  // list an engineer can read or lint against. Each row names the component
+  // and the token path it reads off-system, so the module states the drift
+  // instead of hiding it in a value. Omitted when there is none.
+  const deviationRows = deviations.map(d => {
+    const v = Array.isArray(d.value) ? arr(d.value) : d.value
+    return `  { component: '${d.component}', token: '${d.token}', value: ${v} },`
+  })
+  const deviationBlock =
+    '// Off-system values recorded in Token Lab: one component running a literal\n' +
+    '// in place of the token it names. Not tokens. Listed so the drift is stated.\n' +
+    `export const deviations = [\n${deviationRows.join('\n')}\n]`
+
   return [
     FM_HEADER,
     named('durations', block(t.duration, sec)),
@@ -461,6 +563,7 @@ export function toFramerMotion(state) {
     named('scale', block(t.scale)),
     spring,
     transitions,
+    ...(deviations.length > 0 ? [deviationBlock] : []),
   ].join('\n\n') + '\n'
 }
 
@@ -932,6 +1035,8 @@ function collectForeign(parsed, format) {
   const root = format === 'dtcg' ? parsed.motion : parsed
   const foreign = []
   for (const [family, group] of Object.entries(root || {})) {
+    // The flat file's off-system list: known, read by importDeviations below.
+    if (family === 'deviations') continue
     // The duration scalar is a legitimate lone value the editor holds, but it is
     // not a family in EDITABLE_TOKEN_SCHEMA, so suppress it here the way the
     // fixed constants are suppressed below: a clean round trip must report nothing.
@@ -960,6 +1065,49 @@ function collectForeign(parsed, format) {
 // Total editable tokens, for the report's summary line. The + 1 is the duration
 // scalar: editable-class, but a lone value outside the family schema, so it is
 // counted here explicitly rather than by a schema length.
+// Reads the off-system list back into runtime deviations. Structural problems
+// throw ImportError like any other malformed leaf, because a deviation that
+// names a token the editor does not have, or a value the family cannot hold,
+// is a broken file, not a value to repair. Scalars clamp to the Explore bounds
+// silently: the app bounds a typed literal the same way on entry, so a clamped
+// import lands exactly where typing the value would have.
+export function importDeviations(parsed, format) {
+  const list = format === 'dtcg'
+    ? parsed?.$extensions?.[DTCG_EXTENSION_KEY]?.deviations
+    : parsed?.deviations
+  if (list === undefined) return []
+  if (!Array.isArray(list)) throw new ImportError('deviations: expected a list.')
+  return list.map((d, i) => {
+    const at = `deviations[${i}]`
+    if (!d || typeof d !== 'object') throw new ImportError(`${at}: expected an object.`)
+    if (typeof d.component !== 'string' || d.component.trim() === '') {
+      throw new ImportError(`${at}: expected a component name.`)
+    }
+    const [family, key] = String(d.token ?? '').split('.')
+    const runtimeFamily = CONTROL_TO_RUNTIME_FAMILY[family]
+    if (!runtimeFamily || !EDITABLE_TOKEN_SCHEMA[family]?.includes(key)) {
+      throw new ImportError(`${at}: "${d.token}" is not an editable token.`)
+    }
+    const token = `${runtimeFamily}.${key}`
+    // DTCG entries carry $value on the entry itself; flat entries carry `value`.
+    const leaf = format === 'dtcg' ? d : d.value
+    let value
+    if (family === 'easing') {
+      value = readCurve(leaf, format, `${at}.value`)
+    } else if (family === 'spring') {
+      const raw = readScalar(leaf, format, `${at}.value`)
+      if (raw <= 0) throw new ImportError(`${at}: spring ${key} must be greater than 0.`)
+      value = clampScalar(raw, SPRING_BOUNDS[key])
+    } else {
+      const raw = readScalar(leaf, format, `${at}.value`)
+      const bounded = clampScalar(raw, EXPLORE_BOUNDS[family])
+      // Back to the runtime unit for duration and delay (ms -> seconds).
+      value = (family === 'duration' || family === 'delay') ? bounded / 1000 : bounded
+    }
+    return { component: d.component.trim(), token, value }
+  })
+}
+
 const TOTAL_TOKENS =
   EDITABLE_TOKEN_SCHEMA.duration.length +
   EDITABLE_TOKEN_SCHEMA.easing.length +
@@ -979,10 +1127,14 @@ export function importTokens(text) {
     const format = detectFormat(parsed)
     const { state, clamped, filled, renamed, curvesOutOfRange } = buildState(parsed, format)
     const ignored = collectForeign(parsed, format)
+    const deviations = importDeviations(parsed, format)
     return {
       ok: true,
       state,
-      report: { format, total: TOTAL_TOKENS, clamped, filled, renamed, ignored, curvesOutOfRange },
+      // Off-system deviations ride beside the state, never inside it: the app
+      // restores them as per-demo overrides after it loads the token set.
+      deviations,
+      report: { format, total: TOTAL_TOKENS, clamped, filled, renamed, ignored, curvesOutOfRange, deviations: deviations.length },
     }
   } catch (e) {
     if (e instanceof ImportError) return { ok: false, error: e.message }
