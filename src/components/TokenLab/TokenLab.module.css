@@ -950,7 +950,29 @@
    vertical rhythm between demo groups. The left-heavy padding is carried over
    from the previous tab layout. */
 .demoContent {
-  padding: 32px 40px 32px 48px;
+  /* Trailing space at the bottom, 120px against 32px on the other block edge.
+     It is scroll room, not rhythm.
+
+     Closing a disclosure shortens the column, which lowers the scroll
+     container's maximum scroll position. A scrollTop already sitting at that
+     maximum has to be clamped down to the new one, and clamping moves
+     everything, including the element that was just clicked. Measured on the
+     Accordion demo 2026-09-09: scrollHeight 1758 to 1691 on a close, so
+     maxScroll 1018 to 951, and a scrollTop pinned at 1018 slid the whole column
+     66px down the viewport. Mid-column the same close moved nothing.
+
+     This is NOT browser scroll anchoring, which was the first theory:
+     overflow-anchor: none on the container changed the numbers not at all. It
+     is the scroll end, so the fix is to stop the last demo from sitting at it.
+     120px clears the 66px accordion collapse with room, which means a close
+     while that demo is in view no longer reaches the clamp.
+
+     It does not eliminate the clamp for someone scrolled into the padding
+     itself, and nothing short of a fixed-height container would. That was the
+     deliberate trade (David's call, 2026-09-09): an accordion pushes its
+     neighbours in production, and a demo that never pushed would stop telling
+     the truth about the component it is teaching. */
+  padding: 32px 40px 120px 48px;
   display: flex;
   flex-direction: column;
   /* 50px, not 40px: each .demoMain plate bleeds 20px into the gap via its
