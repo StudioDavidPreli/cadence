@@ -184,7 +184,7 @@ export function lint(inv) {
   const { artboard: main } = defaultArtboardOf(inv)
   if (main && viewModels.length > 0 && main.defaultViewModel === null) {
     add('unbound-default-artboard', 'fail', `artboard "${main.name}"`,
-      `The default artboard binds no view model, and the file has ${viewModels.length === 1 ? 'one' : viewModels.length}. A runtime that auto-binds finds nothing here and draws the artboard with no instance.`)
+      `The default artboard binds no view model, and the file has ${viewModels.length === 1 ? 'one' : viewModels.length}. A runtime that auto-binds finds nothing here and draws the artboard with no instance; its console says "Could not find a View Model linked to Artboard ${main.name}."`)
   }
 
   // fail: the runtime resolves a name to its first match; the rest are

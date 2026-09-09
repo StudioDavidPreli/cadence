@@ -704,3 +704,49 @@
     flex-direction: column;
   }
 }
+
+/* ── Render comparison ─────────────────────────────────────────────────────── */
+.renderBlock {
+  margin: 14px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.renderList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.renderRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.renderRow .factNote {
+  display: inline;
+  margin: 0;
+}
+
+.renderName {
+  min-width: 96px;
+}
+
+.renderPair {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* The frames are pixel art read back at the render size and shown at half,
+   on the demo plate so both files sit on the same ground. */
+.renderFrame {
+  display: block;
+  border-radius: 4px;
+  background-color: var(--color-bg2);
+  image-rendering: pixelated;
+}

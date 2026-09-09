@@ -21,6 +21,7 @@
 //   cleaned up before the next load.
 import { Rive } from '@rive-app/react-webgl2'
 import riveRuntimePkg from '@rive-app/webgl2/package.json'
+import { tapConsole } from '../../utils/consoleTap'
 
 export const RUNTIME_VERSION = riveRuntimePkg.version
 
@@ -65,10 +66,33 @@ export function loadInstance(buffer, canvas, { artboard, assets, autoplay = fals
 }
 
 // buffer → raw read (the shape lintModel.normalizeInventory takes).
+//
+// `runtimeMessages` is what the runtime wrote to the console during the main
+// load and the default artboard's view-model lookup, deduplicated: the one
+// line it does emit ("Could not find a View Model linked to Artboard X") is
+// what a consumer sees in their own console. It is heard through the boot
+// tap (utils/consoleTap.js), because the runtime's printer bound
+// console.error when the module started and a wrapper installed here would
+// never be called. The per-artboard loads below are excluded on purpose:
+// asking every nested artboard for its default view model provokes that
+// line for each one that has none, which is normal, and would bury the
+// message that matters. Tested 2026-09-08: the runtime says nothing about a
+// color property bound to a number.
 export async function readRiv(buffer) {
   const canvas = document.createElement('canvas')
   const assets = []
-  const instance = await loadInstance(buffer, canvas, { assets })
+  const said = new Map()
+  const stopListening = tapConsole((level, args) => {
+    const line = args.map(a => (typeof a === 'string' ? a : a?.message ?? String(a))).join(' ')
+    said.set(`${level}: ${line}`, (said.get(`${level}: ${line}`) ?? 0) + 1)
+  })
+  let instance
+  try {
+    instance = await loadInstance(buffer, canvas, { assets })
+  } catch (err) {
+    stopListening()
+    throw err
+  }
   const raw = { assets, unreadArtboards: [] }
   try {
     raw.defaultArtboard = instance.activeArtboard
@@ -109,7 +133,9 @@ export async function readRiv(buffer) {
     raw.defaultViewModel = instance.defaultViewModel()?.name ?? null
   } finally {
     instance.cleanup()
+    stopListening()
   }
+  raw.runtimeMessages = [...said].map(([text, count]) => ({ text, count }))
 
   raw.perArtboardDefaultVM = {}
   const toRead = raw.artboards.slice(0, PER_ARTBOARD_CAP)

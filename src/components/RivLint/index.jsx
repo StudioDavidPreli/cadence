@@ -29,6 +29,7 @@ import { RUNTIME_VERSION } from './readRiv'
 import { toManifestEntry } from './lintModel'
 import { Preview } from './Preview'
 import { RivLintTitle } from './RivLintTitle'
+import { RENDER_SIZE, SETTLE_MS } from './renderCompare'
 import styles from './RivLint.module.css'
 
 const SAMPLES_URL = '/rivlint-samples/samples.json'
@@ -178,7 +179,7 @@ function Report({ l }) {
   return (
     <div className={styles.results}>
       <Handoff facts={facts} inventory={inventory} />
-      <Findings findings={findings} />
+      <Findings findings={findings} runtimeMessages={subject.raw.runtimeMessages} />
       <p className={styles.cannotSee} data-testid="cannot-see">
         The web runtime does not expose text runs, nesting, scripts,
         listeners, converters, or shape bindings, and it does not carry the
@@ -281,7 +282,7 @@ function Handoff({ facts, inventory }) {
   )
 }
 
-function Findings({ findings }) {
+function Findings({ findings, runtimeMessages = [] }) {
   const counts = Object.fromEntries(['fail', 'warn', 'note'].map(s => [s, findings.filter(f => f.severity === s).length]))
   return (
     <section
@@ -298,6 +299,11 @@ function Findings({ findings }) {
           {findings.length === 0 ? 'none' : `${counts.fail} fail · ${counts.warn} warn · ${counts.note} note`}
         </span>
       </div>
+      <p className={styles.small} data-testid="runtime-said">
+        {runtimeMessages.length === 0
+          ? 'The runtime said nothing while reading this file.'
+          : <>The runtime said, while reading this file: {runtimeMessages.map((m, i) => <span key={i}><code className={styles.chipQuiet}>{m.text.replace(/^(error|warn): /, '')}</code>{m.count > 1 ? ` (${m.count} times)` : ''}{i < runtimeMessages.length - 1 ? ' ' : ''}</span>)}</>}
+      </p>
       {findings.length === 0 ? (
         <p className={styles.small}>Nothing the rules could object to. The rules are the runtime&apos;s contract and Rive&apos;s published guidance, not anyone&apos;s house style.</p>
       ) : (
@@ -428,7 +434,7 @@ function Inventory({ inventory }) {
 }
 
 function Compare({ l }) {
-  const { compare, compareStatus, compareError, mode, setMode, comparison, compareWith, clearCompare } = l
+  const { compare, compareStatus, compareError, mode, setMode, comparison, compareWith, clearCompare, render, renderStatus, renderError, runRender } = l
   const [dragging, setDragging] = useState(false)
   const onFile = file => { if (file) compareWith(file) }
   const onDrop = event => {
@@ -484,9 +490,84 @@ function Compare({ l }) {
             </label>
           </fieldset>
           <CompareResult comparison={comparison} />
+          {compare.kind === 'riv' && (
+            <RenderCompare
+              render={render}
+              status={renderStatus}
+              error={renderError}
+              onRun={runRender}
+              structureUnchanged={comparison.mode === COMPARE_MODE.DIFF ? comparison.entries.length === 0 : comparison.pass && comparison.additions.length === 0}
+            />
+          )}
         </>
       )}
     </section>
+  )
+}
+
+// The render comparison (Q10, reshaped 2026-09-08). Both files drawn on the
+// subject's default artboard, instance by instance, and the pixels compared.
+// The structural diff cannot see a property-to-shape binding and the runtime
+// logs nothing about one fed the wrong type; the pixels can. On request, not
+// on drop: it loads both files once per instance.
+const pct = f => `${(100 * f).toFixed(1)}%`
+function RenderCompare({ render, status, error, onRun, structureUnchanged }) {
+  const rows = render?.rows ?? []
+  const drawn = rows.filter(r => r.diff)
+  const moved = drawn.filter(r => r.diff.differing > 0)
+  const maxFraction = drawn.reduce((m, r) => Math.max(m, r.diff.fraction), 0)
+  let verdict = ''
+  if (render) {
+    if (drawn.length === 0) verdict = 'Neither file could be drawn on this artboard.'
+    else if (moved.length === 0) verdict = `Same pixels on ${drawn.length === 1 ? 'the one instance' : `all ${drawn.length} instances`}. Whatever the earlier export bound, this one still binds the same way.`
+    else if (structureUnchanged) verdict = `The structure reads the same; the pixels do not. ${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas. That is something the inventory cannot see: a binding, a value, or the art itself.`
+    else verdict = `${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas.`
+  }
+  return (
+    <div className={styles.renderBlock} data-testid="render-compare">
+      <div className={styles.compareHead}>
+        <span className={styles.factNote}>
+          <strong>Draw both.</strong> The structural diff cannot see how a shape reads its view model. The pixels can.
+        </span>
+        <button type="button" className={styles.sampleButton} onClick={onRun} disabled={status === STATUS.READING} data-testid="render-run">
+          {status === STATUS.READING ? 'Drawing' : render ? 'Draw again' : 'Draw both files, instance by instance'}
+        </button>
+      </div>
+      {status === STATUS.ERROR && <p className={styles.small}>Could not draw. {error}</p>}
+      {render && (
+        <div data-testid="render-result" data-instances={drawn.length} data-moved={moved.length} data-max-diff={(100 * maxFraction).toFixed(1)}>
+          <p className={styles.verdict}>{verdict}</p>
+          <p className={styles.small}>
+            Artboard <code className={styles.chipQuiet}>{render.scene.artboard}</code>
+            {render.scene.stateMachine && <>, state machine <code className={styles.chipQuiet}>{render.scene.stateMachine}</code></>}
+            {render.scene.viewModel && <>, view model <code className={styles.chipQuiet}>{render.scene.viewModel}</code></>}
+            , each instance bound by hand, the machine run for {SETTLE_MS} ms, one frame read. Earlier file left, this file right.
+          </p>
+          <ul className={styles.renderList}>
+            {rows.map(r => (
+              <li key={r.instance} className={styles.renderRow} data-instance={r.instance} data-diff={r.diff ? (100 * r.diff.fraction).toFixed(1) : ''}>
+                <span className={styles.renderName}><code className={styles.chip}>{r.instance || '(default instance)'}</code></span>
+                {r.error ? (
+                  <span className={styles.factNote}>could not draw: {r.error}</span>
+                ) : (
+                  <>
+                    <span className={styles.renderPair}>
+                      <img className={styles.renderFrame} src={r.a} alt="" width={RENDER_SIZE / 2} height={RENDER_SIZE / 2} />
+                      <img className={styles.renderFrame} src={r.b} alt="" width={RENDER_SIZE / 2} height={RENDER_SIZE / 2} />
+                    </span>
+                    <span className={styles.factNote}>
+                      {r.diff.differing === 0
+                        ? 'same pixels'
+                        : `${pct(r.diff.fraction)} of the canvas differs, inside a ${r.diff.box.width} by ${r.diff.box.height} box`}
+                    </span>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }
 

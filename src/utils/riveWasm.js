@@ -17,7 +17,13 @@
 // `?url` makes Vite emit the .wasm as a hashed static asset and resolve to
 // its served path. The fetch still happens lazily when the first canvas of
 // the runtime initializes, so first paint is unchanged.
+// The console tap goes in BEFORE the runtime can initialize: Emscripten binds
+// console.error once at module start, and rivLint's "the runtime said" line
+// hears through the tap only if the tap is what got bound (consoleTap.js).
+import { installConsoleTap } from './consoleTap'
 import { RuntimeLoader as WebGL2RuntimeLoader } from '@rive-app/webgl2'
 import webgl2WasmUrl from '@rive-app/webgl2/rive.wasm?url'
+
+installConsoleTap()
 
 WebGL2RuntimeLoader.setWasmUrl(webgl2WasmUrl)

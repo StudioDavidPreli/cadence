@@ -7,8 +7,9 @@
 import { useCallback, useMemo, useState } from 'react'
 import { readRiv, RUNTIME_VERSION } from './readRiv'
 import {
-  buildReport, parseReport, lint, handoff, diffInventories, checkContract,
+  buildReport, parseReport, lint, handoff, diffInventories, checkContract, defaultArtboardOf,
 } from './lintModel'
+import { renderComparison } from './renderCompare'
 
 export const STATUS = {
   IDLE: 'idle',
@@ -39,12 +40,17 @@ export function useLint() {
   const [compareStatus, setCompareStatus] = useState(STATUS.IDLE)
   const [compareError, setCompareError] = useState(null)
   const [mode, setMode] = useState(COMPARE_MODE.DIFF)
+  const [render, setRender] = useState(null)          // [{ instance, a, b, diff | error }] | null
+  const [renderStatus, setRenderStatus] = useState(STATUS.IDLE)
+  const [renderError, setRenderError] = useState(null)
 
   const lintFile = useCallback(async file => {
     setStatus(STATUS.READING)
     setError(null)
     setCompare(null)
     setCompareStatus(STATUS.IDLE)
+    setRender(null)
+    setRenderStatus(STATUS.IDLE)
     try {
       setSubject(await readSubject(file))
       setStatus(STATUS.DONE)
@@ -102,8 +108,12 @@ export function useLint() {
       } else {
         const raw = await readRiv(buffer)
         const report = buildReport(raw, { file: file.name, size: file.size, runtime: RUNTIME_VERSION, date: today() })
-        setCompare({ inventory: report.inventory, name: file.name, kind: 'riv' })
+        // The bytes stay with the slot so the render comparison can draw
+        // this file beside the subject.
+        setCompare({ inventory: report.inventory, name: file.name, kind: 'riv', buffer })
       }
+      setRender(null)
+      setRenderStatus(STATUS.IDLE)
       setCompareStatus(STATUS.DONE)
     } catch (err) {
       setCompare(null)
@@ -116,7 +126,35 @@ export function useLint() {
     setCompare(null)
     setCompareStatus(STATUS.IDLE)
     setCompareError(null)
+    setRender(null)
+    setRenderStatus(STATUS.IDLE)
   }, [])
+
+  // Draw the subject and the compared .riv instance by instance and compare
+  // the pixels. The scene is the subject's default artboard, its first state
+  // machine, and its default view model's instances (or the file's first
+  // view model's), so the question is the consumer's: with the same instance
+  // bound, does the same artboard still draw the same thing?
+  const runRender = useCallback(async () => {
+    if (!subject || !compare?.buffer) return
+    setRenderStatus(STATUS.READING)
+    setRenderError(null)
+    try {
+      const inv = subject.report.inventory
+      const { artboard } = defaultArtboardOf(inv)
+      if (!artboard) throw new Error('The file has no artboard to draw.')
+      const vmName = artboard.defaultViewModel || inv.viewModels[0]?.name || null
+      const vm = inv.viewModels.find(v => v.name === vmName) ?? null
+      const instances = vm && vm.instances.length ? vm.instances : ['']
+      const scene = { artboard: artboard.name, stateMachine: artboard.stateMachines[0]?.name ?? null, viewModel: vm?.name ?? null, instances }
+      setRender({ scene, rows: await renderComparison(compare.buffer, subject.buffer, scene) })
+      setRenderStatus(STATUS.DONE)
+    } catch (err) {
+      setRender(null)
+      setRenderError(err?.message ?? String(err))
+      setRenderStatus(STATUS.ERROR)
+    }
+  }, [subject, compare])
 
   const inventory = subject?.report.inventory ?? null
   const findings = useMemo(() => (inventory ? lint(inventory) : []), [inventory])
@@ -131,6 +169,7 @@ export function useLint() {
   return {
     status, error, subject, inventory, findings, facts,
     compare, compareStatus, compareError, mode, setMode, comparison,
+    render, renderStatus, renderError, runRender,
     lintFile, lintSample, compareWith, clearCompare,
   }
 }

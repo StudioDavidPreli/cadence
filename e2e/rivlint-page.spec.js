@@ -70,6 +70,7 @@ test.describe('rivLint', () => {
     // No fail-level finding on a shipped file; the sample is checked against
     // the report the page produced from it earlier, as a contract.
     await expect(page.getByTestId('findings')).toHaveAttribute('data-fails', '0')
+    await expect(page.getByTestId('runtime-said')).toContainText('said nothing')
     const result = page.getByTestId('compare-result')
     await expect(result).toHaveAttribute('data-pass', 'true')
     await expect(result).toHaveAttribute('data-failures', '0')
@@ -105,6 +106,15 @@ test.describe('rivLint', () => {
     const result = page.getByTestId('compare-result')
     await expect(result).toHaveAttribute('data-entries', '0', { timeout: 30_000 })
     await expect(result).toContainText('No structural difference')
+
+    // The render comparison: the same file drawn twice, instance by
+    // instance, is the same pixels on every instance.
+    await page.getByTestId('render-run').click()
+    const render = page.getByTestId('render-result')
+    await expect(render).toHaveAttribute('data-instances', '3', { timeout: 60_000 })
+    await expect(render).toHaveAttribute('data-moved', '0')
+    await expect(render).toContainText('Same pixels on all 3 instances')
+    await expect(page.locator('[data-testid="render-result"] img')).toHaveCount(6)
 
     // Contract mode against the page's own download of this file.
     const [download] = await Promise.all([
