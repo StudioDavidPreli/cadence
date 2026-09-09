@@ -1,0 +1,74 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.section {
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  /* Content surface, not a control. See the note in Toast.module.css. */
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  /* The header scales on hover and press; without this the lifted corners
+     paint outside the rounded box. */
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  /* transform is absent on purpose — Framer Motion owns it for the lift and the
+     press. CSS takes colour only, the same split Button documents. */
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.header:hover {
+  /* surface-active, not surface-hover: hover on a RAISED surface steps to
+     active (#ebebeb light / #262626 dark). surface-hover is the dark control
+     surface's hover and would flip this row to near-black in the light theme.
+     Same pair Card hovers on, and the one --color-text-muted was tuned
+     against in the 2026-04-16 audit. */
+  background-color: var(--color-surface-active);
+  /* Explicit colour with every background change (contrast rule). */
+  color: var(--color-text-base);
+}
+
+.label {
+  min-width: 0;
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.panelBody {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 2px 12px 11px;
+}
+
+.line {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}

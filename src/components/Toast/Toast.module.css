@@ -1,0 +1,88 @@
+.toast {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+}
+
+/* No reserve needed any more. Every slot is permanently mounted (the toasts
+   animate opacity, they do not mount and unmount), so this box has one intrinsic
+   height for the life of the component and nothing below it can be pushed. The
+   earlier min-height existed to hold space for toasts that were not there yet,
+   and it could not help once repeat presses stacked six or fifteen of them. */
+.stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* transform is intentionally absent — Framer Motion owns transform and opacity
+   on this element. Same split as Button: CSS takes color, Framer takes motion. */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  /* A content surface, not a control: --color-surface is the INVERTED button
+     surface (#1a1a1a even in the light theme), which is right for .launch below
+     and wrong for a panel. Raised + text-base is the pairing Card uses. */
+  background-color: var(--color-surface-raised);
+  /* Explicit color beside the background, per the contrast rule: a surface
+     change must never leave text colour to inheritance. */
+  color: var(--color-text-base);
+  max-width: 280px;
+}
+
+/* Accent in its documented role — a live system signal, not decoration. A
+   graphical mark, so the 3:1 UI bar governs it, not the 4.5:1 text bar. */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-base);
+}
+
+.detail {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.launch {
+  padding: 7px 16px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  /* Demonstration motion: this is a demo surface inside the demo column, so its
+     hover reads the editable --motion-* tokens like every other demo. The tool's
+     OWN chrome reads --feedback-* instead. transform is left out so Framer
+     Motion's whileTap press has sole ownership of it. */
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.launch:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}

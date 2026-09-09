@@ -54,22 +54,43 @@
 // delay.short staggers the three colour plates; scale.pressExpressive sets the
 // aberration amplitude. It reads no other slot — the plate rate ratios and the
 // blocks/gap controls are geometry, not tokens, so they add no rows.
+//
+// Toast, Skeleton, and Accordion (2026-09-09) were added to close the coverage
+// gaps this table itself exposed. Read as data rather than as configuration, it
+// showed delay.medium with one consumer and scale.pressSubtle with one, on a
+// branch the tool never triggered — so two whole token families were effectively
+// undemonstrable: drag the slider and nothing answers. The three components were
+// chosen for what they consume, not to round out the category counts.
+//   Toast     — delay.short is the sibling entrance stagger and delay.medium the
+//               looser exit cascade. The reading hold is duration.slower plus
+//               delay.long: delay.long alone was 200ms in Standard, too quick to
+//               read, so the hold takes the two longest named intervals together
+//               (David's call, 2026-09-09, which also leaves Snappy failing to
+//               hold long enough on purpose). The hold's rows are scheduled in
+//               setTimeout rather than a transition, which is still a read: it
+//               decides WHEN the toast leaves.
+//   Skeleton  — duration.slower as the shimmer (the system's slowest interval,
+//               because a placeholder that hurries lies about progress) against
+//               delay.short as the reveal stagger.
+//   Accordion — the scale family: scale.pressSubtle on the wide row and
+//               scale.lift on its hover, giving pressSubtle its first consumer
+//               that the demo actually exercises.
 export const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion'],
   'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock', 'Rive Clock'],
-  'duration.slower':  ['Spinner', 'Stepper', 'React Clock'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock'],
-  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock'],
+  'duration.slower':  ['Spinner', 'Stepper', 'React Clock', 'Skeleton', 'Toast'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock', 'Toast', 'Skeleton', 'Accordion'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
-  'delay.short':      ['Stepper', 'Rive Clock'],
-  'delay.medium':     ['Stepper'],
-  'delay.long':       ['Stepper', 'React Clock'],
-  'scale.pressSubtle':     ['Card'],
-  'scale.pressBase':       ['Button', 'Stepper', 'React Clock'],
+  'delay.short':      ['Stepper', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion'],
+  'delay.medium':     ['Stepper', 'Toast'],
+  'delay.long':       ['Stepper', 'React Clock', 'Toast'],
+  'scale.pressSubtle':     ['Card', 'Accordion'],
+  'scale.pressBase':       ['Button', 'Stepper', 'React Clock', 'Toast', 'Skeleton'],
   'scale.pressExpressive': ['Notification Badge', 'Rive Clock'],
-  'scale.lift':            ['Card', 'Carousel'],
+  'scale.lift':            ['Card', 'Carousel', 'Accordion'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
   // Toggle, Carousel, and Drawer consume it when their per-demo switch is flipped
   // to Spring. The switch is per-instance state the static map cannot read, so

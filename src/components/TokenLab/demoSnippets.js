@@ -358,6 +358,78 @@ for (const plate of plates) {
   }
 }`
 
+const Toast = `const tokens = useMotionTokens()
+
+// Nothing mounts or unmounts. Three toasts exist for the life of
+// the component, each holding its own opacity and x as MotionValues,
+// and a press animates them through one timeline: in, hold, out.
+// Pressing again restarts that timeline on the same elements, so no
+// number of presses can stack generations or change the height.
+const enter = tokens.duration.base
+const lastArrival = (COUNT - 1) * tokens.delay.short + enter
+
+// The hold takes the two longest names the system has. delay.long
+// alone was 200ms in Standard, which is nobody's reading time.
+const holdUntil = lastArrival + tokens.duration.slower + tokens.delay.long
+
+// Entrance staggers on delay.short, the exit on delay.medium: one
+// event arriving, a looser cascade leaving.
+const startAt = index * tokens.delay.short
+const hold = holdUntil + index * tokens.delay.medium - startAt - enter
+
+// Four keyframes, three segments. times places each as a fraction
+// of the whole, so one animation carries segments of unequal length.
+const total = enter + hold + tokens.duration.base
+animate(opacity, [0, 1, 1, 0], {
+  duration: total,
+  times: [0, enter / total, (enter + hold) / total, 1],
+  delay: startAt,
+  ease: [tokens.ease.enter, tokens.ease.linear, tokens.ease.exit],
+})`
+
+const Skeleton = `const tokens = useMotionTokens()
+
+// The shimmer takes the system's slowest interval on purpose. A
+// placeholder that hurries reads as progress, and it knows nothing
+// about the network. Slow says "still here", which is all it can know.
+<motion.span
+  animate={{ opacity: [0.5, 1, 0.5] }}
+  transition={{
+    duration: tokens.duration.slower,
+    ease: tokens.ease.standard,
+    repeat: Infinity,
+    delay: i * tokens.delay.short,
+  }}
+/>
+
+// The reveal takes one of the shortest. The distance between the two
+// is what makes the swap read as an answer, not another load stage.
+<motion.div
+  animate={{ opacity: 1, y: 0 }}
+  transition={{
+    duration: tokens.duration.base,
+    ease: tokens.ease.enter,
+    delay: i * tokens.delay.short,
+  }}
+/>`
+
+const Accordion = `const tokens = useMotionTokens()
+
+// Press scale answers "how big is the surface", not "how much do I
+// want this felt". The same 0.95 that is crisp on a 90px button is a
+// lurch on a 280px row: the edges travel further to say the same thing.
+<motion.button
+  whileHover={{ scale: tokens.scale.lift }}
+  whileTap={{ scale: tokens.scale.pressSubtle }}
+/>
+
+// The chevron rotates instead of scaling — a second press scale nested
+// inside the row's would compound the two transforms.
+<motion.span
+  animate={{ rotate: isOpen ? 180 : 0 }}
+  transition={{ duration: tokens.duration.base, ease: tokens.ease.standard }}
+/>`
+
 export const DEMO_SNIPPETS = {
   Drawer,
   Button,
@@ -375,4 +447,7 @@ export const DEMO_SNIPPETS = {
   Modal,
   WaterWilt,
   PixelPlant,
+  Toast,
+  Skeleton,
+  Accordion,
 }

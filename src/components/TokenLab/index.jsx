@@ -35,6 +35,9 @@ import { Toggle } from '../Toggle'
 import { SpringDemo } from '../SpringDemo'
 import { Spinner } from '../Spinner'
 import { ProgressBar } from '../ProgressBar'
+import { Toast } from '../Toast'
+import { Skeleton } from '../Skeleton'
+import { Accordion } from '../Accordion'
 import { Stepper } from '../Stepper'
 import { Drawer } from '../Drawer'
 import { TOKEN_COMPONENT_MAP } from '../../data/tokenConsumption'
@@ -2103,6 +2106,16 @@ export function TokenLab() {
           </div>
         </DemoWrapper>
 
+        <DemoWrapper
+          componentName="Accordion"
+          instruction="Open a section, and press one. The row takes scale.pressSubtle where the button takes pressBase — the wide surface moves less to read as the same press"
+          code={DEMO_SNIPPETS.Accordion}
+        >
+          <div className={styles.demoRow}>
+            <Accordion />
+          </div>
+        </DemoWrapper>
+
         <NotificationBadgeDemo />
       </div>
     ),
@@ -2150,6 +2163,21 @@ export function TokenLab() {
           <Stepper />
         </DemoWrapper>
 
+        <DemoWrapper
+          componentName="Toast"
+          instruction="Press Notify. delay.short staggers the arrivals, delay.medium loosens the exit, and the reading hold takes duration.slower plus delay.long. Switch to Snappy and the stack leaves before you can read it"
+          code={DEMO_SNIPPETS.Toast}
+        >
+          <Toast />
+        </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Skeleton"
+          instruction="Press Load. The shimmer runs on duration.slower — a placeholder that hurries reads as progress it cannot promise — and the rows resolve on delay.short"
+          code={DEMO_SNIPPETS.Skeleton}
+        >
+          <Skeleton />
+        </DemoWrapper>
       </div>
     ),
 

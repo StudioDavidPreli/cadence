@@ -1,0 +1,94 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+}
+
+/* position: relative so the two layers can stack. Fixed height because both
+   states are built to the same metrics — three rows at 22px plus two 10px gaps
+   plus the panel's own padding. */
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  min-height: 106px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  /* Raised + text-base: the content-panel pairing. --color-surface is the
+     inverted control surface and belongs to .trigger, not here. */
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+}
+
+/* Both layers occupy the same box so the placeholder's exit and the content's
+   entrance overlap in place instead of one pushing the other. */
+.layer {
+  position: absolute;
+  inset: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.placeholderRow,
+.contentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 22px;
+}
+
+/* The placeholder bars. border (not accent) — a skeleton is inert scaffolding,
+   and the accent role means active / currently affecting the system. A pulsing
+   accent bar would claim the wait is doing something. */
+.bar {
+  display: block;
+  height: 9px;
+  border-radius: 4px;
+  background-color: var(--color-border2);
+}
+
+.barLabel {
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.barValue {
+  width: 104px;
+  flex-shrink: 0;
+}
+
+.rowLabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.rowValue {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-base);
+}
+
+.trigger {
+  padding: 7px 16px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  /* Demonstration motion — the editable tokens, like every demo surface.
+     transform omitted so Framer Motion's whileTap owns it alone. */
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.trigger:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
