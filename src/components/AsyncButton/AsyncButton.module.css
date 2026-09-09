@@ -1,0 +1,66 @@
+.asyncButton {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Fixed box. The four states carry different content ("Save changes", a
+   spinner, "Saved", "Could not save") and letting the button size to each would
+   animate layout on every transition. Width is set to the longest label so
+   nothing is clipped. */
+.button {
+  position: relative;
+  width: 168px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  /* Demonstration motion: this is a demo surface, so its hover reads the
+     editable --motion-* tokens. transform is left out because Framer Motion
+     owns it here for both the press and the error shake. */
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  /* Explicit colour with every background change (contrast rule). */
+  color: var(--color-text-primary);
+}
+
+/* Disabled while a run is in flight. No opacity drop: the button still carries
+   live content (the spinner, then the result), and dimming it would fight the
+   thing it is trying to show. Only the cursor changes. */
+.button:disabled {
+  cursor: default;
+}
+
+/* All four faces occupy this one cell, so they cross-fade in place instead of
+   displacing each other. */
+.stack {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* The result text sits on the button's own surface, so it keeps the button's
+   pairing. No accent on either outcome: success does not need colour to be
+   understood here, and error surfaces read plain per the house rule (the grid
+   load error and both bug-report error states do the same). */
+.result {
+  color: var(--color-text-primary);
+}

@@ -75,20 +75,29 @@
 //   Accordion — the scale family: scale.pressSubtle on the wide row and
 //               scale.lift on its hover, giving pressSubtle its first consumer
 //               that the demo actually exercises.
+//   Async Button (2026-09-09) is the first demo of a state a press LEADS to
+//               rather than one it performs: idle, pending, result, idle. It
+//               reads delay.medium as the beat between the spinner leaving and
+//               the mark arriving, and duration.slower + delay.long as the hold
+//               on the result, the same construction Toast uses for its reading
+//               hold so the two move together. Its pending loop is the Spinner's
+//               own duration.slower, reused rather than redrawn. The simulated
+//               request latency is NOT listed and NOT a token: network time is
+//               not animation time.
 export const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton', 'Async Button'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
   'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock', 'Rive Clock'],
-  'duration.slower':  ['Spinner', 'Stepper', 'React Clock', 'Skeleton', 'Toast'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion'],
-  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock', 'Toast', 'Skeleton', 'Accordion'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion'],
-  'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle'],
+  'duration.slower':  ['Spinner', 'Stepper', 'React Clock', 'Skeleton', 'Toast', 'Async Button'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion', 'Async Button'],
+  'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
+  'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle', 'Async Button'],
   'delay.short':      ['Stepper', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion'],
-  'delay.medium':     ['Stepper', 'Toast'],
-  'delay.long':       ['Stepper', 'React Clock', 'Toast'],
+  'delay.medium':     ['Stepper', 'Toast', 'Async Button'],
+  'delay.long':       ['Stepper', 'React Clock', 'Toast', 'Async Button'],
   'scale.pressSubtle':     ['Card', 'Accordion'],
-  'scale.pressBase':       ['Button', 'Stepper', 'React Clock', 'Toast', 'Skeleton'],
+  'scale.pressBase':       ['Button', 'Stepper', 'React Clock', 'Toast', 'Skeleton', 'Async Button'],
   'scale.pressExpressive': ['Notification Badge', 'Rive Clock'],
   'scale.lift':            ['Card', 'Carousel', 'Accordion'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,

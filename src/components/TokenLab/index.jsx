@@ -38,6 +38,7 @@ import { ProgressBar } from '../ProgressBar'
 import { Toast } from '../Toast'
 import { Skeleton } from '../Skeleton'
 import { Accordion } from '../Accordion'
+import { AsyncButton } from '../AsyncButton'
 import { Stepper } from '../Stepper'
 import { Drawer } from '../Drawer'
 import { TOKEN_COMPONENT_MAP } from '../../data/tokenConsumption'
@@ -2178,6 +2179,15 @@ export function TokenLab() {
         >
           <Skeleton />
         </DemoWrapper>
+
+        <DemoWrapper
+          componentName="Async Button"
+          instruction="Press twice: the first save succeeds, the second fails. The spinner leaves and the mark arrives delay.medium later, and the result holds for duration.slower plus delay.long, the same hold Toast uses"
+          code={DEMO_SNIPPETS.AsyncButton}
+        >
+          <AsyncButton />
+        </DemoWrapper>
+
       </div>
     ),
 

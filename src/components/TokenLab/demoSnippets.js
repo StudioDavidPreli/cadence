@@ -430,6 +430,34 @@ const Accordion = `const tokens = useMotionTokens()
   transition={{ duration: tokens.duration.base, ease: tokens.ease.standard }}
 />`
 
+const AsyncButton = `const tokens = useMotionTokens()
+
+// The interesting question is not how any one transition looks,
+// it is how long the button sits in each state.
+
+// The spinner leaves, then the mark arrives a beat later. Swapping
+// them on one frame reads as a glyph mutating, and "working" and
+// "done" are not the same statement.
+<motion.span
+  animate={{ opacity: isResult ? 1 : 0, scale: isResult ? 1 : 0.8 }}
+  transition={{
+    duration: tokens.duration.base,
+    // A confirmation may overshoot. A failure that springs in
+    // would read as pleased with itself.
+    ease: phase === 'success' ? tokens.ease.overshoot
+        : tokens.ease.standard,
+    delay: tokens.delay.medium,
+  }}
+/>
+
+// The same hold Toast uses, on purpose. One named way to say
+// "long enough to register" beats two components inventing their own.
+const held = tokens.duration.slower + tokens.delay.long
+
+// Not a token. Network time is not animation time, and no slider
+// should be able to make a server answer faster.
+const LATENCY_MS = 900`
+
 export const DEMO_SNIPPETS = {
   Drawer,
   Button,
@@ -450,4 +478,5 @@ export const DEMO_SNIPPETS = {
   Toast,
   Skeleton,
   Accordion,
+  AsyncButton,
 }
