@@ -1,0 +1,154 @@
+.reorderList {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* position: relative so the rows' offsetTop is measured against the list and
+   the pitch reads clean. list-style off; the rows are the whole surface. */
+.list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The row pairing is AsyncButton's: --color-surface on the demo plate with the
+   border2 stroke and text-primary. Fixed height so the pitch is one number.
+   transform is left out of the transition on purpose: Framer Motion owns it for
+   the slot translate and the lift, and CSS animating it too would fight. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px 0 4px;
+  border: 1px solid var(--color-border2);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  /* Demonstration motion: a demo surface, so its colour change reads the
+     editable --motion-* tokens, not the chrome constants. */
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color     var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow       var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+/* Held: the row is the active thing in the list, so it takes the accent
+   stroke (accent means active, never decorative), steps to the hover surface
+   (the audited pair with text-primary; NOT surface-raised, which is the demo
+   plate's own colour and would melt the row into it) and, in the two themes
+   that can show one, casts a shadow. It also sits above its neighbours so it
+   passes over them while it moves. Explicit colour with every background
+   change (contrast rule). */
+.held {
+  z-index: 1;
+  border-color: var(--color-accent);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.18);
+}
+
+/* The handle is the control: the button the keyboard reaches and, in the
+   pointer half, the drag surface. The grip glyph is muted at rest and steps to
+   text-primary when the handle is focused or hovered, so the affordance reads
+   before anything moves. No touch-action here yet; that arrives with the drag. */
+.handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: grab;
+  /* Transparent outline placeholder, Button's pattern, so the focus ring
+     changes nothing about layout when it appears. */
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  transition:
+    color   var(--motion-duration-fast) var(--motion-ease-standard),
+    outline var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.handle:hover,
+.handle:focus-visible,
+.held .handle {
+  color: var(--color-text-primary);
+}
+
+/* High contrast has no grays: --color-text-muted is the page text colour
+   (#000 in HC-light, #fff in HC-dark), which is the ROW FILL's colour here,
+   since the row sits on the inverted --color-surface. Muted on that fill is
+   invisible (found on built output, 2026-09-09). The handle takes the row's
+   own text colour at rest in both HC themes, the pair the label already uses. */
+:root[data-theme^="high-contrast"] .handle {
+  color: var(--color-text-primary);
+}
+
+.held .handle {
+  cursor: grabbing;
+}
+
+/* Keyboard focus. NOT the accent ring the rest of the app focuses with: that
+   ring is verified against the plate it sits on, and this one sits on the row
+   fill, where accent measured 2.08:1 in light and 1.66:1 in HC-dark (built
+   output, 2026-09-09). The row's own text colour is the pair already audited
+   against the row fill in every theme (12.6:1 and up), so the ring borrows it.
+   The held state still carries the accent, on the row's border, where it reads
+   against the plate. Placed after the hover rules so a focused-and-hovered
+   handle keeps its ring in every theme (the specificity lesson from
+   Button.module.css). */
+.handle:focus-visible,
+:root[data-theme^="high-contrast"] .handle:focus-visible {
+  outline-color: var(--color-text-primary);
+}
+
+.grip {
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+}
+
+.label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* The runner at the row's end. Sized to the row's inner height and left to its
+   own aspect (the four posters are portrait, two widths), so the four rows line
+   up on the right edge but the figures keep their proportions. draggable is off
+   on the element so a pointer drag on the row (the pointer half) never starts
+   a native image drag instead. */
+.art {
+  display: block;
+  height: 28px;
+  width: auto;
+  flex: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Visually hidden, present to assistive tech: the handle instructions and the
+   live region. The standard clip pattern. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

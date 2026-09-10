@@ -39,6 +39,7 @@ import { Toast } from '../Toast'
 import { Skeleton } from '../Skeleton'
 import { Accordion } from '../Accordion'
 import { AsyncButton } from '../AsyncButton'
+import { ReorderList } from '../ReorderList'
 import { Stepper } from '../Stepper'
 import { Drawer } from '../Drawer'
 import { TOKEN_COMPONENT_MAP } from '../../data/tokenConsumption'
@@ -2251,6 +2252,17 @@ export function TokenLab() {
               </Suspense>
             </ErrorBoundary>
           )}
+        </DemoWrapper>
+
+        {/* Item 13, the keyboard half. The pointer half layers on later
+            (springCapable arrives with it, since only a drop from a real
+            velocity has a spring to show). */}
+        <DemoWrapper
+          componentName="Reorder"
+          instruction="Tab to a handle: Space grabs the row, the arrows move it, Space drops it, Escape puts it back. No hand to follow yet, so every move is timed"
+          code={DEMO_SNIPPETS.Reorder}
+        >
+          <ReorderList />
         </DemoWrapper>
       </div>
     ),

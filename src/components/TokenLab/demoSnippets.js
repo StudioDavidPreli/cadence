@@ -270,6 +270,35 @@ animate(x, index * -slideWidth, snap)
   }}
 />`
 
+const Reorder = `const tokens = useMotionTokens()
+
+// DOM order never changes. Each row is translated to its slot,
+// so a move is direct value animation, never a layout one.
+// With the keyboard there is no hand to follow: the held row
+// and the rows making room are all answering one keypress, so
+// they share one timed transition. Escape returns the whole
+// list on the exit curve.
+const move = last?.type === 'cancel'
+  ? { duration: tokens.duration.fast,
+      ease: tokens.ease.exit }
+  : { duration: tokens.duration.base,
+      ease: tokens.ease.standard }
+
+// A held row rises by the system's one named lift.
+<motion.li
+  animate={{
+    y: (slot - domIndex) * pitch,
+    scale: isHeld ? tokens.scale.lift : 1,
+  }}
+  transition={{
+    y: move,
+    scale: {
+      duration: tokens.duration.fast,
+      ease: tokens.ease.standard,
+    },
+  }}
+/>`
+
 const Modal = `const tokens = useMotionTokens()
 
 // Backdrop fades to 0.8. Panel rises from 0.96 to 1 as it fades
@@ -479,4 +508,5 @@ export const DEMO_SNIPPETS = {
   Skeleton,
   Accordion,
   AsyncButton,
+  Reorder,
 }

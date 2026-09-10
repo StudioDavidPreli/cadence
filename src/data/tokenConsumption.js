@@ -84,14 +84,20 @@
 //               own duration.slower, reused rather than redrawn. The simulated
 //               request latency is NOT listed and NOT a token: network time is
 //               not animation time.
+//
+// Reorder (2026-09-09, build-order item 13, the second Gesture demo) reads what
+// its keyboard path runs: the held row and the rows making room on
+// duration.base + ease.standard, Escape's return on duration.fast + ease.exit,
+// and the lift on scale.lift over duration.fast + ease.standard. The pointer
+// half adds the spring rows when it lands.
 export const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton', 'Async Button'],
-  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton', 'Async Button', 'Reorder'],
+  'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock', 'Rive Clock'],
   'duration.slower':  ['Spinner', 'Stepper', 'React Clock', 'Skeleton', 'Toast', 'Async Button'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion', 'Async Button'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
-  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
+  'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle', 'Async Button'],
   'delay.short':      ['Stepper', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion'],
   'delay.medium':     ['Stepper', 'Toast', 'Async Button'],
@@ -99,7 +105,7 @@ export const TOKEN_COMPONENT_MAP = {
   'scale.pressSubtle':     ['Card', 'Accordion'],
   'scale.pressBase':       ['Button', 'Stepper', 'React Clock', 'Toast', 'Skeleton', 'Async Button'],
   'scale.pressExpressive': ['Notification Badge', 'Rive Clock'],
-  'scale.lift':            ['Card', 'Carousel', 'Accordion'],
+  'scale.lift':            ['Card', 'Carousel', 'Accordion', 'Reorder'],
   // The physics-spring family. The SpringDemo always consumes it; Button, Card,
   // Toggle, Carousel, and Drawer consume it when their per-demo switch is flipped
   // to Spring. The switch is per-instance state the static map cannot read, so
