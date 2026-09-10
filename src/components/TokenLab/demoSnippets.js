@@ -272,31 +272,40 @@ animate(x, index * -slideWidth, snap)
 
 const Reorder = `const tokens = useMotionTokens()
 
-// DOM order never changes. Each row is translated to its slot,
-// so a move is direct value animation, never a layout one.
-// With the keyboard there is no hand to follow: the held row
-// and the rows making room are all answering one keypress, so
-// they share one timed transition. Escape returns the whole
-// list on the exit curve.
-const move = last?.type === 'cancel'
-  ? { duration: tokens.duration.fast,
-      ease: tokens.ease.exit }
+// DOM order never changes. Each row owns its y and is settled
+// into its slot with animate(), never a layout animation.
+// The handle is one control for two inputs.
+
+// Rows making room, and every keyboard move: no hand to
+// follow, so the motion is timed. Escape returns the list
+// on the exit curve.
+const move   = { duration: tokens.duration.base,
+                 ease: tokens.ease.standard }
+const cancel = { duration: tokens.duration.fast,
+                 ease: tokens.ease.exit }
+
+// While the pointer holds a row, nothing here applies:
+// Framer's drag writes y from the hand. Let go and the row
+// lands from that velocity, which only a spring can take.
+// The bezier stand-in gets the same call and ignores it.
+const drop = spring
+  ? { type: 'spring',
+      stiffness: tokens.spring.stiffness,
+      damping: tokens.spring.damping,
+      mass: tokens.spring.mass,
+      velocity: info.velocity.y }
   : { duration: tokens.duration.base,
-      ease: tokens.ease.standard }
+      ease: tokens.ease.overshoot }
+
+animate(y, (slot - domIndex) * pitch,
+  cancelled ? cancel : released ? drop : move)
 
 // A held row rises by the system's one named lift.
 <motion.li
-  animate={{
-    y: (slot - domIndex) * pitch,
-    scale: isHeld ? tokens.scale.lift : 1,
-  }}
-  transition={{
-    y: move,
-    scale: {
-      duration: tokens.duration.fast,
-      ease: tokens.ease.standard,
-    },
-  }}
+  drag="y" dragListener={false} dragMomentum={false}
+  animate={{ scale: isHeld ? tokens.scale.lift : 1 }}
+  transition={{ duration: tokens.duration.fast,
+                ease: tokens.ease.standard }}
 />`
 
 const Modal = `const tokens = useMotionTokens()

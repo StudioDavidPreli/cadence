@@ -1,4 +1,4 @@
-// The linter's model against two kinds of fixture: the e2e manifest's 74
+// The linter's model against two kinds of fixture: the e2e manifest's 78
 // entries (the site's own files, as the gate recorded them on built output),
 // and raw runtime reads saved from the item 9 probe (files from Rive's own
 // repositories and one deliberately broken tile). Nothing here loads a .riv;
@@ -34,9 +34,9 @@ const nested = normalizeInventory(fixture('nested-default'))
 const rules = (inv, rule) => lint(inv).filter(f => f.rule === rule)
 const fails = inv => lint(inv).filter(f => f.severity === 'fail')
 
-describe('the manifest round-trips (the site\'s 74 files as fixtures)', () => {
+describe('the manifest round-trips (the site\'s 78 files as fixtures)', () => {
   it('has the expected number of entries', () => {
-    expect(Object.keys(manifest).length).toBe(74)
+    expect(Object.keys(manifest).length).toBe(78)
   })
 
   for (const [file, entry] of Object.entries(manifest)) {

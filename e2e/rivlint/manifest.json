@@ -6036,6 +6036,70 @@
       }
     ]
   },
+  "runnerSVGS/cinematicrun.riv": {
+    "defaultArtboard": "cinematicRun",
+    "artboards": [
+      {
+        "name": "cinematicRun",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "cinematicRunSM"
+        ],
+        "defaultViewModel": null
+      }
+    ],
+    "viewModels": []
+  },
+  "runnerSVGS/explorerun.riv": {
+    "defaultArtboard": "exploreRun",
+    "artboards": [
+      {
+        "name": "exploreRun",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "exploreRunSM"
+        ],
+        "defaultViewModel": null
+      }
+    ],
+    "viewModels": []
+  },
+  "runnerSVGS/snappyrun.riv": {
+    "defaultArtboard": "snappyRun",
+    "artboards": [
+      {
+        "name": "snappyRun",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "snappyRunSM"
+        ],
+        "defaultViewModel": null
+      }
+    ],
+    "viewModels": []
+  },
+  "runnerSVGS/standardrun.riv": {
+    "defaultArtboard": "standardRun",
+    "artboards": [
+      {
+        "name": "standardRun",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "standardRunSM"
+        ],
+        "defaultViewModel": null
+      }
+    ],
+    "viewModels": []
+  },
   "titleSVGS/heromobile.riv": {
     "defaultArtboard": "heroMobile",
     "artboards": [

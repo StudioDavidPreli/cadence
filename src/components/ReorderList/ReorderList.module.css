@@ -50,17 +50,22 @@
    change (contrast rule). */
 .held {
   z-index: 1;
+  /* A drag sweeps the pointer over the neighbours' labels; no selection. */
+  user-select: none;
   border-color: var(--color-accent);
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.18);
 }
 
-/* The handle is the control: the button the keyboard reaches and, in the
-   pointer half, the drag surface. The grip glyph is muted at rest and steps to
+/* The handle is the control: the button the keyboard reaches and the surface
+   the pointer drags from. The grip glyph is muted at rest and steps to
    text-primary when the handle is focused or hovered, so the affordance reads
-   before anything moves. No touch-action here yet; that arrives with the drag. */
+   before anything moves. touch-action: none is on the handle and nowhere else:
+   the demo column scrolls, and a vertical drag on touch would fight the scroll
+   without it, but the row itself stays scrollable and selectable. */
 .handle {
+  touch-action: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -125,18 +130,40 @@
   white-space: nowrap;
 }
 
-/* The runner at the row's end. Sized to the row's inner height and left to its
-   own aspect (the four posters are portrait, two widths), so the four rows line
-   up on the right edge but the figures keep their proportions. draggable is off
-   on the element so a pointer drag on the row (the pointer half) never starts
-   a native image drag instead. */
+/* The runner at the row's end: a square box (the artboards are 150x150) on
+   the row's inner height, the canvas and its poster laid over each other so
+   the poster-to-art handoff moves nothing. The posters are portrait, so they
+   sit centered in the square. Pointer events off so a drag on the row never
+   targets the canvas or starts a native image drag.
+
+   The poster leaves through the `hidden` attribute, and the display rule
+   below is guarded with :not([hidden]) for the reason the tool pane's is:
+   an author `display: block` outranks the browser's own `[hidden]
+   { display: none }`, so an unguarded rule keeps a hidden poster on screen.
+   That is exactly what shipped to David's first capture (2026-09-10): the
+   running figure drew over the standing poster, a double image in the held
+   row. */
 .art {
+  position: relative;
   display: block;
+  width: 28px;
   height: 28px;
-  width: auto;
   flex: none;
   user-select: none;
   pointer-events: none;
+}
+
+.artPoster:not([hidden]),
+.artCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.artPoster {
+  object-fit: contain;
 }
 
 /* Visually hidden, present to assistive tech: the handle instructions and the

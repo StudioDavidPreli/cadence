@@ -2254,15 +2254,17 @@ export function TokenLab() {
           )}
         </DemoWrapper>
 
-        {/* Item 13, the keyboard half. The pointer half layers on later
-            (springCapable arrives with it, since only a drop from a real
-            velocity has a spring to show). */}
+        {/* Item 13. Drag a row by its handle and the tokens fall silent until
+            you let go; the spring toggle is the argument, since only a drop
+            from a real velocity has a spring to show. The keyboard path is
+            the other half: no hand, so every move is timed. */}
         <DemoWrapper
           componentName="Reorder"
-          instruction="Tab to a handle: Space grabs the row, the arrows move it, Space drops it, Escape puts it back. No hand to follow yet, so every move is timed"
+          instruction="Drag a row by its handle: while you hold it, no token applies. Let go and it lands from your hand's speed; the spring toggle shows why only a spring can. Or Tab to a handle, Space grabs, arrows move, Space drops, Escape puts it back: no hand, so every move is timed"
           code={DEMO_SNIPPETS.Reorder}
+          springCapable
         >
-          <ReorderList />
+          {mode => <ReorderList motionMode={mode} />}
         </DemoWrapper>
       </div>
     ),
