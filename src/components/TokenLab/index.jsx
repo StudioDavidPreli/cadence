@@ -1114,15 +1114,29 @@ function DemoWrapper({ componentName, instruction, children, code, instructionCl
           </div>
         </div>
         {body}
-        {state !== 'no-demo' && state !== 'detached' && instruction && (
-          <p className={`${styles.demoInstruction} ${instructionClass ?? ''}`}>{instruction}</p>
-        )}
-        {state === 'no-demo' && (
-          <p className={styles.noDemoNote}>Token unused by present components.</p>
-        )}
-        {state === 'detached' && (
-          <p className={styles.detachedNote}>Off-system in this demo. The slider no longer drives it.</p>
-        )}
+        {/* One slot, three faces, always mounted, one visible. The slot's height
+            is the tallest face in every state, so a swap moves nothing below the
+            demo (the 14px Carousel reflow, 2026-09-10). Exactly one face is
+            visible at a time, per the April design: the note takes the
+            instruction's place, it does not sit beside it. `hidden` faces are
+            visibility-hidden, not display-none, on purpose; see .demoCaption in
+            the module CSS. */}
+        <div className={styles.demoCaption}>
+          {instruction && (
+            <p
+              className={`${styles.demoInstruction} ${instructionClass ?? ''}`}
+              hidden={state === 'no-demo' || state === 'detached'}
+            >
+              {instruction}
+            </p>
+          )}
+          <p className={styles.noDemoNote} hidden={state !== 'no-demo'}>
+            Token unused by present components.
+          </p>
+          <p className={styles.detachedNote} hidden={state !== 'detached'}>
+            Off-system in this demo. The slider no longer drives it.
+          </p>
+        </div>
       </div>
       {codeAside ? (
         // Side column: fade in at the tool-chrome timing. No exit animation on

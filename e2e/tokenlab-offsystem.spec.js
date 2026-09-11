@@ -55,7 +55,10 @@ test.describe('off-system edits', () => {
     const slider = page.getByRole('slider', { name: 'duration.fast' })
     await slider.focus()
     await slider.press('ArrowRight')
-    await expect(page.getByText('Off-system in this demo.')).toBeVisible()
+    // Every demo carries all three caption faces since the caption slot
+    // (2026-09-11), so the visible one is what this asserts, not the only one
+    // in the DOM.
+    await expect(page.getByText('Off-system in this demo.').filter({ visible: true })).toHaveCount(1)
     const buttonGroup = page.locator('[class*="demoGroup"]', { has: page.locator('[class*="demoLabel"]', { hasText: /^Button/ }) }).first()
     await expect(buttonGroup).not.toHaveClass(/demoGroupHighlighted/)
   })

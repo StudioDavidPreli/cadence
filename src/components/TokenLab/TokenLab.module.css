@@ -1294,6 +1294,33 @@
   margin-top: 4px;
 }
 
+/* The caption slot. Every face is in the grid's one cell, so the slot is as
+   tall as its tallest face whatever is showing, and a swap between faces
+   cannot move the demos below (2026-09-11; the Carousel caption wraps to two
+   lines, the notes are one). The [hidden] rule is deliberate: the browser's
+   own hidden is display: none, which would drop the face out of the layout and
+   lose its height. visibility keeps the box and hides the paint; the face still
+   contributes no reading order and no pointer. This is the mirror of the
+   runner-poster bug (2026-09-10), where an author display rule defeated
+   [hidden] by accident; here the override is the point and the selector says
+   so.
+
+   The faces keep their own margin-top: 4px. Stacked in one cell they are grid
+   items, not flow siblings, so the three margins do not add and the slot keeps
+   a single 4px gap under the demo. */
+.demoCaption {
+  display: grid;
+}
+
+.demoCaption > p {
+  grid-area: 1 / 1;
+}
+
+.demoCaption > p[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
 /* Suspense fallbacks for the two lazy chunks (PrinciplesLibrary
    and the Carousel demo). The crossfade layers are absolutely positioned, so
    the demo column's geometry never depends on layer content; these only need
