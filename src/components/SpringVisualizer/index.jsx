@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { sampleSettleCurve, dampingRatio } from './springCurve'
+import { sampleSettleCurve, dampingRatio } from 'cadence-tokens'
 import styles from './SpringVisualizer.module.css'
 
 // ─── SpringVisualizer ─────────────────────────────────────────────────────────
@@ -15,7 +15,7 @@ import styles from './SpringVisualizer.module.css'
 // numbers. Same stance DurationVisualizer takes. The live springing version of
 // this is the SpringDemo in the demo column; this is the diagram of it.
 //
-// The math is pure and tested in springCurve.js.
+// The math is pure and tested in the package (packages/tokens/src/springCurve.js).
 
 // SVG plot box. Y is inverted (larger displacement sits higher).
 const PLOT = { x0: 10, x1: 98, y0: 46, y1: 6 }

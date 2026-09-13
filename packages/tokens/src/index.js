@@ -499,6 +499,25 @@ export function nearestToken(path, value, tokens) {
   return { key: `${family}.${best.key}`, value: best.value, matches: best.distance <= epsilon }
 }
 
+// ─── Spring math ──────────────────────────────────────────────────────────────
+// The damped-harmonic-oscillator model behind a spring token, re-exported from
+// the package so the audit and the site's visualizer read one implementation.
+//
+// It moved here from src/components/SpringVisualizer/ on 2026-09-13. The audit
+// used to import it upward out of a leaf layer into components/, which its
+// header named as a direction it would rather not have; moving the audit into
+// this package made that import impossible rather than merely untidy, so the
+// math came first. It imports nothing, by design, so it moved clean.
+export {
+  naturalFrequency,
+  dampingRatio,
+  springDisplacement,
+  settleWindow,
+  overshootFraction,
+  settleTime,
+  sampleSettleCurve,
+} from './springCurve.js'
+
 // ─── Reduced motion ───────────────────────────────────────────────────────────
 // What this system does when the reader has asked for less motion, as data.
 //
@@ -1472,3 +1491,23 @@ export function reducer(state, action) {
       throw new Error(`TokenLab reducer: unknown action type "${action.type}"`)
   }
 }
+
+// ─── The audit ────────────────────────────────────────────────────────────────
+// Cadence's judgment about a token set, re-exported so it ships with the set.
+// See ./audit.js for what it judges and where its bars come from; the short
+// version is that nothing it reports is an error, and it is written for the
+// engineer who has to implement the set rather than for Cadence.
+//
+// Last in the file on purpose. audit.js imports its inputs back from here
+// (EASING_CURVES, the schema, the curve metric, the reduced-motion resolution),
+// which makes a cycle, and a cycle is only safe while everything it reaches has
+// already been initialized. Nothing in audit.js reads those bindings at module
+// level today, so the order does not currently matter; putting the re-export
+// after every declaration means it cannot start to.
+export {
+  auditTokens,
+  auditToMarkdown,
+  auditSummarySentence,
+  THRESHOLDS,
+  NIELSEN_RESPONSE_MS,
+} from './audit.js'

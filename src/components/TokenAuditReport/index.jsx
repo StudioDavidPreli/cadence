@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { auditTokens, auditSummarySentence } from '../../tokens/tokenAudit'
+import { auditTokens, auditSummarySentence } from 'cadence-tokens'
 import styles from './TokenAuditReport.module.css'
 
 // ─── TokenAuditReport ─────────────────────────────────────────────────────────

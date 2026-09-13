@@ -45,24 +45,29 @@
 // the distance under which two curves cannot be told apart, so that one question
 // has an answer the tool measured. See checkEasing.
 //
-// Layering note: this imports from components/SpringVisualizer/springCurve.js,
-// which points from a leaf layer up into components/. It creates no cycle
-// (springCurve.js imports nothing at all, by design), but the direction is worth
-// naming. The alternative is relocating springCurve.js to a shared leaf such as
-// src/tokens/ or src/utils/, which would touch SpringVisualizer. Left as-is
-// because the spring math has one owner and the audit is its second reader, not
-// its new home.
+// Where this runs. Inside the tool it answers the modal and the tool bar line.
+// It also ships in cadence-tokens, so the engineer who received a token file can
+// run the same judgment in their own CI on the file they were handed, rather
+// than coming back to the site for it. A check is worth more where the work
+// happens. The function was always pure and always took state, so moving it was
+// mostly a question of ownership (2026-09-13).
+//
+// The one thing that had to move first was the spring math. This module read it
+// from components/SpringVisualizer/, a leaf-to-components import its header used
+// to name as a direction it would rather not have. Shipping the audit in the
+// package turned that from untidy into impossible, so springCurve.js came down
+// here with it.
 
 import {
   stateToTokens, nearestToken, formatDisplay,
   EASING_CURVES, EDITABLE_TOKEN_SCHEMA, curveDistance, CURVE_SEPARATION,
   REDUCED_MOTION_RESOLUTION,
-} from 'cadence-tokens'
+} from './index.js'
 import {
   settleTime,
   overshootFraction,
   dampingRatio,
-} from '../components/SpringVisualizer/springCurve'
+} from './springCurve.js'
 
 // ─── Thresholds ───────────────────────────────────────────────────────────────
 // Exported so the tests can pin them and a future panel can show the bar it

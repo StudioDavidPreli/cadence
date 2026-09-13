@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { auditTokens, auditToMarkdown, auditSummarySentence, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
+import { auditTokens, auditToMarkdown, auditSummarySentence, THRESHOLDS, NIELSEN_RESPONSE_MS } from './audit.js'
 import {
   INITIAL_STATE, BUILT_IN_PRESETS, EASING_CURVES, EDITABLE_TOKEN_SCHEMA,
   curveDistance, CURVE_SEPARATION, REDUCED_MOTION_RESOLUTION,
-} from 'cadence-tokens'
+} from './index.js'
 
 // Build a state by overriding one family of INITIAL_STATE, so each test states
 // only the thing it is testing and everything else stays at a known-clean value.

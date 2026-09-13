@@ -46,7 +46,9 @@ Each personality ships as a complete stylesheet of custom properties:
 | File | What it is |
 | --- | --- |
 | `src/index.js` | The data and every emitter, as pure functions. |
+| `src/audit.js` | The audit: what a token set says about itself, as a report. See below. |
 | `dist/cadence.tokens.json` | The canonical document: all three presets, both vocabularies. |
+| `dist/cadence.resolver.json` | The reduced-motion answer as a Design Tokens Resolver Module 2025.10 document, pointing at `cadence.tokens.json` beside it. |
 | `dist/cadence.rive.json` | Per-preset view-model defaults for Rive, with the clock math and binding-unit notes. |
 | `dist/<preset>/cadence.css` | One personality as `--cadence-*` custom properties. |
 | `dist/<preset>/cadence.motion.js` | One personality as a ready Framer Motion module. |
@@ -55,6 +57,46 @@ Each personality ships as a complete stylesheet of custom properties:
 | `dist/cadence.figma.json` | The interaction tokens as one Figma variable collection with the three personalities as modes, on Figma's native motion types: TIMING durations and delays (seconds), one EASING variable per curve carrying a real cubic-bezier, FLOAT scale and spring parameters. Shaped on Figma's own collection/modes/valuesByMode vocabulary so plugins and scripts map it one to one. |
 
 `cadence-tokens/tokens.json` and `cadence-tokens/rive.json` resolve as export paths if you prefer importing the documents to reading files.
+
+## Audit the set
+
+The judgment Cadence applies to a token set travels with the set, so you can run
+it in your own CI on the file you were handed instead of coming back to the site
+for it.
+
+Point it at a file somebody exported from Token Lab, in either the DTCG or the
+flat shape. (Not at `dist/cadence.tokens.json` in this package: that one is the
+combined document carrying all three presets at once, which is a different kind
+of file and not something `importTokens` reads.)
+
+```js
+import { importTokens, auditTokens, auditToMarkdown } from 'cadence-tokens'
+import { readFileSync } from 'node:fs'
+
+// The .tokens.json a designer handed you, not this package's own document.
+const result = importTokens(readFileSync('cadence.tokens.json', 'utf8'))
+if (!result.ok) throw new Error(result.error)
+
+const { deviations } = result
+const { findings, measurements, counts } = auditTokens(result.state, { deviations })
+process.stdout.write(auditToMarkdown(result.state, { deviations }))
+```
+
+Nothing it reports is an error. Every result is a `finding` (the set contradicts
+itself), a `note` (legal, and worth seeing), or an `off-system` row (one
+component running a literal in place of a token, which says nothing about the
+set). It never blocks, never repairs, and never refuses, because a wide range is
+a legitimate choice and a tool that stamped "invalid" on one would be lying about
+what it knows.
+
+The bars come from two places and nowhere else: the set measured against itself
+(a duration ladder that runs backwards, a spring wildly out of proportion to the
+set's own durations, two easing slots that draw one curve), or one cited external
+number. These three presets are not an authority; a set that looks nothing like
+them is not thereby wrong.
+
+The report prints the values it judged, because it is written for the engineer
+who has to implement the set rather than for the person who exported it.
 
 ## Two vocabularies, one preset
 
