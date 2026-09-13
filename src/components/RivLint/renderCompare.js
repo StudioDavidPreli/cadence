@@ -9,35 +9,66 @@
 // frames (so "all instances the same" is not the check; this is).
 //
 // Two halves: renderInstances runs the runtime (a detached canvas per load,
-// autoBind off, the named instance bound by hand, the first state machine
-// advanced for a fixed beat, one frame read back); comparePixels is pure and
-// tested. Both files are drawn at the same size, the same instance, the same
-// beat, so a difference is the files', not the harness's. A difference is
-// still only a difference: a binding, a value, or the art itself. The page
+// autoBind off, the named instance bound by hand, the state machine applied at
+// zero and one frame read); comparePixels and isFlat are pure and tested. Both
+// files are drawn at the same size, on the same instance, at the same point in
+// the machine, so a difference is the files', not the harness's. A difference
+// is still only a difference: a binding, a value, or the art itself. The page
 // says which of those it cannot tell apart.
+//
+// Why zero and not a beat (2026-09-13). The first version ran the machine for a
+// wall-clock 200 ms and read whatever frame that landed on. Nothing about that
+// beat belonged to the file. The runtime advances by however long the browser
+// took to reach the next animation frame and stops drawing when the machine
+// runs out of work, so the pose a file freezes on is a function of the frame
+// rate: under a full parallel e2e run the same file compared against itself
+// reported up to 11.7 percent of the canvas moved, one side caught before its
+// first advance and the other after it. Waiting for the artboard to stop
+// changing does not fix it either, and was tried: the two sides stop at
+// different poses and each holds there, because a machine fed one long delta
+// lands somewhere a machine fed many short ones does not. Measured across four
+// parallel contexts, the same file against itself froze on two distinct poses
+// per instance, both perfectly still.
+//
+// So the beat is gone. `play` applies the machine's entry state at an elapsed
+// time of exactly zero and draws one frame; rendering is stopped before the
+// runtime can schedule a second. That pose is a property of the file and the
+// bound instance, and two reads of it are equal by construction on any
+// machine, under any load. What it costs is written in the limitations: a
+// difference that only appears later in the animation is not seen here, and a
+// file whose first frame draws nothing is reported as exactly that rather than
+// as a match.
 import { loadInstance } from './readRiv'
 
 export const RENDER_SIZE = 200
-// How long the state machine runs before the frame is read. Long enough for
-// an entry state to settle, short enough that an idle loop has not drifted
-// far; the same beat for both files.
-export const SETTLE_MS = 200
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+// Resolves after the browser has finished a frame, or after this long if none
+// comes (a backgrounded tab never fires rAF). Nothing is advancing by then
+// either way: it is a pause to let the drawn frame reach the canvas, not a beat.
+const NO_FRAME_MS = 1000
+const afterFrame = () => new Promise(resolve => {
+  const timer = setTimeout(resolve, NO_FRAME_MS)
+  requestAnimationFrame(() => setTimeout(() => { clearTimeout(timer); resolve() }, 0))
+})
 
-// Reads the drawn canvas into a plain RGBA array plus a PNG data URL for the
-// page. The runtime draws through its offscreen renderer and blits to this
-// canvas, so a 2D copy is the reliable read.
-function snapshot(canvas) {
-  const copy = document.createElement('canvas')
-  copy.width = canvas.width
-  copy.height = canvas.height
-  const ctx = copy.getContext('2d')
+// Reads the drawn canvas into a plain RGBA array. The runtime draws through its
+// offscreen renderer and blits to this canvas, so a 2D copy is the reliable
+// read.
+function readPixels(canvas, scratch) {
+  const ctx = scratch.getContext('2d')
+  ctx.clearRect(0, 0, scratch.width, scratch.height)
   ctx.drawImage(canvas, 0, 0)
-  return {
-    data: ctx.getImageData(0, 0, copy.width, copy.height).data,
-    png: copy.toDataURL('image/png'),
+  return ctx.getImageData(0, 0, scratch.width, scratch.height).data
+}
+
+// Pure: is every pixel of this frame the same color? Two frames that drew
+// nothing compare equal, and reporting that as a match would be the comparison
+// claiming a result it never had. The page says so instead.
+export function isFlat(data) {
+  for (let i = 4; i < data.length; i += 4) {
+    if (data[i] !== data[0] || data[i + 1] !== data[1] || data[i + 2] !== data[2] || data[i + 3] !== data[3]) return false
   }
+  return true
 }
 
 // buffer + { artboard, stateMachine, viewModel, instances } → per-instance
@@ -46,6 +77,9 @@ export async function renderInstances(buffer, { artboard, stateMachine, viewMode
   const canvas = document.createElement('canvas')
   canvas.width = RENDER_SIZE
   canvas.height = RENDER_SIZE
+  const scratch = document.createElement('canvas')
+  scratch.width = RENDER_SIZE
+  scratch.height = RENDER_SIZE
   const frames = {}
   for (const name of instances) {
     let r = null
@@ -58,13 +92,18 @@ export async function renderInstances(buffer, { artboard, stateMachine, viewMode
         r.bindViewModelInstance(inst)
       }
       if (stateMachine) {
+        // `play` draws its first frame inline with an elapsed time of zero, so
+        // the machine's entry state is applied (which is what carries the view
+        // model onto the shapes) and nothing has advanced. `stopRendering`
+        // cancels the animation frame that draw just scheduled, before it can
+        // advance by whatever the browser's cadence turns out to be.
         r.play(stateMachine)
-        await sleep(SETTLE_MS)
-        r.pause(stateMachine)
+        r.stopRendering()
+      } else {
+        r.drawFrame()
       }
-      r.drawFrame()
-      await sleep(30)
-      frames[name] = snapshot(canvas)
+      await afterFrame()
+      frames[name] = { data: readPixels(canvas, scratch), png: scratch.toDataURL('image/png') }
     } catch (err) {
       frames[name] = { error: err?.message ?? String(err) }
     } finally {
@@ -96,12 +135,21 @@ export function comparePixels(a, b, width, height) {
   }
 }
 
-// Draw both, compare each instance. Returns [{ instance, a, b, diff | error }].
+// Draw both, compare each instance. Returns one row per instance:
+// { instance, error } when a file would not draw it, otherwise { instance, a,
+// b, diff, blank }, where blank marks a pair that drew nothing on either side
+// and so proves nothing about the bindings.
 export async function renderComparison(bufferA, bufferB, scene) {
   const [fa, fb] = [await renderInstances(bufferA, scene), await renderInstances(bufferB, scene)]
   return scene.instances.map(name => {
     const a = fa[name], b = fb[name]
     if (a.error || b.error) return { instance: name, error: a.error ?? b.error, a: a.png ?? null, b: b.png ?? null }
-    return { instance: name, a: a.png, b: b.png, diff: comparePixels(a.data, b.data, RENDER_SIZE, RENDER_SIZE) }
+    return {
+      instance: name,
+      a: a.png,
+      b: b.png,
+      blank: isFlat(a.data) && isFlat(b.data),
+      diff: comparePixels(a.data, b.data, RENDER_SIZE, RENDER_SIZE),
+    }
   })
 }

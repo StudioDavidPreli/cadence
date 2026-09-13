@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { comparePixels } from './renderCompare'
+import { comparePixels, isFlat } from './renderCompare'
 
 const W = 8, H = 8
 const blank = () => new Uint8ClampedArray(W * H * 4)
@@ -26,5 +26,25 @@ describe('comparePixels', () => {
     const a = blank(), b = blank()
     paint(a, 0, 0, [10, 10, 10, 255]); paint(b, 0, 0, [10, 10, 10, 128])
     expect(comparePixels(a, b, W, H).differing).toBe(1)
+  })
+})
+
+// A pair of empty frames compares equal and proves nothing, so the page needs
+// to know an empty frame when it reads one.
+describe('isFlat', () => {
+  it('reads an untouched frame as flat', () => {
+    expect(isFlat(blank())).toBe(true)
+  })
+
+  it('reads a frame of one solid color as flat', () => {
+    const a = blank()
+    for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) paint(a, x, y, [17, 34, 51, 255])
+    expect(isFlat(a)).toBe(true)
+  })
+
+  it('reads one painted pixel as not flat', () => {
+    const a = blank()
+    paint(a, 6, 2, [0, 0, 0, 255])
+    expect(isFlat(a)).toBe(false)
   })
 })
