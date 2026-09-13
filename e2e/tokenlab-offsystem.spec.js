@@ -98,15 +98,20 @@ test.describe('off-system edits', () => {
     ])
     const text = await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString('utf8'))
     const doc = JSON.parse(text)
+    // The 2025.10 leaf shape, on the built bundle: a duration $value is an
+    // object, in the token tree and in the deviation appendix alike.
+    expect(doc.motion.duration.fast.$value).toEqual({ value: 100, unit: 'ms' })
     const list = doc.$extensions['com.davidpreli.cadence'].deviations
     expect(list).toHaveLength(2)
-    expect(list[0]).toMatchObject({ component: 'Button', token: 'duration.fast', $value: '250ms' })
+    expect(list[0]).toMatchObject({ component: 'Button', token: 'duration.fast', $value: { value: 250, unit: 'ms' } })
     expect(list[1]).toMatchObject({ component: 'Button', token: 'easing.overshoot' })
 
     // Clear, then import the same file with one deviation naming a component
     // no demo carries.
     await page.getByRole('button', { name: 'Snappy' }).first().click()
     await expect(block).not.toContainText('off-system')
+    // Deliberately in the pre-2025.10 string form: import still reads it, so this
+    // one line also proves legacy acceptance against the built bundle.
     list.push({ component: 'Ghost', token: 'duration.fast', $type: 'duration', $value: '300ms' })
     await page.locator('input[type="file"]').first().setInputFiles({
       name: 'cadence.tokens.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(doc)),

@@ -294,7 +294,13 @@ export function tokenKeyToCssSuffix(key) {
 // pre-stringified blob. The in-app export button still downloads the string.
 export function toDtcgDoc(state, { deviations = [] } = {}) {
   const t = stateToExport(state)
-  const duration = ms => ({ $type: 'duration', $value: `${ms}ms` })
+  // DTCG 2025.10 (the first stable release of the Design Tokens Format Module,
+  // 28 October 2025) requires a duration $value to be an object, { value, unit },
+  // where unit is 'ms' or 's'. The bare "100ms" string earlier drafts allowed is
+  // no longer permitted. Always 'ms', never 's': the CSS file, the flat file and
+  // this document then read in one unit, which is the point of shipping several
+  // formats off one state.
+  const duration = ms => ({ $type: 'duration', $value: { value: ms, unit: 'ms' } })
   const bezier   = arr => ({ $type: 'cubicBezier', $value: arr })
   const number   = n => ({ $type: 'number', $value: n })
   // Off-system deviations ride in the root group's $extensions, under the
@@ -423,6 +429,12 @@ const CONTROL_TO_RUNTIME_FAMILY = { duration: 'duration', easing: 'ease', delay:
 // Seconds -> ms without float noise (0.123 * 1000 is 123.00000000000001 in JS).
 const secondsToMs = s => +(s * 1000).toFixed(3)
 
+// The two families that carry time. One set, three jobs: they are the families
+// that convert between the runtime's seconds and the file's milliseconds, and
+// they are the only ones DTCG types as `duration` (the rest are `number`), so
+// they are the only ones whose $value may be a { value, unit } object.
+const TIME_FAMILIES = new Set(['duration', 'delay'])
+
 // The `$extensions` key DTCG reserves for tool-specific data, reverse-DNS
 // namespaced per the spec so it cannot collide with another tool's block.
 export const DTCG_EXTENSION_KEY = 'com.davidpreli.cadence'
@@ -430,7 +442,7 @@ export const DTCG_EXTENSION_KEY = 'com.davidpreli.cadence'
 export function deviationToExport({ component, token, value }) {
   const [runtimeFamily, key] = token.split('.')
   const family = RUNTIME_TO_CONTROL_FAMILY[runtimeFamily]
-  const exportValue = (family === 'duration' || family === 'delay') ? secondsToMs(value) : value
+  const exportValue = TIME_FAMILIES.has(family) ? secondsToMs(value) : value
   return { component, token: `${family}.${key}`, value: exportValue }
 }
 
@@ -438,14 +450,14 @@ export function deviationToExport({ component, token, value }) {
 // flat file uses the flat conventions (ms strings, cubic-bezier() strings).
 function deviationLeafDtcg(d) {
   const [family] = d.token.split('.')
-  if (family === 'duration' || family === 'delay') return { $type: 'duration', $value: `${d.value}ms` }
+  if (TIME_FAMILIES.has(family)) return { $type: 'duration', $value: { value: d.value, unit: 'ms' } }
   if (family === 'easing') return { $type: 'cubicBezier', $value: d.value }
   return { $type: 'number', $value: d.value }
 }
 
 function deviationLeafFlat(d) {
   const [family] = d.token.split('.')
-  if (family === 'duration' || family === 'delay') return `${d.value}ms`
+  if (TIME_FAMILIES.has(family)) return `${d.value}ms`
   if (family === 'easing') return bezierCss(d.value)
   return d.value
 }
@@ -861,10 +873,32 @@ function getGroup(parsed, format, family) {
   return format === 'dtcg' ? parsed?.motion?.[family] : parsed?.[family]
 }
 
-// Pull a scalar leaf as a number. DTCG leaves are { $type, $value }; flat leaves
-// are the bare value. Accepts "200ms" strings and bare numbers either way.
-function readScalar(leaf, format, path) {
+// Pull a scalar leaf as a number, in milliseconds where the family carries time.
+// DTCG leaves are { $type, $value }; flat leaves are the bare value.
+//
+// Three shapes are accepted, on purpose. A DTCG duration $value is the 2025.10
+// object, { value, unit }; every DTCG file Cadence wrote before that spec landed
+// carries the string "200ms" instead; and a hand-written file may carry a bare
+// number. Export emits one shape, import reads all three, so no file the tool has
+// ever produced stops loading.
+//
+// `timeValued` says the leaf belongs to a family DTCG types as `duration`, which
+// is the only place the object form is legal. The caller knows the family, so the
+// branch is keyed on that rather than on the shape it happens to find: an object
+// sitting on a `number` leaf (scale, spring, the scalar) is a broken file, and
+// falls through to the parseFloat below, which throws.
+function readScalar(leaf, format, path, { timeValued = false } = {}) {
   const v = format === 'dtcg' ? leaf?.$value : leaf
+  if (timeValued && v !== null && typeof v === 'object' && !Array.isArray(v)) {
+    const { value, unit } = v
+    if (unit !== 'ms' && unit !== 's') {
+      throw new ImportError(`${path}: expected a duration in ms or s.`)
+    }
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      throw new ImportError(`${path}: expected a number.`)
+    }
+    return unit === 's' ? secondsToMs(value) : value
+  }
   const n = typeof v === 'number' ? v : parseFloat(v)
   if (!Number.isFinite(n)) throw new ImportError(`${path}: expected a number.`)
   return n
@@ -957,7 +991,7 @@ function buildState(parsed, format) {
         filled.push({ path, to: INITIAL_STATE[family][key] })
         continue
       }
-      const raw = readScalar(leaf, format, path)
+      const raw = readScalar(leaf, format, path, { timeValued: TIME_FAMILIES.has(family) })
       const value = clampScalar(raw, bounds)
       if (value !== raw) clamped.push({ path, from: raw, to: value })
       state[family][key] = value
@@ -1099,10 +1133,10 @@ export function importDeviations(parsed, format) {
       if (raw <= 0) throw new ImportError(`${at}: spring ${key} must be greater than 0.`)
       value = clampScalar(raw, SPRING_BOUNDS[key])
     } else {
-      const raw = readScalar(leaf, format, `${at}.value`)
+      const raw = readScalar(leaf, format, `${at}.value`, { timeValued: TIME_FAMILIES.has(family) })
       const bounded = clampScalar(raw, EXPLORE_BOUNDS[family])
       // Back to the runtime unit for duration and delay (ms -> seconds).
-      value = (family === 'duration' || family === 'delay') ? bounded / 1000 : bounded
+      value = TIME_FAMILIES.has(family) ? bounded / 1000 : bounded
     }
     return { component: d.component.trim(), token, value }
   })

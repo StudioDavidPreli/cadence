@@ -121,9 +121,9 @@ describe('stateToExport', () => {
 describe('toDtcgJson', () => {
   it('wraps every leaf in $type / $value under a motion namespace', () => {
     const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
-    expect(doc.motion.duration.fast).toEqual({ $type: 'duration', $value: '100ms' })
+    expect(doc.motion.duration.fast).toEqual({ $type: 'duration', $value: { value: 100, unit: 'ms' } })
     expect(doc.motion.easing.standard).toEqual({ $type: 'cubicBezier', $value: EASING_CURVES.standard.fm })
-    expect(doc.motion.delay.short).toEqual({ $type: 'duration', $value: '50ms' })
+    expect(doc.motion.delay.short).toEqual({ $type: 'duration', $value: { value: 50, unit: 'ms' } })
     expect(doc.motion.scale.lift).toEqual({ $type: 'number', $value: 1.02 })
     // The renamed press keys keep their camelCase JSON spelling (the CSS-kebab
     // conversion is CSS-output-only; see toCssVars below).
@@ -134,7 +134,7 @@ describe('toDtcgJson', () => {
     const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
     expect(doc.motion.easing.linear.$value).toEqual(EASING_CURVES.linear.fm)
     expect(doc.motion.easing.overshoot.$value).toEqual(EASING_CURVES.overshoot.fm)
-    expect(doc.motion.delay.none).toEqual({ $type: 'duration', $value: '0ms' })
+    expect(doc.motion.delay.none).toEqual({ $type: 'duration', $value: { value: 0, unit: 'ms' } })
   })
 
   it('serializes spring params as plain number leaves under motion.spring', () => {
@@ -486,6 +486,96 @@ describe('importTokens', () => {
   })
 })
 
+// ─── DTCG 2025.10 leaf shape ──────────────────────────────────────────────────
+// The Design Tokens Format Module 2025.10 (stable, 28 October 2025) requires a
+// duration $value to be an object, { value, unit }. Cadence emitted the "100ms"
+// string an earlier draft allowed, so export moved to the object and import
+// learned to read the object, the old string, and a bare number. These pin all
+// three, and pin the rule that only a duration-typed leaf may carry the object.
+describe('DTCG duration leaves (2025.10)', () => {
+  // What cadence-tokens 1.0.0 wrote for the same state: every duration-typed
+  // leaf as a string. Downgraded from the current export rather than typed out,
+  // so it stays a faithful old file of whatever the token set holds today.
+  const legacyDtcg = state => {
+    const doc = JSON.parse(toDtcgJson(state))
+    for (const family of ['duration', 'delay']) {
+      for (const [key, leaf] of Object.entries(doc.motion[family])) {
+        doc.motion[family][key] = { $type: 'duration', $value: `${leaf.$value.value}ms` }
+      }
+    }
+    return JSON.stringify(doc)
+  }
+
+  it('writes every duration and delay leaf as { value, unit: ms }', () => {
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    for (const family of ['duration', 'delay']) {
+      for (const [key, leaf] of Object.entries(doc.motion[family])) {
+        expect(leaf.$type, `${family}.${key}`).toBe('duration')
+        expect(leaf.$value, `${family}.${key}`).toEqual({ value: expect.any(Number), unit: 'ms' })
+      }
+    }
+  })
+
+  it('round-trips the object form back to the same state', () => {
+    const res = importTokens(toDtcgJson(INITIAL_STATE))
+    expect(res.ok).toBe(true)
+    expect(res.state).toEqual(INITIAL_STATE)
+    expect(res.report.filled).toEqual([])
+  })
+
+  it('reads a seconds leaf as milliseconds', () => {
+    // The spec permits 's' as well as 'ms'. Cadence never writes it; a file from
+    // another tool may, and 0.4 * 1000 must land on 400, not 400.00000000000006.
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    doc.motion.duration.slow.$value = { value: 0.4, unit: 's' }
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(true)
+    expect(res.state.duration.slow).toBe(400)
+    expect(res.report.clamped).toEqual([])
+  })
+
+  it('still loads a legacy file whose duration leaves are strings', () => {
+    const res = importTokens(legacyDtcg(INITIAL_STATE))
+    expect(res.ok).toBe(true)
+    expect(res.state).toEqual(INITIAL_STATE)
+    expect(res.report.clamped).toEqual([])
+    expect(res.report.filled).toEqual([])
+    expect(res.report.ignored).toEqual([])
+  })
+
+  it('rejects an unknown unit, naming the leaf', () => {
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    doc.motion.duration.base.$value = { value: 200, unit: 'frames' }
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(false)
+    expect(res.error).toContain('duration.base')
+    expect(res.error).toContain('ms or s')
+  })
+
+  it('rejects a { value, unit } object on a number leaf', () => {
+    // scale is DTCG `number`. An object there is a broken file, not a duration
+    // in disguise, which is why import keys the object branch on the family.
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE))
+    doc.motion.scale.lift.$value = { value: 1.02, unit: 'ms' }
+    const res = importTokens(JSON.stringify(doc))
+    expect(res.ok).toBe(false)
+    expect(res.error).toContain('scale.lift')
+  })
+
+  it('reads a deviation leaf in either form to the same override', () => {
+    const deviations = [{ component: 'Button', token: 'duration.fast', value: 0.25 }]
+    const doc = JSON.parse(toDtcgJson(INITIAL_STATE, { deviations }))
+    const modern = importTokens(JSON.stringify(doc))
+    const entry = doc.$extensions['com.davidpreli.cadence'].deviations[0]
+    entry.$value = `${entry.$value.value}ms`
+    const legacy = importTokens(JSON.stringify(doc))
+    expect(modern.ok).toBe(true)
+    expect(modern.deviations).toEqual(deviations)
+    expect(legacy.ok).toBe(true)
+    expect(legacy.deviations).toEqual(modern.deviations)
+  })
+})
+
 // ─── Off-system deviations ────────────────────────────────────────────────────
 // A deviation is one demo component running a literal in place of the token it
 // names (the Token Lab off-system edit, 2026-09-09). It never enters state; each
@@ -519,7 +609,7 @@ describe('deviations', () => {
   it('serializes in each format\'s own units and family spelling', () => {
     const dtcg = JSON.parse(toDtcgJson(INITIAL_STATE, { deviations }))
     const list = dtcg.$extensions['com.davidpreli.cadence'].deviations
-    expect(list[0]).toEqual({ component: 'Button', token: 'duration.fast', $type: 'duration', $value: '250ms' })
+    expect(list[0]).toEqual({ component: 'Button', token: 'duration.fast', $type: 'duration', $value: { value: 250, unit: 'ms' } })
     expect(list[1]).toEqual({ component: 'Card', token: 'easing.overshoot', $type: 'cubicBezier', $value: [0.3, 1.4, 0.6, 1] })
     expect(list[2]).toEqual({ component: 'Toggle', token: 'spring.stiffness', $type: 'number', $value: 420 })
 

@@ -62,6 +62,7 @@ The interaction tokens (duration, easing, delay, scale, spring) describe event-d
 
 ## Limitations
 
+- The DTCG export targets the Design Tokens Format Module 2025.10, the first stable release. Durations and delays carry the object value that release requires, `{ "$type": "duration", "$value": { "value": 200, "unit": "ms" } }`, always in `ms`.
 - DTCG has no delay or spring type. Delays serialize as `duration` (a delay is a duration measured from a trigger); the three spring parameters serialize as `number` leaves under a `spring` group. Both round-trip through Cadence's own importer.
 - The ambient vocabulary is not DTCG at all. There is no token type for a period divisor or an ease exponent, and inventing `$types` would be costume, not compliance. Those values ship as plain numbers.
 - The Framer Motion module omits the duration scalar: a transition takes a concrete duration, not a base times a multiplier.
