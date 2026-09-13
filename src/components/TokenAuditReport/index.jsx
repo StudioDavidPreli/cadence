@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { auditTokens } from '../../tokens/tokenAudit'
+import { auditTokens, auditSummarySentence } from '../../tokens/tokenAudit'
 import styles from './TokenAuditReport.module.css'
 
 // ─── TokenAuditReport ─────────────────────────────────────────────────────────
@@ -26,22 +26,22 @@ import styles from './TokenAuditReport.module.css'
 // A measurement whose reference is exceeded is stated in words rather than
 // colored, for the same reason: the audit reports where the set landed, and
 // coloring it would be the tool editorializing about a legitimate choice.
-export function TokenAuditReport({ state, onDownload, onCopy, copied = false }) {
-  // Recomputed only when the token set changes. The audit is cheap, but the modal
-  // re-renders on every parent render while open, and the result feeds three
-  // separate lists below.
-  const { findings, measurements, counts } = useMemo(() => auditTokens(state), [state])
+export function TokenAuditReport({ state, deviations = [], onDownload, onCopy, copied = false }) {
+  // Recomputed when the token set or the off-system values change. The audit is
+  // cheap, but the modal re-renders on every parent render while open, and the
+  // result feeds four separate lists below.
+  const { findings, measurements, counts } = useMemo(
+    () => auditTokens(state, { deviations }),
+    [state, deviations],
+  )
 
   const problems = findings.filter(f => f.severity === 'finding')
   const notes = findings.filter(f => f.severity === 'note')
+  const offSystem = findings.filter(f => f.severity === 'off-system')
 
   return (
     <div className={styles.report}>
-      <p className={styles.summary}>
-        {counts.finding === 0
-          ? 'Nothing in this set contradicts itself.'
-          : `${counts.finding} ${counts.finding === 1 ? 'finding' : 'findings'}, ${counts.note} ${counts.note === 1 ? 'note' : 'notes'}.`}
-      </p>
+      <p className={styles.summary}>{auditSummarySentence(counts)}</p>
 
       {problems.length > 0 && (
         <AuditSection title="Findings">
@@ -52,6 +52,20 @@ export function TokenAuditReport({ state, onDownload, onCopy, copied = false }) 
       {notes.length > 0 && (
         <AuditSection title="Notes">
           {notes.map(f => <AuditRow key={f.id} entry={f} note />)}
+        </AuditSection>
+      )}
+
+      {/* Between the notes and the measurements: a deviation is not a judgment on
+          the set, so it sits after everything that is, and before the numbers
+          the set produces. The sentence under the heading points at the two
+          repairs and the audit performs neither. */}
+      {offSystem.length > 0 && (
+        <AuditSection title="Off-system">
+          <li className={styles.sectionNote}>
+            These values run in place of a token in one demo. The token set is
+            unchanged; the code view offers Adopt and Reconnect.
+          </li>
+          {offSystem.map(f => <AuditRow key={f.id} entry={f} marker={styles.markerOffSystem} />)}
         </AuditSection>
       )}
 
@@ -102,10 +116,13 @@ function AuditSection({ title, children, listClassName }) {
 
 // The marker is decorative: the section heading above already names the severity,
 // so it is hidden from assistive tech rather than announced twice per row.
-function AuditRow({ entry, note = false }) {
+// `marker` overrides the shape for a section that is neither a finding nor a
+// note; `note` stays a boolean because the two original sections read better as
+// one flag than as two class arguments.
+function AuditRow({ entry, note = false, marker = null }) {
   return (
     <li className={styles.row}>
-      <span className={note ? styles.markerNote : styles.marker} aria-hidden="true" />
+      <span className={marker ?? (note ? styles.markerNote : styles.marker)} aria-hidden="true" />
       <div className={styles.rowBody}>
         <div className={styles.message}>{entry.message}</div>
         <code className={styles.paths}>{entry.paths.join('  ')}</code>

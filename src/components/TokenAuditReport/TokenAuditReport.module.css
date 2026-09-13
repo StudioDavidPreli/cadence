@@ -92,6 +92,31 @@
   border: 1px solid var(--color-text-base);
 }
 
+/* A third shape for the off-system rows, and the one marker that is not on
+   --color-text-base. The detached note under the demo itself is muted on
+   purpose: the demo is not warning, it is reporting a state the reader chose,
+   and the audit row takes the same position. A dash rather than a disc or a
+   ring, so the three sections stay apart at a glance without hue doing any of
+   the work. --color-text-muted already carries this dialog's .paths text over
+   4.5:1 in all four themes, which is well past the 3:1 a graphical mark needs,
+   so the muting costs no contrast. */
+.markerOffSystem {
+  flex: none;
+  width: 6px;
+  height: 2px;
+  margin-top: 0.75em;
+  background-color: var(--color-text-muted);
+}
+
+/* The one line of prose inside a section, above its rows. Muted and indented
+   past the marker column so it reads as a caption on the heading rather than as
+   a row with a missing mark. */
+.sectionNote {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+  margin-left: 14px;
+}
+
 /* ── Measurement rows ────────────────────────────────────────────────────────
    Three columns on one line: what was measured, the number, and the reference it
    was measured against. The reference column is the widest and the least

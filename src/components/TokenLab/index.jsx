@@ -698,14 +698,23 @@ export function ExportSection({ rawState, deviations = [], format, onFormatChang
   // the modal carries the rows. Recomputed when the token set changes, which for
   // this section means on every slider release rather than every frame, since
   // rawState is the committed state and not a drag value.
+  // The off-system count rides this line rather than a second one, because the
+  // silence it exists to end was on this line: the tool bar read "nothing to
+  // flag" while a demo had just declined the set (David, 2026-09-12). It is
+  // never folded into the finding count, which is why it is appended after the
+  // verdict instead of joining the parts list.
   const auditSummary = useMemo(() => {
-    const { counts } = auditTokens(rawState)
-    if (counts.finding === 0 && counts.note === 0) return 'Audit: nothing to flag'
+    const { counts } = auditTokens(rawState, { deviations })
+    const offSystem = counts.offSystem > 0 ? `${counts.offSystem} off-system` : ''
+    if (counts.finding === 0 && counts.note === 0) {
+      return offSystem ? `Audit: nothing to flag, ${offSystem}` : 'Audit: nothing to flag'
+    }
     const parts = []
     if (counts.finding > 0) parts.push(`${counts.finding} ${counts.finding === 1 ? 'finding' : 'findings'}`)
     if (counts.note > 0) parts.push(`${counts.note} ${counts.note === 1 ? 'note' : 'notes'}`)
+    if (offSystem) parts.push(offSystem)
     return `Audit: ${parts.join(', ')}`
-  }, [rawState])
+  }, [rawState, deviations])
 
   // The current token state serialized in the selected format. Computed on
   // demand (export and copy both call it) rather than held in state.
@@ -841,6 +850,11 @@ function ImportReport({ result }) {
   // second, so the import report would be misleading without it. Counts only: the
   // rows live in the audit modal, and stacking a second dialog on top of this one
   // to show them would be a worse answer than a sentence.
+  //
+  // Deliberately not given the file's deviations. This sentence is about the set
+  // the file describes, and the restored off-system values are the subject of
+  // their own line directly below; counting them here would say the same number
+  // twice in three lines.
   const auditCounts = auditTokens(result.state).counts
 
   return (
@@ -1735,6 +1749,12 @@ export function TokenLab() {
   // system), import fills it from a file's deviations, and export flattens it.
   const [overrides, setOverrides] = useState({})
 
+  // The override set flattened once per change, not once per render. Four
+  // readers now take this list (the exports, the tool bar's audit line, the
+  // audit modal, and the audit document), and three of them memoize on it, so a
+  // fresh array every render would defeat every one of those memos.
+  const deviations = useMemo(() => deviationsFromOverrides(overrides), [overrides])
+
   // Bumped by the dispatch wrapper below on LOAD_PRESET and RESET_TO_DEFAULTS
   // only, and read by the nav background so it can re-reveal on a deliberate
   // preset change without re-timing on every slider frame. See
@@ -2007,14 +2027,14 @@ export function TokenLab() {
   function handleAuditDownload() {
     downloadTextFile(
       'motion-token-audit.md',
-      auditToMarkdown(rawState, { presetLabel: auditLabel }),
+      auditToMarkdown(rawState, { deviations, presetLabel: auditLabel }),
       'text/markdown',
     )
   }
 
   async function handleAuditCopy() {
     try {
-      await navigator.clipboard.writeText(auditToMarkdown(rawState, { presetLabel: auditLabel }))
+      await navigator.clipboard.writeText(auditToMarkdown(rawState, { deviations, presetLabel: auditLabel }))
       setAuditCopied(true)
       setTimeout(() => setAuditCopied(false), 1500)
     } catch {
@@ -2409,7 +2429,7 @@ export function TokenLab() {
         info={<PrivacyInfoGlyph />}
         infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
-        <ExportSection rawState={rawState} deviations={deviationsFromOverrides(overrides)} onOpenAudit={() => setAuditOpen(true)} />
+        <ExportSection rawState={rawState} deviations={deviations} onOpenAudit={() => setAuditOpen(true)} />
       </ControlSection>
     </>
   )
@@ -2583,6 +2603,7 @@ export function TokenLab() {
       >
         <TokenAuditReport
           state={rawState}
+          deviations={deviations}
           onDownload={handleAuditDownload}
           onCopy={handleAuditCopy}
           copied={auditCopied}

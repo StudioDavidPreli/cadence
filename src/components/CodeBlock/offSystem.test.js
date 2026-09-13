@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { INITIAL_STATE, stateToTokens } from 'cadence-tokens'
 import {
-  formatLiteral, formatDisplay, parseLiteral, nearestToken, offSystemComment,
+  parseLiteral, offSystemComment,
   patchTokens, adoptAction, deviationsFromOverrides, overridesFromDeviations,
 } from './offSystem'
 
@@ -32,25 +32,11 @@ describe('parseLiteral', () => {
   })
 })
 
-describe('formatting', () => {
-  it('prints the literal as source and the display with its unit', () => {
-    expect(formatLiteral('duration.fast', 0.25)).toBe('0.25')
-    expect(formatLiteral('duration.fast', 0.1234567)).toBe('0.123')
-    expect(formatLiteral('ease.standard', [0.4, 0, 0.2, 1])).toBe('[0.4, 0, 0.2, 1]')
-    expect(formatDisplay('duration.fast', 0.25)).toBe('0.25s')
-    expect(formatDisplay('delay.short', 0.05)).toBe('0.05s')
-    expect(formatDisplay('scale.lift', 1.02)).toBe('1.02')
-  })
-})
-
-describe('nearestToken and the comment', () => {
-  it('finds the nearest key in the family and says whether it matches', () => {
-    expect(nearestToken('duration.fast', 0.25, tokens)).toEqual({ key: 'duration.base', value: 0.2, matches: false })
-    expect(nearestToken('duration.fast', 0.2, tokens).matches).toBe(true)
-    expect(nearestToken('ease.overshoot', [0.34, 1.56, 0.64, 1], tokens)).toEqual({ key: 'ease.overshoot', value: [0.34, 1.56, 0.64, 1], matches: true })
-    expect(nearestToken('ease.overshoot', [0.4, 0.1, 0.2, 1], tokens).key).toBe('ease.standard')
-  })
-
+// formatLiteral, formatDisplay and nearestToken moved into cadence-tokens on
+// 2026-09-13 so the token audit could reach them without importing upward into
+// components/; their tests moved with them. What stays here is the wording this
+// module still owns.
+describe('offSystemComment', () => {
   it('words the three cases', () => {
     expect(offSystemComment('duration.fast', 0.2, tokens)).toBe('off-system: matches duration.base today')
     expect(offSystemComment('duration.fast', 0.15, tokens)).toBe('off-system: 0.15s, nearest duration.fast (0.1s)')

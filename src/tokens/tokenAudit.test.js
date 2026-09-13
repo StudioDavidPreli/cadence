@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { auditTokens, auditToMarkdown, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
+import { auditTokens, auditToMarkdown, auditSummarySentence, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
 import { INITIAL_STATE, BUILT_IN_PRESETS } from 'cadence-tokens'
 
 // Build a state by overriding one family of INITIAL_STATE, so each test states
@@ -296,12 +296,112 @@ describe('interaction budget', () => {
 // The audit runs on live editor state as well as on an import result, so a
 // partial object must be skipped rather than guessed at or thrown on.
 
+// ─── Off-system ──────────────────────────────────────────────────────────────
+// The third section. A deviation is a demo running a literal in place of a token
+// (the off-system edit), which leaves the token set untouched, so none of this
+// may ever reach the finding count. The severity carries that, and these tests
+// pin it.
+describe('off-system', () => {
+  // Runtime units, the shape deviationsFromOverrides produces: seconds for the
+  // time families, arrays for curves, bare numbers for the rest.
+  const oneOff = [{ component: 'Button', token: 'duration.fast', value: 0.25 }]
+
+  it('says nothing when there are no deviations', () => {
+    expect(auditTokens(INITIAL_STATE).counts.offSystem).toBe(0)
+    expect(auditTokens(INITIAL_STATE, {}).counts.offSystem).toBe(0)
+    expect(auditTokens(INITIAL_STATE, { deviations: [] }).findings).toEqual([])
+  })
+
+  it('is never a finding or a note', () => {
+    const result = auditTokens(INITIAL_STATE, { deviations: oneOff })
+    expect(result.counts).toEqual({ finding: 0, note: 0, offSystem: 1 })
+    expect(result.findings.every(f => f.severity === 'off-system')).toBe(true)
+  })
+
+  it('words the value that sits near a token', () => {
+    const [row] = auditTokens(INITIAL_STATE, { deviations: oneOff }).findings
+    expect(row.message).toBe('Button runs duration.fast as 0.25s, nearest duration.base (0.2s).')
+    expect(row.paths).toEqual(['duration.fast'])
+  })
+
+  it('words the value that matches a token today', () => {
+    // 0.2s is duration.base on Standard. The literal is still not the token, and
+    // "today" is the whole of the Token Fidelity lesson in one word.
+    const deviations = [{ component: 'Button', token: 'duration.fast', value: 0.2 }]
+    const [row] = auditTokens(INITIAL_STATE, { deviations }).findings
+    expect(row.message).toBe('Button runs duration.fast as 0.2s, which matches duration.base today.')
+  })
+
+  it('words a curve by its nearest name only', () => {
+    const deviations = [{ component: 'Card', token: 'ease.overshoot', value: [0.4, 0.1, 0.2, 1] }]
+    const [row] = auditTokens(INITIAL_STATE, { deviations }).findings
+    expect(row.message).toBe('Card runs ease.overshoot off-system, nearest ease.standard.')
+  })
+
+  it('tracks the set it is measured against, not a constant', () => {
+    // The nearest token is read from the state the audit was handed, so the same
+    // literal reports differently against a different set. Snappy's base is
+    // 120ms, so 0.25s is nearest slow there and nearest base on Standard.
+    const snappy = BUILT_IN_PRESETS.find(p => p.id === 'snappy').state
+    const [row] = auditTokens(snappy, { deviations: oneOff }).findings
+    expect(row.message).toContain('Button runs duration.fast as 0.25s, nearest duration.')
+    expect(row.message).not.toContain('nearest duration.base (0.2s)')
+  })
+
+  it('keeps one row per deviation, after every judgment about the set', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Card', token: 'scale.lift', value: 1.08 },
+      { component: 'Toggle', token: 'spring.stiffness', value: 420 },
+    ]
+    const result = auditTokens(withState({ duration: { fast: 900 } }), { deviations })
+    expect(result.counts.offSystem).toBe(3)
+    // The off-system rows come last, so a panel reads straight down the array.
+    const severities = result.findings.map(f => f.severity)
+    expect(severities.slice(-3)).toEqual(['off-system', 'off-system', 'off-system'])
+    expect(severities.indexOf('off-system')).toBe(severities.length - 3)
+    expect(result.counts.finding).toBeGreaterThan(0)
+  })
+
+  it('gives every row an id keyed by the demo and the path', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Card', token: 'duration.fast', value: 0.25 },
+    ]
+    const ids = auditTokens(INITIAL_STATE, { deviations }).findings.map(f => f.id)
+    expect(ids).toEqual(['off-system-Button-duration.fast', 'off-system-Card-duration.fast'])
+  })
+
+  it('leaves the shipped presets silent, as the charter requires', () => {
+    for (const preset of BUILT_IN_PRESETS) {
+      expect(auditTokens(preset.state, { deviations: [] }).counts.offSystem).toBe(0)
+    }
+  })
+})
+
+describe('the summary sentence', () => {
+  it('keeps the off-system count out of the verdict on the set', () => {
+    const clean = auditTokens(INITIAL_STATE, { deviations: [{ component: 'Button', token: 'duration.fast', value: 0.25 }] })
+    expect(auditSummarySentence(clean.counts))
+      .toBe('Nothing in this set contradicts itself. 1 off-system value.')
+  })
+
+  it('pluralizes, and says nothing at all when there are none', () => {
+    expect(auditSummarySentence({ finding: 0, note: 0, offSystem: 0 }))
+      .toBe('Nothing in this set contradicts itself.')
+    expect(auditSummarySentence({ finding: 0, note: 0, offSystem: 2 }))
+      .toBe('Nothing in this set contradicts itself. 2 off-system values.')
+    expect(auditSummarySentence({ finding: 1, note: 2, offSystem: 1 }))
+      .toBe('1 finding, 2 notes. 1 off-system value.')
+  })
+})
+
 describe('partial and malformed state', () => {
   it('returns an empty result for undefined', () => {
     expect(auditTokens(undefined)).toEqual({
       findings: [],
       measurements: [],
-      counts: { finding: 0, note: 0 },
+      counts: { finding: 0, note: 0, offSystem: 0 },
     })
   })
 
@@ -355,6 +455,30 @@ describe('auditToMarkdown', () => {
     expect(md).toContain('## Findings')
     expect(md).toContain('## Notes')
     expect(md).toMatch(/\*\*duration\.fast, duration\.base\*\*: fast \(900ms\)/)
+  })
+
+  it('carries the off-system section and its pointer only when there is one', () => {
+    const clean = auditToMarkdown(INITIAL_STATE)
+    expect(clean).not.toContain('## Off-system')
+    expect(clean).not.toContain('Adopt')
+
+    const md = auditToMarkdown(INITIAL_STATE, {
+      deviations: [{ component: 'Button', token: 'duration.fast', value: 0.25 }],
+    })
+    expect(md).toContain('## Off-system')
+    expect(md).toContain('Nothing in this set contradicts itself. 1 off-system value.')
+    expect(md).toContain('**duration.fast**: Button runs duration.fast as 0.25s, nearest duration.base (0.2s).')
+    // The pointer, and the whole of the audit's involvement: it names the two
+    // repairs and performs neither.
+    expect(md).toContain('the code view offers Adopt (move the token to the value) and Reconnect (restore the read)')
+  })
+
+  it('puts the off-system section after the notes and before the measurements', () => {
+    const md = auditToMarkdown(withState({ duration: { fast: 900 }, delay: { short: 100, medium: 100 } }), {
+      deviations: [{ component: 'Button', token: 'scale.lift', value: 1.08 }],
+    })
+    expect(md.indexOf('## Notes')).toBeLessThan(md.indexOf('## Off-system'))
+    expect(md.indexOf('## Off-system')).toBeLessThan(md.indexOf('## Measurements'))
   })
 
   it('prints the audited values with their units', () => {

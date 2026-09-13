@@ -407,6 +407,78 @@ export function toCssVars(state, { prefix = '--motion-', deviations = [] } = {})
   return deviations.length === 0 ? rootBlock : `${rootBlock}\n\n${deviationCssComment(deviations)}`
 }
 
+// The two families that carry time. One set, three jobs: they are the families
+// that convert between the runtime's seconds and the file's milliseconds; they
+// are the only ones DTCG types as `duration` (the rest are `number`), so the
+// only ones whose $value may be a { value, unit } object; and they are the ones
+// whose values display with a unit.
+const TIME_FAMILIES = new Set(['duration', 'delay'])
+
+// ─── Token value math and display ─────────────────────────────────────────────
+// Pure arithmetic and wording over token VALUES in runtime units (seconds,
+// four-number curve arrays, unitless numbers), shared by every surface that has
+// to say what a value is and which token it sits nearest.
+//
+// It lives here rather than in the app because two readers now need it: the
+// Token Lab code view, which names the drift under an off-system read, and the
+// token audit, which lists the same drifts in its report. The audit is a leaf
+// layer and must never import upward into components/, so the shared half moved
+// down to the package instead. The two surfaces then agree on the arithmetic by
+// construction rather than by discipline.
+
+// How close counts as equal. The display carries three decimals, so two scalars
+// that round the same way are the same value to anyone reading them; a curve is
+// compared per coordinate, where a five-thousandth is already below what a
+// bezier handle can express on screen.
+export const SCALAR_EPSILON = 0.0005
+export const CURVE_EPSILON = 0.005
+
+// A runtime token path ('duration.fast') split into its two halves.
+export function splitTokenPath(path) {
+  const [family, key] = String(path ?? '').split('.')
+  return { family, key }
+}
+
+// The source text a literal takes in a code view: seconds and unitless numbers
+// print at up to three places, a curve prints as a four-number array.
+export function formatLiteral(path, value) {
+  if (Array.isArray(value)) return `[${value.map(n => +n.toFixed(3)).join(', ')}]`
+  return `${+value.toFixed(3)}`
+}
+
+// Display form with the unit, for prose: "0.25s", "0.93", a curve. Runtime
+// units, so the two time-valued families print seconds and everything else is
+// bare.
+export function formatDisplay(path, value) {
+  const { family } = splitTokenPath(path)
+  if (Array.isArray(value)) return formatLiteral(path, value)
+  return TIME_FAMILIES.has(family) ? `${+value.toFixed(3)}s` : `${+value.toFixed(3)}`
+}
+
+// The named token in the same family closest to a value, and whether the value
+// matches it (to display precision). Scalars by absolute distance; curves by the
+// largest coordinate difference. `tokens` is a runtime token object, the shape
+// stateToTokens returns.
+export function nearestToken(path, value, tokens) {
+  const { family } = splitTokenPath(path)
+  const group = tokens?.[family] ?? {}
+  let best = null
+  for (const [key, tokenValue] of Object.entries(group)) {
+    let distance
+    if (Array.isArray(value)) {
+      if (!Array.isArray(tokenValue)) continue
+      distance = Math.max(...value.map((n, i) => Math.abs(n - tokenValue[i])))
+    } else {
+      if (typeof tokenValue !== 'number') continue
+      distance = Math.abs(value - tokenValue)
+    }
+    if (best === null || distance < best.distance) best = { key, value: tokenValue, distance }
+  }
+  if (best === null) return null
+  const epsilon = Array.isArray(value) ? CURVE_EPSILON : SCALAR_EPSILON
+  return { key: `${family}.${best.key}`, value: best.value, matches: best.distance <= epsilon }
+}
+
 // ─── Off-system deviations ────────────────────────────────────────────────────
 // A deviation is a value one demo component runs INSTEAD of the token it names:
 // the reader clicked a token read in a Token Lab code view and typed a literal
@@ -428,12 +500,6 @@ const CONTROL_TO_RUNTIME_FAMILY = { duration: 'duration', easing: 'ease', delay:
 
 // Seconds -> ms without float noise (0.123 * 1000 is 123.00000000000001 in JS).
 const secondsToMs = s => +(s * 1000).toFixed(3)
-
-// The two families that carry time. One set, three jobs: they are the families
-// that convert between the runtime's seconds and the file's milliseconds, and
-// they are the only ones DTCG types as `duration` (the rest are `number`), so
-// they are the only ones whose $value may be a { value, unit } object.
-const TIME_FAMILIES = new Set(['duration', 'delay'])
 
 // The `$extensions` key DTCG reserves for tool-specific data, reverse-DNS
 // namespaced per the spec so it cannot collide with another tool's block.

@@ -86,6 +86,48 @@ test.describe('off-system edits', () => {
     await expect(block).not.toContainText('off-system')
   })
 
+  test('the audit counts the off-system value and the report carries its own section', async ({ page }) => {
+    const block = await openButtonCode(page)
+    // The Export section holds the audit line; it is open by default.
+    const auditLine = page.locator('[class*="auditSummary"]').first()
+    await expect(auditLine).toHaveText('Audit: nothing to flag')
+
+    await typeLiteral(page, 'duration.fast', '0.25')
+    await expect(auditLine).toHaveText('Audit: nothing to flag, 1 off-system')
+
+    // The modal's third section, and the pointer that sends the reader back to
+    // the code view for the two repairs.
+    await page.getByRole('button', { name: 'View report' }).click()
+    const dialog = page.getByRole('dialog').first()
+    await expect(dialog).toContainText('Off-system')
+    await expect(dialog).toContainText('Button runs duration.fast as 0.25s, nearest duration.base (0.2s).')
+    await expect(dialog).toContainText('the code view offers Adopt and Reconnect')
+    await expect(dialog).toContainText('Nothing in this set contradicts itself. 1 off-system value.')
+    await page.keyboard.press('Escape')
+
+    // A preset is a whole system, so it clears the override and the count with it.
+    await page.getByRole('button', { name: 'Snappy' }).first().click()
+    await expect(block).not.toContainText('off-system')
+    await expect(auditLine).toHaveText('Audit: nothing to flag')
+  })
+
+  test('the downloaded audit document carries the same section', async ({ page }) => {
+    await openButtonCode(page)
+    await typeLiteral(page, 'duration.fast', '0.25')
+    await page.getByRole('button', { name: 'View report' }).click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Download report' }).click(),
+    ])
+    const md = await (await download.createReadStream()).toArray()
+      .then(chunks => Buffer.concat(chunks).toString('utf8'))
+    expect(md).toContain('## Off-system')
+    expect(md).toContain('Button runs duration.fast as 0.25s, nearest duration.base (0.2s).')
+    expect(md).toContain('Nothing in this set contradicts itself. 1 off-system value.')
+    // The report repairs nothing; it points at where the repairs live.
+    expect(md).toContain('Adopt (move the token to the value) and Reconnect (restore the read)')
+  })
+
   test('deviations ride the export and come back through import, unmatched names reported', async ({ page }) => {
     const block = await openButtonCode(page)
     await typeLiteral(page, 'duration.fast', '0.25')

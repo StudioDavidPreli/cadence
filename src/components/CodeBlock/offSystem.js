@@ -1,4 +1,13 @@
-import { EASING_CURVES, EXPLORE_BOUNDS, SPRING_BOUNDS } from 'cadence-tokens'
+import {
+  EASING_CURVES, EXPLORE_BOUNDS, SPRING_BOUNDS,
+  // The value math moved down to the package (2026-09-13) so the token audit, a
+  // leaf layer that must not import upward into components/, can reach the same
+  // arithmetic the code view uses. Re-exported below, so this module's public
+  // surface is unchanged for CodeBlock and Token Lab.
+  splitTokenPath as splitPath, nearestToken, formatLiteral, formatDisplay,
+} from 'cadence-tokens'
+
+export { nearestToken, formatLiteral, formatDisplay }
 
 // ─── Off-system edits: the pure model ─────────────────────────────────────────
 //
@@ -28,33 +37,10 @@ import { EASING_CURVES, EXPLORE_BOUNDS, SPRING_BOUNDS } from 'cadence-tokens'
 // the press and the release) shows the literal at both reads, because that is
 // what the component now runs. Honest, if a little surprising the first time.
 
-const SCALAR_EPSILON = 0.0005     // display is three decimals; equal if they round equal
-const CURVE_EPSILON = 0.005       // per coordinate
-
-function splitPath(path) {
-  const [family, key] = path.split('.')
-  return { family, key }
-}
-
 const isTime = family => family === 'duration' || family === 'delay'
 
 // Seconds -> ms without float noise (0.123 * 1000 is 123.00000000000001 in JS).
 const secondsToMs = s => +(s * 1000).toFixed(3)
-
-// The source text a literal takes in the code view: seconds and unitless
-// numbers print at up to three places (the same trim resolveTokenDisplay uses),
-// a curve prints as a four-number array.
-export function formatLiteral(path, value) {
-  if (Array.isArray(value)) return `[${value.map(n => +n.toFixed(3)).join(', ')}]`
-  return `${+value.toFixed(3)}`
-}
-
-// Display form with the unit, for the comment row: "0.25s", "0.93", a curve.
-export function formatDisplay(path, value) {
-  const { family } = splitPath(path)
-  if (Array.isArray(value)) return formatLiteral(path, value)
-  return isTime(family) ? `${+value.toFixed(3)}s` : `${+value.toFixed(3)}`
-}
 
 // Bounds a typed literal must land inside, in runtime units. These are the
 // Explore-mode bounds, so an accepted literal is always one a slider can show,
@@ -92,29 +78,6 @@ export function parseLiteral(path, text) {
     return { ok: false, reason: `${family}.${key} takes ${min}${unit} to ${max}${unit}.` }
   }
   return { ok: true, value: n }
-}
-
-// The named token in the same family closest to a value, and whether the value
-// matches it (to display precision). Scalars by absolute distance; curves by the
-// largest coordinate difference.
-export function nearestToken(path, value, tokens) {
-  const { family } = splitPath(path)
-  const group = tokens?.[family] ?? {}
-  let best = null
-  for (const [key, tokenValue] of Object.entries(group)) {
-    let distance
-    if (Array.isArray(value)) {
-      if (!Array.isArray(tokenValue)) continue
-      distance = Math.max(...value.map((n, i) => Math.abs(n - tokenValue[i])))
-    } else {
-      if (typeof tokenValue !== 'number') continue
-      distance = Math.abs(value - tokenValue)
-    }
-    if (best === null || distance < best.distance) best = { key, value: tokenValue, distance }
-  }
-  if (best === null) return null
-  const epsilon = Array.isArray(value) ? CURVE_EPSILON : SCALAR_EPSILON
-  return { key: `${family}.${best.key}`, value: best.value, matches: best.distance <= epsilon }
 }
 
 // The comment row under an off-system read. Three phrasings:

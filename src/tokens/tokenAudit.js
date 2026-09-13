@@ -24,8 +24,10 @@
 // Why nothing here is an error. Explore mode's whole argument is that the wide
 // ranges are legitimate, so an audit that stamped "invalid" on a value Explore
 // deliberately offers would be the tool contradicting itself. Every result is a
-// `finding` (the set contradicts itself) or a `note` (legal, and worth seeing).
-// Nothing blocks, nothing is repaired, nothing is refused.
+// `finding` (the set contradicts itself), a `note` (legal, and worth seeing), or
+// an `off-system` row (a demo running a literal in place of a token, which says
+// nothing about the set at all). Nothing blocks, nothing is repaired, nothing is
+// refused.
 //
 // Where the bars come from. Two places, and nowhere else. Either the set is
 // measured against ITSELF (a ladder that runs backwards, a spring wildly out of
@@ -35,9 +37,10 @@
 // wrong. The presets appear in the tests only as a smoke check that the audit is
 // not absurdly tight.
 //
-// Scope: duration, delay, scale, spring. Easing is deliberately absent. A curve's
-// one structural rule (x inside [0, 1]) is already enforced at import, and "is
-// this curve's shape appropriate" is a judgment rather than a check.
+// Scope: duration, delay, scale, spring, and the off-system values the caller
+// hands in. Easing is deliberately absent. A curve's one structural rule (x
+// inside [0, 1]) is already enforced at import, and "is this curve's shape
+// appropriate" is a judgment rather than a check.
 //
 // Layering note: this imports from components/SpringVisualizer/springCurve.js,
 // which points from a leaf layer up into components/. It creates no cycle
@@ -47,6 +50,7 @@
 // because the spring math has one owner and the audit is its second reader, not
 // its new home.
 
+import { stateToTokens, nearestToken, formatDisplay } from 'cadence-tokens'
 import {
   settleTime,
   overshootFraction,
@@ -392,6 +396,77 @@ function checkInteractionBudget(state, report) {
   ))
 }
 
+// ─── Off-system ───────────────────────────────────────────────────────────────
+// The third section, and the only one that is not about the token set at all.
+//
+// A deviation is one demo running a literal in place of a token it names: the
+// reader clicked a token read in a Token Lab code view and typed a value (the
+// off-system edit, 2026-09-09). Before this section existed the tool bar read
+// "Audit: nothing to flag" while a demo had just declined the set, and the
+// downloaded report was silent about a session whose exported token file carried
+// a `deviations` appendix. Two documents about the same session disagreed.
+//
+// Why none of this is a finding. A finding is the set contradicting itself, and
+// a deviation leaves the set exactly as it was. The detached note under the demo
+// already takes this position: muted rather than amber, a state the reader chose.
+// Counting it against a set that did nothing wrong would be the audit
+// contradicting the demo. So the severity is its own, `off-system`, and the
+// summary keeps it in a clause of its own rather than in the finding count.
+//
+// The set measured against its own consumers is likewise not a third source of
+// findings (David, 2026-09-12). The audit's bars stay two: the set against
+// itself, and one cited external number.
+//
+// The wording tracks the code view's comment so the two surfaces say the same
+// thing about the same value, with the component named here because the row has
+// no other place to carry it. The arithmetic is literally the same function:
+// `nearestToken` and `formatDisplay` moved into the package for this.
+//
+// Runtime tokens are derived here rather than taken as an argument. A deviation
+// is in runtime units (seconds, curve arrays) and the state is in CSS-side units
+// (ms), so something has to convert; doing it inside keeps the function a pure
+// read of its two arguments and keeps the caller from having to know.
+function checkOffSystem(state, deviations, report) {
+  if (!Array.isArray(deviations) || deviations.length === 0) return
+  const tokens = stateToTokens(state)
+
+  for (const { component, token, value } of deviations) {
+    const nearest = nearestToken(token, value, tokens)
+    const shown = formatDisplay(token, value)
+    let message
+    if (!nearest) {
+      message = `${component} runs ${token} as ${shown}, off-system.`
+    } else if (nearest.matches) {
+      message = `${component} runs ${token} as ${shown}, which matches ${nearest.key} today.`
+    } else if (Array.isArray(value)) {
+      // A four-number array is long enough that printing it twice buries the
+      // sentence, so a curve names the nearest token and nothing else.
+      message = `${component} runs ${token} off-system, nearest ${nearest.key}.`
+    } else {
+      message = `${component} runs ${token} as ${shown}, nearest ${nearest.key} (${formatDisplay(token, nearest.value)}).`
+    }
+    // Keyed by component and path, which is exactly what the override set is
+    // keyed by, so the id is stable while the list reorders.
+    report.findings.push(entry(`off-system-${component}-${token}`, 'off-system', [token], message))
+  }
+}
+
+// ─── The summary sentence ─────────────────────────────────────────────────────
+// One string, two surfaces (the modal and the markdown), so a change to the
+// wording cannot land on one and miss the other. The tool bar's line is a
+// different sentence and stays in TokenLab.
+//
+// The off-system clause is separate from the finding count on purpose: a set can
+// be entirely coherent and still have a demo running off it, and the sentence
+// should say both without implying the second is a fault.
+export function auditSummarySentence(counts) {
+  const base = counts.finding === 0
+    ? 'Nothing in this set contradicts itself.'
+    : `${counts.finding} ${counts.finding === 1 ? 'finding' : 'findings'}, ${counts.note} ${counts.note === 1 ? 'note' : 'notes'}.`
+  if (!counts.offSystem) return base
+  return `${base} ${counts.offSystem} off-system ${counts.offSystem === 1 ? 'value' : 'values'}.`
+}
+
 // ─── auditTokens ──────────────────────────────────────────────────────────────
 // The one entry point. Takes a Token Lab state object (the shape INITIAL_STATE
 // defines and importTokens returns) and returns the report in two halves.
@@ -404,14 +479,19 @@ function checkInteractionBudget(state, report) {
 // always populated for a complete state, and it is why the output is a report the
 // user can read rather than a pass/fail they can only obey.
 //
-// Both arrive in a stable order (duration, delay, scale, spring, budget) so a
-// panel does not reshuffle rows between renders and a test can read straight
-// through the array.
+// Both arrive in a stable order (duration, delay, scale, spring, budget,
+// off-system) so a panel does not reshuffle rows between renders and a test can
+// read straight through the array.
 //
-// `counts` is precomputed because those two numbers are what a summary line
+// `counts` is precomputed because those three numbers are what a summary line
 // wants, and recomputing them on every render of a panel would be the caller
 // doing this module's arithmetic.
-export function auditTokens(state) {
+//
+// `deviations` is an options object rather than a positional argument (David,
+// 2026-09-12) so that later inputs join without a breaking change, and it is
+// passed in rather than read off the state because a deviation is not part of
+// the token set: the caller holds them, so the caller hands them over.
+export function auditTokens(state, { deviations = [] } = {}) {
   const report = { findings: [], measurements: [] }
 
   checkLadder(state?.duration, 'duration', ['fast', 'base', 'slow', 'slower'], 'ms', report)
@@ -419,12 +499,14 @@ export function auditTokens(state) {
   checkScale(state, report)
   checkSpring(state, report)
   checkInteractionBudget(state, report)
+  checkOffSystem(state, deviations, report)
 
   return {
     ...report,
     counts: {
       finding: report.findings.filter(f => f.severity === 'finding').length,
       note: report.findings.filter(f => f.severity === 'note').length,
+      offSystem: report.findings.filter(f => f.severity === 'off-system').length,
     },
   }
 }
@@ -505,10 +587,11 @@ function tokenTable(state) {
   return sections.join('\n')
 }
 
-export function auditToMarkdown(state, { title = 'Motion token audit', generatedAt = null, presetLabel = null } = {}) {
-  const { findings, measurements, counts } = auditTokens(state)
+export function auditToMarkdown(state, { deviations = [], title = 'Motion token audit', generatedAt = null, presetLabel = null } = {}) {
+  const { findings, measurements, counts } = auditTokens(state, { deviations })
   const problems = findings.filter(f => f.severity === 'finding')
   const notes = findings.filter(f => f.severity === 'note')
+  const offSystem = findings.filter(f => f.severity === 'off-system')
 
   const out = [`# ${title}`, '']
 
@@ -517,15 +600,23 @@ export function auditToMarkdown(state, { title = 'Motion token audit', generated
   if (generatedAt) subtitle.push(generatedAt)
   if (subtitle.length) out.push(subtitle.join(' · '), '')
 
-  out.push(
-    counts.finding === 0
-      ? 'Nothing in this set contradicts itself.'
-      : `${counts.finding} ${counts.finding === 1 ? 'finding' : 'findings'}, ${counts.note} ${counts.note === 1 ? 'note' : 'notes'}.`,
-    '',
-  )
+  out.push(auditSummarySentence(counts), '')
 
   if (problems.length) out.push('## Findings', '', findingLines(problems), '')
   if (notes.length) out.push('## Notes', '', findingLines(notes), '')
+  // The pointer under the heading is the whole of the audit's involvement: it
+  // names where the two repairs live and performs neither. The report reads a
+  // session; the code view is where a reader changes one.
+  if (offSystem.length) {
+    out.push(
+      '## Off-system',
+      '',
+      'These values run in place of a token in one demo. The token set is unchanged; the code view offers Adopt (move the token to the value) and Reconnect (restore the read).',
+      '',
+      findingLines(offSystem),
+      '',
+    )
+  }
 
   if (measurements.length) {
     out.push(
