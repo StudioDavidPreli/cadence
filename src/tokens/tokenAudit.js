@@ -38,9 +38,12 @@
 // not absurdly tight.
 //
 // Scope: duration, delay, scale, spring, and the off-system values the caller
-// hands in. Easing is deliberately absent. A curve's one structural rule (x
-// inside [0, 1]) is already enforced at import, and "is this curve's shape
-// appropriate" is a judgment rather than a check.
+// hands in. Easing is almost absent, and the exception is narrow. "Is this
+// curve's shape appropriate" is a judgment rather than a check, and a curve's
+// one structural rule (x inside [0, 1]) is already enforced at import. But
+// whether two of the set's slots draw the SAME curve is neither: Measure fixed
+// the distance under which two curves cannot be told apart, so that one question
+// has an answer the tool measured. See checkEasing.
 //
 // Layering note: this imports from components/SpringVisualizer/springCurve.js,
 // which points from a leaf layer up into components/. It creates no cycle
@@ -50,7 +53,10 @@
 // because the spring math has one owner and the audit is its second reader, not
 // its new home.
 
-import { stateToTokens, nearestToken, formatDisplay } from 'cadence-tokens'
+import {
+  stateToTokens, nearestToken, formatDisplay,
+  EASING_CURVES, EDITABLE_TOKEN_SCHEMA, curveDistance, CURVE_SEPARATION,
+} from 'cadence-tokens'
 import {
   settleTime,
   overshootFraction,
@@ -396,6 +402,69 @@ function checkInteractionBudget(state, report) {
   ))
 }
 
+// ─── Easing ───────────────────────────────────────────────────────────────────
+// The one easing fact that is not a judgment.
+//
+// Easing was left out of this module on purpose, and mostly still is: a curve's
+// single structural rule (x inside [0, 1]) is enforced at import, and "is this
+// curve's shape right for this interaction" is taste. Measure produced the one
+// exception. Recording the site's own Button, the five named curves could be
+// recovered from the frames and a free bezier could not, which fixed a distance
+// under which two curves cannot be told apart. That is a bar the tool measured
+// rather than one invented here, and it makes one question answerable: do two
+// of this set's easing slots draw the same shape?
+//
+// Two names for one shape is the duplicate-values smell in motion terms, and
+// the Shared Vocabulary argument in the small. A reader who hand-tuned enter
+// until it landed on standard now has two roles that behave identically and a
+// system that does not say so.
+//
+// Why an exact match is NOT reported. Distance zero means the two slots hold the
+// same curve outright, and that is a choice, every time: the visualizer feeds
+// continuous pixel coordinates into those handles, so landing on an identical
+// four numbers by accident does not happen. Two of Cadence's own presets do it
+// deliberately (Snappy points standard at the overshoot curve, Cinematic points
+// it at enter), and they are right to: a slot is a ROLE, and a preset says which
+// named curve fills that role. Calling that a duplicate would be the audit
+// mistaking the system working for the system failing.
+//
+// So the note fires between zero and the bar, on curves that DRIFTED together
+// rather than curves somebody aliased. The A3 spike measured the gap that leaves
+// (2026-09-13): the presets' closest non-identical pair is 0.1797, thirty-five
+// times the bar, so the shipped sets stay silent without the test being written
+// around them.
+function checkEasing(state, report) {
+  const group = state?.easing
+  if (!group) return
+
+  // Named keys resolve through the library; arrays are used as authored. A slot
+  // holding neither is a malformed set, which import already refuses, so it is
+  // skipped here rather than reported twice.
+  const resolve = value => {
+    if (Array.isArray(value)) {
+      return value.length === 4 && value.every(Number.isFinite) ? value : null
+    }
+    return EASING_CURVES[value]?.fm ?? null
+  }
+
+  const slots = EDITABLE_TOKEN_SCHEMA.easing
+  for (let i = 0; i < slots.length; i++) {
+    for (let j = i + 1; j < slots.length; j++) {
+      const a = resolve(group[slots[i]])
+      const b = resolve(group[slots[j]])
+      if (!a || !b) continue
+      const distance = curveDistance(a, b)
+      if (distance <= 0 || distance >= CURVE_SEPARATION) continue
+      report.findings.push(entry(
+        `easing.duplicate.${slots[i]}.${slots[j]}`,
+        'note',
+        [`easing.${slots[i]}`, `easing.${slots[j]}`],
+        `ease.${slots[i]} and ease.${slots[j]} draw the same curve, within the separation a recording can resolve. Two names, one shape.`,
+      ))
+    }
+  }
+}
+
 // ─── Off-system ───────────────────────────────────────────────────────────────
 // The third section, and the only one that is not about the token set at all.
 //
@@ -479,7 +548,7 @@ export function auditSummarySentence(counts) {
 // always populated for a complete state, and it is why the output is a report the
 // user can read rather than a pass/fail they can only obey.
 //
-// Both arrive in a stable order (duration, delay, scale, spring, budget,
+// Both arrive in a stable order (duration, delay, easing, scale, spring, budget,
 // off-system) so a panel does not reshuffle rows between renders and a test can
 // read straight through the array.
 //
@@ -496,6 +565,7 @@ export function auditTokens(state, { deviations = [] } = {}) {
 
   checkLadder(state?.duration, 'duration', ['fast', 'base', 'slow', 'slower'], 'ms', report)
   checkLadder(state?.delay, 'delay', ['short', 'medium', 'long'], 'ms', report)
+  checkEasing(state, report)
   checkScale(state, report)
   checkSpring(state, report)
   checkInteractionBudget(state, report)

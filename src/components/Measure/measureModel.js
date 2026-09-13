@@ -22,7 +22,14 @@
 // the same thing; for an overshoot they are not, and without this the
 // overshoot curve can never be recovered from a recording.
 
-import { EASING_CURVES } from 'cadence-tokens'
+import { EASING_CURVES, bezierY, curveDistance } from 'cadence-tokens'
+
+// bezierY moved into the package on 2026-09-13, with curveDistance, when the
+// token audit needed the same curve comparison and could not import upward out
+// of src/tokens. Re-exported because this module's tests and the item 8 fixture
+// suite read it from here, and that suite is frozen ground truth. The math is
+// unchanged; the fixtures pin that.
+export { bezierY }
 
 // The named library, as four-number arrays, read from the package so the
 // measurement tool can never disagree with the tokens it is measuring against.
@@ -32,27 +39,6 @@ export const NAMED_CURVES = Object.fromEntries(
 
 // ─── Curves ──────────────────────────────────────────────────────────────────
 
-// One cubic Bézier coordinate with endpoints 0 and 1 and handles a, b.
-function cubic(a, b, s) {
-  const u = 1 - s
-  return 3 * u * u * s * a + 3 * u * s * s * b + s * s * s
-}
-
-// y as a function of x (time) for a CSS cubic-bezier. The curve is parametric
-// in s, so x is inverted first: bisection is enough because x(s) is monotonic
-// whenever x1, x2 ∈ [0, 1], which CSS guarantees. Same math as the easing
-// visualizer's sampling, kept separate on purpose: this module must stay
-// importable from node (tests, the spike) with no DOM in its import graph.
-export function bezierY([x1, y1, x2, y2], x) {
-  if (x <= 0) return 0
-  if (x >= 1) return 1
-  let lo = 0, hi = 1
-  for (let i = 0; i < 24; i++) {
-    const mid = (lo + hi) / 2
-    if (cubic(x1, x2, mid) < x) lo = mid; else hi = mid
-  }
-  return cubic(y1, y2, (lo + hi) / 2)
-}
 
 // The k-form t^k / (t^k + (1-t)^k): one parameter, symmetric about the
 // midpoint. It never won a fit in the spike (Cadence's curves are asymmetric,
@@ -357,13 +343,7 @@ export function candidatesFor(segment) {
 export function nearestNamed(bezier) {
   let best = null, bd = Infinity
   for (const [name, nb] of Object.entries(NAMED_CURVES)) {
-    let s = 0
-    for (let i = 1; i < 40; i++) {
-      const x = i / 40
-      const d = bezierY(bezier, x) - bezierY(nb, x)
-      s += d * d
-    }
-    const dist = Math.sqrt(s / 39)
+    const dist = curveDistance(bezier, nb)
     if (dist < bd) { bd = dist; best = name }
   }
   return best

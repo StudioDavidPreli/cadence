@@ -479,6 +479,70 @@ export function nearestToken(path, value, tokens) {
   return { key: `${family}.${best.key}`, value: best.value, matches: best.distance <= epsilon }
 }
 
+// ─── Curve geometry ───────────────────────────────────────────────────────────
+// Two authored curves compared by the shape they draw, and the bar under which
+// they count as one curve.
+//
+// This moved down from src/components/Measure/measureModel.js on 2026-09-13,
+// when the token audit needed the same comparison. Measure keeps its behaviour
+// exactly: it imports these back and its fixture suite, which is frozen ground
+// truth from the item 8 spike, did not move.
+
+// One cubic Bezier coordinate with endpoints 0 and 1 and handles a, b.
+function cubicCoord(a, b, s) {
+  const u = 1 - s
+  return 3 * u * u * s * a + 3 * u * s * s * b + s * s * s
+}
+
+// y as a function of x (time) for a CSS cubic-bezier. The curve is parametric
+// in s, so x is inverted first: bisection is enough because x(s) is monotonic
+// whenever x1, x2 are inside [0, 1], which CSS guarantees. y is left unbounded,
+// because an overshoot curve rises above 1 on purpose.
+export function bezierY([x1, y1, x2, y2], x) {
+  if (x <= 0) return 0
+  if (x >= 1) return 1
+  let lo = 0, hi = 1
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2
+    if (cubicCoord(x1, x2, mid) < x) lo = mid; else hi = mid
+  }
+  return cubicCoord(y1, y2, (lo + hi) / 2)
+}
+
+// How far apart two curves are: rms of sampled y over 39 interior samples. By
+// SHAPE, not by control points, because two handle sets far apart can draw
+// nearly the same curve.
+export function curveDistance(a, b) {
+  let s = 0
+  for (let i = 1; i < 40; i++) {
+    const x = i / 40
+    const d = bezierY(a, x) - bezierY(b, x)
+    s += d * d
+  }
+  return Math.sqrt(s / 39)
+}
+
+// Under this distance, two curves draw the same shape.
+//
+// The number is not invented for the audit. It is the floor of Measure's
+// `indistinctMargin` at eight or more frames: how much worse than the winner a
+// named curve may fit a recording and still not be ruled out. Measure earned it
+// against recorded video; the A3 spike (2026-09-13) confirmed it transfers to a
+// comparison of two authored curves with no frames, and measured the corridor
+// it sits in:
+//
+//   0.0010 to 0.0020   one CSS pixel of drag on the bezier visualizer
+//   0.005              this bar
+//   0.0239 to 0.0492   a 0.1 move of one control point
+//   0.1326             the closest pair in Cadence's own named library
+//
+// So a pixel of drag reads as the same curve, a real edit reads as a different
+// one, and the library never reads as a duplicate of itself. BAND_TOL (0.02)
+// also satisfies all three but leaves only 20% headroom against a 0.1 move,
+// which is thin for a number that has to hold while somebody drags a handle.
+// David's call, 2026-09-13. Record: docs/decisions/easing-duplicate-curve-2026-09-13.md
+export const CURVE_SEPARATION = 0.005
+
 // ─── Off-system deviations ────────────────────────────────────────────────────
 // A deviation is a value one demo component runs INSTEAD of the token it names:
 // the reader clicked a token read in a Token Lab code view and typed a literal

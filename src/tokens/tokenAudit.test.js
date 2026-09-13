@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { auditTokens, auditToMarkdown, auditSummarySentence, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
-import { INITIAL_STATE, BUILT_IN_PRESETS } from 'cadence-tokens'
+import {
+  INITIAL_STATE, BUILT_IN_PRESETS, EASING_CURVES, EDITABLE_TOKEN_SCHEMA,
+  curveDistance, CURVE_SEPARATION,
+} from 'cadence-tokens'
 
 // Build a state by overriding one family of INITIAL_STATE, so each test states
 // only the thing it is testing and everything else stays at a known-clean value.
@@ -295,6 +298,86 @@ describe('interaction budget', () => {
 // ─── Robustness ──────────────────────────────────────────────────────────────
 // The audit runs on live editor state as well as on an import result, so a
 // partial object must be skipped rather than guessed at or thrown on.
+
+// ─── Easing duplicates ───────────────────────────────────────────────────────
+// The one easing question the audit answers. The bar is CURVE_SEPARATION, the
+// floor of Measure's indistinctMargin, confirmed by the A3 spike to transfer
+// from a fit against recorded frames to a comparison of two authored curves.
+describe('easing duplicates', () => {
+  const withEasing = easing => ({ ...INITIAL_STATE, easing: { ...INITIAL_STATE.easing, ...easing } })
+  const easingIds = state => auditTokens(state).findings
+    .filter(f => f.id.startsWith('easing.duplicate')).map(f => f.id)
+
+  it('stays silent on all three shipped presets', () => {
+    // The charter's smoke check, and the reason the rule excludes exact matches.
+    // Snappy points its standard slot at the overshoot curve and Cinematic
+    // points its at enter, both deliberately: a slot is a role, and a preset
+    // says which named curve fills it.
+    for (const preset of BUILT_IN_PRESETS) {
+      expect(easingIds(preset.state), preset.label).toEqual([])
+    }
+  })
+
+  it('says nothing when two slots hold the same curve outright', () => {
+    // Distance zero is an alias somebody chose, not a drift. The visualizer
+    // feeds continuous pixel coordinates into those handles, so an identical
+    // four numbers does not happen by accident.
+    expect(easingIds(withEasing({ enter: 'standard' }))).toEqual([])
+    expect(easingIds(withEasing({ enter: [0.4, 0, 0.2, 1] }))).toEqual([])
+  })
+
+  it('notes two slots that drifted into one shape', () => {
+    // A pixel of drag off standard: 0.0010 to 0.0020 rms, inside the 0.005 bar.
+    const [row] = auditTokens(withEasing({ enter: [0.404, 0, 0.2, 1] })).findings
+    expect(row.severity).toBe('note')
+    expect(row.id).toBe('easing.duplicate.standard.enter')
+    expect(row.paths).toEqual(['easing.standard', 'easing.enter'])
+    expect(row.message).toBe('ease.standard and ease.enter draw the same curve, within the separation a recording can resolve. Two names, one shape.')
+  })
+
+  it('leaves a real edit alone', () => {
+    // A 0.1 move of one handle: 0.024 to 0.049 rms, five to ten times the bar.
+    expect(easingIds(withEasing({ enter: [0.5, 0, 0.2, 1] }))).toEqual([])
+    expect(easingIds(withEasing({ enter: [0.4, 0.1, 0.2, 1] }))).toEqual([])
+  })
+
+  it('covers all four editable slots, overshoot included', () => {
+    // overshoot became editable at the Explore unlock, so a check over "the
+    // set's easing slots" that skipped it would be auditing a subset it chose.
+    expect(EDITABLE_TOKEN_SCHEMA.easing).toEqual(['standard', 'enter', 'exit', 'overshoot'])
+    const nudged = [...EASING_CURVES.exit.fm]
+    nudged[0] += 0.004
+    expect(easingIds(withEasing({ overshoot: nudged }))).toEqual(['easing.duplicate.exit.overshoot'])
+  })
+
+  it('compares curves above y = 1 the same way', () => {
+    // Two overshooting curves, a hundredth apart in the rising handle.
+    const near = [0.34, 1.565, 0.64, 1]
+    expect(easingIds(withEasing({ standard: near }))).toEqual(['easing.duplicate.standard.overshoot'])
+    const far = [0.34, 1.2, 0.64, 1]
+    expect(easingIds(withEasing({ standard: far }))).toEqual([])
+  })
+
+  it('skips a slot it cannot resolve rather than reporting it twice', () => {
+    // Import already refuses these; the audit does not pile on.
+    expect(easingIds(withEasing({ enter: 'nonsense' }))).toEqual([])
+    expect(easingIds(withEasing({ enter: [0.4, 0] }))).toEqual([])
+    expect(() => auditTokens(withEasing({ enter: null }))).not.toThrow()
+  })
+
+  it('pins the bar, so moving it is a deliberate edit', () => {
+    expect(CURVE_SEPARATION).toBe(0.005)
+    // The corridor the spike measured: a pixel of drag under it, a 0.1 move
+    // over it, the named library an order of magnitude clear.
+    const nudge = [...EASING_CURVES.standard.fm]
+    nudge[0] += 0.004
+    expect(curveDistance(EASING_CURVES.standard.fm, nudge)).toBeLessThan(CURVE_SEPARATION)
+    const real = [...EASING_CURVES.standard.fm]
+    real[0] += 0.1
+    expect(curveDistance(EASING_CURVES.standard.fm, real)).toBeGreaterThan(CURVE_SEPARATION)
+    expect(curveDistance(EASING_CURVES.linear.fm, EASING_CURVES.exit.fm)).toBeGreaterThan(CURVE_SEPARATION * 20)
+  })
+})
 
 // ─── Off-system ──────────────────────────────────────────────────────────────
 // The third section. A deviation is a demo running a literal in place of a token

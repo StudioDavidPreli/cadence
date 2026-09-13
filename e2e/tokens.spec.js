@@ -118,3 +118,57 @@ test.describe('token propagation (the thesis)', () => {
     await expect.poll(() => readToken(page, '--motion-scale-lift')).toBe('1.2')
   })
 })
+
+// The easing duplicate-curve note (A3, 2026-09-13). The bar is the floor of
+// Measure's indistinctMargin, and the rule excludes exact matches on purpose:
+// two slots holding the same curve is a role assignment, which two of the three
+// shipped presets do deliberately. docs/decisions/easing-duplicate-curve-2026-09-13.md
+test.describe('easing duplicates', () => {
+  const flatWithEnter = enter => ({
+    name: 'easing.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      easing: {
+        standard: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        enter,
+        exit: 'cubic-bezier(0.4, 0, 1, 1)',
+        overshoot: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+    })),
+  })
+
+  test('notes two slots that drifted together, and stays silent on the presets', async ({ page }) => {
+    await page.goto('/#/token-lab')
+    const auditLine = page.locator('[class*="auditSummary"]').first()
+    await expect(auditLine).toHaveText('Audit: nothing to flag')
+
+    // 0.404 against 0.400: one CSS pixel of drag on the visualizer, 0.0020 rms,
+    // inside the 0.005 bar.
+    await page.locator('input[type="file"]').setInputFiles(flatWithEnter('cubic-bezier(0.404, 0, 0.2, 1)'))
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('0 findings and 1 note')
+    await page.keyboard.press('Escape')
+    await expect(auditLine).toHaveText('Audit: 1 note')
+
+    await page.getByRole('button', { name: 'View report' }).click()
+    await expect(page.getByRole('dialog')).toContainText(
+      'ease.standard and ease.enter draw the same curve, within the separation a recording can resolve. Two names, one shape.',
+    )
+    await page.keyboard.press('Escape')
+
+    // Every shipped preset is silent, including the two that alias a curve
+    // outright: Snappy points standard at overshoot, Cinematic at enter.
+    for (const preset of ['Snappy', 'Cinematic', 'Standard']) {
+      await page.getByRole('button', { name: preset }).first().click()
+      await expect(auditLine).toHaveText('Audit: nothing to flag')
+    }
+  })
+
+  test('says nothing when two slots hold the same curve outright', async ({ page }) => {
+    await page.goto('/#/token-lab')
+    await page.locator('input[type="file"]').setInputFiles(flatWithEnter('cubic-bezier(0.4, 0, 0.2, 1)'))
+    await expect(page.getByRole('dialog')).toContainText('contradicts itself')
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[class*="auditSummary"]').first()).toHaveText('Audit: nothing to flag')
+  })
+})
