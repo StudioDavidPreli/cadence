@@ -29,7 +29,7 @@ import { RUNTIME_VERSION } from './readRiv'
 import { toManifestEntry } from './lintModel'
 import { Preview } from './Preview'
 import { RivLintTitle } from './RivLintTitle'
-import { RENDER_SIZE, SETTLE_MS } from './renderCompare'
+import { RENDER_SIZE } from './renderCompare'
 import styles from './RivLint.module.css'
 
 const SAMPLES_URL = '/rivlint-samples/samples.json'
@@ -510,18 +510,30 @@ function Compare({ l }) {
 // The structural diff cannot see a property-to-shape binding and the runtime
 // logs nothing about one fed the wrong type; the pixels can. On request, not
 // on drop: it loads both files once per instance.
+//
+// Both sides are read at the machine's entry state with nothing advanced, so
+// the frame belongs to the file and not to the browser's frame rate
+// (renderCompare.js, 2026-09-13). An instance where both frames drew nothing is
+// marked blank: equal pixels there say nothing about the bindings, and the
+// verdict declines to claim otherwise.
 const pct = f => `${(100 * f).toFixed(1)}%`
 function RenderCompare({ render, status, error, onRun, structureUnchanged }) {
   const rows = render?.rows ?? []
   const drawn = rows.filter(r => r.diff)
+  const blank = drawn.filter(r => r.blank)
   const moved = drawn.filter(r => r.diff.differing > 0)
   const maxFraction = drawn.reduce((m, r) => Math.max(m, r.diff.fraction), 0)
+  // Named after the verdict, so a reader who was told "same pixels" knows how
+  // many of those instances had no pixels to begin with.
+  const blankNote = blank.length
+    ? ` ${blank.length === 1 ? 'One instance drew' : `${blank.length} instances drew`} an empty frame on both sides, which settles nothing about ${blank.length === 1 ? 'it' : 'them'}: the first frame of this artboard has nothing in it to compare.`
+    : ''
   let verdict = ''
   if (render) {
     if (drawn.length === 0) verdict = 'Neither file could be drawn on this artboard.'
-    else if (moved.length === 0) verdict = `Same pixels on ${drawn.length === 1 ? 'the one instance' : `all ${drawn.length} instances`}. Whatever the earlier export bound, this one still binds the same way.`
-    else if (structureUnchanged) verdict = `The structure reads the same; the pixels do not. ${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas. That is something the inventory cannot see: a binding, a value, or the art itself.`
-    else verdict = `${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas.`
+    else if (moved.length === 0) verdict = `Same pixels on ${drawn.length === 1 ? 'the one instance' : `all ${drawn.length} instances`}. Whatever the earlier export bound, this one still binds the same way.${blankNote}`
+    else if (structureUnchanged) verdict = `The structure reads the same; the pixels do not. ${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas. That is something the inventory cannot see: a binding, a value, or the art itself.${blankNote}`
+    else verdict = `${moved.length === 1 ? 'One instance draws' : `${moved.length} instances draw`} differently, up to ${pct(maxFraction)} of the canvas.${blankNote}`
   }
   return (
     <div className={styles.renderBlock} data-testid="render-compare">
@@ -535,17 +547,30 @@ function RenderCompare({ render, status, error, onRun, structureUnchanged }) {
       </div>
       {status === STATUS.ERROR && <p className={styles.small}>Could not draw. {error}</p>}
       {render && (
-        <div data-testid="render-result" data-instances={drawn.length} data-moved={moved.length} data-max-diff={(100 * maxFraction).toFixed(1)}>
+        <div
+          data-testid="render-result"
+          data-instances={drawn.length}
+          data-moved={moved.length}
+          data-blank={blank.length}
+          data-max-diff={(100 * maxFraction).toFixed(1)}
+        >
           <p className={styles.verdict}>{verdict}</p>
           <p className={styles.small}>
             Artboard <code className={styles.chipQuiet}>{render.scene.artboard}</code>
             {render.scene.stateMachine && <>, state machine <code className={styles.chipQuiet}>{render.scene.stateMachine}</code></>}
             {render.scene.viewModel && <>, view model <code className={styles.chipQuiet}>{render.scene.viewModel}</code></>}
-            , each instance bound by hand, the machine run for {SETTLE_MS} ms, one frame read. Earlier file left, this file right.
+            , each instance bound by hand
+            {render.scene.stateMachine && <>, the machine applied at its entry state with nothing advanced</>}
+            , one frame read. Earlier file left, this file right.
           </p>
           <ul className={styles.renderList}>
             {rows.map(r => (
-              <li key={r.instance} className={styles.renderRow} data-instance={r.instance} data-diff={r.diff ? (100 * r.diff.fraction).toFixed(1) : ''}>
+              <li
+                key={r.instance}
+                className={styles.renderRow}
+                data-instance={r.instance}
+                data-diff={r.diff ? (100 * r.diff.fraction).toFixed(1) : ''}
+              >
                 <span className={styles.renderName}><code className={styles.chip}>{r.instance || '(default instance)'}</code></span>
                 {r.error ? (
                   <span className={styles.factNote}>could not draw: {r.error}</span>
@@ -557,7 +582,7 @@ function RenderCompare({ render, status, error, onRun, structureUnchanged }) {
                     </span>
                     <span className={styles.factNote}>
                       {r.diff.differing === 0
-                        ? 'same pixels'
+                        ? r.blank ? 'both frames empty, nothing to compare' : 'same pixels'
                         : `${pct(r.diff.fraction)} of the canvas differs, inside a ${r.diff.box.width} by ${r.diff.box.height} box`}
                     </span>
                   </>

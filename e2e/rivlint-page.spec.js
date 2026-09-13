@@ -108,11 +108,20 @@ test.describe('rivLint', () => {
     await expect(result).toContainText('No structural difference')
 
     // The render comparison: the same file drawn twice, instance by
-    // instance, is the same pixels on every instance.
+    // instance, is the same pixels on every instance. It holds under load
+    // because neither side is read on a clock (renderCompare.js, 2026-09-13):
+    // the machine is applied at its entry state with nothing advanced, so the
+    // frame is the file's and not the browser's frame rate. While the beat was
+    // wall-clock this assertion was the suite's one flaky test, passing alone
+    // and failing inside a full parallel run at up to 11.7 percent moved.
     await page.getByTestId('render-run').click()
     const render = page.getByTestId('render-result')
     await expect(render).toHaveAttribute('data-instances', '3', { timeout: 60_000 })
     await expect(render).toHaveAttribute('data-moved', '0')
+    // Not zero by default: an empty frame on both sides would also read as no
+    // difference, and would mean the comparison had nothing to compare. Three
+    // instances that drew something and matched is the claim.
+    await expect(render).toHaveAttribute('data-blank', '0')
     await expect(render).toContainText('Same pixels on all 3 instances')
     await expect(page.locator('[data-testid="render-result"] img')).toHaveCount(6)
 
