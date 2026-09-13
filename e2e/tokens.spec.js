@@ -119,6 +119,39 @@ test.describe('token propagation (the thesis)', () => {
   })
 })
 
+// The reduced-motion resolution (A4, 2026-09-13). The provider does not travel
+// with an exported set, so the file carries the answer the tool applies.
+// docs/decisions/reduced-motion-resolution-2026-09-13.md
+test.describe('reduced motion travels with the export', () => {
+  test('the CSS download carries the media block, and the audit states the resolution', async ({ page }) => {
+    await page.goto('/#/token-lab')
+    await page.getByRole('button', { name: 'CSS', exact: true }).click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('button[class*="exportButton"]').first().click(),
+    ])
+    const css = await (await download.createReadStream()).toArray()
+      .then(chunks => Buffer.concat(chunks).toString('utf8'))
+
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)')
+    const media = css.slice(css.indexOf('@media'))
+    expect(media).toContain('--motion-duration-fast: 10ms;')
+    expect(media).toContain('--motion-duration-slower: 10ms;')
+    expect(media).toContain('--motion-delay-long: 0ms;')
+    // The resolution replaces the two time families and nothing else.
+    expect(media).not.toContain('--motion-ease-')
+    expect(media).not.toContain('--motion-scale-')
+    expect(media).not.toContain('--motion-spring-')
+    expect(media).not.toContain('--motion-duration-scalar')
+
+    // The same answer, stated in the report the engineer reads beside the file.
+    await page.getByRole('button', { name: 'View report' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('Reduced motion')
+    await expect(dialog).toContainText('replacement: durations 10ms, delays 0ms; easing, scale and spring unchanged')
+  })
+})
+
 // The easing duplicate-curve note (A3, 2026-09-13). The bar is the floor of
 // Measure's indistinctMargin, and the rule excludes exact matches on purpose:
 // two slots holding the same curve is a role assignment, which two of the three

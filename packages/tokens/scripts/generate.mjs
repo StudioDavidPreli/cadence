@@ -28,6 +28,7 @@ import {
   toFlow,
   BUILT_IN_PRESETS,
   INITIAL_STATE,
+  toResolverJson,
 } from '../src/index.js'
 
 const packageDir = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -38,6 +39,14 @@ mkdirSync(outDir, { recursive: true })
 
 const doc = buildTokensDocument({ version })
 writeFileSync(join(outDir, 'cadence.tokens.json'), JSON.stringify(doc, null, 2) + '\n')
+
+// The reduced-motion resolution as its own file, beside the token document it
+// references. A token document says what the values are; a resolver document
+// says how a context changes them, and the spec keeps them apart. It points at
+// cadence.tokens.json, the combined document, because that is the file this
+// directory hands out and a $ref resolves relative to the resolver's own
+// location.
+writeFileSync(join(outDir, 'cadence.resolver.json'), toResolverJson() + '\n')
 
 const riveDefaults = buildRiveDefaults()
 writeFileSync(join(outDir, 'cadence.rive.json'), JSON.stringify(riveDefaults, null, 2) + '\n')
@@ -60,4 +69,4 @@ for (const preset of BUILT_IN_PRESETS) {
   writeFileSync(join(presetDir, 'cadence.tokens.jsx'), toAfterEffects(preset.state, { label: preset.label, version }))
 }
 
-console.log(`generated (version ${version}): cadence.tokens.json, cadence.rive.json, and css + motion.js + tokens.jsx for ${BUILT_IN_PRESETS.map(p => p.id).join(', ')}`)
+console.log(`generated (version ${version}): cadence.tokens.json, cadence.resolver.json, cadence.rive.json, and css + motion.js + tokens.jsx for ${BUILT_IN_PRESETS.map(p => p.id).join(', ')}`)

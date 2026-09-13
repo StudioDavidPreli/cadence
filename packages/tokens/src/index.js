@@ -402,9 +402,29 @@ export function toCssVars(state, { prefix = '--motion-', deviations = [] } = {})
     `  ${prefix}duration-scalar: ${t.scalar};`,
   ]
   const rootBlock = `:root {\n${lines.join('\n')}\n}`
+  // The resolution the provider applies, written into the file so it travels
+  // with the set. Without it a downstream system receives these values and no
+  // reduced-motion answer at all, and has to invent one.
+  const reduced = [
+    ...block('duration', t.duration, () => `${REDUCED_MOTION_RESOLUTION.duration}ms`),
+    ...block('delay', t.delay, () => `${REDUCED_MOTION_RESOLUTION.delay}ms`),
+  ].map(line => `  ${line}`)
+  const reducedBlock = [
+    '/* Reduced motion, by replacement: every duration collapses and every delay',
+    '   goes to zero. Easing, scale, spring and the scalar are deliberately absent.',
+    '   At 10ms a curve shape and a start scale are not perceived, and a physics',
+    '   spring has no duration to flatten: its consumers switch to a timed branch,',
+    '   which a stylesheet cannot express. Left as authored rather than guessed. */',
+    '@media (prefers-reduced-motion: reduce) {',
+    '  :root {',
+    ...reduced,
+    '  }',
+    '}',
+  ].join('\n')
+  const sheet = `${rootBlock}\n\n${reducedBlock}`
   // CSS has no place for a per-component value, so deviations trail the block
   // as a comment: recorded, never a custom property.
-  return deviations.length === 0 ? rootBlock : `${rootBlock}\n\n${deviationCssComment(deviations)}`
+  return deviations.length === 0 ? sheet : `${sheet}\n\n${deviationCssComment(deviations)}`
 }
 
 // The two families that carry time. One set, three jobs: they are the families
@@ -477,6 +497,38 @@ export function nearestToken(path, value, tokens) {
   if (best === null) return null
   const epsilon = Array.isArray(value) ? CURVE_EPSILON : SCALAR_EPSILON
   return { key: `${family}.${best.key}`, value: best.value, matches: best.distance <= epsilon }
+}
+
+// ─── Reduced motion ───────────────────────────────────────────────────────────
+// What this system does when the reader has asked for less motion, as data.
+//
+// Cadence answers by replacement, not by a scalar: every duration becomes 10ms
+// and every delay becomes 0. It lives here because three things have to agree on
+// it and used to agree only by hand. The site's provider flattens live tokens
+// with it, the CSS export writes it as a media block, and the resolver document
+// writes it as a context. One number, three readers.
+//
+// Why 10ms and not 0: a zero duration has edge cases in Framer Motion, where
+// onAnimationComplete does not always fire and some interruption logic
+// short-circuits. Ten milliseconds is indistinguishable from instant and keeps
+// the pipeline well formed.
+//
+// Why easing and scale are untouched: at 10ms the curve's shape and the start
+// scale are not perceived, so flattening them would add code and change nothing
+// a reader could see.
+//
+// Why the spring is untouched, and why that is the interesting one: a physics
+// spring has no duration, so flattening durations does nothing to it. Cadence's
+// spring consumers read a `reducedMotion` flag the provider sets and switch to
+// their timed branch. A token file cannot express "switch branches", so the
+// exported resolution leaves the spring values as they are and says so rather
+// than inventing a policy. Same for the duration scalar. A reader who receives
+// this set gets the answer the tool actually applies, and is told where the
+// answer stops.
+export const REDUCED_MOTION_RESOLUTION = {
+  duration: 10,   // ms, every key
+  delay: 0,       // ms, every key
+  unchanged: ['easing', 'scale', 'spring', 'scalar'],
 }
 
 // ─── Curve geometry ───────────────────────────────────────────────────────────
@@ -601,6 +653,83 @@ function deviationCssComment(deviations) {
           '   component running a literal in place of the token it names.',
           ...rows,
           '*/'].join('\n')
+}
+
+// ─── Resolver document ────────────────────────────────────────────────────────
+// The reduced-motion answer as an interchange artifact, on the Design Tokens
+// Resolver Module 2025.10 (Final Community Group Report, 28 October 2025, read
+// from the source 2026-09-13).
+//
+// A separate file from the token document, because the spec makes them two kinds
+// of file: a token document says what the values are, a resolver document says
+// how contexts change them. The `.resolver.json` extension is the spec's own
+// recommendation.
+//
+// The spec's introduction names "Accessibility mode, such as reduced motion" as
+// a use case and gives no example of one. This is a small one.
+//
+// Shape notes, checked against the spec rather than assumed. `version` is the
+// literal "2025.10" and is required. `resolutionOrder` is required and holds
+// reference objects, `{ "$ref": "#/sets/..." }` and `{ "$ref": "#/modifiers/..." }`,
+// not bare names. A modifier declares a contexts map of name to an array of
+// token sources, and an empty array is explicitly valid, which is what the
+// "full" context is: no tokens added, so the set stands as authored. `default`
+// must name one of the contexts. The resolver module does define `$schema`
+// (unlike the format module, which defines none), so it is included.
+export function toResolverDoc({ tokensFile = 'cadence.tokens.json' } = {}) {
+  // The reduced context carries only the leaves it replaces, on the same 2025.10
+  // object shape the token document uses. Everything it does not name resolves
+  // from the set underneath, which is the whole point of the layering.
+  const duration = ms => ({ $type: 'duration', $value: { value: ms, unit: 'ms' } })
+  const replace = (keys, ms) => Object.fromEntries(keys.map(k => [k, duration(ms)]))
+
+  return {
+    $schema: 'https://www.designtokens.org/schemas/2025.10/resolver.json',
+    name: 'Cadence motion',
+    version: '2025.10',
+    description:
+      'Cadence answers reduced motion by replacement: every duration collapses to 10ms and every delay to 0. ' +
+      'Easing, scale, spring and the duration scalar are deliberately unchanged. At 10ms a curve shape and a ' +
+      'start scale are not perceived. A physics spring has no duration to flatten, and its consumers switch to ' +
+      'a timed branch instead, which a token file cannot express, so the spring is left as authored rather than guessed.',
+    sets: {
+      // The set and the modifier could share a name (the spec allows it at the
+      // root), but they are separate ideas and reading them side by side in
+      // resolutionOrder is clearer when the names differ.
+      tokens: {
+        description: 'The motion token set as exported.',
+        sources: [{ $ref: tokensFile }],
+      },
+    },
+    modifiers: {
+      motion: {
+        description: 'Whether the reader has asked for less motion.',
+        contexts: {
+          // Empty on purpose: full motion adds nothing, the set stands.
+          full: [],
+          reduced: [{
+            motion: {
+              duration: replace(EDITABLE_TOKEN_SCHEMA.duration, REDUCED_MOTION_RESOLUTION.duration),
+              // delay.none is a fixed reference rather than an editable key, and
+              // it is already zero, but the context names every delay the token
+              // document carries so a consumer reading this file alone sees the
+              // whole family answered.
+              delay: replace(['none', ...EDITABLE_TOKEN_SCHEMA.delay], REDUCED_MOTION_RESOLUTION.delay),
+            },
+          }],
+        },
+        default: 'full',
+      },
+    },
+    resolutionOrder: [
+      { $ref: '#/sets/tokens' },
+      { $ref: '#/modifiers/motion' },
+    ],
+  }
+}
+
+export function toResolverJson(options) {
+  return JSON.stringify(toResolverDoc(options), null, 2)
 }
 
 // ─── Flow export ──────────────────────────────────────────────────────────────

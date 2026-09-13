@@ -7,6 +7,9 @@ import {
   toCssVars,
   toFramerMotion,
   importTokens,
+  toResolverJson,
+  REDUCED_MOTION_RESOLUTION,
+  EDITABLE_TOKEN_SCHEMA,
   formatLiteral,
   formatDisplay,
   nearestToken,
@@ -605,6 +608,95 @@ describe('DTCG duration leaves (2025.10)', () => {
     expect(modern.deviations).toEqual(deviations)
     expect(legacy.ok).toBe(true)
     expect(legacy.deviations).toEqual(modern.deviations)
+  })
+})
+
+// ─── Reduced motion ───────────────────────────────────────────────────────────
+// One resolution, three readers: the site's provider, the CSS export's media
+// block, and the resolver document. The provider's half is pinned site-side in
+// src/context/reducedMotionDrift.test.js.
+describe('reduced motion', () => {
+  it('writes a media block carrying the resolution, after the root block', () => {
+    const css = toCssVars(INITIAL_STATE)
+    expect(css.indexOf(':root {')).toBeLessThan(css.indexOf('@media'))
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)')
+    expect(css).toContain(`  --motion-duration-fast: ${REDUCED_MOTION_RESOLUTION.duration}ms;`)
+    expect(css).toContain(`  --motion-delay-long: ${REDUCED_MOTION_RESOLUTION.delay}ms;`)
+  })
+
+  it('replaces the two time families and nothing else', () => {
+    const css = toCssVars(INITIAL_STATE)
+    const media = css.slice(css.indexOf('@media'))
+    for (const family of ['ease', 'scale', 'spring']) {
+      expect(media, family).not.toContain(`--motion-${family}-`)
+    }
+    expect(media).not.toContain('--motion-duration-scalar')
+    expect(REDUCED_MOTION_RESOLUTION.unchanged).toEqual(['easing', 'scale', 'spring', 'scalar'])
+  })
+
+  it('carries the block into the published prefix too, one emitter', () => {
+    const css = toCssVars(INITIAL_STATE, { prefix: '--cadence-' })
+    expect(css).toContain(`  --cadence-duration-base: ${REDUCED_MOTION_RESOLUTION.duration}ms;`)
+    expect(css).not.toContain('--motion-')
+  })
+
+  it('keeps the deviations comment after the media block', () => {
+    const deviations = [{ component: 'Button', token: 'duration.fast', value: 0.25 }]
+    const css = toCssVars(INITIAL_STATE, { deviations })
+    expect(css.indexOf('@media')).toBeLessThan(css.indexOf('Button reads duration.fast'))
+  })
+})
+
+describe('toResolverJson', () => {
+  const doc = () => JSON.parse(toResolverJson())
+
+  it('declares the 2025.10 root the spec requires', () => {
+    const d = doc()
+    expect(d.version).toBe('2025.10')
+    expect(d.$schema).toBe('https://www.designtokens.org/schemas/2025.10/resolver.json')
+    expect(Array.isArray(d.resolutionOrder)).toBe(true)
+  })
+
+  it('orders the set under the modifier, by reference not by name', () => {
+    // resolutionOrder holds reference objects; later entries override earlier,
+    // so the modifier has to come second or the context would never win.
+    expect(doc().resolutionOrder).toEqual([
+      { $ref: '#/sets/tokens' },
+      { $ref: '#/modifiers/motion' },
+    ])
+  })
+
+  it('points the set at the token document beside it', () => {
+    expect(doc().sets.tokens.sources).toEqual([{ $ref: 'cadence.tokens.json' }])
+    expect(JSON.parse(toResolverJson({ tokensFile: 'elsewhere.json' })).sets.tokens.sources)
+      .toEqual([{ $ref: 'elsewhere.json' }])
+  })
+
+  it('gives full motion an empty context and defaults to it', () => {
+    // The spec allows an empty context array explicitly. Full motion adds
+    // nothing, so the set underneath stands as authored.
+    const m = doc().modifiers.motion
+    expect(m.contexts.full).toEqual([])
+    expect(m.default).toBe('full')
+    expect(Object.keys(m.contexts)).toContain(m.default)
+  })
+
+  it('carries the reduced values as 2025.10 duration leaves', () => {
+    const [source] = doc().modifiers.motion.contexts.reduced
+    const { duration, delay } = source.motion
+    expect(Object.keys(duration).sort()).toEqual([...EDITABLE_TOKEN_SCHEMA.duration].sort())
+    expect(Object.keys(delay).sort()).toEqual(['none', ...EDITABLE_TOKEN_SCHEMA.delay].sort())
+    for (const leaf of Object.values(duration)) {
+      expect(leaf).toEqual({ $type: 'duration', $value: { value: REDUCED_MOTION_RESOLUTION.duration, unit: 'ms' } })
+    }
+    for (const leaf of Object.values(delay)) {
+      expect(leaf).toEqual({ $type: 'duration', $value: { value: REDUCED_MOTION_RESOLUTION.delay, unit: 'ms' } })
+    }
+  })
+
+  it('names only what it replaces, so the rest resolves from the set', () => {
+    const [source] = doc().modifiers.motion.contexts.reduced
+    expect(Object.keys(source.motion).sort()).toEqual(['delay', 'duration'])
   })
 })
 

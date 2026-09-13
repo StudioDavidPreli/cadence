@@ -56,6 +56,7 @@
 import {
   stateToTokens, nearestToken, formatDisplay,
   EASING_CURVES, EDITABLE_TOKEN_SCHEMA, curveDistance, CURVE_SEPARATION,
+  REDUCED_MOTION_RESOLUTION,
 } from 'cadence-tokens'
 import {
   settleTime,
@@ -402,6 +403,36 @@ function checkInteractionBudget(state, report) {
   ))
 }
 
+// ─── Reduced motion ───────────────────────────────────────────────────────────
+// A measurement, never a finding, and the one row that is not about the set.
+//
+// Every other row answers to the values the reader assembled. This one answers
+// to the tool that exported them: whoever receives this set is going to have to
+// answer reduced motion, and the report should say what answer travels with the
+// file rather than leaving them to invent one. So it is always present, on every
+// set, including a set with nothing else to say.
+//
+// The audit's subject is the set and the resolutions the tool itself applies,
+// which today is one (David, 2026-09-12). Theme and contrast are not motion
+// resolutions and do not enter.
+//
+// It states its own edge. Scale and spring are not flattened, and the row says
+// so rather than implying the resolution is total, because a reader who assumes
+// their spring collapses under reduced motion and finds it does not has been
+// misled by a report that was trying to be tidy.
+function checkReducedMotion(state, report) {
+  const { duration, delay } = REDUCED_MOTION_RESOLUTION
+  report.measurements.push(measure(
+    'reducedMotion',
+    'Reduced motion',
+    `replacement: durations ${duration}ms, delays ${delay}ms; easing, scale and spring unchanged`,
+    [
+      ...EDITABLE_TOKEN_SCHEMA.duration.map(k => `duration.${k}`),
+      ...EDITABLE_TOKEN_SCHEMA.delay.map(k => `delay.${k}`),
+    ],
+  ))
+}
+
 // ─── Easing ───────────────────────────────────────────────────────────────────
 // The one easing fact that is not a judgment.
 //
@@ -549,7 +580,7 @@ export function auditSummarySentence(counts) {
 // user can read rather than a pass/fail they can only obey.
 //
 // Both arrive in a stable order (duration, delay, easing, scale, spring, budget,
-// off-system) so a panel does not reshuffle rows between renders and a test can
+// reduced motion, off-system) so a panel does not reshuffle rows between renders and a test can
 // read straight through the array.
 //
 // `counts` is precomputed because those three numbers are what a summary line
@@ -569,6 +600,7 @@ export function auditTokens(state, { deviations = [] } = {}) {
   checkScale(state, report)
   checkSpring(state, report)
   checkInteractionBudget(state, report)
+  checkReducedMotion(state, report)
   checkOffSystem(state, deviations, report)
 
   return {

@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import { REDUCED_MOTION_RESOLUTION } from 'cadence-tokens'
 
 // This context enables TokenLab to push live token values into components
 // that would otherwise read tokens once from CSS on mount.
@@ -44,11 +45,18 @@ export const MotionTokensContext = createContext(null)
 // respectReducedMotion, or the no-provider OS path); everywhere else it is
 // absent and reads falsy, which is correct. This is the spring branch the
 // physics-spring decision doc anticipated (docs/decisions/physics-spring-2026-07-20.md).
+//
+// The two numbers live in cadence-tokens as REDUCED_MOTION_RESOLUTION, in the
+// file unit (ms), because three things have to agree on them: this provider,
+// the CSS export's @media block, and the resolver document. They used to agree
+// by hand. `reducedMotionDrift.test.js` pins this function against the package.
 export function reduceMotion(tokens) {
+  const duration = REDUCED_MOTION_RESOLUTION.duration / 1000
+  const delay = REDUCED_MOTION_RESOLUTION.delay / 1000
   return {
     ...tokens,
-    duration: { fast: 0.01, base: 0.01, slow: 0.01, slower: 0.01 },
-    delay:    { none: 0, short: 0, medium: 0, long: 0 },
+    duration: { fast: duration, base: duration, slow: duration, slower: duration },
+    delay:    { none: delay, short: delay, medium: delay, long: delay },
     reducedMotion: true,
   }
 }

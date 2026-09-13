@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { auditTokens, auditToMarkdown, auditSummarySentence, THRESHOLDS, NIELSEN_RESPONSE_MS } from './tokenAudit'
 import {
   INITIAL_STATE, BUILT_IN_PRESETS, EASING_CURVES, EDITABLE_TOKEN_SCHEMA,
-  curveDistance, CURVE_SEPARATION,
+  curveDistance, CURVE_SEPARATION, REDUCED_MOTION_RESOLUTION,
 } from 'cadence-tokens'
 
 // Build a state by overriding one family of INITIAL_STATE, so each test states
@@ -87,6 +87,7 @@ describe('measurements', () => {
       'spring.overshoot',
       'spring.damping',
       'budget.interaction',
+      'reducedMotion',
     ])
   })
 
@@ -120,7 +121,35 @@ describe('measurements', () => {
 
   it('omits spring measurements when the spring cannot be measured', () => {
     expect(measureIds({ duration: INITIAL_STATE.duration, delay: INITIAL_STATE.delay }))
-      .toEqual(['budget.interaction'])
+      .toEqual(['budget.interaction', 'reducedMotion'])
+  })
+
+  // ── The reduced-motion row ─────────────────────────────────────────────────
+  // The one measurement that is not about the set. It answers for the tool that
+  // exported it, so it is present on every report, including a report with
+  // nothing else in it.
+  it('states the resolution on every set, including an empty one', () => {
+    for (const preset of BUILT_IN_PRESETS) {
+      expect(measureIds(preset.state), preset.label).toContain('reducedMotion')
+    }
+    expect(measureIds({})).toEqual(['reducedMotion'])
+  })
+
+  it('states the replacement and its edge, and cites no reference', () => {
+    const row = auditTokens(INITIAL_STATE).measurements.find(m => m.id === 'reducedMotion')
+    expect(row.label).toBe('Reduced motion')
+    expect(row.display).toBe('replacement: durations 10ms, delays 0ms; easing, scale and spring unchanged')
+    // No external number to answer to: this is a fact about the tool, not a
+    // value measured against an industry bar.
+    expect(row.reference).toBe(null)
+    expect(row.paths).toContain('duration.fast')
+    expect(row.paths).toContain('delay.long')
+  })
+
+  it('tracks the package resolution rather than restating it', () => {
+    const row = auditTokens(INITIAL_STATE).measurements.find(m => m.id === 'reducedMotion')
+    expect(row.display).toContain(`durations ${REDUCED_MOTION_RESOLUTION.duration}ms`)
+    expect(row.display).toContain(`delays ${REDUCED_MOTION_RESOLUTION.delay}ms`)
   })
 })
 
@@ -481,11 +510,13 @@ describe('the summary sentence', () => {
 
 describe('partial and malformed state', () => {
   it('returns an empty result for undefined', () => {
-    expect(auditTokens(undefined)).toEqual({
-      findings: [],
-      measurements: [],
-      counts: { finding: 0, note: 0, offSystem: 0 },
-    })
+    // The reduced-motion row survives an absent state on purpose: it reports
+    // what the tool does, not what the set says, so there is nothing for a
+    // missing set to remove.
+    const result = auditTokens(undefined)
+    expect(result.findings).toEqual([])
+    expect(result.counts).toEqual({ finding: 0, note: 0, offSystem: 0 })
+    expect(result.measurements.map(m => m.id)).toEqual(['reducedMotion'])
   })
 
   it('returns an empty result for an empty object', () => {
