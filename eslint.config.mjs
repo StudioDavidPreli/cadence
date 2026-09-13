@@ -8,7 +8,11 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist/**', 'archive/**', 'node_modules/**'] },
+  // .claude/** holds the agent worktrees, which are whole transient copies of
+  // this repo. Without it, a session running in a worktree gets its copy of
+  // every file linted alongside the real one, and the warning count triples
+  // for reasons that have nothing to do with the code (2026-09-13).
+  { ignores: ['dist/**', 'archive/**', 'node_modules/**', '.claude/**'] },
   {
     files: ['src/**/*.{js,jsx}', 'worker/**/*.js'],
     languageOptions: {
