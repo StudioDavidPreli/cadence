@@ -16,7 +16,15 @@
 //
 // Policy: a component is listed under a token if its source reads that token
 // (tokens.<group>.<key>, or the matching --motion-* CSS variable). Objective and
-// greppable. ease.linear has no slider (corners only), so reads of it produce no
+// greppable.
+//
+// Toast was missing from duration.fast and easing.standard until 2026-09-13. Its
+// launch button runs a whileTap that reads all three of duration.fast,
+// easing.standard and scale.pressBase, and only the scale had been recorded, so
+// two thirds of that press were invisible to the connection highlighting and to
+// the generated guide. The site table found it on the first
+// run of its cross-check (motionSites.test.js), which is the whole argument for
+// keeping the two tables answerable to each other. ease.linear has no slider (corners only), so reads of it produce no
 // entry here. Two reads are wired but not exercised by the TokenLab demo itself —
 // Card's scale.pressSubtle (its dimmed branch, used by the Appeal principle) and
 // Stepper's scale.pressBase — and are listed because the component consumes them even
@@ -94,11 +102,11 @@
 // the spring toggle off: the one demo where the spring is not an alternative
 // to the bezier but the only transition that can take a velocity.
 export const TOKEN_COMPONENT_MAP = {
-  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Accordion', 'Skeleton', 'Async Button', 'Reorder'],
+  'duration.fast':    ['Button', 'NavItem', 'Toggle', 'Dropdown', 'Tooltip', 'Stepper', 'Carousel', 'React Clock', 'Toast', 'Accordion', 'Skeleton', 'Async Button', 'Reorder'],
   'duration.base':    ['Card', 'Drawer', 'Modal', 'Tooltip', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'duration.slow':    ['ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'Modal', 'Drawer', 'React Clock', 'Rive Clock'],
   'duration.slower':  ['Spinner', 'Stepper', 'React Clock', 'Skeleton', 'Toast', 'Async Button'],
-  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
+  'easing.standard':  ['Button', 'Card', 'ProgressBar', 'Stepper', 'Carousel', 'Notification Badge', 'React Clock', 'Rive Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'easing.enter':     ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button'],
   'easing.exit':      ['NavItem', 'Drawer', 'Modal', 'Tooltip', 'Stepper', 'Dropdown', 'ProgressBar', 'React Clock', 'Toast', 'Skeleton', 'Accordion', 'Async Button', 'Reorder'],
   'easing.overshoot': ['Button', 'Card', 'Carousel', 'Notification Badge', 'Toggle', 'Async Button', 'Reorder'],
