@@ -215,6 +215,54 @@
       "viewUniques": 0,
       "clones": 34,
       "cloneUniques": 18
+    },
+    "2026-09-06": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 12,
+      "cloneUniques": 5
+    },
+    "2026-09-07": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 22,
+      "cloneUniques": 13
+    },
+    "2026-09-08": {
+      "views": 1,
+      "viewUniques": 1,
+      "clones": 11,
+      "cloneUniques": 8
+    },
+    "2026-09-09": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 28,
+      "cloneUniques": 17
+    },
+    "2026-09-10": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 17,
+      "cloneUniques": 11
+    },
+    "2026-09-11": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 4,
+      "cloneUniques": 3
+    },
+    "2026-09-12": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 1,
+      "cloneUniques": 1
+    },
+    "2026-09-13": {
+      "views": 0,
+      "viewUniques": 0,
+      "clones": 23,
+      "cloneUniques": 12
     }
   },
   "snapshots": [
@@ -313,6 +361,35 @@
       },
       "referrers": [],
       "paths": []
+    },
+    {
+      "capturedAt": "2026-09-14T15:52:59.572Z",
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "views14d": {
+        "count": 1,
+        "uniques": 1
+      },
+      "clones14d": {
+        "count": 401,
+        "uniques": 236
+      },
+      "referrers": [
+        {
+          "referrer": "github.com",
+          "count": 1,
+          "uniques": 1
+        }
+      ],
+      "paths": [
+        {
+          "path": "/StudioDavidPreli/cadence",
+          "title": "Overview",
+          "count": 1,
+          "uniques": 1
+        }
+      ]
     }
   ]
 }
