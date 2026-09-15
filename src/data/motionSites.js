@@ -117,7 +117,10 @@ export const MOTION_SITES = {
       tokens: ['duration.slow', 'easing.standard'], fixed: ['delay.none'] },
     { name: 'stagger', moment: 'The gaps between the cascade beats, all measured from the click, so the spacing stays editable.',
       tokens: ['delay.short', 'delay.medium'] },
-    { name: 'ring', moment: 'The active step ring arrives.',
+    // Was 'ring' until 2026-09-14. Nothing called a ring reads a token: the
+    // active-step ring is a CSS border-color transition on chrome timing. These
+    // two tokens belong to the description paragraph at beat 3.
+    { name: 'description', moment: 'The new step\'s description arrives, the last beat of the cascade, after the checkmark and the connector have resolved.',
       tokens: ['duration.fast', 'easing.enter'] },
     { name: 'completion', moment: 'The final message, held back by the longest delay so the climax breathes.',
       tokens: ['duration.slower', 'easing.enter', 'delay.long'] },
