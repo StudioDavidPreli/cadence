@@ -1,12 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ExportSection } from '../../components/TokenLab'
-import {
-  INITIAL_STATE,
-  toDtcgJson,
-  toFlatJson,
-  toCssVars,
-  toFramerMotion,
-} from 'cadence-tokens'
+import { ExportFormatPicker } from '../../components/ExportModal'
+import { EXPORT_FORMATS, exportFile } from '../../components/TokenLab/exportFormats'
+import { INITIAL_STATE } from 'cadence-tokens'
 import { Button } from '../../components/Button'
 import { ScrambleCode } from './ScrambleCode'
 import rigStyles from './CaptureRig.module.css'
@@ -62,16 +57,11 @@ const SCRAMBLE_FPS = 24
 // scramble entirely, so common structure holds still while the rest churns.
 const HOLD_MATCHING = true
 
-// The four formats in step order, each with the stringifier that produces it
-// and the grammar the panel highlights it with. The language field is the
-// reason this table lives here rather than in ExportSection: the app has no
-// use for it.
-const FORMATS = [
-  { key: 'dtcg', stringify: toDtcgJson,     language: 'json' },
-  { key: 'flat', stringify: toFlatJson,     language: 'json' },
-  { key: 'css',  stringify: toCssVars,      language: 'css' },
-  { key: 'fm',   stringify: toFramerMotion, language: 'javascript' },
-]
+// The formats in step order, from the app's own export table (2026-09-15;
+// this scene kept a four-entry copy with the highlight language until the
+// table grew one). Six now, After Effects and Flow included, so the footage
+// steps through everything the modal offers.
+const FORMATS = EXPORT_FORMATS
 
 export function ExportFormatsScene() {
   const [index, setIndex] = useState(0)
@@ -119,7 +109,7 @@ export function ExportFormatsScene() {
   }, [])
 
   const format = FORMATS[index]
-  const text = format.stringify(INITIAL_STATE)
+  const text = exportFile(format.key, INITIAL_STATE).text
 
   return (
     <div className={rigStyles.stage}>
@@ -138,18 +128,19 @@ export function ExportFormatsScene() {
           className={`${rigStyles.plate} ${SHOW_CROP_GUIDE ? rigStyles.plateGuide : ''}`}
           style={{ width: PLATE.w, height: PLATE.h }}
         >
-          {/* The real shipped component, driven from out here so the panel
-              beneath it can show the same format's output. */}
+          {/* The real shipped format list (the modal's picker, since the
+              2026-09-15 export modal replaced the tool bar's toggle), driven
+              from out here so the panel beneath it can show the same
+              format's output. */}
           <div className={rigStyles.controlBand} style={{ height: controlHeight || undefined }}>
             <div
               ref={controlRef}
               className={rigStyles.exportControl}
               style={{ '--control-scale': CONTROL_SCALE }}
             >
-              <ExportSection
-                rawState={INITIAL_STATE}
-                format={format.key}
-                onFormatChange={(key) => setIndex(FORMATS.findIndex((f) => f.key === key))}
+              <ExportFormatPicker
+                value={format.key}
+                onChange={(key) => setIndex(FORMATS.findIndex((f) => f.key === key))}
               />
             </div>
           </div>

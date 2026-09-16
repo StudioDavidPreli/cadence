@@ -1,0 +1,255 @@
+/* ── Export modal ─────────────────────────────────────────────────────────────
+   Two columns inside Modal's wide panel: the format list at a fixed width on
+   the left, the preview taking the rest. Under 640px the columns stack, list
+   first, so the choice still comes before the file. The Modal owns the panel's
+   ground, border and elevation; everything here is interior. */
+
+.layout {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Format list ──────────────────────────────────────────────────────────────
+   A column of full-width buttons, each a label line over a one-sentence
+   description. The active one takes the surface fill the tool bar's active
+   pills use; hover inverts the same way (see .presetItem:hover in TokenLab). */
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.option:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.optionActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.optionActive:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+}
+
+.optionLabel {
+  composes: type-button from global;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: inherit;
+}
+
+/* The "reads back" tag: microcopy weight, the muted role, so it reads as a
+   note on the name rather than a second name. Inherits the row's hover and
+   active color shifts through currentColor. */
+.optionTag {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
+.optionActive .optionTag,
+.option:hover .optionTag {
+  color: inherit;
+}
+
+.optionDescription {
+  composes: type-microcopy from global;
+  color: inherit;
+  line-height: 1.4;
+}
+
+/* ── Preview ──────────────────────────────────────────────────────────────────
+   The file as it will be written, in the code view's own type and palette. The
+   block scrolls in both directions rather than wrapping: unlike the demo code
+   view (which wraps because its reveal animation broke scroll, see
+   CodeBlock.module.css), this pre mounts inside a dialog with no height
+   animation of its own, and a token file's lines are meant to be read as
+   written. */
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* The list sets the row's height; the preview fills it and scrolls inside.
+     contain: size makes this box contribute nothing to the grid row (a
+     147-line DTCG file would otherwise size the row to itself), while
+     align-self: stretch (the grid default) still hands it the row's height.
+     The stacked layout below gives it a height of its own, since with no
+     neighbour to stretch against a size-contained box would be zero tall. */
+  contain: size;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .preview {
+    height: 320px;
+  }
+}
+
+.previewHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-muted);
+}
+
+/* text-base, not text-primary: primary is the role for text ON the dark
+   surface fill (the active pill, the Export button), and on the page ground
+   in light mode it is near white. The filename and the subject line sit on
+   the ground, so they take the ground's text role. Caught on the light-theme
+   pass, 2026-09-15. */
+.filename {
+  composes: type-value from global;
+  font-family: var(--font-mono);
+  color: var(--color-text-base);
+}
+
+.lineCount {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+  flex: none;
+}
+
+.pre {
+  margin: 0;
+  padding: 12px 14px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+.pre:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.line {
+  white-space: pre;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────────
+   The subject line on the left (what the file is of, and the deviation note),
+   the actions on the right. Export is the primary verb: solid fill, the same
+   weight as the audit report's download. */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.subjectLine {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.subject {
+  composes: type-label from global;
+  color: var(--color-text-base);
+}
+
+.deviationNote {
+  composes: type-microcopy from global;
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.exportButton {
+  composes: type-button from global;
+  padding: 6px 14px;
+  border-radius: 5px;
+  border: none;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.exportButton:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.copyButton {
+  composes: type-button from global;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.copyButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}

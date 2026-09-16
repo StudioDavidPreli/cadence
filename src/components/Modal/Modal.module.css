@@ -92,6 +92,16 @@
   width: auto;
 }
 
+/* ── Wide mode ────────────────────────────────────────────────────────────────
+   A two-column dialog (the export modal: format list beside a code preview).
+   Fills the width up to 760px so the preview has room for a line of DTCG
+   without wrapping; the viewport margin and the height cap are unchanged.
+   Placed after .panel so it wins the cascade. */
+.panelWide {
+  width: 100%;
+  max-width: min(760px, calc(100vw - 32px));
+}
+
 /* ── Header ───────────────────────────────────────────────────────────────── */
 .header {
   display: flex;

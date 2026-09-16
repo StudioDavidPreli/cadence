@@ -125,10 +125,13 @@ test.describe('token propagation (the thesis)', () => {
 test.describe('reduced motion travels with the export', () => {
   test('the CSS download carries the media block, and the audit states the resolution', async ({ page }) => {
     await page.goto('/#/token-lab')
-    await page.getByRole('button', { name: 'CSS', exact: true }).click()
+    // The export modal (2026-09-15): the tool bar's Export… opens it, the
+    // format list picks CSS, and the primary action names the format.
+    await page.getByRole('button', { name: 'Export…' }).click()
+    await page.getByRole('button', { name: /^CSS\b/ }).click()
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('button[class*="exportButton"]').first().click(),
+      page.getByRole('button', { name: 'Export CSS' }).click(),
     ])
     const css = await (await download.createReadStream()).toArray()
       .then(chunks => Buffer.concat(chunks).toString('utf8'))
@@ -145,6 +148,9 @@ test.describe('reduced motion travels with the export', () => {
     expect(media).not.toContain('--motion-duration-scalar')
 
     // The same answer, stated in the report the engineer reads beside the file.
+    // The export dialog is modal, so it closes before the tool bar is reachable.
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: 'Export tokens' })).toBeHidden()
     await page.getByRole('button', { name: 'View report' }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('Reduced motion')

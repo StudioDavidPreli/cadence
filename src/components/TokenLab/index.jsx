@@ -54,15 +54,13 @@ import {
   INITIAL_STATE,
   BUILT_IN_PRESETS,
   stateToTokens,
-  toDtcgJson,
-  toFlatJson,
-  toCssVars,
-  toFramerMotion,
   tokenKeyToCssSuffix,
   importTokens,
   reducer,
 } from 'cadence-tokens'
 import { trackEvent } from '../../utils/trackEvent'
+import { downloadTextFile } from '../../utils/downloadTextFile'
+import { ExportModal } from '../ExportModal'
 import styles from './TokenLab.module.css'
 
 // ─── Lazy boundaries: PrinciplesLibrary and Carousel ─────────────────────────
@@ -165,21 +163,6 @@ function writeAllTokensToCss(state) {
   // to the CSS export and any future consumer; DurationVisualizer itself reads
   // rawState.scalar, not this property.
   el.style.setProperty('--motion-duration-scalar',  `${state.scalar}`)
-}
-
-// Triggers a client-side file download for a text payload. Builds a Blob, points
-// a temporary object URL at it, clicks a synthetic <a download>, then revokes the
-// URL so it is not leaked. Entirely in-browser: the exported token file never
-// touches a server.
-function downloadTextFile(filename, text, mime = 'application/json') {
-  const url = URL.createObjectURL(new Blob([text], { type: mime }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
 }
 
 // ─── CSS sync (Channel 1) ─────────────────────────────────────────────────────
@@ -652,48 +635,14 @@ export function PresetsSection({ rawState, allPresets, onLoad, onDelete, onSave,
 }
 
 // ─── ExportSection ────────────────────────────────────────────────────────────
-// The token-export tools, split out of PresetsSection (2026-07-21) so they live
-// in their own collapsible Export section rather than riding under the presets.
-// Two stacked rows: the format toggle spans the full column width on top (its
-// four segments share the width equally), Export and Copy sit beneath. Four
-// segments plus both actions do not fit one 300px row without the FM segment
-// clipping, so the toggle gets the whole width and the actions drop below it.
-// The wire names the /api/event counter records per export format. The UI's
-// internal keys stay as they are ('flat', 'fm'); the counter speaks the
-// endpoint's contract instead ('json', 'framer-motion'), so the report reads
-// without a decoder ring. This map is the single translation point.
-const EXPORT_EVENT_FORMAT = {
-  dtcg: 'dtcg',
-  flat: 'json',
-  css:  'css',
-  fm:   'framer-motion',
-}
-
-export function ExportSection({ rawState, deviations = [], format, onFormatChange, onOpenAudit }) {
-  // Export format: 'dtcg' (W3C Design Tokens), 'flat' (CSS-mirroring JSON), 'css'
-  // (a drop-in :root block), or 'fm' (a Framer Motion config module). All four
-  // serialize from the same stateToExport object, so the toggle only selects
-  // which stringifier runs at export time. Import handles dtcg/flat only; css and
-  // fm are export-only (a destination, not an interchange format).
-  const [internalFormat, setInternalFormat] = useState('dtcg')
-  // Optionally controlled. In the app nothing outside this section needs to know
-  // which format is selected, so it owns the state. The case-study capture rig
-  // (src/caseStudyMedia/captureRig/ExportFormatsScene.jsx) renders a code panel
-  // beneath this component showing the selected format's output, which means the
-  // format has to live above both — so it may be supplied. Passing neither prop
-  // leaves the component exactly as it was.
-  // Controlled-or-not is decided by `format` alone, and the pairing is
-  // checked: `format` without an `onFormatChange` would render four
-  // live-looking buttons that update the invisible internal state and change
-  // nothing on screen, so dev fails loud instead of shipping a dead toggle.
-  const controlled = format !== undefined
-  if (import.meta.env.DEV && controlled && !onFormatChange) {
-    console.warn('ExportSection: `format` supplied without `onFormatChange`; the format buttons will be inert.')
-  }
-  const exportFormat = controlled ? format : internalFormat
-  const setExportFormat = controlled ? (onFormatChange ?? (() => {})) : setInternalFormat
-  const [copied, setCopied] = useState(false)
-
+// The foot of the tool bar: the audit line, and the one button that opens the
+// export modal. Split out of PresetsSection 2026-07-21 as a four-segment format
+// toggle with Export and Copy beneath; the toggle clipped its fourth segment
+// once (the FM restack) and could not take six, so on 2026-09-15 the choice of
+// format, the preview and the actions moved into ExportModal and this section
+// kept only what belongs in a 300px column. The format table the modal renders
+// is `./exportFormats.js`.
+export function ExportSection({ rawState, deviations = [], onOpenAudit, onOpenExport }) {
   // The one-line audit verdict for the tool bar. Only the counts are shown here;
   // the modal carries the rows. Recomputed when the token set changes, which for
   // this section means on every slider release rather than every frame, since
@@ -716,98 +665,14 @@ export function ExportSection({ rawState, deviations = [], format, onFormatChang
     return `Audit: ${parts.join(', ')}`
   }, [rawState, deviations])
 
-  // The current token state serialized in the selected format. Computed on
-  // demand (export and copy both call it) rather than held in state.
-  // Off-system deviations (a demo running a literal in place of a token) ride
-  // every format as an appendix in its own idiom; the token blocks never change
-  // for them. Empty list, identical file.
-  function exportText() {
-    const opts = { deviations }
-    if (exportFormat === 'dtcg') return toDtcgJson(rawState, opts)
-    if (exportFormat === 'css')  return toCssVars(rawState, opts)
-    if (exportFormat === 'fm')   return toFramerMotion(rawState, opts)
-    return toFlatJson(rawState, opts)
-  }
-
-  function handleExport() {
-    // DTCG files conventionally carry the .tokens.json extension; the flat
-    // shape is a plain .json; the css block is a .css; the Framer Motion module
-    // is a .js. Each carries the matching mime so the download opens as its own
-    // file type rather than plain text.
-    const file = {
-      dtcg: { name: 'cadence.tokens.json', mime: 'application/json' },
-      flat: { name: 'cadence-tokens.json', mime: 'application/json' },
-      css:  { name: 'cadence.tokens.css',  mime: 'text/css' },
-      fm:   { name: 'cadence.motion.js',   mime: 'text/javascript' },
-    }[exportFormat]
-    downloadTextFile(file.name, exportText(), file.mime)
-    // Count the export (fire-and-forget; see trackEvent). Downloads and copies
-    // both count as "a spec left the building", per the capture doc.
-    trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
-  }
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(exportText())
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-      // Inside the try, after the await: a failed copy put nothing on the
-      // clipboard, so it must not count as an export either.
-      trackEvent({ type: 'export', format: EXPORT_EVENT_FORMAT[exportFormat] })
-    } catch {
-      // clipboard API is unavailable in insecure contexts; the download button
-      // is the reliable path, so a failed copy is a silent no-op.
-    }
-  }
-
   return (
     <div className={styles.exportRow}>
-      <div
-        className={styles.exportFormatToggle}
-        role="group"
-        aria-label="Export format"
-      >
-        <button
-          type="button"
-          className={`${styles.exportFormatOption} ${exportFormat === 'dtcg' ? styles.exportFormatOptionActive : ''}`}
-          onClick={() => setExportFormat('dtcg')}
-          aria-pressed={exportFormat === 'dtcg'}
-        >
-          DTCG
-        </button>
-        <button
-          type="button"
-          className={`${styles.exportFormatOption} ${exportFormat === 'flat' ? styles.exportFormatOptionActive : ''}`}
-          onClick={() => setExportFormat('flat')}
-          aria-pressed={exportFormat === 'flat'}
-        >
-          Flat
-        </button>
-        <button
-          type="button"
-          className={`${styles.exportFormatOption} ${exportFormat === 'css' ? styles.exportFormatOptionActive : ''}`}
-          onClick={() => setExportFormat('css')}
-          aria-pressed={exportFormat === 'css'}
-        >
-          CSS
-        </button>
-        {/* FM = a Framer Motion config module (cadence.motion.js). Export-only,
-            like CSS. */}
-        <button
-          type="button"
-          className={`${styles.exportFormatOption} ${exportFormat === 'fm' ? styles.exportFormatOptionActive : ''}`}
-          onClick={() => setExportFormat('fm')}
-          aria-pressed={exportFormat === 'fm'}
-        >
-          FM
-        </button>
-      </div>
-      {/* The audit line. Present only when a caller wires it (the capture rig
-          renders this section without one), and always visible when it is: a
-          clean set says so, which is the state most sets are in and the one a
-          user needs to be able to trust. The full report is a modal rather than
-          more rows here, because a 300px column cannot hold a findings list and
-          a measurements table without becoming a scroll of its own. */}
+      {/* The audit line. Present only when a caller wires it, and always visible
+          when it is: a clean set says so, which is the state most sets are in
+          and the one a user needs to be able to trust. The full report is a
+          modal rather than more rows here, because a 300px column cannot hold
+          a findings list and a measurements table without becoming a scroll
+          of its own. */}
       {onOpenAudit && (
         <div className={styles.auditRow}>
           <span className={styles.auditSummary}>{auditSummary}</span>
@@ -817,14 +682,11 @@ export function ExportSection({ rawState, deviations = [], format, onFormatChang
         </div>
       )}
 
-      {/* Row two: the download actions, beneath the full-width toggle. Export
-          fills the remaining width; Copy sits compact at its right. */}
+      {/* The way into the export modal. The ellipsis is the convention for "a
+          dialog follows": nothing downloads on this click. */}
       <div className={styles.exportActions}>
-        <button type="button" className={styles.exportButton} onClick={handleExport}>
-          Export
-        </button>
-        <button type="button" className={styles.exportCopyButton} onClick={handleCopy}>
-          {copied ? 'Copied' : 'Copy'}
+        <button type="button" className={styles.exportButton} onClick={onOpenExport}>
+          Export…
         </button>
       </div>
     </div>
@@ -1972,6 +1834,9 @@ export function TokenLab() {
   // because unlike importResult there is no payload, the report is derived from
   // rawState at render time.
   const [auditOpen, setAuditOpen] = useState(false)
+  // The export modal. Same shape as the audit report: a boolean, because the
+  // dialog derives everything it shows from rawState and the deviations.
+  const [exportOpen, setExportOpen] = useState(false)
   const [auditCopied, setAuditCopied] = useState(false)
 
   function handleImport(result) {
@@ -2429,7 +2294,12 @@ export function TokenLab() {
         info={<PrivacyInfoGlyph />}
         infoDescription="Exports and imports are counted anonymously: format only, no cookies, no identifiers, no IP address."
       >
-        <ExportSection rawState={rawState} deviations={deviations} onOpenAudit={() => setAuditOpen(true)} />
+        <ExportSection
+          rawState={rawState}
+          deviations={deviations}
+          onOpenAudit={() => setAuditOpen(true)}
+          onOpenExport={() => setExportOpen(true)}
+        />
       </ControlSection>
     </>
   )
@@ -2591,6 +2461,18 @@ export function TokenLab() {
       >
         {importResult && <ImportReport result={importResult} />}
       </Modal>
+
+      {/* The export modal: format list, live preview, Export and Copy. Headed
+          with the active preset's label, or "Custom" once the set is edited,
+          the same rule the audit's heading follows (auditLabel). Viewport and
+          chrome for the reports' reasons; see the component. */}
+      <ExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        rawState={rawState}
+        deviations={deviations}
+        presetLabel={auditLabel}
+      />
 
       {/* The audit report. chrome: this dialog is the tool talking about the
           user's token set, so it must not be timed BY that set. See the chrome

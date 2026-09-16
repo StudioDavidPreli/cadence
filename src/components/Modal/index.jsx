@@ -83,6 +83,12 @@ import styles from './Modal.module.css'
 // 372×480 card) sits flush inside the dialog frame. The class lives in
 // Modal.module.css so its cascade order over .panel is controlled. Off by
 // default, which keeps the standard dialog sizing.
+// wide lifts the 420px cap to 760px (still inside the viewport) for a dialog
+// whose content is two columns: the export modal lists six formats beside a
+// highlighted preview of the file, and a report-width panel would fold the
+// preview under the list. Off by default; the reports and the demos keep the
+// standard width.
+//
 // chrome (default false) switches this dialog's own timing off the editable
 // --motion-* tokens and onto the fixed --feedback-* constants, via
 // useChromeTransition. Off by default because Modal IS the Staging principle's
@@ -95,7 +101,7 @@ import styles from './Modal.module.css'
 // seconds to appear, and a near-zero value would make it flash in with no
 // transition at all. The dialog is chrome the moment its content is the tool
 // talking about itself rather than a component demonstrating a token.
-export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null, hideHeader = false, bare = false, chrome = false }) {
+export function Modal({ isOpen, onClose, title, children, scoped = false, portalTarget = null, hideHeader = false, bare = false, wide = false, chrome = false }) {
   const tokens = useMotionTokens()
   const chromeTransition = useChromeTransition()
   const panelRef = useRef(null)
@@ -189,6 +195,7 @@ export function Modal({ isOpen, onClose, title, children, scoped = false, portal
             styles.panel,
             portalTarget ? styles.panelAnchored : scoped && styles.panelScoped,
             bare && styles.panelBare,
+            wide && styles.panelWide,
           ].filter(Boolean).join(' ')}
           role="dialog"
           aria-modal="true"
