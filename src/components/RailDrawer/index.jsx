@@ -60,7 +60,11 @@ export function RailDrawer({ label, drawerId, open, onToggle, onClose, children 
     }
   }, [open, onClose])
 
-  const dur = navDurationSeconds(reduce)
+  // One transition for the backdrop and the panel. Chrome pairs the fixed nav
+  // duration with FEEDBACK_EASE (the same pairing useChromeTransition makes);
+  // written as two separate objects, the backdrop once lost the ease and rode
+  // Framer's default curve (found by the 2026-09-15 ease-less scan).
+  const transition = { duration: navDurationSeconds(reduce), ease: FEEDBACK_EASE }
 
   return (
     <>
@@ -84,7 +88,7 @@ export function RailDrawer({ label, drawerId, open, onToggle, onClose, children 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: dur }}
+              transition={transition}
               onClick={onClose}
             />
             <motion.div
@@ -98,7 +102,7 @@ export function RailDrawer({ label, drawerId, open, onToggle, onClose, children 
               initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: dur, ease: FEEDBACK_EASE }}
+              transition={transition}
             >
               {children}
             </motion.div>
