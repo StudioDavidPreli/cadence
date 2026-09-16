@@ -113,15 +113,17 @@ export const MOTION_SITES = {
   Stepper: [
     { name: 'press', moment: 'Next is pressed and the control compresses.',
       tokens: ['duration.fast', 'easing.standard', 'scale.pressBase'] },
-    { name: 'step', moment: 'A step completes and its connector fills.',
-      tokens: ['duration.slow', 'easing.standard'], fixed: ['delay.none'] },
+    { name: 'step', moment: 'A step completes: its number gives way to the checkmark, and its connector fills.',
+      tokens: ['duration.slow', 'duration.fast', 'easing.enter', 'easing.standard'], fixed: ['delay.none'] },
+    { name: 'handoff', moment: 'The step view fades under the completion message, then returns on reset. Its delay is the first beat plus the longest gap, so the cascade finishes in view.',
+      tokens: ['duration.fast', 'duration.slow', 'delay.long', 'easing.exit', 'easing.enter'] },
     { name: 'stagger', moment: 'The gaps between the cascade beats, all measured from the click, so the spacing stays editable.',
       tokens: ['delay.short', 'delay.medium'] },
-    // Was 'ring' until 2026-09-14. Nothing called a ring reads a token: the
-    // active-step ring is a CSS border-color transition on chrome timing. These
-    // two tokens belong to the description paragraph at beat 3.
-    { name: 'description', moment: 'The new step\'s description arrives, the last beat of the cascade, after the checkmark and the connector have resolved.',
-      tokens: ['duration.fast', 'easing.enter'] },
+    // Was 'ring' until 2026-09-14, then 'description' until 2026-09-15 when the
+    // label's read joined it. Nothing called a ring reads a token: the
+    // active-step ring is a CSS border-color transition on chrome timing.
+    { name: 'activate', moment: 'The new step activates: its label brightens and its description arrives, the last beat of the cascade, after the checkmark and the connector have resolved.',
+      tokens: ['duration.fast', 'easing.enter', 'easing.standard'] },
     { name: 'completion', moment: 'The final message, held back by the longest delay so the climax breathes.',
       tokens: ['duration.slower', 'easing.enter', 'delay.long'] },
     { name: 'completion-exit', moment: 'The message leaves on a reset.',

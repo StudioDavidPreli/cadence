@@ -116,8 +116,13 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
             at 100 % until the wrapper resets. */}
         <motion.div
           animate={{ opacity: !compact && completed ? 0 : 1 }}
+          // Leaving under the overlay is a departure, so ease.exit; coming back
+          // on reset is an arrival, so ease.enter. Until 2026-09-15 this carried
+          // no ease and rode Framer's default easeOut, the same class of
+          // untokened curve the 2026-07-16 audit found on Button's release.
           transition={{
             duration: tokens.duration.fast,
+            ease: !compact && completed ? tokens.ease.exit : tokens.ease.enter,
             delay: !compact && completed ? completionDelay : 0,
           }}
           style={{ pointerEvents: !compact && completed ? 'none' : 'auto' }}
@@ -153,6 +158,10 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
                             exit={{ scale: 0, opacity: 0 }}
                             transition={{
                               duration: tokens.duration.slow,
+                              // The checkmark arrives, so ease.enter: it decelerates
+                              // into the circle rather than easing both ends. (No ease
+                              // here until 2026-09-15; see the fade above.)
+                              ease: tokens.ease.enter,
                               // Beat 1: starts immediately. delay.none is the system's
                               // named zero (a fixed reference token), used here instead
                               // of a literal 0 so even "no delay" is sourced from the
@@ -169,7 +178,9 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0, opacity: 0 }}
-                            transition={{ duration: tokens.duration.fast }}
+                            // An arrival, like the checkmark, on the fast clock: a
+                            // number returning on reset is a reveal, not an event.
+                            transition={{ duration: tokens.duration.fast, ease: tokens.ease.enter }}
                           >{i + 1}</motion.span>
                         )}
                       </AnimatePresence>
@@ -186,6 +197,11 @@ export function Stepper({ compact = false, currentStep: currentStepProp }) {
                       }}
                       transition={{
                         duration: tokens.duration.fast,
+                        // The label moves between three opacities in both
+                        // directions (brightens on activate, dims on complete),
+                        // so it takes the neutral curve, the way ProgressBar's
+                        // forward fill does. (No ease here until 2026-09-15.)
+                        ease: tokens.ease.standard,
                         // Beat 3: the newly active step label brightens last,
                         // after the checkmark and connector have both resolved.
                         delay: isAdvancing && i === currentStep ? beat3Delay : 0,
