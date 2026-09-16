@@ -109,3 +109,24 @@ against.
 No UI reads the table yet. It is data and a test, which is what "design first"
 meant, and the next move is a reading of that list of fourteen rather than a
 mechanism.
+
+## Addendum, 2026-09-15: the table is rendered
+
+The risk named above happened before anything rendered the table: a Stepper
+site called `ring` (`duration.fast`, `easing.enter`) matched nothing in the
+component, sat unnoticed for a day, and was caught only by a second human
+reading against the source. The union was unchanged, so the cross-check could
+not have flagged it.
+
+The Glossary's Components view now renders the table. Each component's
+disclosure lists its sites: the name as an eyebrow, the moment sentence, the
+tokens that moment reads as chips, fixed reads (`easing.linear`, `delay.none`)
+as outlined chips with a "fixed" marker and outside the count, and a site with
+no transition of its own naming the site whose timing it borrows. The
+disclosure's count stays the flat union, so the inversion test and the e2e
+count are untouched. `buildGlossaryModel` carries the sites through from
+`MOTION_SITES`, and its test proves each component's site tokens union to its
+reads, the same equality the table's own test proves from the other side.
+
+This is the table's first consumer. The audit's shared-literal entry, whose row
+identity is (component, site, path), is the second and is not built yet.

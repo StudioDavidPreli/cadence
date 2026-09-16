@@ -311,16 +311,74 @@
   color: var(--color-text-base);
 }
 
-/* Components view: a plain list of token paths per component. */
-.readsList {
+/* Components view: a component's moments, each with the tokens it reads
+   (2026-09-15; a flat list of paths before). Each site is a bordered block
+   like a token row, so the two views share a rhythm. */
+.sitesList {
   margin: 0;
-  padding: 0 0 0 2px;
+  padding: 0;
   list-style: none;
 }
 
-.readsList li {
-  margin: 0 0 6px;
+.site {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
 }
+
+.site:last-child {
+  margin-bottom: 0;
+}
+
+.siteHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 4px;
+}
+
+/* The site name, set like the preset labels in the Tokens view: the small
+   caps eyebrow, so "press" and "release" read as headings of the moment
+   rather than as tokens. */
+.siteName {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-base);
+}
+
+.siteTiming {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.siteMoment {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.siteReads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.siteReads li {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
 
 .readPath {
   padding: 1px 5px;
@@ -338,4 +396,19 @@
   .caret {
     transition: none;
   }
+}
+
+/* A fixed reference read: outlined rather than filled, since it has no
+   slider behind it and is not in the count. Placed after .readPath so it
+   wins the cascade at equal specificity (both classes sit on one element). */
+.readPathFixed {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.fixedMarker {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
 }

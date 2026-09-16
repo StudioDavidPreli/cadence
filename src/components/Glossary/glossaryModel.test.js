@@ -87,6 +87,36 @@ describe('components view', () => {
     const names = model.components.map(c => c.name)
     expect(names).toEqual([...names].sort())
   })
+
+  // The sites (2026-09-15): every component carries its moments from the site
+  // table, and the union of their tokens is exactly the component's reads.
+  // motionSites.test.js proves the same equality from the table's side; this
+  // proves the model carried it through without dropping or inventing a site.
+  it('every component has sites whose tokens union to its reads', () => {
+    for (const comp of model.components) {
+      expect(comp.sites.length, comp.name).toBeGreaterThan(0)
+      const union = [...new Set(comp.sites.flatMap(s => s.tokens))].sort()
+      expect(union, comp.name).toEqual([...comp.reads].sort())
+      for (const site of comp.sites) {
+        expect(site.name, `${comp.name}.${site.name}`).toMatch(/^[a-z][a-z-]*$/)
+        expect(site.moment, `${comp.name}.${site.name}`).toMatch(/\.$/)
+        expect(Array.isArray(site.fixed)).toBe(true)
+      }
+    }
+  })
+
+  it('fixed reads ride the sites for display and never join the reads', () => {
+    const spinner = model.components.find(c => c.name === 'Spinner')
+    expect(spinner.sites.some(s => s.fixed.includes('easing.linear'))).toBe(true)
+    expect(spinner.reads).not.toContain('easing.linear')
+  })
+
+  it('a site with no transition of its own says whose timing it borrows', () => {
+    const card = model.components.find(c => c.name === 'Card')
+    const dim = card.sites.find(s => s.name === 'dim')
+    expect(dim.timingFrom).toBe('deselect')
+    expect(card.sites.some(s => s.name === 'deselect')).toBe(true)
+  })
 })
 
 describe('preset labels', () => {

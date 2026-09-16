@@ -21,6 +21,7 @@ import {
   tokenKeyToCssSuffix,
 } from 'cadence-tokens'
 import { TOKEN_COMPONENT_MAP } from '../../data/tokenConsumption'
+import { MOTION_SITES } from '../../data/motionSites'
 
 const PRESET_ORDER = BUILT_IN_PRESETS.map(p => p.id)
 export const PRESET_LABELS = Object.fromEntries(BUILT_IN_PRESETS.map(p => [p.id, p.label]))
@@ -133,9 +134,22 @@ export function buildGlossaryModel() {
     ],
   })
 
-  // The Components view: the consumption map inverted. Component names sort
+  // The Components view: the consumption map inverted, then grouped by the
+  // moments the site table names (2026-09-15). Component names sort
   // alphabetically; each component's reads keep the map's family order (the
   // map is authored in family order, so iterating it preserves that).
+  //
+  // `reads` stays the flat union from the map: it is the count on the
+  // disclosure and the thing the inversion test checks. `sites` is the same
+  // reads attributed to moments, straight from MOTION_SITES, whose own test
+  // proves the union of its tokens per component equals this map's row. So
+  // the two cannot disagree about WHICH tokens; which moment a token belongs
+  // to is authored judgment, and rendering it here is what lets a reader
+  // notice when that judgment has drifted (the `ring` mislabel of 2026-09-14
+  // sat unseen for a day because nothing rendered the table).
+  //
+  // A site's `fixed` reads (easing.linear, delay.none) are outside the map by
+  // policy, so they are carried through for display and never counted.
   const byComponent = new Map()
   for (const [path, components] of Object.entries(TOKEN_COMPONENT_MAP)) {
     for (const name of components) {
@@ -146,6 +160,13 @@ export function buildGlossaryModel() {
   const components = [...byComponent.keys()].sort().map(name => ({
     name,
     reads: byComponent.get(name),
+    sites: (MOTION_SITES[name] ?? []).map(site => ({
+      name: site.name,
+      moment: site.moment,
+      tokens: site.tokens,
+      fixed: site.fixed ?? [],
+      timingFrom: site.timingFrom ?? null,
+    })),
   }))
 
   return { families, components }

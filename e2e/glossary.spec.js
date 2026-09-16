@@ -42,13 +42,32 @@ test.describe('glossary', () => {
     await expect(buttonDisclosure).toHaveAttribute('aria-expanded', 'false')
     await buttonDisclosure.click()
 
-    // Button's reads include its press duration and the overshoot slot.
+    // Button's reads are grouped by moment (2026-09-15): press and release,
+    // and duration.fast appears under both, which the flat list could not say.
     // Scoped to Button's own body: the same paths sit hidden inside every
     // other closed component's disclosure, so a page-wide text match is
     // ambiguous by construction.
     const body = page.locator('#glossary-body-component-Button')
-    await expect(body.getByText('duration.fast', { exact: true })).toBeVisible()
+    await expect(body.getByText('press', { exact: true })).toBeVisible()
+    await expect(body.getByText('release', { exact: true })).toBeVisible()
+    await expect(body.getByText('duration.fast', { exact: true })).toHaveCount(2)
     await expect(body.getByText('easing.overshoot', { exact: true })).toBeVisible()
+  })
+
+  test('a fixed read shows with its marker and a borrowed timing names its site', async ({ page }) => {
+    await page.goto('/#/glossary/components')
+    await expect(page.getByRole('heading', { level: 2, name: 'Components' })).toBeVisible({ timeout: 30_000 })
+
+    // Spinner's spin runs on easing.linear, which has no slider: shown, marked, not counted.
+    await page.getByRole('button', { name: /^Spinner \d/ }).click()
+    const spinner = page.locator('#glossary-body-component-Spinner')
+    await expect(spinner.getByText('easing.linear', { exact: true })).toBeVisible()
+    await expect(spinner.getByText('fixed', { exact: true })).toBeVisible()
+
+    // Card's dim has no transition of its own; it says whose timing it takes.
+    await page.getByRole('button', { name: /^Card \d/ }).click()
+    const card = page.locator('#glossary-body-component-Card')
+    await expect(card.getByText('timing from deselect')).toBeVisible()
   })
 
   test('the nav section routes both leaves and the tool bar rails', async ({ page }) => {

@@ -169,15 +169,27 @@ function TokenRow({ row }) {
   )
 }
 
+// A component's reads, grouped by the moments the site table names
+// (2026-09-15). Before this the view was a flat list of paths; it could say
+// Button reads duration.fast but not that it reads it twice, once for the
+// press and once for the release. The count on the disclosure stays the flat
+// union, which is what the inversion test and the e2e count.
+//
+// Fixed reads (easing.linear, delay.none) are shown with a marker and are not
+// in the count: they have no slider, so the consumption map excludes them by
+// policy, but a reader asking what Spinner's spin runs on needs to see the
+// linear. A site with no transition of its own (Card's dim) names the site
+// whose timing it borrows instead of listing timing tokens it never reads.
 function ComponentsView({ components }) {
   return (
     <>
       <ComponentsTitle />
       <p className={styles.lede}>
-        The same map read the other way: each demo component, and the tokens
-        its source actually reads. A component is listed under a token only if
-        the read is in its code, so this view is greppable against the
-        repository.
+        The same map read the other way: each demo component, its moments, and
+        the tokens each moment reads. A component is listed under a token only
+        if the read is in its code, so the tokens are greppable against the
+        repository. Which moment a token belongs to is a judgment made reading
+        the source, and this page is where that judgment is checked.
       </p>
 
       {components.map(component => (
@@ -187,9 +199,30 @@ function ComponentsView({ components }) {
           title={component.name}
           count={component.reads.length}
         >
-          <ul className={styles.readsList}>
-            {component.reads.map(path => (
-              <li key={path}><code className={styles.readPath}>{path}</code></li>
+          <ul className={styles.sitesList}>
+            {component.sites.map(site => (
+              <li key={site.name} className={styles.site}>
+                <div className={styles.siteHead}>
+                  <span className={styles.siteName}>{site.name}</span>
+                  {site.timingFrom && (
+                    <span className={styles.siteTiming}>timing from {site.timingFrom}</span>
+                  )}
+                </div>
+                <p className={styles.siteMoment}>{site.moment}</p>
+                {(site.tokens.length > 0 || site.fixed.length > 0) && (
+                  <ul className={styles.siteReads}>
+                    {site.tokens.map(path => (
+                      <li key={path}><code className={styles.readPath}>{path}</code></li>
+                    ))}
+                    {site.fixed.map(path => (
+                      <li key={path}>
+                        <code className={`${styles.readPath} ${styles.readPathFixed}`}>{path}</code>
+                        <span className={styles.fixedMarker}>fixed</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
             ))}
           </ul>
         </Disclosure>
