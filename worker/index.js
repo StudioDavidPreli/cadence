@@ -62,7 +62,7 @@ async function handleBugReport(request, env) {
 // on first write, so the binding in wrangler.jsonc is the whole setup.
 //
 // Validation is allowlist-only, same posture as the bug report above: two
-// event types, six export formats, 400 for everything else. A format on an
+// event types, seven export formats, 400 for everything else. A format on an
 // import is rejected too; letting unknown shapes through would let junk POSTs
 // pollute the counts the report is built on. Nothing from the body is ever
 // echoed back.
@@ -70,8 +70,9 @@ async function handleBugReport(request, env) {
 const EVENT_TYPES = ['export', 'import'];
 // The wire names the client's export table speaks (src/components/TokenLab/
 // exportFormats.js, whose test reads this line and pins the two lists to each
-// other). 'after-effects' and 'flow' joined 2026-09-15 with the export modal.
-const EXPORT_FORMATS = ['dtcg', 'json', 'css', 'framer-motion', 'after-effects', 'flow'];
+// other). 'after-effects' and 'flow' joined 2026-09-15 with the export modal,
+// 'figma' the same day.
+const EXPORT_FORMATS = ['dtcg', 'json', 'css', 'framer-motion', 'after-effects', 'flow', 'figma'];
 
 async function handleEvent(request, env) {
   let body;

@@ -29,10 +29,10 @@ async function downloadFrom(page, dialog, label) {
 }
 
 test.describe('the export modal', () => {
-  test('lists six formats, and each downloads under its own file name', async ({ page }) => {
+  test('lists seven formats, and each downloads under its own file name', async ({ page }) => {
     const dialog = await openExport(page)
     const group = dialog.getByRole('group', { name: 'Export format' })
-    await expect(group.getByRole('button')).toHaveCount(6)
+    await expect(group.getByRole('button')).toHaveCount(7)
 
     const expected = [
       ['DTCG', 'cadence.tokens.json', '"$type"'],
@@ -41,6 +41,7 @@ test.describe('the export modal', () => {
       ['Framer Motion', 'cadence.motion.js', 'export const'],
       ['After Effects', 'cadence.tokens.jsx', "'TOKENS Motion'"],
       ['Flow', 'cadence.flow.txt', '"standard"'],
+      ['Figma', 'cadence.figma.json', '"collection": "Cadence Motion"'],
     ]
     for (const [label, filename, signature] of expected) {
       await pick(dialog, label).click()
@@ -86,7 +87,7 @@ test.describe('the export modal', () => {
     expect(file.text).not.toContain('Standard preset')
   })
 
-  test('the counter speaks the new wire names for After Effects and Flow', async ({ page }) => {
+  test('the counter speaks the new wire names for After Effects, Flow and Figma', async ({ page }) => {
     const events = []
     await page.route('**/api/event', async route => {
       events.push(route.request().postDataJSON())
@@ -97,9 +98,12 @@ test.describe('the export modal', () => {
     await downloadFrom(page, dialog, 'After Effects')
     await pick(dialog, 'Flow').click()
     await downloadFrom(page, dialog, 'Flow')
+    await pick(dialog, 'Figma').click()
+    await downloadFrom(page, dialog, 'Figma')
     expect(events).toEqual([
       { type: 'export', format: 'after-effects' },
       { type: 'export', format: 'flow' },
+      { type: 'export', format: 'figma' },
     ])
   })
 

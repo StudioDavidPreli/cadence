@@ -128,3 +128,18 @@ letting them assume a deviation travelled when it did not.
 - `src/caseStudyMedia/captureRig/ExportFormatsScene.jsx` (onto the table)
 - `src/components/TokenLabGuide/index.jsx` (the export paragraph)
 - `e2e/tokenlab-export.spec.js` (new), `e2e/tokens.spec.js`
+
+## Addendum, 2026-09-15: the Figma option
+
+Item 7 filed a state-parameterized `buildFigmaVariables` as the export modal's
+Figma option. Built the same day the modal shipped, as the seventh row of the
+table. `buildFigmaVariables` now takes `{ modes }`, a list of `{ id, name,
+state }` defaulting to the three built-ins (what the generator writes to
+dist, unchanged), and `toFigmaJson(state, { presetLabel })` emits the one-mode
+document the modal offers: the live set as a mode named by the active preset
+or "Custom". The mode note adapts, so a one-mode file says it can be joined by
+a second personality rather than telling the reader to switch modes it does
+not have. Same variable set either way, native TIMING and EASING types, the
+spring as three FLOATs. Not a reimport format, and no deviation appendix: a
+Figma variable has no place for "one demo declined the token". The Worker
+allows `figma`.

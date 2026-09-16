@@ -99,16 +99,17 @@ export function TokenLabGuide() {
       <section className={styles.section}>
         <h3 className={styles.heading}>Export and import</h3>
         <p className={styles.body}>
-          Export opens a dialog that lists six files and shows each one before
-          it is written. Two are for a pipeline: the W3C Design Tokens (DTCG)
-          format that Style Dictionary and Tokens Studio consume, and a flat
-          JSON that mirrors the CSS variable names. Those two read back in. The
-          other four are destinations: a drop-in <code>:root</code> block of
-          CSS, a Framer Motion module of ready transition values, an After
-          Effects script that writes the values onto a comp's TOKENS Motion
-          layer, and a Flow library of the curve set. The preview is the real
-          file for the live sliders, headed with the preset's name or Custom
-          once the set has been edited.
+          Export opens a dialog that lists seven files and shows each one
+          before it is written. Two are for a pipeline: the W3C Design Tokens
+          (DTCG) format that Style Dictionary and Tokens Studio consume, and a
+          flat JSON that mirrors the CSS variable names. Those two read back
+          in. The other five are destinations: a drop-in <code>:root</code>
+          block of CSS, a Framer Motion module of ready transition values, an
+          After Effects script that writes the values onto a comp's TOKENS
+          Motion layer, a Flow library of the curve set, and a Figma variables
+          document with the set as one mode. The preview is the real file for
+          the live sliders, headed with the preset's name or Custom once the
+          set has been edited.
         </p>
         <p className={styles.body}>
           Import reads a JSON file back in. It flips Token Lab to Explore so an

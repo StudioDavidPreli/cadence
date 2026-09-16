@@ -21,7 +21,7 @@ function mockEnv() {
 }
 
 describe('POST /api/event', () => {
-  it.each(['dtcg', 'json', 'css', 'framer-motion', 'after-effects', 'flow'])(
+  it.each(['dtcg', 'json', 'css', 'framer-motion', 'after-effects', 'flow', 'figma'])(
     'accepts an export with format %s and writes one data point',
     async (format) => {
       const env = mockEnv()

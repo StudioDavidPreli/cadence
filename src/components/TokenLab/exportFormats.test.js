@@ -16,12 +16,19 @@ const here = dirname(fileURLToPath(import.meta.url))
 const cinematic = BUILT_IN_PRESETS.find(p => p.id === 'cinematic')
 
 describe('the export format table', () => {
-  it('names six formats with unique keys, filenames and wire names', () => {
-    expect(EXPORT_FORMAT_KEYS).toEqual(['dtcg', 'flat', 'css', 'fm', 'ae', 'flow'])
+  it('names seven formats with unique keys, filenames and wire names', () => {
+    expect(EXPORT_FORMAT_KEYS).toEqual(['dtcg', 'flat', 'css', 'fm', 'ae', 'flow', 'figma'])
     const unique = field => new Set(EXPORT_FORMATS.map(f => f[field])).size
-    expect(unique('filename')).toBe(6)
-    expect(unique('wire')).toBe(6)
-    expect(unique('label')).toBe(6)
+    expect(unique('filename')).toBe(7)
+    expect(unique('wire')).toBe(7)
+    expect(unique('label')).toBe(7)
+  })
+
+  it('the Figma file is one mode named by the preset, or Custom', () => {
+    const named = JSON.parse(exportFile('figma', cinematic.state, { presetLabel: 'Cinematic' }).text)
+    expect(named.modes).toEqual([{ id: 'cinematic', name: 'Cinematic' }])
+    const custom = JSON.parse(exportFile('figma', cinematic.state).text)
+    expect(custom.modes).toEqual([{ id: 'custom', name: 'Custom' }])
   })
 
   it('every entry is complete, and its description is a sentence', () => {

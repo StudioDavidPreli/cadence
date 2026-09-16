@@ -930,11 +930,19 @@ export function buildTokensDocument({ version = '0.0.0' } = {}) {
 // — except the scalar IS here (identical across modes), because a complete
 // interaction document round-trips and a missing lone value reads as an
 // omission, not a decision.
-export function buildFigmaVariables() {
-  const modeIds = BUILT_IN_PRESETS.map(p => p.id)
-  const exports_ = Object.fromEntries(modeIds.map(id =>
-    [id, stateToExport(BUILT_IN_PRESETS.find(p => p.id === id).state)]
-  ))
+//
+// State-parameterized since 2026-09-15 (filed under item 7 for the export
+// modal): `modes` is a list of { id, name, state }, defaulting to the three
+// built-in personalities, which is what the generator writes to dist. The
+// export modal passes ONE mode, the user's live set, named by the active
+// preset or "Custom". The alias architecture is why one mode is a complete
+// document: a personality is a primitives group, and a file with one group
+// is a file a second group can join later. The notes say which case the file
+// is, so a reader of a one-mode file is not told to switch modes it lacks.
+export function buildFigmaVariables({ modes = BUILT_IN_PRESETS.map(p => ({ id: p.id, name: p.label, state: p.state })) } = {}) {
+  if (!Array.isArray(modes) || modes.length === 0) throw new Error('buildFigmaVariables: at least one mode is required')
+  const modeIds = modes.map(m => m.id)
+  const exports_ = Object.fromEntries(modes.map(m => [m.id, stateToExport(m.state)]))
   const perMode = fn => Object.fromEntries(modeIds.map(id => [id, fn(exports_[id])]))
 
   const variables = []
@@ -970,17 +978,37 @@ export function buildFigmaVariables() {
     addVar(`spring/${key}`, 'FLOAT', 'unitless physics-spring parameter', t => t.spring[key])
   }
 
+  // The count in words for the sizes a file will actually have; a numeral
+  // past that, since "nine personalities" is already more than a mode
+  // switcher is for.
+  const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+  const modeNote = modes.length > 1
+    ? `Bind a motion duration to duration/base (or the token your gesture uses) and switching the collection mode retimes it through the ${words[modes.length] ?? modes.length} personalities.`
+    : `One mode, ${modes[0].name}: the set as it was exported. A second personality is another mode carrying the same variables, so this file can be joined, not replaced.`
+
   return {
     collection: 'Cadence Motion',
-    modes: BUILT_IN_PRESETS.map(p => ({ id: p.id, name: p.label })),
+    modes: modes.map(m => ({ id: m.id, name: m.name })),
     notes: [
       'Durations and delays are TIMING variables in SECONDS (Figma’s unit); each easing curve is one EASING variable carrying a native cubic-bezier object.',
       'The spring ships as its three physical FLOAT parameters; figma.motion.physicalSpringToNormalized({ mass, stiffness, damping }) converts them to a native CUSTOM_SPRING easing (lossy: three parameters become one bounce number).',
-      'Bind a motion duration to duration/base (or the token your gesture uses) and switching the collection mode retimes it through the three personalities.',
+      modeNote,
       'The ambient (Motion Tiles) vocabulary is not included: a Figma variable exists to bind, and the field clock has no Figma consumer.',
     ],
     variables,
   }
+}
+
+// The Figma document for ONE state, as text: the export modal's stringifier,
+// in the family of toDtcgJson and the rest. The mode is named by the active
+// preset, or "Custom" once the set is edited, the rule every state export
+// follows (the After Effects header, the audit's heading). The id is the name
+// lowercased, since a Figma mode id is a label a plugin reads, not a key
+// anything joins on.
+export function toFigmaJson(state, { presetLabel = null } = {}) {
+  const name = presetLabel ?? 'Custom'
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custom'
+  return JSON.stringify(buildFigmaVariables({ modes: [{ id, name, state }] }), null, 2) + '\n'
 }
 
 // ─── Rive VM defaults ─────────────────────────────────────────────────────────

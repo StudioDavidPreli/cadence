@@ -4,6 +4,7 @@ import {
   stateToTokens,
   toFlow,
   buildFigmaVariables,
+  toFigmaJson,
   toDtcgDoc,
   toDtcgJson,
   toCssVars,
@@ -152,6 +153,42 @@ describe('buildFigmaVariables (build-order item 7)', () => {
     expect(byName['delay/none'].valuesByMode.cinematic).toBe(0)
     expect(byName['spring/stiffness'].valuesByMode.snappy).toBe(600)
     expect(doc.variables.some(v => v.name.startsWith('ambient'))).toBe(false)
+  })
+})
+
+describe('buildFigmaVariables for one state (the export modal, 2026-09-15)', () => {
+  const cinematic = BUILT_IN_PRESETS.find(p => p.id === 'cinematic')
+
+  it('one mode, named by the preset, with that state\'s values', () => {
+    const doc = JSON.parse(toFigmaJson(cinematic.state, { presetLabel: 'Cinematic' }))
+    expect(doc.collection).toBe('Cadence Motion')
+    expect(doc.modes).toEqual([{ id: 'cinematic', name: 'Cinematic' }])
+    const base = doc.variables.find(v => v.name === 'duration/base')
+    expect(base.valuesByMode).toEqual({ cinematic: 0.5 })
+    for (const v of doc.variables) expect(Object.keys(v.valuesByMode)).toEqual(['cinematic'])
+  })
+
+  it('an edited set is the Custom mode', () => {
+    const doc = JSON.parse(toFigmaJson(INITIAL_STATE))
+    expect(doc.modes).toEqual([{ id: 'custom', name: 'Custom' }])
+  })
+
+  it('the mode note fits the file: one mode says it can be joined, three say switch', () => {
+    const one = toFigmaJson(INITIAL_STATE, { presetLabel: 'Standard' })
+    expect(one).toContain('One mode, Standard')
+    expect(one).not.toContain('switching the collection mode')
+    const three = JSON.stringify(buildFigmaVariables())
+    expect(three).toContain('switching the collection mode retimes it through the three personalities')
+  })
+
+  it('carries the same variable set as the three-mode document', () => {
+    const one = JSON.parse(toFigmaJson(INITIAL_STATE)).variables.map(v => v.name)
+    const three = buildFigmaVariables().variables.map(v => v.name)
+    expect(one).toEqual(three)
+  })
+
+  it('refuses an empty mode list rather than emitting a document with no values', () => {
+    expect(() => buildFigmaVariables({ modes: [] })).toThrow(/at least one mode/)
   })
 })
 
