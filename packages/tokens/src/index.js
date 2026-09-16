@@ -631,6 +631,15 @@ export const CURVE_SEPARATION = 0.005
 // the same units. deviationToExport is that translation; importDeviations is its
 // inverse.
 const RUNTIME_TO_CONTROL_FAMILY = { duration: 'duration', ease: 'easing', delay: 'delay', scale: 'scale', spring: 'spring' }
+
+// The one naming seam between a runtime token path (what a component reads,
+// `ease.standard`) and a control-layer path (what the sliders, the exports and
+// the site table use, `easing.standard`). Exported so the audit's shared-literal
+// note can look a deviation up in a site table without restating the map.
+export function runtimeToControlPath(token) {
+  const [runtimeFamily, key] = String(token).split('.')
+  return `${RUNTIME_TO_CONTROL_FAMILY[runtimeFamily] ?? runtimeFamily}.${key}`
+}
 const CONTROL_TO_RUNTIME_FAMILY = { duration: 'duration', easing: 'ease', delay: 'delay', scale: 'scale', spring: 'spring' }
 
 // Seconds -> ms without float noise (0.123 * 1000 is 123.00000000000001 in JS).

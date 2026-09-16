@@ -61,6 +61,7 @@ import {
 import { trackEvent } from '../../utils/trackEvent'
 import { downloadTextFile } from '../../utils/downloadTextFile'
 import { ExportModal } from '../ExportModal'
+import { MOTION_SITES } from '../../data/motionSites'
 import styles from './TokenLab.module.css'
 
 // ─── Lazy boundaries: PrinciplesLibrary and Carousel ─────────────────────────
@@ -653,7 +654,7 @@ export function ExportSection({ rawState, deviations = [], onOpenAudit, onOpenEx
   // never folded into the finding count, which is why it is appended after the
   // verdict instead of joining the parts list.
   const auditSummary = useMemo(() => {
-    const { counts } = auditTokens(rawState, { deviations })
+    const { counts } = auditTokens(rawState, { deviations, sites: MOTION_SITES })
     const offSystem = counts.offSystem > 0 ? `${counts.offSystem} off-system` : ''
     if (counts.finding === 0 && counts.note === 0) {
       return offSystem ? `Audit: nothing to flag, ${offSystem}` : 'Audit: nothing to flag'
@@ -1892,14 +1893,14 @@ export function TokenLab() {
   function handleAuditDownload() {
     downloadTextFile(
       'motion-token-audit.md',
-      auditToMarkdown(rawState, { deviations, presetLabel: auditLabel }),
+      auditToMarkdown(rawState, { deviations, sites: MOTION_SITES, presetLabel: auditLabel }),
       'text/markdown',
     )
   }
 
   async function handleAuditCopy() {
     try {
-      await navigator.clipboard.writeText(auditToMarkdown(rawState, { deviations, presetLabel: auditLabel }))
+      await navigator.clipboard.writeText(auditToMarkdown(rawState, { deviations, sites: MOTION_SITES, presetLabel: auditLabel }))
       setAuditCopied(true)
       setTimeout(() => setAuditCopied(false), 1500)
     } catch {

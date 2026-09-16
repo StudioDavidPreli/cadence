@@ -122,3 +122,30 @@ duplicate-values smell in motion terms and the shared-vocabulary argument in the
 small, and it waits on the per-site motion values design, where two sites
 wanting one value is the stronger statement and the row's identity is settled.
 A note when it lands, never a finding.
+
+## Addendum, 2026-09-15: the shared-literal note
+
+Landed once the site table existed and was rendered. `checkSharedLiterals`
+runs after the off-system rows: deviations are grouped by family and value
+(scalars within `SCALAR_EPSILON`, curves within `CURVE_SEPARATION`, families
+never mixed), and any group of two or more raises one note:
+
+```
+Button (press, release) and Toggle (flip) run duration.fast as 0.25s off-system. One value in two places is a token that has not been named yet.
+Button (press, release) runs duration.fast and Card (select, deselect) runs duration.base as 0.25s off-system. One value in two places is a token that has not been named yet.
+Button (release) and Card (select) run ease.overshoot off-system on one curve. One value in two places is a token that has not been named yet.
+```
+
+Grouping is by value rather than path because the argument is about the
+value: one number under two names, neither a token, is the case Shared
+Vocabulary describes. A note, never a finding, per David's 2026-09-12
+decision, so it joins the note count and the tool bar reads "Audit: 1 note,
+2 off-system" for exactly the case it exists to name.
+
+The row identity the per-site design settled, (component, site, path), is
+carried by a new `sites` option on `auditTokens` and `auditToMarkdown`. The
+app passes `MOTION_SITES`; the package stays site-agnostic, so an engineer
+running the audit in their own CI gets component names and the same judgment.
+A deviation is keyed by runtime path and the site table by control path;
+`runtimeToControlPath`, now exported from the package, is the one crossing of
+that seam. This is the site table's second consumer, after the Glossary.

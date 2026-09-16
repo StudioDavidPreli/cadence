@@ -59,8 +59,8 @@
 // here with it.
 
 import {
-  stateToTokens, nearestToken, formatDisplay,
-  EASING_CURVES, EDITABLE_TOKEN_SCHEMA, curveDistance, CURVE_SEPARATION,
+  stateToTokens, nearestToken, formatDisplay, runtimeToControlPath,
+  EASING_CURVES, EDITABLE_TOKEN_SCHEMA, curveDistance, CURVE_SEPARATION, SCALAR_EPSILON,
   REDUCED_MOTION_RESOLUTION,
 } from './index.js'
 import {
@@ -556,6 +556,88 @@ function checkOffSystem(state, deviations, report) {
   }
 }
 
+// ─── Shared literals ──────────────────────────────────────────────────────────
+// Two or more deviations carrying one value in one family. It is the
+// duplicate-values smell in motion terms and the Shared Vocabulary argument in
+// the small: a value two demos want is a token that has not been named yet.
+// Deferred out of the off-system section on 2026-09-12 until the per-site
+// design settled what a row is; built 2026-09-15 once it had.
+//
+// A note, never a finding (David, 2026-09-12). The audit's two sources of
+// findings stay two, and this is about what the reader did beside the set, not
+// about the set. It joins the note count, so the tool bar reads "Audit: 1
+// note, 2 off-system" for the case it exists to name.
+//
+// Grouping is by family and value, not by path: Button's duration.fast and
+// Card's duration.base both running 0.25s is the case the argument is about
+// (one number, two names, neither of them a token), and the row says which path
+// each demo took. Scalars compare within SCALAR_EPSILON, curves within
+// CURVE_SEPARATION, the same tolerances the rest of the package uses. Families
+// never mix: a 0.25 scale and a 0.25s duration are not one value.
+//
+// `sites` is optional and site-agnostic on this side. The app passes its site
+// table so the row can say Button (press, release) rather than Button, which is
+// the (component, site, path) identity the per-site design settled on. An
+// engineer running the audit in their own CI with no site table gets the
+// component names and the same judgment. A deviation is keyed by runtime path
+// and the site table by control path; runtimeToControlPath crosses that seam.
+function sameValue(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) return curveDistance(a, b) <= CURVE_SEPARATION
+  if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= SCALAR_EPSILON
+  return false
+}
+
+const COUNT_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+const countWord = n => COUNT_WORDS[n] ?? String(n)
+
+// "a", "a and b", "a, b and c". The audit's rows are sentences, so a list in
+// one reads as prose rather than as a comma-separated dump.
+function joinNames(names) {
+  if (names.length <= 1) return names.join('')
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+}
+
+function siteNames(sites, component, token) {
+  const list = sites?.[component]
+  if (!Array.isArray(list)) return []
+  const controlPath = runtimeToControlPath(token)
+  return list.filter(site => Array.isArray(site.tokens) && site.tokens.includes(controlPath)).map(site => site.name)
+}
+
+function checkSharedLiterals(deviations, sites, report) {
+  if (!Array.isArray(deviations) || deviations.length < 2) return
+  const groups = []
+  for (const d of deviations) {
+    const family = String(d.token).split('.')[0]
+    const group = groups.find(g => g.family === family && sameValue(g.value, d.value))
+    if (group) group.members.push(d)
+    else groups.push({ family, value: d.value, members: [d] })
+  }
+
+  for (const group of groups) {
+    if (group.members.length < 2) continue
+    const paths = [...new Set(group.members.map(m => m.token))]
+    const named = group.members.map(m => {
+      const moments = siteNames(sites, m.component, m.token)
+      return moments.length ? `${m.component} (${moments.join(', ')})` : m.component
+    })
+    const isCurve = Array.isArray(group.value)
+    // One path: "Button and Toggle run duration.fast as 0.25s off-system."
+    // Mixed paths: "Button runs duration.fast and Card runs duration.base as
+    // 0.25s off-system." A curve names no numbers, as the rows above do not.
+    let subject
+    if (paths.length === 1) {
+      subject = `${joinNames(named)} run ${paths[0]}`
+    } else {
+      subject = joinNames(group.members.map((m, i) => `${named[i]} runs ${m.token}`))
+    }
+    const value = isCurve ? 'off-system on one curve' : `as ${formatDisplay(group.members[0].token, group.value)} off-system`
+    const message = `${subject} ${value}. One value in ${countWord(group.members.length)} places is a token that has not been named yet.`
+    const id = `shared-literal-${group.members.map(m => `${m.component}:${m.token}`).join('+')}`
+    report.findings.push(entry(id, 'note', paths, message))
+  }
+}
+
 // ─── The summary sentence ─────────────────────────────────────────────────────
 // One string, two surfaces (the modal and the markdown), so a change to the
 // wording cannot land on one and miss the other. The tool bar's line is a
@@ -595,8 +677,10 @@ export function auditSummarySentence(counts) {
 // `deviations` is an options object rather than a positional argument (David,
 // 2026-09-12) so that later inputs join without a breaking change, and it is
 // passed in rather than read off the state because a deviation is not part of
-// the token set: the caller holds them, so the caller hands them over.
-export function auditTokens(state, { deviations = [] } = {}) {
+// the token set: the caller holds them, so the caller hands them over. `sites`
+// joined the same way (2026-09-15): the app's site table, so the shared-literal
+// note can name moments; absent, the note names components.
+export function auditTokens(state, { deviations = [], sites = null } = {}) {
   const report = { findings: [], measurements: [] }
 
   checkLadder(state?.duration, 'duration', ['fast', 'base', 'slow', 'slower'], 'ms', report)
@@ -607,6 +691,7 @@ export function auditTokens(state, { deviations = [] } = {}) {
   checkInteractionBudget(state, report)
   checkReducedMotion(state, report)
   checkOffSystem(state, deviations, report)
+  checkSharedLiterals(deviations, sites, report)
 
   return {
     ...report,
@@ -694,8 +779,8 @@ function tokenTable(state) {
   return sections.join('\n')
 }
 
-export function auditToMarkdown(state, { deviations = [], title = 'Motion token audit', generatedAt = null, presetLabel = null } = {}) {
-  const { findings, measurements, counts } = auditTokens(state, { deviations })
+export function auditToMarkdown(state, { deviations = [], sites = null, title = 'Motion token audit', generatedAt = null, presetLabel = null } = {}) {
+  const { findings, measurements, counts } = auditTokens(state, { deviations, sites })
   const problems = findings.filter(f => f.severity === 'finding')
   const notes = findings.filter(f => f.severity === 'note')
   const offSystem = findings.filter(f => f.severity === 'off-system')

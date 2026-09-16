@@ -480,7 +480,10 @@ describe('off-system', () => {
       { component: 'Button', token: 'duration.fast', value: 0.25 },
       { component: 'Card', token: 'duration.fast', value: 0.25 },
     ]
-    const ids = auditTokens(INITIAL_STATE, { deviations }).findings.map(f => f.id)
+    // Two demos on one value also raise the shared-literal note (below), which
+    // is a note, so the off-system rows are read by severity here.
+    const ids = auditTokens(INITIAL_STATE, { deviations }).findings
+      .filter(f => f.severity === 'off-system').map(f => f.id)
     expect(ids).toEqual(['off-system-Button-duration.fast', 'off-system-Card-duration.fast'])
   })
 
@@ -488,6 +491,109 @@ describe('off-system', () => {
     for (const preset of BUILT_IN_PRESETS) {
       expect(auditTokens(preset.state, { deviations: [] }).counts.offSystem).toBe(0)
     }
+  })
+})
+
+describe('shared literals', () => {
+  // The site table shape the app passes: component -> sites, each with the
+  // tokens it reads in CONTROL spelling (easing.overshoot), which is the seam
+  // a runtime deviation (ease.overshoot) has to cross.
+  const sites = {
+    Button: [
+      { name: 'press', tokens: ['duration.fast', 'easing.standard', 'scale.pressBase'] },
+      { name: 'release', tokens: ['duration.fast', 'easing.overshoot'] },
+    ],
+    Toggle: [{ name: 'flip', tokens: ['duration.fast', 'easing.overshoot'] }],
+    Card: [
+      { name: 'select', tokens: ['duration.base', 'easing.overshoot'] },
+      { name: 'deselect', tokens: ['duration.base', 'easing.standard'] },
+    ],
+  }
+
+  it('is silent for one deviation, and for two that differ', () => {
+    const one = auditTokens(INITIAL_STATE, { deviations: [{ component: 'Button', token: 'duration.fast', value: 0.25 }] })
+    expect(one.counts.note).toBe(0)
+    const two = auditTokens(INITIAL_STATE, { deviations: [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Toggle', token: 'duration.fast', value: 0.3 },
+    ] })
+    expect(two.counts.note).toBe(0)
+    expect(two.counts.offSystem).toBe(2)
+  })
+
+  it('notes two demos on one value along one path, as a note and never a finding', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Toggle', token: 'duration.fast', value: 0.25 },
+    ]
+    const result = auditTokens(INITIAL_STATE, { deviations })
+    expect(result.counts).toEqual({ finding: 0, note: 1, offSystem: 2 })
+    const note = result.findings.find(f => f.severity === 'note')
+    expect(note.message).toBe('Button and Toggle run duration.fast as 0.25s off-system. One value in two places is a token that has not been named yet.')
+    expect(note.paths).toEqual(['duration.fast'])
+    expect(note.id).toBe('shared-literal-Button:duration.fast+Toggle:duration.fast')
+  })
+
+  it('names the moments when the caller passes a site table', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Toggle', token: 'duration.fast', value: 0.25 },
+    ]
+    const note = auditTokens(INITIAL_STATE, { deviations, sites }).findings.find(f => f.severity === 'note')
+    expect(note.message).toBe('Button (press, release) and Toggle (flip) run duration.fast as 0.25s off-system. One value in two places is a token that has not been named yet.')
+  })
+
+  it('groups by family and value, not by path, and says which path each took', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Card', token: 'duration.base', value: 0.25 },
+    ]
+    const note = auditTokens(INITIAL_STATE, { deviations, sites }).findings.find(f => f.severity === 'note')
+    expect(note.message).toBe('Button (press, release) runs duration.fast and Card (select, deselect) runs duration.base as 0.25s off-system. One value in two places is a token that has not been named yet.')
+    expect(note.paths).toEqual(['duration.fast', 'duration.base'])
+  })
+
+  it('never mixes families: a 0.25 scale and a 0.25s duration are not one value', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Card', token: 'scale.lift', value: 0.25 },
+    ]
+    expect(auditTokens(INITIAL_STATE, { deviations }).counts.note).toBe(0)
+  })
+
+  it('compares curves by the package separation and names no numbers', () => {
+    const near = [
+      { component: 'Button', token: 'ease.overshoot', value: [0.3, 1.4, 0.6, 1] },
+      { component: 'Card', token: 'ease.overshoot', value: [0.3, 1.4, 0.6, 1.001] },
+    ]
+    const note = auditTokens(INITIAL_STATE, { deviations: near, sites }).findings.find(f => f.severity === 'note')
+    expect(note.message).toBe('Button (release) and Card (select) run ease.overshoot off-system on one curve. One value in two places is a token that has not been named yet.')
+    const far = [
+      { component: 'Button', token: 'ease.overshoot', value: [0.3, 1.4, 0.6, 1] },
+      { component: 'Card', token: 'ease.overshoot', value: [0.4, 0, 0.2, 1] },
+    ]
+    expect(auditTokens(INITIAL_STATE, { deviations: far }).counts.note).toBe(0)
+  })
+
+  it('counts three places in words and lists them as prose', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Toggle', token: 'duration.fast', value: 0.25 },
+      { component: 'Card', token: 'duration.fast', value: 0.25 },
+    ]
+    const note = auditTokens(INITIAL_STATE, { deviations }).findings.find(f => f.severity === 'note')
+    expect(note.message).toBe('Button, Toggle and Card run duration.fast as 0.25s off-system. One value in three places is a token that has not been named yet.')
+  })
+
+  it('reaches the markdown under Notes, above the off-system rows it refers to', () => {
+    const deviations = [
+      { component: 'Button', token: 'duration.fast', value: 0.25 },
+      { component: 'Toggle', token: 'duration.fast', value: 0.25 },
+    ]
+    const md = auditToMarkdown(INITIAL_STATE, { deviations, sites })
+    expect(md).toContain('## Notes')
+    expect(md.indexOf('## Notes')).toBeLessThan(md.indexOf('## Off-system'))
+    expect(md).toContain('Button (press, release) and Toggle (flip) run duration.fast as 0.25s off-system.')
   })
 })
 

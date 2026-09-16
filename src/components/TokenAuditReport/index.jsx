@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { auditTokens, auditSummarySentence } from 'cadence-tokens'
 import styles from './TokenAuditReport.module.css'
+import { MOTION_SITES } from '../../data/motionSites'
 
 // ─── TokenAuditReport ─────────────────────────────────────────────────────────
 // The body of the audit modal. Presentational: it takes a token set and renders
@@ -31,7 +32,9 @@ export function TokenAuditReport({ state, deviations = [], onDownload, onCopy, c
   // cheap, but the modal re-renders on every parent render while open, and the
   // result feeds four separate lists below.
   const { findings, measurements, counts } = useMemo(
-    () => auditTokens(state, { deviations }),
+    // The site table rides along so the shared-literal note can name moments
+    // (Button (press, release)) rather than components alone.
+    () => auditTokens(state, { deviations, sites: MOTION_SITES }),
     [state, deviations],
   )
 

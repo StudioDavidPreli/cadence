@@ -133,11 +133,17 @@ test.describe('off-system edits', () => {
     await typeLiteral(page, 'duration.fast', '0.25')
     await typeLiteral(page, 'ease.overshoot', '[0.3, 1.4, 0.6, 1]')
 
-    await page.getByRole('button', { name: 'DTCG', exact: true }).click()
+    // Through the export modal (2026-09-15): Export… opens it, the list picks
+    // DTCG, the primary action names the format, and Escape closes it so the
+    // tool bar is reachable again for the preset click below.
+    await page.getByRole('button', { name: 'Export…' }).click()
+    await page.getByRole('button', { name: /^DTCG\b/ }).click()
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('button[class*="exportButton"]').first().click(),
+      page.getByRole('button', { name: 'Export DTCG' }).click(),
     ])
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: 'Export tokens' })).toBeHidden()
     const text = await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString('utf8'))
     const doc = JSON.parse(text)
     // The 2025.10 leaf shape, on the built bundle: a duration $value is an
