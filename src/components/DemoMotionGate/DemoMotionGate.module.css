@@ -18,9 +18,9 @@
   font-weight: 500;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: border-color var(--feedback-ui-duration) var(--motion-ease-standard),
-    color var(--feedback-ui-duration) var(--motion-ease-standard),
-    background-color var(--feedback-ui-duration) var(--motion-ease-standard);
+  transition: border-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease),
+    background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* aria-pressed carries the on state; accent border because the gate is then

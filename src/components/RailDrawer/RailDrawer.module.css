@@ -14,7 +14,7 @@
   border-right: 1px solid var(--color-border);
   cursor: pointer;
   color: var(--color-text-muted);
-  transition: color var(--feedback-nav-duration) ease;
+  transition: color var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .rail:hover {

@@ -99,7 +99,7 @@
 .comment {
   color: var(--color-text-muted);
   font-weight: 400;
-  transition: background-color var(--feedback-ui-duration) ease, color var(--feedback-ui-duration) ease;
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* While its slider is being dragged, the value lights up green. The green lives
@@ -138,7 +138,7 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in

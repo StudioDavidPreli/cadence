@@ -74,8 +74,8 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration),
-    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in
@@ -134,8 +134,8 @@
   font-family: inherit;
   color: var(--color-text-base);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration),
-    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified hover invert, mirroring .pill:hover. The old rule kept text-base on a
@@ -175,7 +175,7 @@
   line-height: 1.5;
   resize: vertical;
   min-height: 96px;
-  transition: border-color var(--feedback-ui-duration);
+  transition: border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .reportField:focus-visible {
@@ -198,7 +198,7 @@
   margin: 0;
   font-size: 12px;
   color: var(--color-text-muted);
-  transition: color var(--feedback-ui-duration);
+  transition: color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .reportStatus[data-state='sent'] {
@@ -319,7 +319,7 @@
   border-radius: 50%;
   background: var(--color-text-muted2);
   cursor: pointer;
-  transition: transform var(--feedback-ui-duration);
+  transition: transform var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .slider::-webkit-slider-thumb:hover {

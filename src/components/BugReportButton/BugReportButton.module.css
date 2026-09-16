@@ -28,7 +28,7 @@
      the signature should not shout — with the underline arriving on hover to
      say it goes somewhere. */
   text-decoration: none;
-  transition: color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .copyright:hover {
@@ -83,7 +83,7 @@
   line-height: 1.5;
   resize: vertical;
   min-height: 96px;
-  transition: border-color var(--feedback-ui-duration);
+  transition: border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .reportField:focus-visible {
@@ -106,7 +106,7 @@
   margin: 0;
   font-size: 12px;
   color: var(--color-text-muted);
-  transition: color var(--feedback-ui-duration);
+  transition: color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .reportStatus[data-state='sent'] {
@@ -129,8 +129,8 @@
   font-family: inherit;
   color: var(--color-text-base);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration),
-    color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in

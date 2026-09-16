@@ -79,6 +79,36 @@ describe('token integrity — no hardcoded animation values in components', () =
     expect(offenders, `\nHardcoded CSS timing — move to a --motion-* token or a --feedback-* constant:\n${offenders.join('\n')}\n`).toEqual([])
   })
 
+  // Chrome CSS transitions run on a --feedback-*-duration, and every one of
+  // them names the chrome curve, --feedback-ease (2026-09-15). Before this the
+  // same hover could decelerate three different ways across panels: no curve
+  // (the browser's default), the editable --motion-ease-standard (which
+  // Explore mode can reshape), or the `ease` keyword. A discrete part
+  // (visibility 0s with a delay) has nothing to ease and is exempt.
+  it('every chrome CSS transition names --feedback-ease', () => {
+    const offenders = []
+    const splitTopLevel = value => {
+      const parts = []; let depth = 0, cur = ''
+      for (const ch of value) { if (ch === '(') depth++; else if (ch === ')') depth--; if (ch === ',' && depth === 0) { parts.push(cur); cur = '' } else cur += ch }
+      parts.push(cur); return parts.map(p => p.trim()).filter(Boolean)
+    }
+    for (const file of files) {
+      if (!file.endsWith('.module.css')) continue
+      const src = readFileSync(file, 'utf8')
+      for (const m of src.matchAll(/\btransition\s*:\s*([^;{}]+);/g)) {
+        for (const part of splitTopLevel(m[1])) {
+          if (!/var\(--feedback-[a-z-]*-duration\)/.test(part)) continue
+          if (/^visibility\s+0s\b/.test(part)) continue
+          if (!/var\(--feedback-ease\)/.test(part)) {
+            const line = src.slice(0, m.index).split('\n').length
+            offenders.push(`${file}:${line}  ${part}`)
+          }
+        }
+      }
+    }
+    expect(offenders, `\nChrome transition without the chrome curve — add var(--feedback-ease):\n${offenders.join('\n')}\n`).toEqual([])
+  })
+
   it('has no inline duration literals in JSX transitions (duration: 0 excepted)', () => {
     const offenders = []
     for (const file of files) {

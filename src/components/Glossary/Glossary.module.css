@@ -164,7 +164,7 @@
   border-style: solid;
   border-width: 4px 0 4px 6px;
   border-color: transparent transparent transparent currentColor;
-  transition: transform var(--feedback-nav-duration) ease;
+  transition: transform var(--feedback-nav-duration) var(--feedback-ease);
   flex-shrink: 0;
 }
 
@@ -188,7 +188,7 @@
 .body {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--feedback-nav-duration) ease;
+  transition: grid-template-rows var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .bodyOpen {
@@ -208,7 +208,7 @@
   overflow: hidden;
   min-height: 0;
   visibility: hidden;
-  transition: visibility 0s var(--feedback-nav-duration);
+  transition: visibility 0s var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .bodyOpen .bodyInner {

@@ -156,7 +156,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-nav);
-  transition: color var(--feedback-nav-duration) ease;
+  transition: color var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 /* text-base, not text-primary: text-primary is #ffffff in the light theme (it
@@ -182,7 +182,7 @@
   border-style: solid;
   border-width: 4px 0 4px 6px;
   border-color: transparent transparent transparent currentColor;
-  transition: transform var(--feedback-nav-duration) ease;
+  transition: transform var(--feedback-nav-duration) var(--feedback-ease);
   flex-shrink: 0;
 }
 
@@ -198,7 +198,7 @@
 .body {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--feedback-nav-duration) ease;
+  transition: grid-template-rows var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .bodyOpen {
@@ -223,8 +223,8 @@
   font-family: inherit;
   font-size: 13px;
   color: var(--color-text-nav);
-  transition: color var(--feedback-nav-duration) ease,
-              background-color var(--feedback-nav-duration) ease;
+  transition: color var(--feedback-nav-duration) var(--feedback-ease),
+              background-color var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .row:hover {

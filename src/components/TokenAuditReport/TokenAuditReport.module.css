@@ -194,7 +194,7 @@
   color: var(--color-text-primary);
   font-family: inherit;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .downloadButton:hover {
@@ -211,7 +211,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .copyButton:hover {

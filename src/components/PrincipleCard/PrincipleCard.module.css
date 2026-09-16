@@ -198,8 +198,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: color var(--feedback-ui-duration) var(--motion-ease-standard),
-              background-color var(--feedback-ui-duration) var(--motion-ease-standard);
+  transition: color var(--feedback-ui-duration) var(--feedback-ease),
+              background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in
@@ -311,9 +311,9 @@
   color: var(--color-text-muted);
   text-wrap: balance;
   cursor: pointer;
-  transition: border-color var(--feedback-ui-duration) var(--motion-ease-standard),
-              color var(--feedback-ui-duration) var(--motion-ease-standard),
-              background-color var(--feedback-ui-duration) var(--motion-ease-standard);
+  transition: border-color var(--feedback-ui-duration) var(--feedback-ease),
+              color var(--feedback-ui-duration) var(--feedback-ease),
+              background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in
@@ -440,9 +440,9 @@
   font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color var(--feedback-ui-duration) var(--motion-ease-standard),
-              border-color var(--feedback-ui-duration) var(--motion-ease-standard),
-              color var(--feedback-ui-duration) var(--motion-ease-standard);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease),
+              border-color var(--feedback-ui-duration) var(--feedback-ease),
+              color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .copyLink:hover {

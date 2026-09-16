@@ -103,8 +103,8 @@
   border-radius: 8px;
   cursor: pointer;
   transition:
-    border-color var(--feedback-ui-duration) ease,
-    background-color var(--feedback-ui-duration) ease;
+    border-color var(--feedback-ui-duration) var(--feedback-ease),
+    background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .dropSmall {
@@ -171,7 +171,7 @@
   color: var(--color-text-primary);
   cursor: pointer;
   font-family: inherit;
-  transition: background-color var(--feedback-ui-duration) ease;
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .sampleButton:hover,
@@ -455,7 +455,7 @@
   border-style: solid;
   border-width: 4px 0 4px 6px;
   border-color: transparent transparent transparent currentColor;
-  transition: transform var(--feedback-nav-duration) ease;
+  transition: transform var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .caret[data-open='true'] {
@@ -475,7 +475,7 @@
 .body {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--feedback-nav-duration) ease;
+  transition: grid-template-rows var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .bodyOpen {
@@ -486,7 +486,7 @@
   overflow: hidden;
   min-height: 0;
   visibility: hidden;
-  transition: visibility 0s var(--feedback-nav-duration);
+  transition: visibility 0s var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .bodyOpen .bodyInner {

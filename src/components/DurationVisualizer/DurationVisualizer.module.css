@@ -45,7 +45,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in
@@ -98,7 +98,7 @@
      tracks are always a true 50/50 split, whatever the label costs. */
   text-align: center;
   min-width: 0;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .modeOption:first-child {
@@ -148,7 +148,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(-2px);
-  transition: opacity var(--feedback-ui-duration), transform var(--feedback-ui-duration);
+  transition: opacity var(--feedback-ui-duration) var(--feedback-ease), transform var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .modeTipShown {
@@ -203,7 +203,7 @@
   border-radius: 50%;
   background: var(--color-text-muted2);
   cursor: pointer;
-  transition: transform var(--feedback-ui-duration);
+  transition: transform var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .scalarSlider::-webkit-slider-thumb:hover {
@@ -297,7 +297,7 @@
   stroke: var(--color-text-muted);
   stroke-width: 1;
   fill: none;
-  transition: stroke var(--feedback-ui-duration), stroke-width var(--feedback-ui-duration);
+  transition: stroke var(--feedback-ui-duration) var(--feedback-ease), stroke-width var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* The line for the active mode — accent, thicker. */
@@ -338,7 +338,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in

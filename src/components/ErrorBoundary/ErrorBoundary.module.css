@@ -51,9 +51,9 @@
   padding: 0.5rem 1.25rem;
   font: inherit;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration),
-    color var(--feedback-ui-duration),
-    border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease),
+    border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover invert (see the .presetItem:hover note in

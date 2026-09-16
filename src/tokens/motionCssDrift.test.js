@@ -82,3 +82,17 @@ describe('motion.css matches the cadence-tokens package (Standard preset)', () =
     expect(Object.keys(reduced).sort()).toEqual(timeProperties.sort())
   })
 })
+
+// The chrome curve has two spellings, one per transition engine: --feedback-ease
+// for CSS transitions, FEEDBACK_EASE for Framer's. They must be one curve.
+import { FEEDBACK_EASE } from '../utils/feedbackDuration'
+
+describe('the chrome curve is one curve', () => {
+  it('--feedback-ease in motion.css equals FEEDBACK_EASE', () => {
+    const css = readFileSync(cssPath, 'utf8')
+    const m = css.match(/--feedback-ease:\s*cubic-bezier\(([^)]+)\)/)
+    expect(m, '--feedback-ease declared in motion.css').not.toBeNull()
+    const numbers = m[1].split(',').map(s => Number(s.trim()))
+    expect(numbers).toEqual(FEEDBACK_EASE)
+  })
+})

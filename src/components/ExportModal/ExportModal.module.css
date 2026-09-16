@@ -43,9 +43,9 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition:
-    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease),
+    border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .option:hover {
@@ -225,7 +225,7 @@
   color: var(--color-text-primary);
   font-family: inherit;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .exportButton:hover {
@@ -243,9 +243,9 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition:
-    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    border-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--feedback-ease),
+    border-color var(--feedback-ui-duration) var(--feedback-ease),
+    color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .copyButton:hover {

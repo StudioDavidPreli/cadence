@@ -124,7 +124,7 @@
   border-radius: 50%;
   background: var(--color-text-muted2);
   cursor: pointer;
-  transition: transform var(--feedback-ui-duration);
+  transition: transform var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .slider::-webkit-slider-thumb:hover {
@@ -163,7 +163,7 @@
   font-weight: 500;
   text-align: center;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .toggleButton:hover {

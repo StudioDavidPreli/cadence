@@ -12,7 +12,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  transition: opacity var(--feedback-nav-duration) ease;
+  transition: opacity var(--feedback-nav-duration) var(--feedback-ease);
 }
 
 .wordmark:hover {

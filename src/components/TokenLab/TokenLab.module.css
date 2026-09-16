@@ -222,7 +222,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified chrome-button hover (2026-07-19): every chip/pill chrome button in
@@ -266,7 +266,7 @@
   border-radius: 2px;
   padding: 1px 3px;
   margin: -1px -3px;
-  transition: color var(--feedback-ui-duration), background-color var(--feedback-ui-duration);
+  transition: color var(--feedback-ui-duration) var(--feedback-ease), background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* The pill's inverted hover fill would leave the muted ✕ illegible (muted on
@@ -299,7 +299,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified hover invert (see .presetItem:hover). The dashed "potential action"
@@ -351,7 +351,7 @@
   font-size: var(--type-size-base);
   font-family: inherit;
   outline: none;
-  transition: border-color var(--feedback-ui-duration);
+  transition: border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .presetSaveInput:focus {
@@ -372,7 +372,7 @@
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .presetSaveConfirm:hover {
@@ -414,7 +414,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* A divider after every option but the last, so the segments read as one unit. */
@@ -467,7 +467,7 @@
   background: none;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .springToggle:hover {
@@ -511,7 +511,7 @@
   color: var(--color-text-primary);
   font-family: inherit;
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .exportButton:hover {
@@ -527,7 +527,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .exportCopyButton:hover {
@@ -555,7 +555,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), border-color var(--feedback-ui-duration), color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Unified hover invert (see .presetItem:hover); dashed rest, solid hover,
@@ -730,7 +730,7 @@
 
 .chevron {
   composes: type-glyph from global;
-  transition: transform var(--feedback-ui-duration);
+  transition: transform var(--feedback-ui-duration) var(--feedback-ease);
   display: inline-block;
 }
 
@@ -809,7 +809,7 @@
      (#1e1e1e in dark) was nearly identical to the track — invisible. */
   background: var(--color-text-muted2);
   cursor: pointer;
-  transition: transform var(--feedback-ui-duration);
+  transition: transform var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .slider::-webkit-slider-thumb:hover {
@@ -842,7 +842,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .easingTab:hover {
@@ -879,7 +879,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .easeButton:hover {
@@ -1003,7 +1003,7 @@
   color: var(--color-text-primary);
   outline: 1px solid var(--color-border2);
   transition:
-    background-color var(--feedback-ui-duration) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    background-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .demoTrigger:hover {
@@ -1042,7 +1042,7 @@
   line-height: 1.4;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .codeToggle:hover {
@@ -1255,7 +1255,7 @@
 .demoGroupHighlighted .demoMain {
   background-image: linear-gradient(var(--color-accent-subtle), var(--color-accent-subtle));
   outline: 1px solid var(--color-accent);
-  transition: opacity var(--feedback-ui-duration);
+  transition: opacity var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* forced-colors flattens the accent outline and the subtle background to system
@@ -1272,7 +1272,7 @@
 /* All other demo groups step back — reduce contrast without hiding. */
 .demoGroupDimmed {
   opacity: 0.35;
-  transition: opacity var(--feedback-ui-duration);
+  transition: opacity var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 /* Shown inside a dimmed group when the active token has no demo component.
@@ -1395,7 +1395,7 @@
   font-family: inherit;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color var(--feedback-ui-duration), color var(--feedback-ui-duration), border-color var(--feedback-ui-duration);
+  transition: background-color var(--feedback-ui-duration) var(--feedback-ease), color var(--feedback-ui-duration) var(--feedback-ease), border-color var(--feedback-ui-duration) var(--feedback-ease);
 }
 
 .auditButton:hover {

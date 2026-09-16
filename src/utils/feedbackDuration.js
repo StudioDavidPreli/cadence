@@ -58,5 +58,7 @@ export function backgroundIdlePeriodSeconds() {
 // The chrome easing curve, defined once. Chrome transitions use a FIXED curve
 // rather than tokens.ease.standard so an edited easing curve in the lab never
 // alters the tool's own feedback. Same coordinates as the standard token's
-// default, but deliberately independent of it.
+// default, but deliberately independent of it. The CSS twin is --feedback-ease
+// in motion.css (2026-09-15), for the chrome that transitions in CSS rather
+// than through Framer; motionCssDrift.test.js pins the two to each other.
 export const FEEDBACK_EASE = [0.4, 0, 0.2, 1]
