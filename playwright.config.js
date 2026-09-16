@@ -26,7 +26,12 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npx wrangler dev',
     url: 'http://localhost:8787',
-    reuseExistingServer: true,
+    // Never reuse. With reuse on, anything already listening on 8787 (a
+    // preview, an earlier run's workerd that outlived npm) made Playwright
+    // skip this command, the build included, and pass the suite against
+    // whatever that server was serving: a green light for source it never
+    // compiled. Off, a busy port is a loud error (2026-09-15).
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 })

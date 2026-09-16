@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# The pre-push gate (2026-09-15). A push to main is a production deploy here
+# (Cloudflare's Git integration), so this is the last thing standing between a
+# change and the live site. It runs lint, the unit suite, and the full e2e
+# suite on built output, and refuses the push on any failure.
+#
+# Why a hook and not a habit: on 2026-09-15 ten commits reached main in eight
+# pushes and the full suite ran before one of them. The one run caught a test
+# still clicking a control the export modal had removed forty minutes earlier.
+# Each subset chosen by hand was reasonable; the pattern was the problem.
+#
+# The gate needs port 8787 free. Playwright builds and starts its own server
+# there (reuseExistingServer is off, see playwright.config.js), and a stale
+# server on that port would either fail the start or, under the old setting,
+# be silently reused with an old build. This refuses rather than kills: the
+# server may be yours.
+#
+# Escape hatch: git push --no-verify. Use it knowingly.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+if lsof -nP -iTCP:8787 -sTCP:LISTEN >/dev/null 2>&1; then
+  echo "pre-push: something is listening on 8787. Stop it (a preview? an earlier e2e run's workerd?) and push again." >&2
+  lsof -nP -iTCP:8787 -sTCP:LISTEN | tail -n +2 >&2
+  exit 1
+fi
+
+echo "pre-push: lint"
+npm run lint --silent
+echo "pre-push: unit"
+npx vitest run --reporter=dot 2>&1 | tail -4
+echo "pre-push: e2e on built output"
+status=0
+npx playwright test --reporter=line 2>&1 | tail -6 || status=$?
+
+# wrangler's workerd can outlive the npm process Playwright stopped. It is ours
+# by construction (the port was free above), so it goes.
+pids=$(lsof -nP -tiTCP:8787 -sTCP:LISTEN 2>/dev/null || true)
+if [ -n "$pids" ]; then kill $pids 2>/dev/null || true; fi
+
+if [ "$status" -ne 0 ]; then
+  echo "pre-push: e2e failed; the push is refused. Fix, or git push --no-verify if you mean it." >&2
+  exit "$status"
+fi
+echo "pre-push: clean"
