@@ -83,6 +83,15 @@ export function Card({
       // Different transitions for select vs deselect: overshoot (or a real
       // spring) in, standard out. In communicates "something was chosen"
       // (expressive); out communicates "returning to rest" (neutral).
+      //
+      // Both share duration.base on purpose, and this branch is also the dim's
+      // timing (an unselected card takes it whether it is settling or receding).
+      // The Appeal principle names base as the one clock under settle, dim and
+      // lift, so a click in its grid resolves three motions together; the
+      // curves carry the difference, not the length (docs/principles/appeal.md).
+      // A quicker release was considered 2026-09-15 and declined: it would
+      // split the dim off this branch to keep the grid coherent, to serve a
+      // convention the demo's own record argues against (David's call).
       transition={
         isSelected
           ? selectTransition
