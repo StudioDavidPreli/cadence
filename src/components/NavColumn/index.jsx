@@ -14,6 +14,7 @@ import {
   GLOSSARY_COMPONENTS,
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
+  IN_PRACTICE_BASIS,
 } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
@@ -85,17 +86,20 @@ function NavAccordion({ onNavigate }) {
     showMotionTilesLanding, enterMotionTilesGrid,
     showGlossaryTokens, showGlossaryComponents,
     showToolsMeasure, showToolsRivLint,
+    showInPracticeBasis,
   } = useNavActions()
 
   const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
   const principlesOpen   = expandedSection === SECTIONS.PRINCIPLES
   const motionTilesOpen  = expandedSection === SECTIONS.MOTION_TILES
+  const inPracticeOpen      = expandedSection === SECTIONS.IN_PRACTICE
   const glossaryOpen        = expandedSection === SECTIONS.GLOSSARY
   const toolsOpen           = expandedSection === SECTIONS.TOOLS
 
   const tokenLabBodyId    = 'nav-section-token-lab'
   const principlesBodyId  = 'nav-section-principles'
   const motionTilesBodyId = 'nav-section-motion-tiles'
+  const inPracticeBodyId     = 'nav-section-in-practice'
   const glossaryBodyId       = 'nav-section-glossary'
   const toolsBodyId          = 'nav-section-tools'
 
@@ -120,6 +124,11 @@ function NavAccordion({ onNavigate }) {
   const clickTools             = () => toggleSection(SECTIONS.TOOLS)
   const pickToolsMeasure       = () => { showToolsMeasure(); onNavigate?.() }
   const pickToolsRivLint       = () => { showToolsRivLint(); onNavigate?.() }
+  // In Practice opens like Tools: the header discloses its leaves (one per
+  // product running on the tokens) and shows the first; the drawer stays open
+  // on toggle so the user can pick a leaf.
+  const clickInPractice        = () => toggleSection(SECTIONS.IN_PRACTICE)
+  const pickInPracticeBasis    = () => { showInPracticeBasis(); onNavigate?.() }
   const pickGlossaryTokens     = () => { showGlossaryTokens();     onNavigate?.() }
   const pickGlossaryComponents = () => { showGlossaryComponents(); onNavigate?.() }
 
@@ -199,6 +208,26 @@ function NavAccordion({ onNavigate }) {
           active={destination === MOTION_TILES_GRID}
           tabbable={motionTilesOpen}
           onClick={pickMotionGrid}
+        />
+      </AccordionBody>
+
+      {/* ── In Practice ───────────────────────────────────────────────── */}
+      {/* Products running on cadence-tokens, one leaf each (David's call,
+          2026-10-15). Basis is the first. */}
+      <SectionHeader
+        label="In Practice"
+        open={inPracticeOpen}
+        bodyId={inPracticeBodyId}
+        active={section === SECTIONS.IN_PRACTICE}
+        current={section === SECTIONS.IN_PRACTICE}
+        onClick={clickInPractice}
+      />
+      <AccordionBody id={inPracticeBodyId} open={inPracticeOpen}>
+        <NavRow
+          label="Basis"
+          active={destination === IN_PRACTICE_BASIS}
+          tabbable={inPracticeOpen}
+          onClick={pickInPracticeBasis}
         />
       </AccordionBody>
 

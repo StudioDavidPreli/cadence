@@ -10,6 +10,7 @@ import {
   GLOSSARY_COMPONENTS,
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
+  IN_PRACTICE_BASIS,
 } from '../data/navigation'
 import { principleBySlug, principleById } from '../data/principles'
 
@@ -30,6 +31,8 @@ import { principleBySlug, principleById } from '../data/principles'
 //   #/principles/<filter>/<slug>    grid + one principle open as a deep-link modal
 //   #/motion-tiles                  Motion Tiles landing (the Enter gate)
 //   #/motion-tiles/grid             the live Motion Tiles grid
+//   #/in-practice                   In Practice, Basis view (the default)
+//   #/in-practice/basis             same
 //   #/glossary                      the glossary, Tokens view
 //   #/glossary/tokens               same (Tokens is the default view)
 //   #/glossary/components           the glossary, Components view
@@ -122,6 +125,18 @@ export function parseHash(hash) {
     }
   }
 
+  if (first === SECTIONS.IN_PRACTICE) {
+    // #/in-practice or #/in-practice/basis. Basis is the only leaf so far, so
+    // every tail resolves to it, the same fail-soft posture as Tools.
+    return {
+      section: SECTIONS.IN_PRACTICE,
+      expandedSection: SECTIONS.IN_PRACTICE,
+      destination: IN_PRACTICE_BASIS,
+      principleFilter: FILTERS.ALL,
+      principleId: null,
+    }
+  }
+
   if (first === SECTIONS.TOOLS) {
     // #/tools, #/tools/measure, or #/tools/rivlint. Measure is the default; any
     // other tail falls back to it, the same fail-soft posture as the Glossary.
@@ -178,6 +193,11 @@ export function stateToHash(state) {
     return state.destination === MOTION_TILES_GRID
       ? `#/${SECTIONS.MOTION_TILES}/${MOTION_TILES_GRID}`
       : `#/${SECTIONS.MOTION_TILES}`
+  }
+  if (state.section === SECTIONS.IN_PRACTICE) {
+    // Basis is the default view and serializes to the bare route, the way
+    // Measure does under Tools. A second leaf will fill the tail.
+    return `#/${SECTIONS.IN_PRACTICE}`
   }
   if (state.section === SECTIONS.TOOLS) {
     // Measure is the default view and serializes to the bare route, the way

@@ -9,6 +9,7 @@ export const SECTIONS = {
   TOKEN_LAB: 'token-lab',
   PRINCIPLES: 'principles',
   MOTION_TILES: 'motion-tiles',
+  IN_PRACTICE: 'in-practice',
   GLOSSARY: 'glossary',
   TOOLS: 'tools',
 }
@@ -45,6 +46,12 @@ export const GLOSSARY_COMPONENTS = 'components'
 // default view for the bare #/tools route and rivLint fills #/tools/rivlint.
 export const TOOLS_MEASURE = 'measure'
 export const TOOLS_RIVLINT = 'rivlint'
+
+// In Practice (David's call, 2026-10-15): products running on cadence-tokens,
+// one leaf each, shaped like Tools. Basis is the first and the default view
+// for the bare #/in-practice route. Decision record:
+// docs/decisions/in-practice-2026-10-14.md.
+export const IN_PRACTICE_BASIS = 'basis'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but

@@ -1,0 +1,211 @@
+/* The In Practice pages. The document frame is Measure's (scroll region on
+   surface-raised, an 880 px measure, the display title centered, a lede
+   under it), so the leaves under In Practice read as kin of the Tools pages.
+
+   Color pairings are existing audited ones: text-base and text-muted on
+   surface-raised, border as the frame's edge. No new pairing. Nothing here
+   animates; the frame's content is Basis's, timed by Basis. */
+
+.scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-base);
+}
+
+.scroll:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+  color: var(--color-text-base);
+}
+
+/* These type properties style the heading's accessible name; the visible
+   title is the canvas, with the SVG poster until it paints. */
+.title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text-base);
+}
+
+/* The title's box: 480 px wide like the Measure and rivLint titles, at the
+   artboard's own 1360:506 proportion. max-width covers narrow viewports;
+   Contain keeps the art whole as it scales. */
+.titleAnim {
+  position: relative;
+  display: block;
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 1360 / 506;
+  margin: 0 auto;
+}
+
+.titleCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.titlePoster {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lede {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* The link out to the full sheet: underlined text, not accent. Accent means
+   active and connected in this app, and a link out is neither. */
+.link {
+  color: var(--color-text-base);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Guidance ── Measure's workflow notes, same box and rows, so the two
+   pages give instructions the same way. */
+.guide {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.guideRow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.guideRow:last-child {
+  margin-bottom: 0;
+}
+
+.guideRow strong {
+  font-weight: 600;
+  color: var(--color-text-base);
+}
+
+.motionRow {
+  display: flex;
+  margin: 0 0 8px;
+}
+
+/* The example's outer edge: the chart stand-in (while it exists) and the
+   frame share one border, so they read as the one embed they will become. */
+.embed {
+  margin-top: 8px;
+  border: 1px solid var(--color-border);
+}
+
+/* ── Chart stand-in ── TEMPORARY. Drawn here only while the frame loads the
+   chartless table-sort placeholder; the Basis chart embed draws the real one
+   inside the frame. Neutral strokes on purpose: company inks are Basis's,
+   and a stand-in borrowing them would pass for the real chart. */
+.chartStandIn {
+  position: relative;
+  height: 220px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-muted);
+}
+
+.chartLabel {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.chartGrid {
+  stroke: var(--color-border);
+  stroke-dasharray: 2 4;
+}
+
+.chartLine {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+/* One line carries the base text color so the stand-in shows the read the
+   real chart will have: one series picked out against the rest. */
+.chartLineFocus {
+  stroke: var(--color-text-base);
+}
+
+/* The frame's box. A fixed height: the frame cannot report its own across
+   origins without a message channel, and the record rules one out. 640 px
+   fits table-sort's twelve rows; the chart embed reports its own height. */
+.frameBox {
+  position: relative;
+  height: 640px;
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Covers the frame while a src is loading, so a reload shows a quiet panel
+   instead of a white document flashing on a dark page. */
+.frameStandIn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 32px 20px 48px;
+  }
+}

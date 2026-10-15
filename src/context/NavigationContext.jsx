@@ -9,6 +9,7 @@ import {
   GLOSSARY_COMPONENTS,
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
+  IN_PRACTICE_BASIS,
 } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
@@ -21,7 +22,7 @@ import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 // Lab state persist while the user is in the Principles Library.
 //
 // State shape:
-//   section          'token-lab' | 'principles' | 'motion-tiles' | null  (null = landing/hero)
+//   section          'token-lab' | 'principles' | 'motion-tiles' | 'in-practice' | 'glossary' | 'tools' | null  (null = landing/hero)
 //   destination       categoryId | 'principles' | 'landing' | 'grid' | null  (what the tool region shows)
 //   expandedSection  'token-lab' | 'principles' | 'motion-tiles' | null  (single-open accordion)
 //   principleFilter  'all' | 'classic' | 'extended'
@@ -91,6 +92,16 @@ function navReducer(state, action) {
           principleFilter: FILTERS.ALL,
         }
       }
+      // In Practice opens like Tools: disclosure and destination in one,
+      // landing on its first leaf, Basis.
+      if (action.id === SECTIONS.IN_PRACTICE) {
+        return {
+          section: SECTIONS.IN_PRACTICE,
+          expandedSection: SECTIONS.IN_PRACTICE,
+          destination: IN_PRACTICE_BASIS,
+          principleFilter: FILTERS.ALL,
+        }
+      }
       // Tools opens like the Glossary: disclosure and destination in one,
       // landing on Measure. A second tool (the linter) swaps the view via
       // SET_TOOLS_VIEW.
@@ -134,6 +145,15 @@ function navReducer(state, action) {
       return {
         section: SECTIONS.GLOSSARY,
         expandedSection: SECTIONS.GLOSSARY,
+        destination: action.view,
+        principleFilter: FILTERS.ALL,
+      }
+
+    // An In Practice view selected. Same shape as SET_TOOLS_VIEW.
+    case 'SET_IN_PRACTICE_VIEW':
+      return {
+        section: SECTIONS.IN_PRACTICE,
+        expandedSection: SECTIONS.IN_PRACTICE,
         destination: action.view,
         principleFilter: FILTERS.ALL,
       }
@@ -212,6 +232,8 @@ export function NavigationProvider({ children }) {
         dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_MEASURE }),
       showToolsRivLint: () =>
         dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_RIVLINT }),
+      showInPracticeBasis: () =>
+        dispatch({ type: 'SET_IN_PRACTICE_VIEW', view: IN_PRACTICE_BASIS }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
       // Flag the replaceState write, then clear the deep-link modal. Order
       // matters: the ref must be true before the dispatch that triggers the

@@ -206,6 +206,54 @@
       }
     ]
   },
+  "rive/basistitles.riv": {
+    "defaultArtboard": "basisTitles",
+    "artboards": [
+      {
+        "name": "basisTitles",
+        "animations": [
+          "Timeline 1"
+        ],
+        "stateMachines": [
+          "basisSM"
+        ],
+        "defaultViewModel": "BasisTitleVM"
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "BasisTitleVM",
+        "instances": [
+          "darkMode",
+          "contrastLight",
+          "contrastDark",
+          "lightMode"
+        ],
+        "properties": [
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "bg",
+            "type": "color"
+          },
+          {
+            "name": "lineFront",
+            "type": "color"
+          },
+          {
+            "name": "lineBack",
+            "type": "color"
+          },
+          {
+            "name": "lineMid",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
   "rive/carouselStatics/followthrough_static.riv": {
     "defaultArtboard": "frame_followThrough",
     "artboards": [

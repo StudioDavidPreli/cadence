@@ -6,7 +6,8 @@ import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../co
 import { DemoOverridesProvider, useDemoOverrides } from '../../context/DemoOverridesContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
-import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT } from '../../data/navigation'
+import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT, IN_PRACTICE_BASIS } from '../../data/navigation'
+import { framePreset, DEFAULT_PRESET as BASIS_DEFAULT_PRESET } from '../InPractice/inPracticeModel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
@@ -101,6 +102,13 @@ const MeasureSection = lazy(() =>
 // rivLint, the .riv linter (build-order item 9): its own chunk, for the same reason.
 const RivLintSection = lazy(() =>
   import('../RivLint').then((m) => ({ default: m.RivLintSection })),
+)
+
+// In Practice › Basis (2026-10-15): its own chunk, for the same reason as
+// the Tools pages. It also keeps the Basis frame off first paint entirely:
+// nothing requests basis.davidpreli.com until the leaf is first entered.
+const BasisPractice = lazy(() =>
+  import('../InPractice').then((m) => ({ default: m.BasisPractice })),
 )
 
 const PrinciplesLibrary = lazy(() =>
@@ -1666,6 +1674,18 @@ export function TokenLab() {
   const toolsSeen = useRef(new Set())
   if (isTools && destination) toolsSeen.current.add(destination)
 
+  // In Practice leaves, visited this session. Same ref-set idiom as toolsSeen,
+  // with one difference that matters: these panes are rendered OUTSIDE the
+  // section ternary below, so they survive leaving In Practice altogether, not
+  // only a switch between its leaves. Each leaf is a cross-origin frame
+  // holding a whole Next app; tearing it down on every section change would
+  // reload it on every return (decision record, kickoff answer 6). Unlike
+  // Glossary and Tools, In Practice does NOT rail the tool bar: the Basis page
+  // tells the visitor to change presets there, so the presets stay on screen.
+  const isInPractice = section === SECTIONS.IN_PRACTICE
+  const inPracticeSeen = useRef(new Set())
+  if (isInPractice && destination) inPracticeSeen.current.add(destination)
+
   // Which rail's drawer is open: 'tokens' | 'nav' | null. A single value makes
   // the two drawers mutually exclusive — opening one closes the other, which is
   // exactly the requested behavior. Clearing it when its breakpoint passes keeps
@@ -1885,6 +1905,15 @@ export function TokenLab() {
   // edited is no longer that preset, and heading the report with a stale name
   // would misdescribe the very thing the report exists to describe.
   const auditLabel = allPresets.find(p => p.id === getActivePresetId(rawState, allPresets))?.label ?? null
+
+  // The preset the Basis frame runs (In Practice). Basis takes only the three
+  // built-ins, so while the tool bar reads Custom the frame keeps the last
+  // built-in it had (framePreset). The ref remembers that across renders;
+  // writing it during render is idempotent (the same value on Strict Mode's
+  // second pass), so it needs no effect and causes no extra render.
+  const lastBasisPreset = useRef(BASIS_DEFAULT_PRESET)
+  const basisPreset = framePreset(getActivePresetId(rawState, allPresets), lastBasisPreset.current)
+  lastBasisPreset.current = basisPreset
 
   // The audit document. Named for what it is about (the user's motion tokens)
   // rather than for the tool that produced it: this file leaves here and lands in
@@ -2357,7 +2386,11 @@ export function TokenLab() {
           tokens). Motion Tiles renders its own section instead: the landing, then
           the lazy grid on Enter. It sits outside MotionTokensProvider on purpose,
           it reads no --motion-* tokens and runs its own preset system. */}
-      {isTools ? (
+      {isInPractice ? (
+        // In Practice renders below, outside this ternary, so its frames
+        // outlive the section. Nothing here while it is showing.
+        null
+      ) : isTools ? (
         // Tools replace the right region like the Glossary does, outside
         // MotionTokensProvider: neither page reads a --motion-* token.
         //
@@ -2441,6 +2474,27 @@ export function TokenLab() {
             guide={<TokenLabGuide />}
           />
         </MotionTokensProvider>
+      )}
+
+      {/* ── In Practice panes ── mounted on first visit, then only hidden.
+          Siblings of the ternary above, not a branch of it: a branch is torn
+          down when the section changes, and a torn-down frame reloads. A
+          hidden pane is display: none, so grid auto-placement skips it and
+          the visible section keeps the right column to itself. */}
+      {inPracticeSeen.current.has(IN_PRACTICE_BASIS) && (
+        <div
+          className={styles.toolPane}
+          hidden={!(isInPractice && destination === IN_PRACTICE_BASIS)}
+        >
+          <ErrorBoundary
+            title="The Basis page hit a snag"
+            message="The Basis page ran into an unexpected error. Reloading usually clears it."
+          >
+            <Suspense fallback={<div className={styles.lazyFallback}>Loading Basis…</div>}>
+              <BasisPractice preset={basisPreset} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
       )}
 
       {/* Import report. Opens after any import attempt; the title reflects
