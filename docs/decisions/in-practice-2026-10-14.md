@@ -83,6 +83,18 @@ refuses framing everywhere else. Cadence's `public/_headers` sets no
   `BasisTitleVM`, state machine `basisSM`). *(Supersedes kickoff answer 1,
   "text title until the art exists".)*
 
+## The chart embed lands (2026-10-15)
+
+Basis shipped `/embed/in-practice` (Basis `bbacfa4`): four companies' Level
+over one year, charted over the ledger, from a frozen fixture snapshot dated
+on the stage; the four charted rows are selected and locked, a row and its
+line light together, and the sort never touches the chart. It is 820 px tall
+at every width from 560 to 880 px. Cadence moved `BASIS_EMBED_PATH` to it,
+set the frame to 820 px, and deleted the chart stand-in that had held the
+layout while the frame still loaded `table-sort`. The live spec now also
+checks that the chart draws and that the stage does not scroll inside its
+box.
+
 ## Settled at kickoff (David, 2026-10-14), still standing
 
 - **Nav order.** Token Lab, Principles, Motion Tiles, In Practice,

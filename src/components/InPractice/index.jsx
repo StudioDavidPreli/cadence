@@ -3,8 +3,7 @@ import { useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
 import { DemoMotionControl } from '../DemoMotionGate'
 import { BasisTitle } from './BasisTitle'
-import { ChartStandIn } from './ChartStandIn'
-import { BASIS_SHEET_URL, CHART_STAND_IN, frameSrc } from './inPracticeModel'
+import { BASIS_SHEET_URL, frameSrc } from './inPracticeModel'
 import styles from './InPractice.module.css'
 
 // ─── In Practice › Basis ─────────────────────────────────────────────────────
@@ -66,7 +65,8 @@ export function BasisPractice({ preset }) {
           <p className={styles.guideRow}>
             <strong>Sort a column.</strong> Click a header, or tab to it and
             press Enter. Rows travel to their new places in a short stagger,
-            and the rising ones lift as they pass.
+            and the rising ones lift as they pass. The charted companies stay
+            selected; hover one and its line lights with it.
           </p>
           <p className={styles.guideRow}>
             <strong>Switch and sort again.</strong> Same table, same move,
@@ -83,12 +83,11 @@ export function BasisPractice({ preset }) {
         )}
 
         <div className={styles.embed}>
-          {CHART_STAND_IN && <ChartStandIn />}
           <div className={styles.frameBox}>
             <iframe
               className={styles.frame}
               src={src}
-              title={`Basis ledger, ${preset} preset`}
+              title={`Basis chart and ledger, ${preset} preset`}
               loading="lazy"
               referrerPolicy="strict-origin-when-cross-origin"
               onLoad={() => setLoadedSrc(src)}

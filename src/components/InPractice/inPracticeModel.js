@@ -8,15 +8,11 @@
 
 export const BASIS_ORIGIN = 'https://basis.davidpreli.com'
 
-// The embed the frame loads. A stand-in until Basis ships the chart embed
-// (docs/briefings/IN_PRACTICE_BASIS_CHART_EMBED_HANDOFF.md): table-sort has
-// the same parameters and no chart. One constant, so the switch is one line.
-export const BASIS_EMBED_PATH = '/embed/table-sort'
-
-// True while the frame loads the chartless stand-in: the page draws a
-// placeholder chart above it so the layout can be judged at its real
-// proportions. Derived, not set, so moving BASIS_EMBED_PATH retires it.
-export const CHART_STAND_IN = BASIS_EMBED_PATH === '/embed/table-sort'
+// The embed the frame loads: Basis's In Practice stage (live 2026-10-15,
+// Basis bbacfa4), a simplified chart over the ledger from a frozen fixture
+// snapshot, built for a 560 to 880 px frame and 820 px tall at every width
+// in that range. One constant, so a later product page is one line too.
+export const BASIS_EMBED_PATH = '/embed/in-practice'
 
 // The full, live sheet the description links to.
 export const BASIS_SHEET_URL = `${BASIS_ORIGIN}/`

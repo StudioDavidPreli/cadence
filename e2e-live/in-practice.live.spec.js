@@ -49,6 +49,13 @@ for (const theme of THEMES) {
     })
     expect(cadence, `frame paper ${paper} is not a Cadence ${theme} surface`).toContain(paper)
 
+    // The chart is drawn, and the 820 px box holds the whole stage: Basis
+    // reported that height for every width from 560 to 880, so the framed
+    // document must not scroll inside itself.
+    await expect(framed.locator('svg').first()).toBeVisible()
+    const overflow = await frame.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+    expect(overflow, 'the framed stage scrolls inside its 820 px box').toBeLessThanOrEqual(0)
+
     // Axe inside the frame.
     const results = await new AxeBuilder({ page })
       .include('[data-testid="basis-frame"]')

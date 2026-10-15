@@ -125,63 +125,19 @@
   margin: 0 0 8px;
 }
 
-/* The example's outer edge: the chart stand-in (while it exists) and the
-   frame share one border, so they read as the one embed they will become. */
+/* The example's outer edge. */
 .embed {
   margin-top: 8px;
   border: 1px solid var(--color-border);
 }
 
-/* ── Chart stand-in ── TEMPORARY. Drawn here only while the frame loads the
-   chartless table-sort placeholder; the Basis chart embed draws the real one
-   inside the frame. Neutral strokes on purpose: company inks are Basis's,
-   and a stand-in borrowing them would pass for the real chart. */
-.chartStandIn {
-  position: relative;
-  height: 220px;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface-raised);
-  color: var(--color-text-muted);
-}
-
-.chartLabel {
-  position: absolute;
-  top: 10px;
-  left: 16px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.chartSvg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.chartGrid {
-  stroke: var(--color-border);
-  stroke-dasharray: 2 4;
-}
-
-.chartLine {
-  fill: none;
-  stroke: var(--color-text-muted);
-  stroke-width: 1.5;
-}
-
-/* One line carries the base text color so the stand-in shows the read the
-   real chart will have: one series picked out against the rest. */
-.chartLineFocus {
-  stroke: var(--color-text-base);
-}
-
 /* The frame's box. A fixed height: the frame cannot report its own across
-   origins without a message channel, and the record rules one out. 640 px
-   fits table-sort's twelve rows; the chart embed reports its own height. */
+   origins without a message channel, and the record rules one out. 820 px is
+   the height Basis reported for its In Practice stage, the same at every
+   width from 560 to 880 px, so the frame never scrolls inside itself. */
 .frameBox {
   position: relative;
-  height: 640px;
+  height: 820px;
 }
 
 .frame {
