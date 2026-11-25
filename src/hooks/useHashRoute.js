@@ -11,6 +11,7 @@ import {
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
   IN_PRACTICE_BASIS,
+  IN_PRACTICE_CLNDR,
 } from '../data/navigation'
 import { principleBySlug, principleById } from '../data/principles'
 
@@ -33,6 +34,7 @@ import { principleBySlug, principleById } from '../data/principles'
 //   #/motion-tiles/grid             the live Motion Tiles grid
 //   #/in-practice                   In Practice, Basis view (the default)
 //   #/in-practice/basis             same
+//   #/in-practice/clndr             In Practice, CLNDR (the booking calendar)
 //   #/glossary                      the glossary, Tokens view
 //   #/glossary/tokens               same (Tokens is the default view)
 //   #/glossary/components           the glossary, Components view
@@ -126,12 +128,13 @@ export function parseHash(hash) {
   }
 
   if (first === SECTIONS.IN_PRACTICE) {
-    // #/in-practice or #/in-practice/basis. Basis is the only leaf so far, so
-    // every tail resolves to it, the same fail-soft posture as Tools.
+    // #/in-practice, #/in-practice/basis, or #/in-practice/clndr. Basis is the
+    // default; any other tail falls back to it, the same fail-soft posture as
+    // Tools.
     return {
       section: SECTIONS.IN_PRACTICE,
       expandedSection: SECTIONS.IN_PRACTICE,
-      destination: IN_PRACTICE_BASIS,
+      destination: second === IN_PRACTICE_CLNDR ? IN_PRACTICE_CLNDR : IN_PRACTICE_BASIS,
       principleFilter: FILTERS.ALL,
       principleId: null,
     }
@@ -196,8 +199,10 @@ export function stateToHash(state) {
   }
   if (state.section === SECTIONS.IN_PRACTICE) {
     // Basis is the default view and serializes to the bare route, the way
-    // Measure does under Tools. A second leaf will fill the tail.
-    return `#/${SECTIONS.IN_PRACTICE}`
+    // Measure does under Tools; only CLNDR fills the tail.
+    return state.destination === IN_PRACTICE_CLNDR
+      ? `#/${SECTIONS.IN_PRACTICE}/${IN_PRACTICE_CLNDR}`
+      : `#/${SECTIONS.IN_PRACTICE}`
   }
   if (state.section === SECTIONS.TOOLS) {
     // Measure is the default view and serializes to the bare route, the way

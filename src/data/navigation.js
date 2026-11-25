@@ -49,9 +49,11 @@ export const TOOLS_RIVLINT = 'rivlint'
 
 // In Practice (David's call, 2026-10-15): products running on cadence-tokens,
 // one leaf each, shaped like Tools. Basis is the first and the default view
-// for the bare #/in-practice route. Decision record:
+// for the bare #/in-practice route; CLNDR, the studio's booking calendar
+// (2026-11-25), fills #/in-practice/clndr. Decision record:
 // docs/decisions/in-practice-2026-10-14.md.
 export const IN_PRACTICE_BASIS = 'basis'
+export const IN_PRACTICE_CLNDR = 'clndr'
 
 // Token Lab's behavior categories, in display order. Embeds (2026-07-18) is
 // the home for canvas-embedded demos: motion that lives in a Rive file but

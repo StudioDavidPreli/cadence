@@ -15,6 +15,7 @@ import {
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
   IN_PRACTICE_BASIS,
+  IN_PRACTICE_CLNDR,
 } from '../../data/navigation'
 import styles from './NavColumn.module.css'
 
@@ -86,7 +87,7 @@ function NavAccordion({ onNavigate }) {
     showMotionTilesLanding, enterMotionTilesGrid,
     showGlossaryTokens, showGlossaryComponents,
     showToolsMeasure, showToolsRivLint,
-    showInPracticeBasis,
+    showInPracticeBasis, showInPracticeClndr,
   } = useNavActions()
 
   const tokenLabOpen     = expandedSection === SECTIONS.TOKEN_LAB
@@ -129,6 +130,7 @@ function NavAccordion({ onNavigate }) {
   // on toggle so the user can pick a leaf.
   const clickInPractice        = () => toggleSection(SECTIONS.IN_PRACTICE)
   const pickInPracticeBasis    = () => { showInPracticeBasis(); onNavigate?.() }
+  const pickInPracticeClndr    = () => { showInPracticeClndr(); onNavigate?.() }
   const pickGlossaryTokens     = () => { showGlossaryTokens();     onNavigate?.() }
   const pickGlossaryComponents = () => { showGlossaryComponents(); onNavigate?.() }
 
@@ -213,7 +215,7 @@ function NavAccordion({ onNavigate }) {
 
       {/* ── In Practice ───────────────────────────────────────────────── */}
       {/* Products running on cadence-tokens, one leaf each (David's call,
-          2026-10-15). Basis is the first. */}
+          2026-10-15). Basis is the first; CLNDR is the second (2026-11-25). */}
       <SectionHeader
         label="In Practice"
         open={inPracticeOpen}
@@ -228,6 +230,12 @@ function NavAccordion({ onNavigate }) {
           active={destination === IN_PRACTICE_BASIS}
           tabbable={inPracticeOpen}
           onClick={pickInPracticeBasis}
+        />
+        <NavRow
+          label="CLNDR"
+          active={destination === IN_PRACTICE_CLNDR}
+          tabbable={inPracticeOpen}
+          onClick={pickInPracticeClndr}
         />
       </AccordionBody>
 

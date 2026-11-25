@@ -4,7 +4,7 @@
 
    Color pairings are existing audited ones: text-base and text-muted on
    surface-raised, border as the frame's edge. No new pairing. Nothing here
-   animates; the frame's content is Basis's, timed by Basis. */
+   animates; a frame's content is its product's, timed by the product. */
 
 .scroll {
   height: 100%;
@@ -24,6 +24,15 @@
   margin: 0 auto;
   padding: 48px 48px 64px;
   color: var(--color-text-base);
+}
+
+/* CLNDR's page is 880 px of content and the 48 px each side (David,
+   2026-11-25): title, guidance box and frame share one width, 880 at most, and
+   keep the 48 below that. `composes` keeps .page's padding, its narrow media
+   query included. */
+.clndrPage {
+  composes: page;
+  max-width: 976px;
 }
 
 /* These type properties style the heading's accessible name; the visible
@@ -47,6 +56,12 @@
   max-width: 100%;
   aspect-ratio: 1360 / 506;
   margin: 0 auto;
+}
+
+/* CLNDR's artboard is 920x355; everything else is the same box. */
+.clndrTitleAnim {
+  composes: titleAnim;
+  aspect-ratio: 920 / 355;
 }
 
 .titleCanvas {
@@ -128,7 +143,8 @@
 /* The frame's box. A fixed height: the frame cannot report its own across
    origins without a message channel, and the record rules one out. 820 px is
    the height Basis reported for its In Practice stage, the same at every
-   width from 560 to 880 px, so the frame never scrolls inside itself. */
+   width from 560 to 880 px, so the frame never scrolls inside itself. The
+   calendar's embed is built to the same 820. */
 .frameBox {
   position: relative;
   height: 820px;

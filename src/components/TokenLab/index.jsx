@@ -6,8 +6,8 @@ import { ActiveTokenProvider, useActiveToken, useSetActiveToken } from '../../co
 import { DemoOverridesProvider, useDemoOverrides } from '../../context/DemoOverridesContext'
 import { TitlePulseProvider, useTitlePulse } from '../../context/TitlePulseContext'
 import { useNavState, useNavActions } from '../../context/NavigationContext'
-import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT, IN_PRACTICE_BASIS } from '../../data/navigation'
-import { framePreset, DEFAULT_PRESET as BASIS_DEFAULT_PRESET } from '../InPractice/inPracticeModel'
+import { SECTIONS, TOOLS_MEASURE, TOOLS_RIVLINT, IN_PRACTICE_BASIS, IN_PRACTICE_CLNDR } from '../../data/navigation'
+import { framePreset, DEFAULT_PRESET as FRAME_DEFAULT_PRESET } from '../InPractice/inPracticeModel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useMotionTokens } from '../../hooks/useMotionTokens'
 import { useChromeTransition } from '../../hooks/useChromeTransition'
@@ -104,11 +104,15 @@ const RivLintSection = lazy(() =>
   import('../RivLint').then((m) => ({ default: m.RivLintSection })),
 )
 
-// In Practice › Basis (2026-10-15): its own chunk, for the same reason as
-// the Tools pages. It also keeps the Basis frame off first paint entirely:
-// nothing requests basis.davidpreli.com until the leaf is first entered.
+// In Practice (2026-10-15): its own chunk, for the same reason as the Tools
+// pages. It also keeps the frames off first paint entirely: nothing requests
+// basis.davidpreli.com or calendar.davidpreli.com until that leaf is entered.
+// Both leaves come from the one chunk; they share nearly all of it.
 const BasisPractice = lazy(() =>
   import('../InPractice').then((m) => ({ default: m.BasisPractice })),
+)
+const ClndrPractice = lazy(() =>
+  import('../InPractice').then((m) => ({ default: m.ClndrPractice })),
 )
 
 const PrinciplesLibrary = lazy(() =>
@@ -1680,8 +1684,8 @@ export function TokenLab() {
   // only a switch between its leaves. Each leaf is a cross-origin frame
   // holding a whole Next app; tearing it down on every section change would
   // reload it on every return (decision record, kickoff answer 6). Unlike
-  // Glossary and Tools, In Practice does NOT rail the tool bar: the Basis page
-  // tells the visitor to change presets there, so the presets stay on screen.
+  // Glossary and Tools, In Practice does NOT rail the tool bar: the pages tell
+  // the visitor to change presets there, so the presets stay on screen.
   const isInPractice = section === SECTIONS.IN_PRACTICE
   const inPracticeSeen = useRef(new Set())
   if (isInPractice && destination) inPracticeSeen.current.add(destination)
@@ -1906,14 +1910,14 @@ export function TokenLab() {
   // would misdescribe the very thing the report exists to describe.
   const auditLabel = allPresets.find(p => p.id === getActivePresetId(rawState, allPresets))?.label ?? null
 
-  // The preset the Basis frame runs (In Practice). Basis takes only the three
-  // built-ins, so while the tool bar reads Custom the frame keeps the last
+  // The preset the In Practice frames run. A product takes only the three
+  // built-ins, so while the tool bar reads Custom a frame keeps the last
   // built-in it had (framePreset). The ref remembers that across renders;
   // writing it during render is idempotent (the same value on Strict Mode's
   // second pass), so it needs no effect and causes no extra render.
-  const lastBasisPreset = useRef(BASIS_DEFAULT_PRESET)
-  const basisPreset = framePreset(getActivePresetId(rawState, allPresets), lastBasisPreset.current)
-  lastBasisPreset.current = basisPreset
+  const lastPracticePreset = useRef(FRAME_DEFAULT_PRESET)
+  const practicePreset = framePreset(getActivePresetId(rawState, allPresets), lastPracticePreset.current)
+  lastPracticePreset.current = practicePreset
 
   // The audit document. Named for what it is about (the user's motion tokens)
   // rather than for the tool that produced it: this file leaves here and lands in
@@ -2491,7 +2495,22 @@ export function TokenLab() {
             message="The Basis page ran into an unexpected error. Reloading usually clears it."
           >
             <Suspense fallback={<div className={styles.lazyFallback}>Loading Basis…</div>}>
-              <BasisPractice preset={basisPreset} />
+              <BasisPractice preset={practicePreset} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      )}
+      {inPracticeSeen.current.has(IN_PRACTICE_CLNDR) && (
+        <div
+          className={styles.toolPane}
+          hidden={!(isInPractice && destination === IN_PRACTICE_CLNDR)}
+        >
+          <ErrorBoundary
+            title="The CLNDR page hit a snag"
+            message="The CLNDR page ran into an unexpected error. Reloading usually clears it."
+          >
+            <Suspense fallback={<div className={styles.lazyFallback}>Loading CLNDR…</div>}>
+              <ClndrPractice preset={practicePreset} />
             </Suspense>
           </ErrorBoundary>
         </div>

@@ -3,6 +3,8 @@ import { PracticePage } from './PracticePage'
 import { BASIS } from './inPracticeModel'
 import styles from './InPractice.module.css'
 
+export { ClndrPractice } from './ClndrPractice'
+
 // ─── In Practice › Basis ─────────────────────────────────────────────────────
 //
 // Basis running Cadence's presets, framed. The page follows Measure and

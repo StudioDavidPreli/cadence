@@ -10,6 +10,7 @@ import {
   TOOLS_MEASURE,
   TOOLS_RIVLINT,
   IN_PRACTICE_BASIS,
+  IN_PRACTICE_CLNDR,
 } from '../data/navigation'
 import { LANDING, parseHash, useHashSync } from '../hooks/useHashRoute'
 
@@ -234,6 +235,8 @@ export function NavigationProvider({ children }) {
         dispatch({ type: 'SET_TOOLS_VIEW', view: TOOLS_RIVLINT }),
       showInPracticeBasis: () =>
         dispatch({ type: 'SET_IN_PRACTICE_VIEW', view: IN_PRACTICE_BASIS }),
+      showInPracticeClndr: () =>
+        dispatch({ type: 'SET_IN_PRACTICE_VIEW', view: IN_PRACTICE_CLNDR }),
       returnHome: () => dispatch({ type: 'RETURN_HOME' }),
       // Flag the replaceState write, then clear the deep-link modal. Order
       // matters: the ref must be true before the dispatch that triggers the

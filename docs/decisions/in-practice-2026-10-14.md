@@ -156,3 +156,73 @@ attribute the page rendered and compares it to the same function's output.
   preset switcher. The tool bar is the only control.
 - It does not quote a number from the frame, though the snapshot is now
   fixed. The full sheet, linked from the description, is live.
+
+## CLNDR, the second leaf (David, 2026-11-25)
+
+The studio's booking calendar, live at `https://calendar.davidpreli.com`, framed
+from `/embed/booking`. It takes the same three parameters by the same names as
+Basis. It takes real bookings, with the same checks and emails as the real
+page. The contract is `docs/embed.md` in the booking-calendar repo.
+
+**Decided by David:**
+
+- Second in the nav, under Basis. `#/in-practice` still opens Basis;
+  `#/in-practice/clndr` is the leaf. Label "CLNDR".
+- The page is 976 px at most with 48 px each side, so the title, the guidance
+  box and the frame are 880 together when there is room and keep the 48 below
+  that. Basis's page stays 880. Under 720 px the page takes Basis's narrow
+  padding (`composes: page`).
+- No lede. The first row of the box is David's line, not bold, with the link out
+  on `[here]`, in a new tab. The other three rows are the workflow. The second
+  says a reload clears the form; the third says Book makes a real booking.
+- The title is `clndrTitle.riv` (artboard `clndrTitle`, 920 by 355, its own box
+  class), accessible name "CLNDR, studio booking". Its posters are final: the
+  thin grid in them is in the art, and the live title draws it on a 2x screen
+  and loses most of it on a 1x one.
+- Nothing local may frame the calendar. A Cadence on `localhost` shows a refused
+  frame, by design.
+
+**How it is built:**
+
+- A product is an entry in `inPracticeModel.js` (origin, embed path, link out)
+  and `embedSrc(product, state)` builds any `src`. `frameSrc` is Basis's, kept as
+  its tests call it, and its output is pinned byte for byte.
+- `PracticePage` is the page both leaves are, and `PracticeTitle` the title both
+  use. A leaf is its words, its title and its entry. The alternative, a copy of
+  Basis's page, would have put the loading and consent rules in two places.
+- The "View motion" consent is each leaf's own, for the visit.
+- Both leaves mount on first visit and then hide, so both frames stay alive.
+- A preset, theme or motion change while a leaf is hidden loads nothing until
+  the leaf is shown again, in Chromium, WebKit and Firefox (`loading="lazy"` on
+  a frame with no box). The 2026-10-14 text above says the reload happens while
+  hidden; it does not. Changing presets elsewhere does not ask the calendar
+  anything.
+- Both alive, measured in Chromium on a Mac with Metal, the calendar a
+  stand-in: the page's renderer held 285 MB on the Glossary with neither
+  visited, 367 with Basis, 453 with both, 464 with both hidden. The GPU process
+  held 151, 154, 175 and 176. Cadence stayed at 60 frames a second, its main
+  thread 21 to 27% busy. The three sites are one site to the browser, so they
+  share that one process.
+
+**The frame's width** picks the embed's layout, with breaks at 560 and 660 px,
+so the e2e pins it:
+
+| Window | 1000 | 1120 | 1280 | 1360 | 1440 | 1536 | 1600 and up |
+|---|---|---|---|---|---|---|---|
+| Frame | 476 | 420 | 580 | 660 | 740 | 836 | 878 |
+
+1280 is 20 px over a break and 1360 is exactly on one. A change of the column
+that moves them moves the calendar's layout; tell the calendar repo. Windows
+under 1000 px give frames of 322 to 497 px, which the calendar's contract does
+not cover below 420.
+
+**Tests.** `e2e/in-practice-clndr.spec.js` is its own file, so Basis's spec is
+untouched. It answers `calendar.davidpreli.com` itself in every test: a refused
+frame still sends a request. The live check is in `e2e-live/` and runs against
+the deployed Cadence only. It looks and presses nothing inside the frame:
+pressing a day loads Cloudflare's script and opening the form runs the real
+Turnstile. Four loads in series, because the zone blocks an address after 15
+requests in 10 seconds.
+
+Cadence must never narrow the frame: no `sandbox`, no `credentialless`, no COEP,
+and any future `frame-src` names `https://calendar.davidpreli.com` beside Basis.
