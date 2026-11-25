@@ -1,6 +1,6 @@
 /* The In Practice pages. The document frame is Measure's (scroll region on
-   surface-raised, an 880 px measure, the display title centered, a lede
-   under it), so the leaves under In Practice read as kin of the Tools pages.
+   surface-raised, an 880 px measure, the display title centered, the
+   guidance box under it), so the leaves under In Practice read as kin of the Tools pages.
 
    Color pairings are existing audited ones: text-base and text-muted on
    surface-raised, border as the frame's edge. No new pairing. Nothing here
@@ -75,13 +75,6 @@
   border: 0;
 }
 
-.lede {
-  margin: 0 0 16px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--color-text-base);
-}
-
 /* The link out to the full sheet: underlined text, not accent. Accent means
    active and connected in this app, and a link out is neither. */
 .link {
@@ -96,7 +89,8 @@
 }
 
 /* ── Guidance ── Measure's workflow notes, same box and rows, so the two
-   pages give instructions the same way. */
+   pages give instructions the same way. The first row says what Basis is;
+   this page has no lede (David, 2026-11-25). */
 .guide {
   margin: 0 0 24px;
   padding: 12px 16px;

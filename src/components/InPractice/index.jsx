@@ -9,8 +9,9 @@ import styles from './InPractice.module.css'
 // ─── In Practice › Basis ─────────────────────────────────────────────────────
 //
 // Basis running Cadence's presets, framed. The page follows Measure and
-// rivLint: a Rive title, a description, and in place of a tool, the product in
-// use. Decision record: docs/decisions/in-practice-2026-10-14.md.
+// rivLint: a Rive title, a guidance box (what Basis is, then the workflow), and
+// in place of a tool, the product in use. Decision record:
+// docs/decisions/in-practice-2026-10-14.md.
 //
 // What crosses into the frame is three query parameters and nothing else: the
 // preset name, the theme's Basis stock, and whether motion is reduced. No
@@ -45,18 +46,17 @@ export function BasisPractice({ preset }) {
     <div className={styles.scroll} tabIndex={0} role="region" aria-label="Basis">
       <article className={styles.page}>
         <BasisTitle />
-        <p className={styles.lede}>
-          Basis is a ledger of simulated companies, each figure fed by a live
-          public source and carrying the request that produced it. Every
-          duration, curve, delay and spring in it comes from cadence-tokens; it
-          takes the timing and nothing visual. Framed here it wears Cadence&apos;s
-          colors. <a className={styles.link} href={BASIS_SHEET_URL} target="_blank" rel="noopener noreferrer">The full sheet</a> wears
-          its own.
-        </p>
-        {/* The workflow, in Measure's guidance form: three bold imperatives,
-            each with its reason. The presets live in the tool bar, so the
-            page tells the visitor where to find them rather than repeat them. */}
-        <section className={styles.guide} aria-label="How to compare presets">
+        {/* What Basis is, then the workflow in Measure's guidance form: three
+            bold imperatives, each with its reason. The presets live in the
+            tool bar, so the page tells the visitor where to find them rather
+            than repeat them. */}
+        <section className={styles.guide} aria-label="About Basis and how to compare presets">
+          <p className={styles.guideRow}>
+            Basis is a ledger of simulated companies, each figure fed by a live
+            public source and carrying the request that produced it. Every
+            duration, curve, delay and spring in it comes from cadence-tokens.
+            Link to the <a className={styles.link} href={BASIS_SHEET_URL} target="_blank" rel="noopener noreferrer">full sheet</a>.
+          </p>
           <p className={styles.guideRow}>
             <strong>Load a preset.</strong> Standard, Snappy and Cinematic sit
             in the Presets row at the top of the tool bar. The frame reloads

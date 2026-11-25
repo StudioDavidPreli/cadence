@@ -95,6 +95,16 @@ layout while the frame still loaded `table-sort`. The live spec now also
 checks that the chart draws and that the stage does not scroll inside its
 box.
 
+## The description moves into the box (David, 2026-11-25)
+
+The page loses its lede. The description is the first row of the guidance
+box, in the box's own type (13 px, muted), above the three instructions. Two
+clauses were cut with the move: "it takes the timing and nothing visual",
+and the sentence that the frame wears Cadence's colors here and the full
+sheet its own. The link out is now "Link to the full sheet." The page no
+longer says in words why the frame is in Cadence's palette; the sheet shows
+Basis's own.
+
 ## Settled at kickoff (David, 2026-10-14), still standing
 
 - **Nav order.** Token Lab, Principles, Motion Tiles, In Practice,
@@ -102,8 +112,9 @@ box.
   Measure.
 - **A theme switch reloads the frame.** No message channel exists to
   repaint it in place. The cost is the visitor's current sort order.
-- **No high-contrast note.** The description says the frame wears Cadence's
-  colors here and Basis's own at its address. That covers the HC themes.
+- **No high-contrast note.** The description said the frame wears Cadence's
+  colors here and Basis's own at its address, which covered the HC themes.
+  *(That sentence was cut 2026-11-25; there is still no note.)*
 - **The frame outlives the category.** In Practice is the first section
   that stays mounted after the visitor leaves it. The right region was a
   ternary and every section change a teardown; the Tools leaves persist
