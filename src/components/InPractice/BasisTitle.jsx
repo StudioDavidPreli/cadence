@@ -16,23 +16,8 @@
 // 480 px wide, the width the Measure and rivLint titles occupy, so the three
 // pages read as one family; Fit.Contain scales the art into that box.
 //
-// Reduced motion renders the per-theme SVG poster (/fallBacks/basisTitle*.svg)
-// instead of mounting the canvas, so the .riv is never fetched for a visitor
-// who will not see it play. On the motion path the same poster shows until
-// the canvas has painted once, and stays if the file never loads.
-import {
-  useRive,
-  useViewModel,
-  useViewModelInstance,
-  Layout,
-  Fit,
-  Alignment,
-} from '@rive-app/react-webgl2'
-import { useReducedMotion } from 'framer-motion'
-import { useRivePainted } from '../../hooks/useRivePainted'
-import { useTheme } from '../../context/ThemeContext'
-import { riveFallbackSrc } from '../../utils/riveFallbacks'
-import styles from './InPractice.module.css'
+// The mechanics (instance binding, posters, reduced motion) are PracticeTitle's.
+import { PracticeTitle } from './PracticeTitle'
 
 const TITLE = {
   word: 'Basis',
@@ -43,59 +28,6 @@ const TITLE = {
   viewModel: 'BasisTitleVM',
 }
 
-const themeToInstanceName = {
-  dark: 'darkMode',
-  light: 'lightMode',
-  'high-contrast-light': 'contrastLight',
-  'high-contrast-dark': 'contrastDark',
-}
-
 export function BasisTitle() {
-  const { theme } = useTheme()
-  const reduce = useReducedMotion()
-
-  return (
-    <h2 className={styles.title}>
-      <span className={styles.srOnly}>{TITLE.word}</span>
-      <span className={styles.titleAnim} aria-hidden="true">
-        {reduce ? (
-          <img
-            className={styles.titleCanvas}
-            src={riveFallbackSrc(TITLE.surface, theme)}
-            alt=""
-          />
-        ) : (
-          <TitleRive theme={theme} />
-        )}
-      </span>
-    </h2>
-  )
-}
-
-// The Rive half, isolated so its hooks only run when motion is allowed.
-function TitleRive({ theme }) {
-  const { rive, RiveComponent } = useRive({
-    src: TITLE.src,
-    artboard: TITLE.artboard,
-    stateMachines: TITLE.stateMachine,
-    autoplay: true,
-    autoBind: false,
-    layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
-  })
-
-  const viewModel = useViewModel(rive, { name: TITLE.viewModel })
-  useViewModelInstance(viewModel, {
-    name: themeToInstanceName[theme],
-    rive,
-  })
-  const painted = useRivePainted(rive)
-
-  return (
-    <>
-      {/* The poster until the canvas has painted, or for good if the file
-          never loads. */}
-      {!painted && <img className={styles.titlePoster} src={riveFallbackSrc(TITLE.surface, theme)} alt="" />}
-      <RiveComponent className={styles.titleCanvas} />
-    </>
-  )
+  return <PracticeTitle title={TITLE} />
 }
