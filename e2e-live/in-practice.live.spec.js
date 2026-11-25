@@ -69,3 +69,73 @@ for (const theme of THEMES) {
     await expect(header).not.toHaveAttribute('aria-sort', 'none')
   })
 }
+
+// ─── CLNDR, the booking calendar ─────────────────────────────────────────────
+//
+// Against LIVE CADENCE, not the local build: only https://cadence.davidpreli.com
+// may frame the calendar (David, 2026-11-25), so this works once the leaf is
+// deployed, and says nothing about an undeployed change.
+//
+// The calendar takes real bookings. This test LOOKS AND NOTHING ELSE: it presses
+// no day and no time, never opens the form and never presses Book. Pressing a
+// day loads Cloudflare's script and opening the form runs the real Turnstile.
+// Nothing inside the frame is ever clicked here; keep it that way.
+//
+// One test, one frame, four loads one after another, no retry: each load asks
+// the live /api/slots, and the zone blocks an address for 10 s after 15
+// requests in 10 s, which would block a real visitor on that address too. The
+// pause between themes keeps well under it.
+const LIVE_CADENCE = 'https://cadence.davidpreli.com'
+const LIVE_CALENDAR = 'https://calendar.davidpreli.com'
+const CLNDR_THEMES = {
+  dark: ['Dark theme', 'cadence-dark'],
+  light: ['Light theme', 'cadence-light'],
+  'high-contrast-light': ['HC Light theme', 'cadence-hc-light'],
+  'high-contrast-dark': ['HC Dark theme', 'cadence-hc-dark'],
+}
+
+test.describe('CLNDR in live Cadence', () => {
+  test.describe.configure({ retries: 0, timeout: 180_000 })
+
+  test('the calendar paints in each theme, does not scroll, and is axe clean at rest', async ({ page, context }) => {
+    // This visit is not a visitor: no analytics beacon, no event.
+    await context.route('https://static.cloudflareinsights.com/**', (r) => r.fulfill({ contentType: 'application/javascript', body: '' }))
+    await context.route(`${LIVE_CADENCE}/api/**`, (r) => r.fulfill({ status: 204, body: '' }))
+    await context.addInitScript(() => localStorage.setItem('cadence-theme', 'dark'))
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(`${LIVE_CADENCE}/#/in-practice/clndr`)
+    await expect(page.getByTestId('clndr-frame')).toBeVisible({ timeout: 30_000 })
+    const framed = page.frameLocator('[data-testid="clndr-frame"]')
+
+    for (const [theme, [button, name]] of Object.entries(CLNDR_THEMES)) {
+      await page.getByRole('button', { name: button, exact: true }).click()
+      await expect(page.getByTestId('clndr-frame')).toHaveAttribute('src', new RegExp(`theme=${name}$`))
+      // Rendered at all (a frame-ancestors refusal leaves an empty document),
+      // in this theme, with its open days come back.
+      await expect(framed.locator('html')).toHaveAttribute('data-theme', name, { timeout: 30_000 })
+      await expect(framed.getByRole('heading', { level: 1, name: 'Studio David Preli' })).toBeVisible({ timeout: 30_000 })
+      await expect(framed.locator('#days')).not.toBeEmpty({ timeout: 30_000 })
+      const open = await framed.locator('#days button').count()
+      test.info().annotations.push({ type: 'open days', description: `${theme}: ${open}` })
+
+      // The ground is Cadence's bg in this theme.
+      const [bg] = await resolvedColors(page, ['--color-bg'])
+      const live = page.frames().find((f) => f.url().startsWith(LIVE_CALENDAR))
+      const state = await live.evaluate(() => ({
+        ground: getComputedStyle(document.documentElement).backgroundColor,
+        overflowY: document.documentElement.scrollHeight - window.innerHeight,
+        overflowX: document.documentElement.scrollWidth - window.innerWidth,
+      }))
+      expect(state.ground, theme).toBe(bg)
+      expect(state.overflowY, `${theme}: the frame's page scrolls`).toBeLessThanOrEqual(0)
+      expect(state.overflowX, `${theme}: the frame's page runs wide`).toBeLessThanOrEqual(0)
+
+      const results = await new AxeBuilder({ page })
+        .include('[data-testid="clndr-frame"]')
+        .withTags(['wcag2a', 'wcag2aa'])
+        .analyze()
+      expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
+      await page.waitForTimeout(5_000)
+    }
+  })
+})
