@@ -394,6 +394,66 @@
       }
     ]
   },
+  "rive/clndrTitle.riv": {
+    "defaultArtboard": "clndrTitle",
+    "artboards": [
+      {
+        "name": "clndrTitle",
+        "animations": [
+          ""
+        ],
+        "stateMachines": [
+          "clndrSM"
+        ],
+        "defaultViewModel": "ClndrTitleVM"
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "ClndrTitleVM",
+        "instances": [
+          "darkMode",
+          "lightMode",
+          "contrastLight",
+          "contrastDark"
+        ],
+        "properties": [
+          {
+            "name": "accent",
+            "type": "color"
+          },
+          {
+            "name": "alternate",
+            "type": "color"
+          },
+          {
+            "name": "face",
+            "type": "color"
+          },
+          {
+            "name": "innerArch",
+            "type": "color"
+          },
+          {
+            "name": "outerArch",
+            "type": "color"
+          },
+          {
+            "name": "staticInk",
+            "type": "color"
+          },
+          {
+            "name": "text",
+            "type": "color"
+          },
+          {
+            "name": "text2",
+            "type": "color"
+          }
+        ]
+      }
+    ]
+  },
   "rive/componentsTitles.riv": {
     "defaultArtboard": "componentsTitles",
     "artboards": [

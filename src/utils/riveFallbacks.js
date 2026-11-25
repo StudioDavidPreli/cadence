@@ -20,7 +20,7 @@ const THEME_SUFFIX = {
 
 // surface: 'hero3' | 'hero3Mobile' | 'tokenLab' | 'motionTilesOverview' |
 // 'enter' | 'problems' | 'singleLineLogo' | 'components' | 'measure' | 'basisTitle' |
-// 'lint' — must match the
+// 'clndrTitle' | 'lint' — must match the
 // exported filenames in /public/fallBacks.
 export function riveFallbackSrc(surface, theme) {
   return `/fallBacks/${surface}${THEME_SUFFIX[theme] ?? 'DarkMode'}.svg`
